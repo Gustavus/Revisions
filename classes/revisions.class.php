@@ -7,7 +7,8 @@ namespace Gustavus\Revisions;
 /**
  * @package Revisions
  */
-class Revisions {
+class Revisions
+{
   /**
    * @var array of revisions
    */
