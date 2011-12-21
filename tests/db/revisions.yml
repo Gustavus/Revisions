@@ -1,0 +1,33 @@
+revisions:
+  -
+    id: 1
+    table: "person"
+    rowId: 1
+    key: "name"
+    value: "Visto"
+    startIndex: 1
+    endIndex:
+  -
+    id: 2
+    table: "person"
+    rowId: 1
+    key: "age"
+    value: 23
+    startIndex: 0
+    endIndex: 0
+  -
+    id: 3
+    table: "person"
+    rowId: 1
+    key: "city"
+    value: "North"
+    startIndex: 0
+    endIndex:
+  -
+    id: 4
+    table: "person"
+    rowId: 1
+    key: "aboutYou"
+    value: "I like"
+    startIndex: 0
+    endIndex:
