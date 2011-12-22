@@ -21,11 +21,40 @@ class RevisionsPullerTest extends \Gustavus\Test\TestDBPDO
    */
   private $revisionsPuller;
 
+  /**
+   * @var \Gustavus\Revisions\RevisionsPuller Mock
+   */
   private $revisionsPullerMock;
 
+  /**
+   * @var Doctrine\DBAL connection
+   */
   private $dbalConnection;
 
+  /**
+   * @var yml file for expected results
+   */
   private $ymlFile = 'person.yml';
+
+  /**
+   * @var array of person table data for testing
+   */
+  private $personData = array(
+    'name' => 'Billy',
+    'age' => 2,
+    'city' => 'Mankato',
+    'aboutYou' => 'food',
+  );
+
+  /**
+   * @var array of revisionsPuller info
+   */
+  private $revisionsPullerInfo = array(
+    'dbName' => 'person',
+    'column' => 'person-revision',
+    'table' => 'person',
+    'column' => 'name',
+  );
 
   /**
    * sets up the object for each test
@@ -33,7 +62,7 @@ class RevisionsPullerTest extends \Gustavus\Test\TestDBPDO
    */
   public function setUp()
   {
-    $this->revisionsPuller = new Revisions\RevisionsPuller('person', 'person-revision', 'person', 'name');
+    $this->revisionsPuller = new Revisions\RevisionsPuller($this->revisionsPullerInfo);
   }
 
   /**
@@ -51,7 +80,7 @@ class RevisionsPullerTest extends \Gustavus\Test\TestDBPDO
       $this->dbalConnection = \Gustavus\DB\DBAL::getDBAL('revisions', self::$dbh);
     }
 
-    $this->revisionsPullerMock = $this->getMockWithDB('\Gustavus\Revisions\RevisionsPuller', 'getDB', array('person', 'person-revision', 'person', 'name'), $this->dbalConnection);
+    $this->revisionsPullerMock = $this->getMockWithDB('\Gustavus\Revisions\RevisionsPuller', 'getDB', array($this->revisionsPullerInfo), $this->dbalConnection);
   }
 
   /**
@@ -63,6 +92,22 @@ class RevisionsPullerTest extends \Gustavus\Test\TestDBPDO
   }
 
   /**
+   * @
+   */
+  public function insertToDB()
+  {
+    $name  = $this->personData['name'];
+    $age   = $this->personData['age'];
+    $city  = $this->personData['city'];
+    $about = $this->personData['aboutYou'];
+    $sql   = "
+    INSERT INTO `person` (name, age, city, aboutYou)
+    VALUES (?, ?, ?, ?)
+    ";
+    $this->dbalConnection->executeQuery($sql, array($name, $age, $city, $about));
+  }
+
+  /**
    * @test
    */
   public function getDB()
@@ -70,7 +115,7 @@ class RevisionsPullerTest extends \Gustavus\Test\TestDBPDO
     $conn = $this->getConnection();
     $this->setUpMock();
     $expected = $this->dbalConnection;
-    $actual = $this->callMethod($this->revisionsPullerMock, 'getDB');
+    $actual = $this->call($this->revisionsPullerMock, 'getDB');
     $this->assertSame($expected, $actual);
   }
 
@@ -87,7 +132,7 @@ class RevisionsPullerTest extends \Gustavus\Test\TestDBPDO
     //set up table
     $this->setUpDBFromDataset($expected);
     //modify
-    $this->revisionsPullerMock->insertToDB();
+    $this->insertToDB();
 
     $actual = $conn->createDataSet(array('person'));
 
@@ -111,7 +156,7 @@ class RevisionsPullerTest extends \Gustavus\Test\TestDBPDO
     $this->setUpDBFromDataset($expected, array('person'));
 
     //modify
-    $this->revisionsPullerMock->insertToDB();
+    $this->insertToDB();
 
     $actual = $conn->createDataSet(array('person'));
 

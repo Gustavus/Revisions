@@ -73,7 +73,7 @@ class RevisionTest extends \Gustavus\Test\Test
   {
     $expected = $this->revision;
     $this->revisionProperties['newProp'] = 'test';
-    $this->callMethod($this->revision, 'populateObjectWithArray', array($this->revisionProperties));
+    $this->call($this->revision, 'populateObjectWithArray', array($this->revisionProperties));
     $this->assertSame($expected, $this->revision);
   }
 
@@ -83,7 +83,7 @@ class RevisionTest extends \Gustavus\Test\Test
   public function renderRevision3()
   {
     $expected = 'some testing test content';
-    $result = $this->callMethod($this->revision, 'renderRevision');
+    $result = $this->call($this->revision, 'renderRevision');
     $this->assertSame($expected, $result);
   }
 
@@ -103,7 +103,7 @@ class RevisionTest extends \Gustavus\Test\Test
     $this->setUp();
     $expected = 'some test content';
 
-    $result = $this->callMethod($this->revision, 'renderRevision');
+    $result = $this->call($this->revision, 'renderRevision');
     $this->assertSame($expected, $result);
   }
 
@@ -123,7 +123,7 @@ class RevisionTest extends \Gustavus\Test\Test
     $this->setUp();
     $expected = 'some test content';
 
-    $result = $this->callMethod($this->revision, 'renderRevision');
+    $result = $this->call($this->revision, 'renderRevision');
     $this->assertSame($expected, $result);
   }
 
@@ -143,7 +143,7 @@ class RevisionTest extends \Gustavus\Test\Test
     $this->setUp();
     $expected = 'some test content';
 
-    $result = $this->callMethod($this->revision, 'renderRevision');
+    $result = $this->call($this->revision, 'renderRevision');
     $this->assertSame($expected, $result);
   }
 
@@ -163,7 +163,7 @@ class RevisionTest extends \Gustavus\Test\Test
     $this->setUp();
     $expected = 'some random other testing content';
 
-    $result = $this->callMethod($this->revision, 'renderRevision');
+    $result = $this->call($this->revision, 'renderRevision');
     $this->assertSame($expected, $result);
   }
 
@@ -183,7 +183,7 @@ class RevisionTest extends \Gustavus\Test\Test
     $this->setUp();
     $expected = 'hello some test content';
 
-    $result = $this->callMethod($this->revision, 'renderRevision');
+    $result = $this->call($this->revision, 'renderRevision');
     $this->assertSame($expected, $result);
   }
 
@@ -203,7 +203,7 @@ class RevisionTest extends \Gustavus\Test\Test
     $this->setUp();
     $expected = 'some hello test content';
 
-    $result = $this->callMethod($this->revision, 'renderRevision');
+    $result = $this->call($this->revision, 'renderRevision');
     $this->assertSame($expected, $result);
   }
 
@@ -223,7 +223,7 @@ class RevisionTest extends \Gustavus\Test\Test
     $this->setUp();
     $expected = 'some test content';
 
-    $result = $this->callMethod($this->revision, 'renderRevision');
+    $result = $this->call($this->revision, 'renderRevision');
     $this->assertSame($expected, $result);
   }
 
@@ -238,7 +238,7 @@ class RevisionTest extends \Gustavus\Test\Test
     $this->setUp();
     $expected = '<del>some</del><ins>new</ins> test content';
 
-    $result = $this->callMethod($this->revision, 'makeDiff', array('new test content'));
+    $result = $this->call($this->revision, 'makeDiff', array('new test content'));
     $this->assertSame($expected, $result);
   }
 
@@ -253,7 +253,7 @@ class RevisionTest extends \Gustavus\Test\Test
     $this->setUp();
     $expected = '<del>some </del>test content';
 
-    $result = $this->callMethod($this->revision, 'makeDiff', array('test content'));
+    $result = $this->call($this->revision, 'makeDiff', array('test content'));
     $this->assertSame($expected, $result);
   }
 
@@ -268,7 +268,7 @@ class RevisionTest extends \Gustavus\Test\Test
     $this->setUp();
     $expected = 'some <ins>new </ins>test <del>content revision</del><ins>change</ins>';
 
-    $result = $this->callMethod($this->revision, 'makeDiff', array('some new test change'));
+    $result = $this->call($this->revision, 'makeDiff', array('some new test change'));
     $this->assertSame($expected, $result);
   }
 
@@ -283,7 +283,7 @@ class RevisionTest extends \Gustavus\Test\Test
     $this->setUp();
     $expected = 'Hello, <del>my name is</del><ins>I am</ins> Billy. I am writing <del>this </del>to test <del>some</del><ins>a new</ins> diff functions I wrote.';
 
-    $result = $this->callMethod($this->revision, 'makeDiff', array('Hello, I am Billy. I am writing to test a new diff functions I wrote.'));
+    $result = $this->call($this->revision, 'makeDiff', array('Hello, I am Billy. I am writing to test a new diff functions I wrote.'));
     $this->assertSame($expected, $result);
   }
 
@@ -294,7 +294,7 @@ class RevisionTest extends \Gustavus\Test\Test
   {
     $this->revisionProperties['currentContent'] = 'some testing test content';
     $this->setUp();
-    $result = $this->callMethod($this->revision, 'makeRevisionInfo', array('some test content'));
+    $result = $this->call($this->revision, 'makeRevisionInfo', array('some test content'));
     $expected = array(array('startIndex' => 1, 'endIndex' => null, 'revisionContent' => ' testing'));
     $this->assertSame($expected, $result);
   }
@@ -306,7 +306,7 @@ class RevisionTest extends \Gustavus\Test\Test
   {
     $this->revisionProperties['currentContent'] = 'some test content';
     $this->setUp();
-    $result = $this->callMethod($this->revision, 'makeRevisionInfo', array('some'));
+    $result = $this->call($this->revision, 'makeRevisionInfo', array('some'));
     $expected = array(array('startIndex' => 1, 'endIndex' => null, 'revisionContent' => ' test content'));
     $this->assertSame($expected, $result);
   }
@@ -321,7 +321,7 @@ class RevisionTest extends \Gustavus\Test\Test
     $this->setUp();
     $expected = array(array('startIndex' => 2, 'endIndex' => 3, 'revisionContent' => ''), array('startIndex' => 6, 'endIndex' => 6, 'revisionContent' => 'content revision'));
 
-    $result = $this->callMethod($this->revision, 'makeRevisionInfo', array('some new test change'));
+    $result = $this->call($this->revision, 'makeRevisionInfo', array('some new test change'));
     $this->assertSame($expected, $result);
   }
 
@@ -330,7 +330,7 @@ class RevisionTest extends \Gustavus\Test\Test
    */
   public function makeRevisionInfoAddedWord()
   {
-    $result = $this->callMethod($this->revision, 'makeRevisionInfo', array('some test new content'));
+    $result = $this->call($this->revision, 'makeRevisionInfo', array('some test new content'));
     $expected = array(array('startIndex' => 4, 'endIndex' => 5, 'revisionContent' => ''));
     $this->assertSame($expected, $result);
   }
@@ -340,7 +340,7 @@ class RevisionTest extends \Gustavus\Test\Test
    */
   public function makeRevisionInfoAddedWords()
   {
-    $result = $this->callMethod($this->revision, 'makeRevisionInfo', array('some test new other content'));
+    $result = $this->call($this->revision, 'makeRevisionInfo', array('some test new other content'));
     $expected = array(array('startIndex' => 4, 'endIndex' => 7, 'revisionContent' => ''));
     $this->assertSame($expected, $result);
   }
@@ -350,7 +350,7 @@ class RevisionTest extends \Gustavus\Test\Test
    */
   public function makeRevisionInfoRemovedWord()
   {
-    $result = $this->callMethod($this->revision, 'makeRevisionInfo', array('some content'));
+    $result = $this->call($this->revision, 'makeRevisionInfo', array('some content'));
     $expected = array(array('startIndex' => 2, 'endIndex' => null, 'revisionContent' => 'test '));
     $this->assertSame($expected, $result);
   }
@@ -360,7 +360,7 @@ class RevisionTest extends \Gustavus\Test\Test
    */
   public function makeRevisionInfoRemovedWordsFromEnd()
   {
-    $result = $this->callMethod($this->revision, 'makeRevisionInfo', array('some'));
+    $result = $this->call($this->revision, 'makeRevisionInfo', array('some'));
     $expected = array(array('startIndex' => 1, 'endIndex' => null, 'revisionContent' => ' test content'));
     $this->assertSame($expected, $result);
   }
@@ -370,7 +370,7 @@ class RevisionTest extends \Gustavus\Test\Test
    */
   public function makeRevisionInfoRemovedWordsFromBeginning()
   {
-    $result = $this->callMethod($this->revision, 'makeRevisionInfo', array('content'));
+    $result = $this->call($this->revision, 'makeRevisionInfo', array('content'));
     $expected = array(array('startIndex' => 0, 'endIndex' => null, 'revisionContent' => 'some test '));
     $this->assertSame($expected, $result);
   }
@@ -380,7 +380,7 @@ class RevisionTest extends \Gustavus\Test\Test
    */
   public function makeRevisionInfoRemovedWordsFromEnd2()
   {
-    $result = $this->callMethod($this->revision, 'makeRevisionInfo', array('some more'));
+    $result = $this->call($this->revision, 'makeRevisionInfo', array('some more'));
     $expected = array(array('startIndex' => 2, 'endIndex' => 2, 'revisionContent' => 'test content'));
     $this->assertSame($expected, $result);
   }
@@ -390,7 +390,7 @@ class RevisionTest extends \Gustavus\Test\Test
    */
   public function makeRevisionInfoRemovedWordsFromBeginning2()
   {
-    $result = $this->callMethod($this->revision, 'makeRevisionInfo', array('content'));
+    $result = $this->call($this->revision, 'makeRevisionInfo', array('content'));
     $expected = array(array('startIndex' => 0, 'endIndex' => null, 'revisionContent' => 'some test '));
     $this->assertSame($expected, $result);
   }
@@ -402,7 +402,7 @@ class RevisionTest extends \Gustavus\Test\Test
   {
     $this->revisionProperties['currentContent'] = 'some testr content';
     $this->setUp();
-    $result = $this->callMethod($this->revision, 'makeRevisionInfo', array('some tests content'));
+    $result = $this->call($this->revision, 'makeRevisionInfo', array('some tests content'));
     $expected = array(array('startIndex' => 2, 'endIndex' => 2, 'revisionContent' => 'testr'));
     $this->assertSame($expected, $result);
   }
@@ -415,7 +415,7 @@ class RevisionTest extends \Gustavus\Test\Test
   {
     $this->revisionProperties['currentContent'] = 'some random testing content';
     $this->setUp();
-    $result = $this->callMethod($this->revision, 'makeRevisionInfo', array('some test content'));
+    $result = $this->call($this->revision, 'makeRevisionInfo', array('some test content'));
     $expected = array(array('startIndex' => 2, 'endIndex' => 2, 'revisionContent' => 'random testing'));
     $this->assertSame($expected, $result);
   }
@@ -427,7 +427,7 @@ class RevisionTest extends \Gustavus\Test\Test
   {
     $this->revisionProperties['currentContent'] = 'some  tests content here and here';
     $this->setUp();
-    $result = $this->callMethod($this->revision, 'makeRevisionInfo', array('some test content'));
+    $result = $this->call($this->revision, 'makeRevisionInfo', array('some test content'));
     $expected = array(array('startIndex' => 1, 'endIndex' => 2, 'revisionContent' => '  tests'), array('startIndex' => 5, 'endIndex' => null, 'revisionContent' => ' here and here'));
     $this->assertSame($expected, $result);
   }
@@ -439,7 +439,7 @@ class RevisionTest extends \Gustavus\Test\Test
   {
     $this->revisionProperties['currentContent'] = 'some test content';
     $this->setUp();
-    $result = $this->callMethod($this->revision, 'makeRevisionInfo', array('some test content here and here'));
+    $result = $this->call($this->revision, 'makeRevisionInfo', array('some test content here and here'));
     $expected = array(array('startIndex' => 5, 'endIndex' => 10, 'revisionContent' => ''));
     $this->assertSame($expected, $result);
   }
@@ -451,7 +451,7 @@ class RevisionTest extends \Gustavus\Test\Test
   {
     $this->revisionProperties['currentContent'] = 'some new test content';
     $this->setUp();
-    $result = $this->callMethod($this->revision, 'makeRevisionInfo', array('some test content here'));
+    $result = $this->call($this->revision, 'makeRevisionInfo', array('some test content here'));
     $expected = array(array('startIndex' => 1, 'endIndex' => null, 'revisionContent' => ' new'), array('startIndex' => 5, 'endIndex' => 6, 'revisionContent' => ''));
     $this->assertSame($expected, $result);
   }
@@ -463,7 +463,7 @@ class RevisionTest extends \Gustavus\Test\Test
   {
     $this->revisionProperties['currentContent'] = 'Hello, my name is Billy. I am writing this to test some diff functions I wrote.';
     $this->setUp();
-    $result = $this->callMethod($this->revision, 'makeRevisionInfo', array('Hello, I am Billy. I am writing to test a new diff functions I wrote here.'));
+    $result = $this->call($this->revision, 'makeRevisionInfo', array('Hello, I am Billy. I am writing to test a new diff functions I wrote here.'));
     $expected = array(array('startIndex' => 2, 'endIndex' => 4, 'revisionContent' => 'my name is'), array('startIndex' => 14, 'endIndex' => null, 'revisionContent' => 'this '), array('startIndex' => 18, 'endIndex' => 20, 'revisionContent' => 'some'), array('startIndex' => 29, 'endIndex' => 30, 'revisionContent' => ''));
 
     $this->assertSame($expected, $result);
@@ -476,7 +476,7 @@ class RevisionTest extends \Gustavus\Test\Test
   {
     $this->revisionProperties['currentContent'] = 'some random content';
     $this->setUp();
-    $result = $this->callMethod($this->revision, 'renderRevisionForDB', array('some tests contentss'));
+    $result = $this->call($this->revision, 'renderRevisionForDB', array('some tests contentss'));
     $expected = array(array('startIndex' => 2, 'endIndex' => 4, 'revisionContent' => 'random content'));
     $this->assertSame($expected, $result);
   }
@@ -486,7 +486,7 @@ class RevisionTest extends \Gustavus\Test\Test
    */
   public function renderRevisionForDBSame()
   {
-    $result = $this->callMethod($this->revision, 'renderRevisionForDB', array('some test content'));
+    $result = $this->call($this->revision, 'renderRevisionForDB', array('some test content'));
     $this->assertFalse($result);
   }
 
@@ -497,12 +497,12 @@ class RevisionTest extends \Gustavus\Test\Test
   {
     $this->revisionProperties['currentContent'] = 'some random content';
     $this->setUp();
-    $result = $this->callMethod($this->revision, 'makeRevisionInfo', array('some tests contentss'));
+    $result = $this->call($this->revision, 'makeRevisionInfo', array('some tests contentss'));
     $expected = array(array('startIndex' => 2, 'endIndex' => 4, 'revisionContent' => 'random content'));
     $this->assertSame($expected, $result);
-    $this->callMethod($this->revision, 'populateObjectWithArray', array(array('revisionInfo' => $expected)));
+    $this->call($this->revision, 'populateObjectWithArray', array(array('revisionInfo' => $expected)));
     $expected = 'some random content';
-    $result = $this->callMethod($this->revision, 'renderRevision');
+    $result = $this->call($this->revision, 'renderRevision');
     $this->assertSame($expected, $result);
   }
 }

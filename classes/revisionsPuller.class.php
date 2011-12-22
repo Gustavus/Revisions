@@ -13,35 +13,36 @@ class RevisionsPuller
   /**
    * @var string database name
    */
-  protected $dbName;
+  private $dbName;
 
   /**
    * @var string revision DBName
    */
-  protected $revisionDBName;
+  private $revisionDBName;
 
   /**
    * @var string database table name
    */
-  protected $table;
+  private $table;
 
   /**
    * @var string database table column name
    */
-  protected $column;
+  private $column;
+
+  /**
+   * @var int of the rowId in the table
+   */
+  private $rowId;
 
   /**
    * Class constructor
    *
-   * @param string $dbName
-   * @param string $revisionDBName
+   * @param array $params
    */
-  public function __construct($dbName, $revisionDBName, $table, $column)
+  public function __construct(array $params = array())
   {
-    $this->dbName = $dbName;
-    $this->revisionDBName = $revisionDBName;
-    $this->table = $table;
-    $this->column = $column;
+    $this->populateObjectWithArray($params);
   }
 
   /**
@@ -51,25 +52,44 @@ class RevisionsPuller
    */
   public function __destruct()
   {
-    unset($this->table, $this->column, $this->dbName, $this->revisionDBName);
+    unset($this->table, $this->column, $this->dbName, $this->rowId, $this->revisionDBName);
   }
 
+  /**
+   * @param array $array
+   * @return void
+   */
+  private function populateObjectWithArray(array $array)
+  {
+    foreach ($array as $key => $value) {
+      if (property_exists($this, $key)) {
+        $this->$key = $value;
+      }
+    }
+  }
+
+  /**
+   * @return /Doctrine/DBAL connection
+   */
   protected function getDB()
   {
     return \Gustavus\DB\DBAL::getDBAL('revisions');
   }
 
-  public function insertToDB()
+  /**
+   * @param  array $revisionInfo
+   * @return void
+   */
+  protected function saveRevision($revisionInfo)
   {
     $db = $this->getDB();
-    $sql = "
-    INSERT INTO `person` (name, age, city, aboutYou)
-    VALUES ('Billy', 2, 'Mankato', 'food')
-    ";
-    //var_dump($db);
-    $db->query($sql);
+    $sql = sprintf("
+      INSERT INTO `%1$s` (`table`, `rowId`, `key`, `revisionInfo`)
+      VALUES (:table, :rowId, :key, :revInfo)",
+        $this->dbName
+    );
+    $db->executeQuery($sql, array(':table' => $this->table, ':rowId' => $this->rowId, ':revisionInfo' => $revisionInfo));
   }
-
   /**
    * @param array $params
    * @return MySQLi
@@ -78,5 +98,4 @@ class RevisionsPuller
   {
 
   }
-
 }

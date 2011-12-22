@@ -26,7 +26,7 @@ class RevisionsTest extends \Gustavus\Test\Test
    */
   public function setUp()
   {
-    $this->revision = new Revisions\Revisions();
+    $this->revisions = new Revisions\Revisions();
   }
 
   /**
@@ -43,6 +43,8 @@ class RevisionsTest extends \Gustavus\Test\Test
    */
   public function renderDiff()
   {
-    //$this->assertSame('revisionTest', $revision->getDBName());
+    $expected = '<del>some</del><ins>new</ins> test content';
+    $result = $this->revisions->renderDiff('some test content', 'new test content');
+    $this->assertSame($expected, $result);
   }
 }

@@ -26,6 +26,8 @@ class Revision
   private $currentContent;
 
   /**
+   * startIndex, endIndex, revisionContent are keys for each revision
+   *
    * @var array of revision information
    */
   private $revisionInfo = array();
@@ -120,7 +122,7 @@ class Revision
    * @param string $newContent
    * @return string
    */
-  protected function makeDiff($newContent)
+  public function makeDiff($newContent)
   {
     $revisionInfo = $this->makeRevisionInfo($newContent);
     $this->revisionInfo = $revisionInfo;
