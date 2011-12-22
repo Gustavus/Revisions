@@ -4,7 +4,7 @@
  */
 namespace Gustavus\Revisions;
 
-require_once 'db/db.class.php';
+require_once 'db/DBAL.class.php';
 /**
  * @package Revisions
  */
@@ -56,7 +56,7 @@ class RevisionsPuller
 
   protected function getDB()
   {
-    return \DB::_('revisions');
+    return \Gustavus\DB\DBAL::getDBAL('revisions');
   }
 
   public function insertToDB()

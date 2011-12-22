@@ -178,16 +178,14 @@ class Revision
    * Given two arrays, the function diff will return an array of the changes.
    * I won't describe the format of the array, but it will be obvious
    * if you use print_r() on the result of a diff on some test data.
-   * htmlDiff is a wrapper for the diff command, it takes two strings and
-   * returns the differences in HTML. The tags used are <ins> and <del>,
-   * which can easily be styled with CSS.
+   *
    * @link https://github.com/paulgb/simplediff/blob/master/simplediff.php
    *
    * @param array $old
    * @param array $new
    * @return array
    */
-  private function arrayDiff($old, $new)
+  private function diff($old, $new)
   {
     $maxlen = 0;
     foreach ($old as $oindex => $oldv) {
@@ -205,9 +203,9 @@ class Revision
       return array(array('d'=>$old, 'i'=>$new));
     }
     return array_merge(
-        $this->arrayDiff(array_slice($old, 0, $omax), array_slice($new, 0, $nmax)),
+        $this->diff(array_slice($old, 0, $omax), array_slice($new, 0, $nmax)),
         array_slice($new, $nmax, $maxlen),
-        $this->arrayDiff(array_slice($old, $omax + $maxlen), array_slice($new, $nmax + $maxlen))
+        $this->diff(array_slice($old, $omax + $maxlen), array_slice($new, $nmax + $maxlen))
     );
   }
 
@@ -220,7 +218,7 @@ class Revision
    */
   private function myArrayDiff($old, $new)
   {
-    $diff = $this->arrayDiff($old, $new);
+    $diff = $this->diff($old, $new);
     //remove empty garbage from beginning and end
     array_shift($diff);
     array_shift($diff);

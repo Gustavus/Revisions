@@ -8,6 +8,7 @@ use Gustavus\Revisions;
 
 require_once '/cis/lib/test/testDBPDO.class.php';
 require_once 'revisions/classes/revisionsPuller.class.php';
+require_once 'db/DBAL.class.php';
 
 /**
  * @package Revisions
@@ -20,6 +21,10 @@ class RevisionsPullerTest extends \Gustavus\Test\TestDBPDO
    * @var \Gustavus\Revisions\RevisionsPuller
    */
   private $revisionsPuller;
+
+  private $revisionsPullerMock;
+
+  private $DBALConnection;
 
   private $ymlFile = 'person.yml';
 
@@ -41,6 +46,15 @@ class RevisionsPullerTest extends \Gustavus\Test\TestDBPDO
     unset($this->revisionsPuller);
   }
 
+  private function setUpMock()
+  {
+    if (!isset($this->DBALConnection)) {
+      $this->DBALConnection = \Gustavus\DB\DBAL::getDBAL('revisions', self::$dbh);
+    }
+
+    $this->revisionsPullerMock = $this->getMockWithDB('\Gustavus\Revisions\RevisionsPuller', 'getDB', array('person', 'person-revision', 'person', 'name'), $this->DBALConnection);
+  }
+
   /**
    * @return PHPUnit_Extensions_Database_DataSet_IDataSet
    */
@@ -55,13 +69,11 @@ class RevisionsPullerTest extends \Gustavus\Test\TestDBPDO
   public function getDB()
   {
     $conn = $this->getConnection();
-    $expected = self::$dbh;
-    $revisionsPullerMock = $this->getMockWithDB('\Gustavus\Revisions\RevisionsPuller', 'getDB', array('person', 'person-revision', 'person', 'name'));
-    $actual = $this->callMethod($revisionsPullerMock, 'getDB');
+    $this->setUpMock();
+    $expected = $this->DBALConnection;
+    $actual = $this->callMethod($this->revisionsPullerMock, 'getDB');
     $this->assertSame($expected, $actual);
   }
-
-
 
   /**
    * @test
@@ -69,16 +81,14 @@ class RevisionsPullerTest extends \Gustavus\Test\TestDBPDO
   public function getDBRow()
   {
     $conn = $this->getConnection();
-
-    $revisionsPullerMock = $this->getMockWithDB('\Gustavus\Revisions\RevisionsPuller', 'getDB', array('person', 'person-revision', 'person', 'name'));
+    $this->setUpMock();
 
     $this->ymlFile = 'person.yml';
     $expected = $this->getDataSet();
-
     //set up table
     $this->setUpDBFromDataset($expected);
     //modify
-    $revisionsPullerMock->insertToDB();
+    $this->revisionsPullerMock->insertToDB();
 
     $actual = $conn->createDataSet(array('person'));
 
@@ -93,8 +103,7 @@ class RevisionsPullerTest extends \Gustavus\Test\TestDBPDO
   public function getDBRows()
   {
     $conn = $this->getConnection();
-
-    $revisionsPullerMock = $this->getMockWithDB('\Gustavus\Revisions\RevisionsPuller', 'getDB', array('person', 'person-revision', 'person', 'name'));
+    $this->setUpMock();
 
     $this->xmlFile = 'person.yml';
     $expected = $this->getDataSet();
@@ -103,7 +112,7 @@ class RevisionsPullerTest extends \Gustavus\Test\TestDBPDO
     $this->setUpDBFromDataset($expected, array('person'));
 
     //modify
-    $revisionsPullerMock->insertToDB();
+    $this->revisionsPullerMock->insertToDB();
 
     $actual = $conn->createDataSet(array('person'));
 
