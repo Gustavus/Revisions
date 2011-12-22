@@ -16,7 +16,6 @@ require_once 'db/DBAL.class.php';
  */
 class RevisionsPullerTest extends \Gustavus\Test\TestDBPDO
 {
-  //\Gustavus\Test\Test
   /**
    * @var \Gustavus\Revisions\RevisionsPuller
    */
@@ -24,7 +23,7 @@ class RevisionsPullerTest extends \Gustavus\Test\TestDBPDO
 
   private $revisionsPullerMock;
 
-  private $DBALConnection;
+  private $dbalConnection;
 
   private $ymlFile = 'person.yml';
 
@@ -48,11 +47,11 @@ class RevisionsPullerTest extends \Gustavus\Test\TestDBPDO
 
   private function setUpMock()
   {
-    if (!isset($this->DBALConnection)) {
-      $this->DBALConnection = \Gustavus\DB\DBAL::getDBAL('revisions', self::$dbh);
+    if (!isset($this->dbalConnection)) {
+      $this->dbalConnection = \Gustavus\DB\DBAL::getDBAL('revisions', self::$dbh);
     }
 
-    $this->revisionsPullerMock = $this->getMockWithDB('\Gustavus\Revisions\RevisionsPuller', 'getDB', array('person', 'person-revision', 'person', 'name'), $this->DBALConnection);
+    $this->revisionsPullerMock = $this->getMockWithDB('\Gustavus\Revisions\RevisionsPuller', 'getDB', array('person', 'person-revision', 'person', 'name'), $this->dbalConnection);
   }
 
   /**
@@ -70,7 +69,7 @@ class RevisionsPullerTest extends \Gustavus\Test\TestDBPDO
   {
     $conn = $this->getConnection();
     $this->setUpMock();
-    $expected = $this->DBALConnection;
+    $expected = $this->dbalConnection;
     $actual = $this->callMethod($this->revisionsPullerMock, 'getDB');
     $this->assertSame($expected, $actual);
   }
