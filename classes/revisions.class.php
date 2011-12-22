@@ -54,6 +54,7 @@ class Revisions extends RevisionsPuller
    */
   public function makeRevision($oldText, $newText, $revisionDB, $table, $rowId, $key)
   {
+    //need to update revisions.yml to have revisionInfo which will be json_encode(array of revisionInfo made by Revision->getRevisionInfo() after makeRevisionInfo)
     //make revisionInfo and save into revisionDB
   }
 
