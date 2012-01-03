@@ -161,12 +161,12 @@ class Revision
    * @param string $newContent
    * @return array of revision info or false if it's the same
    */
-  private function renderRevisionForDB($newContent)
+  protected function renderRevisionForDB($newContent)
   {
     if ($newContent === $this->getCurrentContent()) {
       return false;
     } else {
-      return $this->makeRevisionInfo($newContent);
+      return json_encode($this->makeRevisionInfo($newContent));
     }
   }
 

@@ -477,7 +477,7 @@ class RevisionTest extends \Gustavus\Test\Test
     $this->revisionProperties['currentContent'] = 'some random content';
     $this->setUp();
     $result = $this->call($this->revision, 'renderRevisionForDB', array('some tests contentss'));
-    $expected = array(array('startIndex' => 2, 'endIndex' => 4, 'revisionContent' => 'random content'));
+    $expected = json_encode(array(array('startIndex' => 2, 'endIndex' => 4, 'revisionContent' => 'random content')));
     $this->assertSame($expected, $result);
   }
 

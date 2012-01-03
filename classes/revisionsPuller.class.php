@@ -11,14 +11,9 @@ require_once 'db/DBAL.class.php';
 class RevisionsPuller
 {
   /**
-   * @var string database name
+   * @var string database name where revisions are stored
    */
   private $dbName;
-
-  /**
-   * @var string revision DBName
-   */
-  private $revisionDBName;
 
   /**
    * @var string database table name
@@ -52,7 +47,7 @@ class RevisionsPuller
    */
   public function __destruct()
   {
-    unset($this->table, $this->column, $this->dbName, $this->rowId, $this->revisionDBName);
+    unset($this->table, $this->column, $this->dbName, $this->rowId);
   }
 
   /**
@@ -71,7 +66,7 @@ class RevisionsPuller
   /**
    * @return /Doctrine/DBAL connection
    */
-  protected function getDB()
+  private function getDB()
   {
     return \Gustavus\DB\DBAL::getDBAL('revisions');
   }
@@ -84,12 +79,13 @@ class RevisionsPuller
   {
     $db = $this->getDB();
     $sql = sprintf("
-      INSERT INTO `%1$s` (`table`, `rowId`, `key`, `revisionInfo`)
-      VALUES (:table, :rowId, :key, :revInfo)",
+      INSERT INTO `%1$s` (`table`, `rowId`, `key`, `value`)
+      VALUES (:table, :rowId, :key, :revisionInfo)",
         $this->dbName
     );
-    $db->executeQuery($sql, array(':table' => $this->table, ':rowId' => $this->rowId, ':revisionInfo' => $revisionInfo));
+    $db->executeQuery($sql, array(':table' => $this->table, ':rowId' => $this->rowId, ':key' => $this->column, ':revisionInfo' => $revisionInfo));
   }
+
   /**
    * @param array $params
    * @return MySQLi

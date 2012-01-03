@@ -8,6 +8,7 @@ use Gustavus\Revisions;
 
 require_once '/cis/lib/test/testDBPDO.class.php';
 require_once 'revisions/classes/revisionsPuller.class.php';
+require_once 'revisions/classes/revision.class.php';
 require_once 'db/DBAL.class.php';
 
 /**
@@ -50,10 +51,11 @@ class RevisionsPullerTest extends \Gustavus\Test\TestDBPDO
    * @var array of revisionsPuller info
    */
   private $revisionsPullerInfo = array(
-    'dbName' => 'person',
-    'column' => 'person-revision',
-    'table' => 'person',
+    'dbName' => 'person-revision',
     'column' => 'name',
+    'table'  => 'person',
+    'column' => 'name',
+    'rowId'  => 1,
   );
 
   /**
@@ -92,7 +94,9 @@ class RevisionsPullerTest extends \Gustavus\Test\TestDBPDO
   }
 
   /**
-   * @
+   * function to set up db used for current versions
+   *
+   * @return void
    */
   public function insertToDB()
   {
@@ -144,24 +148,39 @@ class RevisionsPullerTest extends \Gustavus\Test\TestDBPDO
   /**
    * @test
    */
-  public function getDBRows()
+  public function saveRevision()
   {
     $conn = $this->getConnection();
     $this->setUpMock();
 
-    $this->xmlFile = 'person.yml';
+    $this->ymlFile = 'nameRevision.yml';
     $expected = $this->getDataSet();
 
     //set up table
-    $this->setUpDBFromDataset($expected, array('person'));
+    $this->setUpDBFromDataset($expected, array('personRevision'));
 
-    //modify
-    $this->insertToDB();
+    // $revision = \Gustavus\Revisions\Revision(array(
+    //   'currentContent' => 'Billy',
+    //   'revisionInfo' => array(array(
+    //     'revisionContent' => 'Visto',
+    //     'startIndex' => 1,
+    //     'endIndex' => null,
+    //   )),
+    // ));
 
-    $actual = $conn->createDataSet(array('person'));
+    // $revision = \Gustavus\Revisions\Revision(array(
+    //   'currentContent' => 'Billy Visto',
+    // ));
 
-    $this->assertDataSetsEqual($expected, $actual);
-    $this->assertTablesEqual($expected->getTable('person'), $actual->getTable('person'));
-    $this->dropCreatedTables();
+    // $revisionInfo = $this->call($revision, 'renderRevisionForDB', array('Billy'));
+
+    // //modify
+    // $this->call($this->revisionsPuller, 'saveRevision', array($revisionInfo));
+
+    // $actual = $conn->createDataSet(array('person-revision'));
+
+    // $this->assertDataSetsEqual($expected, $actual);
+    // $this->assertTablesEqual($expected->getTable('person-revision'), $actual->getTable('person-revision'));
+    // $this->dropCreatedTables();
   }
 }

@@ -1,4 +1,4 @@
-revisions:
+person-revision:
   -
     id: 1
     table: "person"
