@@ -73,6 +73,7 @@ class RevisionsPuller
 
   /**
    * @param integer $prevRevisionId
+   * @param integer $limit
    * @return array of revisions
    */
   protected function getRevisions($prevRevisionId = null, $limit = 10)
@@ -161,7 +162,6 @@ class RevisionsPuller
 
   /**
    * @param json $revisionInfo
-   * @param integer $oldContentId
    * @param string $newContent
    * @return void
    */
