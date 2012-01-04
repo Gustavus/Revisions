@@ -41,10 +41,10 @@ class RevisionsPullerTest extends \Gustavus\Test\TestDBPDO
    * @var array of person table data for testing
    */
   private $personData = array(
-    'name' => 'Billy',
-    'age' => 2,
-    'city' => 'Mankato',
-    'aboutYou' => 'food',
+    'name' => 'Billy Visto',
+    'age' => 23,
+    'city' => 'North Mankato',
+    'aboutYou' => 'I like food',
   );
 
   /**
@@ -54,7 +54,6 @@ class RevisionsPullerTest extends \Gustavus\Test\TestDBPDO
     'dbName' => 'person-revision',
     'column' => 'name',
     'table'  => 'person',
-    'column' => 'name',
     'rowId'  => 1,
   );
 
@@ -73,13 +72,32 @@ class RevisionsPullerTest extends \Gustavus\Test\TestDBPDO
    */
   public function tearDown()
   {
-    unset($this->revisionsPuller);
+    unset($this->revisionsPuller, $this->revisionsPullerMock);
   }
 
-  private function setUpMock()
+  /**
+   * @return string
+   */
+  private function getCreateQuery()
+  {
+    $sql = 'CREATE TABLE IF NOT EXISTS `person-revision`
+            (`id` INTEGER PRIMARY KEY,
+            `table` VARCHAR,
+            `rowId` INTEGER,
+            `key` VARCHAR,
+            `value` VARCHAR,
+            `createdOn` DATETIME)
+            ';
+    return $sql;
+  }
+
+  /**
+   * @param string $tableName
+   */
+  private function setUpMock($tableName)
   {
     if (!isset($this->dbalConnection)) {
-      $this->dbalConnection = \Gustavus\DB\DBAL::getDBAL('revisions', self::$dbh);
+      $this->dbalConnection = \Gustavus\DB\DBAL::getDBAL($tableName, self::$dbh);
     }
 
     $this->revisionsPullerMock = $this->getMockWithDB('\Gustavus\Revisions\RevisionsPuller', 'getDB', array($this->revisionsPullerInfo), $this->dbalConnection);
@@ -112,12 +130,21 @@ class RevisionsPullerTest extends \Gustavus\Test\TestDBPDO
   }
 
   /**
+   * function to return the currently saved content
+   * @return [type]
+   */
+  private function getCurrentContent()
+  {
+
+  }
+
+  /**
    * @test
    */
   public function getDB()
   {
     $conn = $this->getConnection();
-    $this->setUpMock();
+    $this->setUpMock('revisions');
     $expected = $this->dbalConnection;
     $actual = $this->call($this->revisionsPullerMock, 'getDB');
     $this->assertSame($expected, $actual);
@@ -126,10 +153,10 @@ class RevisionsPullerTest extends \Gustavus\Test\TestDBPDO
   /**
    * @test
    */
-  public function getDBRow()
+  public function getPerson()
   {
     $conn = $this->getConnection();
-    $this->setUpMock();
+    $this->setUpMock('revisions');
 
     $this->ymlFile = 'person.yml';
     $expected = $this->getDataSet();
@@ -148,39 +175,133 @@ class RevisionsPullerTest extends \Gustavus\Test\TestDBPDO
   /**
    * @test
    */
+  public function getRevisions()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $currContent = 'Billy Visto';
+    $newContent = 'Billy Joel Visto';
+
+    $this->dbalConnection->query($this->getCreateQuery());
+
+    $revision = new \Gustavus\Revisions\Revision(array(
+      'currentContent' => $currContent,
+    ));
+    $revisionInfo = $this->call($revision, 'renderRevisionForDB', array($newContent));
+    // modify
+    $this->call($this->revisionsPullerMock, 'saveRevision', array($revisionInfo, $newContent));
+    $actual = $this->call($this->revisionsPullerMock, 'getRevisions');
+    $expected = array(
+      array(
+        'id' => '2',
+        'table' => 'person',
+        'rowId' => '1',
+        'key' => 'name',
+        'value' => 'Billy Joel Visto',
+        'createdOn' => $actual[1]['createdOn']
+      ),
+      array(
+        'id' => '1',
+        'table' => 'person',
+        'rowId' => '1',
+        'key' => 'name',
+        'value' => $revisionInfo,
+        'createdOn' => $actual[0]['createdOn'],
+      ),
+    );
+    $this->assertSame($expected, $actual);
+    $this->dropCreatedTables(array('person-revision'));
+  }
+
+  /**
+   * @test
+   */
   public function saveRevision()
   {
     $conn = $this->getConnection();
-    $this->setUpMock();
+    $this->setUpMock('person-revision');
+    $currContent = 'Billy Visto';
+    $newContent = 'Billy';
 
     $this->ymlFile = 'nameRevision.yml';
     $expected = $this->getDataSet();
 
     //set up table
-    $this->setUpDBFromDataset($expected, array('personRevision'));
+    $this->dbalConnection->query($this->getCreateQuery());
 
-    // $revision = \Gustavus\Revisions\Revision(array(
-    //   'currentContent' => 'Billy',
-    //   'revisionInfo' => array(array(
-    //     'revisionContent' => 'Visto',
-    //     'startIndex' => 1,
-    //     'endIndex' => null,
-    //   )),
-    // ));
+    $revision = new \Gustavus\Revisions\Revision(array(
+      'currentContent' => $currContent,
+    ));
 
-    // $revision = \Gustavus\Revisions\Revision(array(
-    //   'currentContent' => 'Billy Visto',
-    // ));
+    $revisionInfo = $this->call($revision, 'renderRevisionForDB', array($newContent));
 
-    // $revisionInfo = $this->call($revision, 'renderRevisionForDB', array('Billy'));
+    // modify
+    $this->call($this->revisionsPullerMock, 'saveRevision', array($revisionInfo, $newContent));
 
-    // //modify
-    // $this->call($this->revisionsPuller, 'saveRevision', array($revisionInfo));
+    $actualDataSet = $conn->createDataSet(array('person-revision'));
+    $actual = $this->getFilteredDataSet($actualDataSet, array('person-revision' => array('createdOn')));
+    $expected = $this->getFilteredDataSet($expected, array('person-revision' => array('createdOn')));
 
-    // $actual = $conn->createDataSet(array('person-revision'));
+    $this->assertDataSetsEqual($expected, $actual);
+    $this->assertTablesEqual($expected->getTable('person-revision'), $actual->getTable('person-revision'));
+  }
 
-    // $this->assertDataSetsEqual($expected, $actual);
-    // $this->assertTablesEqual($expected->getTable('person-revision'), $actual->getTable('person-revision'));
-    // $this->dropCreatedTables();
+  /**
+   * @test
+   */
+  public function saveRevision2()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $currContent = 'Billy';
+    $newContent = 'Billy Visto';
+
+    $this->ymlFile = 'nameRevision2.yml';
+    $expected = $this->getDataSet();
+
+    $revision = new \Gustavus\Revisions\Revision(array(
+      'currentContent' => $currContent,
+    ));
+
+    $revisionInfo = $this->call($revision, 'renderRevisionForDB', array($newContent));
+
+    // modify
+    $this->call($this->revisionsPullerMock, 'saveRevision', array($revisionInfo, $newContent));
+
+    $actualDataSet = $conn->createDataSet(array('person-revision'));
+    $actual = $this->getFilteredDataSet($actualDataSet, array('person-revision' => array('createdOn')));
+    $expected = $this->getFilteredDataSet($expected, array('person-revision' => array('createdOn')));
+
+    $this->assertDataSetsEqual($expected, $actual);
+    $this->assertTablesEqual($expected->getTable('person-revision'), $actual->getTable('person-revision'));
+    var_dump($this->call($this->revisionsPullerMock, 'getRevisions', array()));
+    //$this->dropCreatedTables(array('person-revision'));
+  }
+
+  /**
+   * @test
+   */
+  public function getRevisionsStartingId()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+
+    $actual = $this->call($this->revisionsPullerMock, 'getRevisions', array(2));
+
+    $revision = new \Gustavus\Revisions\Revision(array(
+      'currentContent' => 'Billy Visto',
+    ));
+    $revisionInfo = $this->call($revision, 'renderRevisionForDB', array('Billy'));
+    $expected = array(
+      array(
+        'id' => '1',
+        'table' => 'person',
+        'rowId' => '1',
+        'key' => 'name',
+        'value' => $revisionInfo,
+        'createdOn' => $actual[0]['createdOn'],
+      ),
+    );
+    $this->assertSame($expected, $actual);
   }
 }

@@ -66,32 +66,110 @@ class RevisionsPuller
   /**
    * @return /Doctrine/DBAL connection
    */
-  private function getDB()
+  protected function getDB()
   {
-    return \Gustavus\DB\DBAL::getDBAL('revisions');
+    return \Gustavus\DB\DBAL::getDBAL($this->dbName);
   }
 
   /**
-   * @param  array $revisionInfo
-   * @return void
+   * @param integer $prevRevisionId
+   * @return array of revisions
    */
-  protected function saveRevision($revisionInfo)
+  protected function getRevisions($prevRevisionId = null, $limit = 10)
   {
     $db = $this->getDB();
-    $sql = sprintf("
-      INSERT INTO `%1$s` (`table`, `rowId`, `key`, `value`)
-      VALUES (:table, :rowId, :key, :revisionInfo)",
-        $this->dbName
+    $args = array(
+      ':table' => $this->table,
+      ':rowId' => $this->rowId,
+      ':key' => $this->column,
     );
-    $db->executeQuery($sql, array(':table' => $this->table, ':rowId' => $this->rowId, ':key' => $this->column, ':revisionInfo' => $revisionInfo));
+    $dbName = "`$this->dbName`";
+    $qb = $db->createQueryBuilder();
+    $qb->addSelect('`id`, `table`, `rowId`, `key`, `value`, `createdOn`')
+      ->from($dbName, $dbName)
+      ->where('`table` = :table')
+      ->andWhere('`rowId` = :rowId')
+      ->andWhere('`key` = :key')
+      ->orderBy('`id`', 'DESC')
+      ->setMaxResults($limit);
+
+    if ($prevRevisionId !== null) {
+      $qb->andWhere('`id` < :id');
+      $args[':id'] = $prevRevisionId;
+    }
+    return $db->fetchAll($qb->getSQL(), $args);
   }
 
   /**
-   * @param array $params
-   * @return MySQLi
+   * function to save the new content in the revisions db so we know the date it was modified
+   * @param string $newContent
+   * @return void
    */
-  protected function getDBRow(array $params)
+  private function saveNewContent($newContent)
   {
+    $db = $this->getDB();
+    $args = array(
+      ':table' => $this->table,
+      ':rowId' => $this->rowId,
+      ':key' => $this->column,
+      ':revisionInfo' => $newContent,
+    );
+    $sql = sprintf('
+      INSERT INTO `%1$s` (`table`, `rowId`, `key`, `value`, `createdOn`)
+      VALUES (:table, :rowId, :key, :revisionInfo, %2$s)',
+        $this->dbName,
+        $db->getDatabasePlatform()->getNowExpression()
+    );
+    $db->executeQuery($sql, $args);
+  }
 
+  /**
+   * @param json $revisionInfo
+   * @param integer $oldContentId
+   * @return void
+   */
+  private function saveRevisionContent($revisionInfo, $oldContentId = null)
+  {
+    $db = $this->getDB();
+    $args = array(
+      ':table' => $this->table,
+      ':rowId' => $this->rowId,
+      ':key' => $this->column,
+      ':revisionInfo' => $revisionInfo,
+    );
+    if ($oldContentId === null) {
+      $sql = sprintf('
+        INSERT INTO `%1$s` (`table`, `rowId`, `key`, `value`, `createdOn`)
+        VALUES (:table, :rowId, :key, :revisionInfo, %2$s)',
+          $this->dbName,
+          $db->getDatabasePlatform()->getNowExpression()
+      );
+    } else {
+      $sql = sprintf('
+        UPDATE `%1$s` SET
+          `table`     = :table,
+          `rowId`     = :rowId,
+          `key`       = :key,
+          `value`     = :revisionInfo
+        WHERE `id` = :id',
+          $this->dbName
+      );
+      $args[':id'] = $oldContentId;
+    }
+    $db->executeQuery($sql, $args);
+  }
+
+  /**
+   * @param json $revisionInfo
+   * @param integer $oldContentId
+   * @param string $newContent
+   * @return void
+   */
+  protected function saveRevision($revisionInfo, $newContent)
+  {
+    $currContentArray = $this->getRevisions(null, 1);
+    $currContentId = empty($currContentArray) ? null : $currContentArray[0]['id'];
+    $this->saveRevisionContent($revisionInfo, $currContentId);
+    $this->saveNewContent($newContent);
   }
 }
