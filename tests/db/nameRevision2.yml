@@ -11,5 +11,12 @@ person-revision:
     table: "person"
     rowId: 1
     key: "name"
-    value: 'Billy'
+    value: '[{"startIndex":1,"endIndex":2,"revisionContent":""}]'
+    createdOn:
+  -
+    id: 3
+    table: "person"
+    rowId: 1
+    key: "name"
+    value: 'Billy Visto'
     createdOn:

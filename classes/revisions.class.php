@@ -54,6 +54,10 @@ class Revisions extends RevisionsPuller
    */
   public function makeRevision($oldText, $newText, $revisionDB, $table, $rowId, $key)
   {
+    // have to have the current version saved in db
+    // when we make a new revision, we will turn the currentContent into a revision information to go from the new content back. It will use the same date
+    // save new content to project db
+
     //need to update revisions.yml to have revisionInfo which will be json_encode(array of revisionInfo made by Revision->getRevisionInfo() after makeRevisionInfo)
     //make revisionInfo and save into revisionDB
   }
