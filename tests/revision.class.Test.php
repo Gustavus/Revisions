@@ -487,7 +487,7 @@ class RevisionTest extends \Gustavus\Test\Test
   public function renderRevisionForDBSame()
   {
     $result = $this->call($this->revision, 'renderRevisionForDB', array('some test content'));
-    $this->assertFalse($result);
+    $this->assertNull($result);
   }
 
   /**

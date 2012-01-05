@@ -6,16 +6,16 @@
 
 use Gustavus\Revisions;
 
-require_once '/cis/lib/test/testDBPDO.class.php';
 require_once 'revisions/classes/revisionsPuller.class.php';
 require_once 'revisions/classes/revision.class.php';
+require_once 'revisions/tests/revisionsTestsHelper.class.Test.php';
 require_once 'db/DBAL.class.php';
 
 /**
  * @package Revisions
  * @subpackage Tests
  */
-class RevisionsPullerTest extends \Gustavus\Test\TestDBPDO
+class RevisionsPullerTest extends RevisionsHelper
 {
   /**
    * @var \Gustavus\Revisions\RevisionsPuller
@@ -48,16 +48,6 @@ class RevisionsPullerTest extends \Gustavus\Test\TestDBPDO
   );
 
   /**
-   * @var array of revisionsPuller info
-   */
-  private $revisionsPullerInfo = array(
-    'dbName' => 'person-revision',
-    'column' => 'name',
-    'table'  => 'person',
-    'rowId'  => 1,
-  );
-
-  /**
    * sets up the object for each test
    * @return void
    */
@@ -76,19 +66,11 @@ class RevisionsPullerTest extends \Gustavus\Test\TestDBPDO
   }
 
   /**
-   * @return string
+   * @return PHPUnit_Extensions_Database_DataSet_IDataSet
    */
-  private function getCreateQuery()
+  protected function getDataSet()
   {
-    $sql = 'CREATE TABLE IF NOT EXISTS `person-revision`
-            (`id` INTEGER PRIMARY KEY,
-            `table` VARCHAR,
-            `rowId` INTEGER,
-            `key` VARCHAR,
-            `value` VARCHAR,
-            `createdOn` DATETIME)
-            ';
-    return $sql;
+    return new \PHPUnit_Extensions_Database_DataSet_YamlDataSet(dirname(__FILE__).'/db/'.$this->ymlFile);
   }
 
   /**
@@ -101,14 +83,6 @@ class RevisionsPullerTest extends \Gustavus\Test\TestDBPDO
     }
 
     $this->revisionsPullerMock = $this->getMockWithDB('\Gustavus\Revisions\RevisionsPuller', 'getDB', array($this->revisionsPullerInfo), $this->dbalConnection);
-  }
-
-  /**
-   * @return PHPUnit_Extensions_Database_DataSet_IDataSet
-   */
-  protected function getDataSet()
-  {
-    return new \PHPUnit_Extensions_Database_DataSet_YamlDataSet(dirname(__FILE__).'/db/'.$this->ymlFile);
   }
 
   /**
@@ -127,15 +101,6 @@ class RevisionsPullerTest extends \Gustavus\Test\TestDBPDO
     VALUES (?, ?, ?, ?)
     ";
     $this->dbalConnection->executeQuery($sql, array($name, $age, $city, $about));
-  }
-
-  /**
-   * function to return the currently saved content
-   * @return [type]
-   */
-  private function getCurrentContent()
-  {
-
   }
 
   /**
@@ -229,14 +194,7 @@ class RevisionsPullerTest extends \Gustavus\Test\TestDBPDO
     //set up table
     $this->dbalConnection->query($this->getCreateQuery());
 
-    $revision = new \Gustavus\Revisions\Revision(array(
-      'currentContent' => $currContent,
-    ));
-
-    $revisionInfo = $this->call($revision, 'renderRevisionForDB', array($newContent));
-
-    // modify
-    $this->call($this->revisionsPullerMock, 'saveRevision', array($revisionInfo, $newContent));
+    $this->saveRevisionToDB($currContent, $newContent, $this->revisionsPullerMock);
 
     $actualDataSet = $conn->createDataSet(array('person-revision'));
     $actual = $this->getFilteredDataSet($actualDataSet, array('person-revision' => array('createdOn')));
@@ -244,6 +202,7 @@ class RevisionsPullerTest extends \Gustavus\Test\TestDBPDO
 
     $this->assertDataSetsEqual($expected, $actual);
     $this->assertTablesEqual($expected->getTable('person-revision'), $actual->getTable('person-revision'));
+    $this->dropCreatedTables(array('person-revision'));
   }
 
   /**
@@ -259,14 +218,9 @@ class RevisionsPullerTest extends \Gustavus\Test\TestDBPDO
     $this->ymlFile = 'nameRevision2.yml';
     $expected = $this->getDataSet();
 
-    $revision = new \Gustavus\Revisions\Revision(array(
-      'currentContent' => $currContent,
-    ));
-
-    $revisionInfo = $this->call($revision, 'renderRevisionForDB', array($newContent));
-
-    // modify
-    $this->call($this->revisionsPullerMock, 'saveRevision', array($revisionInfo, $newContent));
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->saveRevisionToDB('Billy Visto', 'Billy', $this->revisionsPullerMock);
+    $this->saveRevisionToDB($currContent, $newContent, $this->revisionsPullerMock);
 
     $actualDataSet = $conn->createDataSet(array('person-revision'));
     $actual = $this->getFilteredDataSet($actualDataSet, array('person-revision' => array('createdOn')));
@@ -274,8 +228,34 @@ class RevisionsPullerTest extends \Gustavus\Test\TestDBPDO
 
     $this->assertDataSetsEqual($expected, $actual);
     $this->assertTablesEqual($expected->getTable('person-revision'), $actual->getTable('person-revision'));
-    var_dump($this->call($this->revisionsPullerMock, 'getRevisions', array()));
-    //$this->dropCreatedTables(array('person-revision'));
+    $this->dropCreatedTables(array('person-revision'));
+  }
+
+  /**
+   * @test
+   */
+  public function saveRevisionAlreadySaved()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $currContent = 'Billy';
+    $newContent = 'Billy Visto';
+
+    $this->ymlFile = 'nameRevision2.yml';
+    $expected = $this->getDataSet();
+
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->saveRevisionToDB('Billy Visto', 'Billy', $this->revisionsPullerMock);
+    $this->saveRevisionToDB($currContent, $newContent, $this->revisionsPullerMock);
+    $this->saveRevisionToDB($newContent, $newContent, $this->revisionsPullerMock);
+
+    $actualDataSet = $conn->createDataSet(array('person-revision'));
+    $actual = $this->getFilteredDataSet($actualDataSet, array('person-revision' => array('createdOn')));
+    $expected = $this->getFilteredDataSet($expected, array('person-revision' => array('createdOn')));
+
+    $this->assertDataSetsEqual($expected, $actual);
+    $this->assertTablesEqual($expected->getTable('person-revision'), $actual->getTable('person-revision'));
+    $this->dropCreatedTables(array('person-revision'));
   }
 
   /**
@@ -285,6 +265,9 @@ class RevisionsPullerTest extends \Gustavus\Test\TestDBPDO
   {
     $conn = $this->getConnection();
     $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->saveRevisionToDB('Billy Visto', 'Billy', $this->revisionsPullerMock);
+    $this->saveRevisionToDB('Billy', 'Billy Visto', $this->revisionsPullerMock);
 
     $actual = $this->call($this->revisionsPullerMock, 'getRevisions', array(2));
 
@@ -303,5 +286,6 @@ class RevisionsPullerTest extends \Gustavus\Test\TestDBPDO
       ),
     );
     $this->assertSame($expected, $actual);
+    $this->dropCreatedTables(array('person-revision'));
   }
 }

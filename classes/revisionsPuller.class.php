@@ -16,6 +16,11 @@ class RevisionsPuller
   private $dbName;
 
   /**
+   * @var string database table name where revisions are stored
+   */
+  private $revisionsTable;
+
+  /**
    * @var string database table name
    */
   private $table;
@@ -29,6 +34,11 @@ class RevisionsPuller
    * @var int of the rowId in the table
    */
   private $rowId;
+
+  /**
+   * @var DBAL connection
+   */
+  private $dbal;
 
   /**
    * Class constructor
@@ -54,7 +64,7 @@ class RevisionsPuller
    * @param array $array
    * @return void
    */
-  private function populateObjectWithArray(array $array)
+  protected function populateObjectWithArray(array $array)
   {
     foreach ($array as $key => $value) {
       if (property_exists($this, $key)) {
@@ -68,7 +78,10 @@ class RevisionsPuller
    */
   protected function getDB()
   {
-    return \Gustavus\DB\DBAL::getDBAL($this->dbName);
+    if (!isset($this->dbal)) {
+      $this->dbal = \Gustavus\DB\DBAL::getDBAL($this->dbName);
+    }
+    return $this->dbal;
   }
 
   /**
@@ -84,7 +97,7 @@ class RevisionsPuller
       ':rowId' => $this->rowId,
       ':key' => $this->column,
     );
-    $dbName = "`$this->dbName`";
+    $dbName = "`$this->revisionsTable`";
     $qb = $db->createQueryBuilder();
     $qb->addSelect('`id`, `table`, `rowId`, `key`, `value`, `createdOn`')
       ->from($dbName, $dbName)
@@ -110,18 +123,14 @@ class RevisionsPuller
   {
     $db = $this->getDB();
     $args = array(
-      ':table' => $this->table,
-      ':rowId' => $this->rowId,
-      ':key' => $this->column,
-      ':revisionInfo' => $newContent,
+      '`table`'     => $this->table,
+      '`rowId`'     => $this->rowId,
+      '`key`'       => $this->column,
+      '`value`'     => $newContent,
+      '`createdOn`' => $db->getDatabasePlatform()->getNowExpression()
     );
-    $sql = sprintf('
-      INSERT INTO `%1$s` (`table`, `rowId`, `key`, `value`, `createdOn`)
-      VALUES (:table, :rowId, :key, :revisionInfo, %2$s)',
-        $this->dbName,
-        $db->getDatabasePlatform()->getNowExpression()
-    );
-    $db->executeQuery($sql, $args);
+
+    return $db->insert("`$this->revisionsTable`", $args);
   }
 
   /**
@@ -133,43 +142,36 @@ class RevisionsPuller
   {
     $db = $this->getDB();
     $args = array(
-      ':table' => $this->table,
-      ':rowId' => $this->rowId,
-      ':key' => $this->column,
-      ':revisionInfo' => $revisionInfo,
+      '`table`' => $this->table,
+      '`rowId`' => $this->rowId,
+      '`key`'   => $this->column,
+      '`value`' => $revisionInfo,
     );
     if ($oldContentId === null) {
-      $sql = sprintf('
-        INSERT INTO `%1$s` (`table`, `rowId`, `key`, `value`, `createdOn`)
-        VALUES (:table, :rowId, :key, :revisionInfo, %2$s)',
-          $this->dbName,
-          $db->getDatabasePlatform()->getNowExpression()
-      );
+      $args['`createdOn`'] = $db->getDatabasePlatform()->getNowExpression();
+      return $db->insert("`$this->revisionsTable`", $args);
     } else {
-      $sql = sprintf('
-        UPDATE `%1$s` SET
-          `table`     = :table,
-          `rowId`     = :rowId,
-          `key`       = :key,
-          `value`     = :revisionInfo
-        WHERE `id` = :id',
-          $this->dbName
-      );
-      $args[':id'] = $oldContentId;
+      return $db->update("`$this->revisionsTable`", $args, array('id' => $oldContentId));
     }
-    $db->executeQuery($sql, $args);
   }
 
   /**
    * @param json $revisionInfo
    * @param string $newContent
+   * @param array $currContentArray set if we are saving
    * @return void
    */
-  protected function saveRevision($revisionInfo, $newContent)
+  protected function saveRevision($revisionInfo, $newContent, array $currContentArray = array())
   {
-    $currContentArray = $this->getRevisions(null, 1);
     $currContentId = empty($currContentArray) ? null : $currContentArray[0]['id'];
-    $this->saveRevisionContent($revisionInfo, $currContentId);
+    if ($revisionInfo !== null) {
+      //either revision is the first one, or it is the same as it used to be
+      $this->saveRevisionContent($revisionInfo, $currContentId);
+    }
+    if ($currContentId !== null && $revisionInfo === null) {
+      // the current content is what it used to be, so don't add it again
+      return false;
+    }
     $this->saveNewContent($newContent);
   }
 }

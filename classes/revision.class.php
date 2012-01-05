@@ -55,6 +55,22 @@ class Revision
   /**
    * @return string
    */
+  public function getRevisionId()
+  {
+    return $this->revisionId;
+  }
+
+  /**
+   * @return string
+   */
+  public function getRevisionDate()
+  {
+    return $this->revisionDate;
+  }
+
+  /**
+   * @return string
+   */
   public function getCurrentContent()
   {
     return $this->currentContent;
@@ -124,8 +140,10 @@ class Revision
    */
   public function makeDiff($newContent)
   {
-    $revisionInfo = $this->makeRevisionInfo($newContent);
-    $this->revisionInfo = $revisionInfo;
+    if (empty($this->revisionInfo)) {
+      $revisionInfo = $this->makeRevisionInfo($newContent);
+      $this->revisionInfo = $revisionInfo;
+    }
     $this->currentContent = $newContent;
 
     return $this->renderRevision(true);
@@ -161,10 +179,10 @@ class Revision
    * @param string $newContent
    * @return array of revision info or false if it's the same
    */
-  protected function renderRevisionForDB($newContent)
+  public function renderRevisionForDB($newContent)
   {
     if ($newContent === $this->getCurrentContent()) {
-      return false;
+      return null;
     } else {
       return json_encode($this->makeRevisionInfo($newContent));
     }
@@ -280,6 +298,7 @@ class Revision
       $currDiff = array('startIndex' => $startInd, 'endIndex' => $endInd, 'revisionContent' => $revisionContent);
       $diffInfo[] = $currDiff;
     }
+    $this->revisionInfo = $diffInfo;
     return $diffInfo;
   }
 }
