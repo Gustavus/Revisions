@@ -1,0 +1,15 @@
+person-revision:
+  -
+    id: 1
+    table: "person"
+    rowId: 1
+    key: "name"
+    value: '[{"startIndex":1,"endIndex":null,"revisionContent":" Visto"}]'
+    createdOn:
+  -
+    id: 2
+    table: "person"
+    rowId: 1
+    key: "name"
+    value: 'Billy'
+    createdOn:

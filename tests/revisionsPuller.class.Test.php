@@ -188,7 +188,7 @@ class RevisionsPullerTest extends RevisionsHelper
     $currContent = 'Billy Visto';
     $newContent = 'Billy';
 
-    $this->ymlFile = 'nameRevision.yml';
+    $this->ymlFile = 'nameRevision1.yml';
     $expected = $this->getDataSet();
 
     //set up table

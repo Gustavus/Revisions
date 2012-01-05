@@ -12,15 +12,30 @@ require_once 'revisions/classes/revision.class.php';
 class Revisions extends RevisionsPuller
 {
   /**
-   * @var array of revisionsInfo
+   * @var array of revisions keyed by revision id
    */
-  private $revisionsInfo;
+  private $revisions = array();
+
+  /**
+   * @var array of current content info
+   */
+  private $currentContentInfo;
+
+  /**
+   * @var string of what the previous revisions content was
+   */
+  private $previousContent;
+
+  /**
+   * @var int of previous revisions id
+   */
+  private $previousRevisionId = null;
 
   /**
    * Class constructor
-   *
+   * @param array $params
    */
-  public function __construct()
+  public function __construct(array $params = array())
   {
   }
 
@@ -31,7 +46,7 @@ class Revisions extends RevisionsPuller
    */
   public function __destruct()
   {
-    unset($this->revisionsInfo);
+    unset($this->revisions, $this->previousRevisionId, $this->currentContentInfo, $this->previousContent);
   }
 
   /**
@@ -70,7 +85,6 @@ class Revisions extends RevisionsPuller
     $oldContentArray = $this->getRevisions(null, 1);
     if (!empty($oldContentArray)) {
       $oldContent = $oldContentArray[0]['value'];
-      //var_dump($oldContentArray);
       $revision = new Revision(array('currentContent' => $oldContent));
       $revisionInfo = $revision->renderRevisionForDB($newText);
       $diff = $revision->makeDiff($newText);
@@ -85,13 +99,70 @@ class Revisions extends RevisionsPuller
   /**
    * function to get and store revisions in the object
    *
-   * @param
+   * function to make and store a revision
+   * @param  string $revisionDB    revision database name
+   * @param  string $revisionTable revision table name currenty working with
+   * @param  string $table         project table name used for distinguishing between tables if db is used for multiple table's revisions
+   * @param  integer $rowId        id of the row that the current content is in for complex databases
+   * @param  string $key           column name that is being worked with
+   * @param  integer $limit        how many revisions to go back
+   * @return void
    */
-  public function makeRevisions($newText, $revisionDB, $revisionTable, $table, $rowId, $key, $limit = 10)
+  public function populateObjectWithRevisions($revisionDB, $revisionTable, $table, $rowId, $key, $limit = 10)
   {
-    // have to have the current version saved in db
-    // when we make a new revision, we will turn the currentContent into a revision information to go from the new content back. It will use the same date
-    // save new content to project db
+    $this->populateObjectWithArray(array(
+      'dbName'         => $revisionDB,
+      'revisionsTable' => $revisionTable,
+      'column'         => $key,
+      'table'          => $table,
+      'rowId'          => $rowId,
+    ));
+    $currentContent = null;
+    $revisions = $this->getRevisions($this->previousRevisionId, $limit);
+    if ($this->previousRevisionId === null) {
+      $this->currentContentInfo = array_shift($revisions);
+      $currentContent = $this->currentContentInfo['value'];
+    }
+    foreach ($revisions as $revision) {
+      $params = array(
+        'revisionId'     => $revision['id'],
+        'revisionDate'   => $revision['createdOn'],
+        'currentContent' => $currentContent,
+        'revisionInfo'   => json_decode($revision['value'], true),
+      );
+      $rev = new Revision($params);
+      $revDiff = $rev->makeRevisionContent(true);
+      $currentContent = $rev->makeRevisionContent(false);
+      $this->revisions[$revision['id']] = array(
+        'revision'        => $rev,
+        'revisionContent' => $currentContent,
+        'revisionDiff'    => $revDiff,
+      );
+    }
+    $this->previousRevisionId = $revision['id'];
+    $this->previousContent    = $currentContent;
+  }
 
+  /**
+   * pulls a specific revision out of the object to return
+   * @param  integer $id revision id you want
+   * @param  boolean $diff whether to return plain text or a diff
+   * @return string
+   */
+  public function getRevision($id, $diff = false)
+  {
+    if (!isset($this->revisions[$id])) {
+      return null;
+    }
+    if ($diff) {
+      $revContent = $this->revisions[$id]['revisionDiff'];
+    } else {
+      $revContent = $this->revisions[$id]['revisionContent'];
+    }
+    $rev = $this->revisions[$id]['revision'];
+    return array(
+      'date' => $rev->getRevisionDate(),
+      'revisionContent' => $revContent,
+    );
   }
 }
