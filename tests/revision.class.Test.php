@@ -25,6 +25,8 @@ class RevisionTest extends \Gustavus\Test\Test
    */
   private $revisionProperties = array(
     'currentContent' => 'some test content',
+    'revisionId' => 1,
+    'revisionDate' => '2012-01-05 23:34:15',
     'revisionInfo' => array(array(
       'revisionContent' => 'testing',
       'startIndex' => 2,
@@ -69,6 +71,22 @@ class RevisionTest extends \Gustavus\Test\Test
   /**
    * @test
    */
+  public function getRevisionId()
+  {
+    $this->assertSame($this->revisionProperties['revisionId'], $this->revision->getRevisionId());
+  }
+
+  /**
+   * @test
+   */
+  public function getRevisionDate()
+  {
+    $this->assertSame($this->revisionProperties['revisionDate'], $this->revision->getRevisionDate());
+  }
+
+  /**
+   * @test
+   */
   public function populateObjectWithArray()
   {
     $expected = $this->revision;
@@ -80,7 +98,7 @@ class RevisionTest extends \Gustavus\Test\Test
   /**
    * @test
    */
-  public function renderRevision3()
+  public function renderRevision()
   {
     $expected = 'some testing test content';
     $result = $this->call($this->revision, 'renderRevision');
@@ -224,6 +242,27 @@ class RevisionTest extends \Gustavus\Test\Test
     $expected = 'some test content';
 
     $result = $this->call($this->revision, 'renderRevision');
+    $this->assertSame($expected, $result);
+  }
+
+  /**
+   * @test
+   */
+  public function makeRevisionContent()
+  {
+    $expected = 'some testing test content';
+    $result = $this->call($this->revision, 'makeRevisionContent');
+    $this->assertSame($expected, $result);
+  }
+
+  /**
+   * @test
+   */
+  public function makeRevisionContentWithDiff()
+  {
+    $expected = 'some <del>testing</del>test content';
+
+    $result = $this->call($this->revision, 'makeRevisionContent', array(true));
     $this->assertSame($expected, $result);
   }
 

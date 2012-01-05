@@ -150,6 +150,17 @@ class Revision
   }
 
   /**
+   * renders revision content
+   *
+   * @param boolean $showChanges
+   * @return string of revision
+   */
+  public function makeRevisionContent($showChanges = false)
+  {
+    return $this->renderRevision($showChanges);
+  }
+
+  /**
    * highlights changes from revision to current
    *
    * @param array $content
