@@ -123,14 +123,30 @@ class RevisionsPuller
   {
     $db = $this->getDB();
     $args = array(
-      '`table`'     => $this->table,
-      '`rowId`'     => $this->rowId,
-      '`key`'       => $this->column,
-      '`value`'     => $newContent,
-      '`createdOn`' => $db->getDatabasePlatform()->getNowExpression()
+      ':table'     => $this->table,
+      ':rowId'     => $this->rowId,
+      ':key'       => $this->column,
+      ':value'     => $newContent,
+    );
+    $sql = sprintf('
+      INSERT INTO `%1$s` (
+        `table`,
+        `rowId`,
+        `key`,
+        `value`,
+        `createdOn`
+      ) VALUES (
+        :table,
+        :rowId,
+        :key,
+        :value,
+        %2$s
+      )',
+        $this->revisionsTable,
+        $db->getDatabasePlatform()->getNowExpression()
     );
 
-    return $db->insert("`$this->revisionsTable`", $args);
+    return $db->executeUpdate($sql, $args);
   }
 
   /**
@@ -142,16 +158,43 @@ class RevisionsPuller
   {
     $db = $this->getDB();
     $args = array(
-      '`table`' => $this->table,
-      '`rowId`' => $this->rowId,
-      '`key`'   => $this->column,
-      '`value`' => $revisionInfo,
+      ':table' => $this->table,
+      ':rowId' => $this->rowId,
+      ':key'   => $this->column,
+      ':value' => $revisionInfo,
     );
     if ($oldContentId === null) {
-      $args['`createdOn`'] = $db->getDatabasePlatform()->getNowExpression();
-      return $db->insert("`$this->revisionsTable`", $args);
+      $sql = sprintf('
+        INSERT INTO `%1$s` (
+          `table`,
+          `rowId`,
+          `key`,
+          `value`,
+          `createdOn`
+        ) VALUES (
+          :table,
+          :rowId,
+          :key,
+          :value,
+          %2$s
+        );
+          ',
+          $this->revisionsTable,
+          $db->getDatabasePlatform()->getNowExpression()
+      );
+      return $db->executeUpdate($sql, $args);
     } else {
-      return $db->update("`$this->revisionsTable`", $args, array('id' => $oldContentId));
+      $args[':oldContentId'] = $oldContentId;
+      $sql = sprintf('
+        UPDATE `%1$s` SET
+          `table` = :table,
+          `rowId` = :rowId,
+          `key` = :key,
+          `value` = :value
+        WHERE `id` = :oldContentId',
+          $this->revisionsTable
+      );
+      return $db->executeUpdate($sql, $args);
     }
   }
 
