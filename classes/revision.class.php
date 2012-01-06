@@ -49,7 +49,7 @@ class Revision
    */
   public function __destruct()
   {
-    unset($this->currentContent, $this->revisionInfo);
+    unset($this->currentContent, $this->revisionInfo, $this->revisionId, $this->revisionDate);
   }
 
   /**

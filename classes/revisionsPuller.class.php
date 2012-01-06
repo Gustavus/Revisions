@@ -57,7 +57,7 @@ class RevisionsPuller
    */
   public function __destruct()
   {
-    unset($this->table, $this->column, $this->dbName, $this->rowId);
+    unset($this->dbName, $this->revisionsTable, $this->table, $this->column, $this->dbal, $this->rowId);
   }
 
   /**
