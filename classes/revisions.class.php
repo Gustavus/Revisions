@@ -32,11 +32,23 @@ class Revisions extends RevisionsPuller
   private $previousRevisionId = null;
 
   /**
+   * @var boolean on whether object has tried to pull revisions or not
+   */
+  private $revisionsHaveBeenPulled = false;
+
+  /**
    * Class constructor
    * @param array $params
    */
   public function __construct(array $params = array())
   {
+    if (isset($params['dbName'],
+      $params['revisionsTable'],
+      $params['column'],
+      $params['table'],
+      $params['rowId'])) {
+        $this->populateObjectWithArray($params);
+    }
   }
 
   /**
@@ -73,15 +85,8 @@ class Revisions extends RevisionsPuller
    * @param  string $key           column name that is being worked with
    * @return string of the diff
    */
-  public function makeRevision($newText, $revisionDB, $revisionTable, $table, $rowId, $key)
+  public function makeRevision($newText)
   {
-    $this->populateObjectWithArray(array(
-      'dbName'         => $revisionDB,
-      'revisionsTable' => $revisionTable,
-      'column'         => $key,
-      'table'          => $table,
-      'rowId'          => $rowId,
-    ));
     $oldContentArray = $this->getRevisions(null, 1);
     if (!empty($oldContentArray)) {
       $oldContent = $oldContentArray[0]['value'];
@@ -98,6 +103,7 @@ class Revisions extends RevisionsPuller
 
   /**
    * function to get and store revisions in the object
+   * Defaults to pull the latest 10 revisions to cache in the object
    *
    * function to make and store a revision
    * @param  string $revisionDB    revision database name
@@ -108,15 +114,8 @@ class Revisions extends RevisionsPuller
    * @param  integer $limit        how many revisions to go back
    * @return void
    */
-  public function populateObjectWithRevisions($revisionDB, $revisionTable, $table, $rowId, $key, $limit = 10)
+  private function populateObjectWithRevisions($limit = 10)
   {
-    $this->populateObjectWithArray(array(
-      'dbName'         => $revisionDB,
-      'revisionsTable' => $revisionTable,
-      'column'         => $key,
-      'table'          => $table,
-      'rowId'          => $rowId,
-    ));
     $currentContent = null;
     $revisions = $this->getRevisions($this->previousRevisionId, $limit);
     if ($this->previousRevisionId === null) {
@@ -139,7 +138,7 @@ class Revisions extends RevisionsPuller
         'revisionDiff'    => $revDiff,
       );
     }
-    $this->previousRevisionId = $revision['id'];
+    $this->previousRevisionId = isset($revision['id']) ? $revision['id'] : null;
     $this->previousContent    = $currentContent;
   }
 
@@ -151,6 +150,12 @@ class Revisions extends RevisionsPuller
    */
   public function getRevision($id, $diff = false)
   {
+    if (!$this->revisionsHaveBeenPulled) {
+      $this->populateObjectWithRevisions();
+      $this->revisionsHaveBeenPulled = true;
+    } else if ($this->previousRevisionId !== null && $this->previousRevisionId > $id) {
+      $this->populateObjectWithRevisions();
+    }
     if (!isset($this->revisions[$id])) {
       return null;
     }

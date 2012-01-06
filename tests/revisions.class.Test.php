@@ -65,7 +65,7 @@ class RevisionsTest extends RevisionsHelper
       $this->dbalConnection = \Gustavus\DB\DBAL::getDBAL($tableName, self::$dbh);
     }
 
-    $this->revisions = $this->getMockWithDB('\Gustavus\Revisions\Revisions', 'getDB', array(), $this->dbalConnection);
+    $this->revisions = $this->getMockWithDB('\Gustavus\Revisions\Revisions', 'getDB', array($this->revisionsPullerInfo), $this->dbalConnection);
   }
 
   /**
@@ -86,7 +86,6 @@ class RevisionsTest extends RevisionsHelper
     $conn = $this->getConnection();
     $this->setUpMock('person-revision');
     $this->dbalConnection->query($this->getCreateQuery());
-    $this->call($this->revisions, 'populateObjectWithArray', array($this->revisionsPullerInfo));
 
     $this->saveRevisionToDB('Billy Visto', 'Billy', $this->revisions);
     $this->saveRevisionToDB('Billy', 'Billy Visto', $this->revisions);
@@ -94,7 +93,7 @@ class RevisionsTest extends RevisionsHelper
     $this->ymlFile = 'nameRevision2.yml';
     $expected = $this->getDataSet();
 
-    $result = $this->revisions->makeRevision('Billy Visto', 'person-revision', 'person-revision', 'person', 1, 'name');
+    $result = $this->revisions->makeRevision('Billy Visto');
     $this->assertSame('Billy Visto', $result);
 
     $actualDataSet = $conn->createDataSet(array('person-revision'));
@@ -114,7 +113,6 @@ class RevisionsTest extends RevisionsHelper
     $conn = $this->getConnection();
     $this->setUpMock('person-revision');
     $this->dbalConnection->query($this->getCreateQuery());
-    $this->call($this->revisions, 'populateObjectWithArray', array($this->revisionsPullerInfo));
 
     // $this->saveRevisionToDB('Billy Visto', 'Billy', $this->revisions);
     // $this->saveRevisionToDB('Billy', 'Billy Visto', $this->revisions);
@@ -122,7 +120,7 @@ class RevisionsTest extends RevisionsHelper
     $this->ymlFile = 'nameRevision.yml';
     $expected = $this->getDataSet();
 
-    $result = $this->revisions->makeRevision('Billy Visto', 'person-revision', 'person-revision', 'person', 1, 'name');
+    $result = $this->revisions->makeRevision('Billy Visto');
     $this->assertSame('Billy Visto', $result);
 
     $actualDataSet = $conn->createDataSet(array('person-revision'));
@@ -142,13 +140,13 @@ class RevisionsTest extends RevisionsHelper
     $conn = $this->getConnection();
     $this->setUpMock('person-revision');
     $this->dbalConnection->query($this->getCreateQuery());
-    $this->call($this->revisions, 'populateObjectWithArray', array($this->revisionsPullerInfo));
+    //$this->call($this->revisions, 'populateObjectWithArray', array($this->revisionsPullerInfo));
 
     $this->ymlFile = 'nameRevision1.yml';
     $expected = $this->getDataSet();
 
-    $this->revisions->makeRevision('Billy Visto', 'person-revision', 'person-revision', 'person', 1, 'name');
-    $result = $this->revisions->makeRevision('Billy', 'person-revision', 'person-revision', 'person', 1, 'name');
+    $this->revisions->makeRevision('Billy Visto');
+    $result = $this->revisions->makeRevision('Billy');
     $this->assertSame('Billy<del> Visto</del>', $result);
 
     $actualDataSet = $conn->createDataSet(array('person-revision'));
@@ -165,7 +163,22 @@ class RevisionsTest extends RevisionsHelper
    */
   public function getRevision()
   {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
     $this->assertNull($this->revisions->getRevision(0));
+    $this->dropCreatedTables(array('person-revision'));
+  }
+
+  /**
+   * @test
+   * @expectedException PDOException
+   */
+  public function getRevisionWithNoTable()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->assertInstanceOf('PDOException', $this->revisions->getRevision(0));
   }
 
   /**
@@ -176,12 +189,12 @@ class RevisionsTest extends RevisionsHelper
     $conn = $this->getConnection();
     $this->setUpMock('person-revision');
     $this->dbalConnection->query($this->getCreateQuery());
-    $this->call($this->revisions, 'populateObjectWithArray', array($this->revisionsPullerInfo));
+    //$this->call($this->revisions, 'populateObjectWithArray', array($this->revisionsPullerInfo));
 
     $this->saveRevisionToDB('Billy Visto', 'Billy', $this->revisions);
     $this->saveRevisionToDB('Billy', 'Billy Visto', $this->revisions);
 
-    $this->revisions->populateObjectWithRevisions('person-revision', 'person-revision', 'person', 1, 'name');
+    $this->call($this->revisions, 'populateObjectWithRevisions');
     $this->assertSame('Billy', array_pop($this->revisions->getRevision(2)));
     $this->assertSame('Billy Visto', array_pop($this->revisions->getRevision(1)));
     $this->assertSame('Billy<ins> Visto</ins>', array_pop($this->revisions->getRevision(2, true)));
