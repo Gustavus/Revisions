@@ -1,8 +1,30 @@
+revisionData:
+  -
+    id: 1
+    revisionId: 1
+    revisionNumber: 1
+    key: "name"
+    value: '[]'
+  -
+    id: 2
+    revisionId: 2
+    revisionNumber: 2
+    key: "name"
+    value: 'Billy Visto'
 person-revision:
   -
     id: 1
     table: "person"
     rowId: 1
-    key: "name"
-    value: 'Billy Visto'
+    revisionNumber: 1
+    message: ""
+    createdBy: "name"
+    createdOn:
+  -
+    id: 2
+    table: "person"
+    rowId: 1
+    revisionNumber: 2
+    message: ""
+    createdBy: "name"
     createdOn:

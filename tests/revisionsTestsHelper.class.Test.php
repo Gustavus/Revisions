@@ -4,6 +4,7 @@
  * @subpackage Tests
  */
 
+namespace Gustavus\Revisions\Test;
 use Gustavus\Revisions;
 
 require_once '/cis/lib/test/testDBPDO.class.php';
@@ -37,7 +38,7 @@ class RevisionsHelper extends \Gustavus\Test\TestDBPDO
   protected $revisionsPullerInfo = array(
     'dbName' => 'person-revision',
     'revisionsTable' => 'person-revision',
-    'column' => 'name',
+    'revisionDataTable' => 'revisionData',
     'table'  => 'person',
     'rowId'  => 1,
   );
@@ -51,9 +52,25 @@ class RevisionsHelper extends \Gustavus\Test\TestDBPDO
             (`id` INTEGER PRIMARY KEY,
             `table` VARCHAR,
             `rowId` INTEGER,
-            `key` VARCHAR,
-            `value` VARCHAR,
+            `revisionNumber` INTEGER,
+            `message` VARCHAR,
+            `createdBy` VARCHAR,
             `createdOn` DATETIME)
+            ';
+    return $sql;
+  }
+
+  /**
+   * @return string
+   */
+  protected function getCreateDataQuery()
+  {
+    $sql = 'CREATE TABLE IF NOT EXISTS `revisionData`
+            (`id` INTEGER PRIMARY KEY,
+            `revisionId` INTEGER,
+            `revisionNumber` INTEGER,
+            `key` VARCHAR,
+            `value` VARCHAR)
             ';
     return $sql;
   }
@@ -63,15 +80,14 @@ class RevisionsHelper extends \Gustavus\Test\TestDBPDO
    * @param string $newContent
    * @return void
    */
-  protected function saveRevisionToDB($currContent, $newContent, $object)
+  protected function saveRevisionToDB($currContent, $newContent, $column, $object, $revisionDataArray = array(), $message = '', $createdBy = 'name')
   {
-    $revision = new \Gustavus\Revisions\Revision(array(
+    $revisionData = new \Gustavus\Revisions\RevisionData(array(
       'currentContent' => $currContent,
     ));
 
-    $revisionInfo = $this->call($revision, 'renderRevisionForDB', array($newContent));
-    $oldContentArray = $this->call($object, 'getRevisions', array(null, 1));
-    // modify
-    $this->call($object, 'saveRevision', array($revisionInfo, $newContent, $oldContentArray));
+    $revisionInfo = $revisionData->renderRevisionForDB($newContent);
+    $revisionInfoArray = array($column => $revisionInfo);
+    $this->call($object, 'saveRevision', array($revisionInfoArray, array($column => $newContent), $revisionDataArray, $message, $createdBy));
   }
 }

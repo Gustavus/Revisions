@@ -5,6 +5,7 @@
 namespace Gustavus\Revisions;
 require_once 'revisions/classes/revisionsPuller.class.php';
 require_once 'revisions/classes/revision.class.php';
+require_once 'revisions/classes/revisionData.class.php';
 
 /**
  * @package Revisions
@@ -12,27 +13,27 @@ require_once 'revisions/classes/revision.class.php';
 class Revisions extends RevisionsPuller
 {
   /**
-   * @var array of revisions keyed by revision id
+   * @var SplFixedArray of revisions keyed by revision number
    */
-  private $revisions = array();
+  private $revisions = null;
 
   /**
-   * @var array of current content info
+   * @var array of current content info keyed by column
    */
-  private $currentContentInfo;
+  private $currentContent = array();
 
   /**
-   * @var string of what the previous revisions content was
+   * @var array keyed by column name of what the previous revision's content was
    */
-  private $previousContent;
+  private $previousContent = array();
 
   /**
-   * @var int of previous revisions id
+   * @var array of booleans keyed by column on whether object has tried to pull revisions or not
    */
-  private $previousRevisionId = null;
+  private $revisionDataHasBeenPulled = array();
 
   /**
-   * @var boolean on whether object has tried to pull revisions or not
+   * @var boolean
    */
   private $revisionsHaveBeenPulled = false;
 
@@ -44,7 +45,7 @@ class Revisions extends RevisionsPuller
   {
     if (isset($params['dbName'],
       $params['revisionsTable'],
-      $params['column'],
+      $params['revisionDataTable'],
       $params['table'],
       $params['rowId'])) {
         $this->populateObjectWithArray($params);
@@ -58,7 +59,7 @@ class Revisions extends RevisionsPuller
    */
   public function __destruct()
   {
-    unset($this->revisions, $this->previousRevisionId, $this->currentContentInfo, $this->previousContent);
+    unset($this->revisions, $this->previousRevisionNumber, $this->currentContentInfo, $this->previousContent);
   }
 
   /**
@@ -70,104 +71,145 @@ class Revisions extends RevisionsPuller
    */
   public function renderDiff($oldText, $newText)
   {
-    $revision = new Revision(array('currentContent' => $oldText));
-    $diff = $revision->makeDiff($newText);
+    $revisionData = new RevisionData(array('currentContent' => $oldText));
+    $diff = $revisionData->makeDiff($newText);
     return $diff;
   }
 
   /**
    * function to make and store a revision
-   * @param  string $newText       text that has replaced the old text
-   * @param  string $revisionDB    revision database name
-   * @param  string $revisionTable revision table name currenty working with
-   * @param  string $table         project table name used for distinguishing between tables if db is used for multiple table's revisions
-   * @param  integer $rowId        id of the row that the current content is in for complex databases
-   * @param  string $key           column name that is being worked with
+   * @param  array $newText       array of text that has replaced the old text keyed by column
+   * @param  string $message      revision message
+   * @param  string $createdBy    person creating revision
    * @return string of the diff
    */
-  public function makeRevision($newText)
+  public function makeRevision(array $newText, $message = '', $createdBy = '')
   {
-    $oldContentArray = $this->getRevisions(null, 1);
-    if (!empty($oldContentArray)) {
-      $oldContent = $oldContentArray[0]['value'];
-      $revision = new Revision(array('currentContent' => $oldContent));
-      $revisionInfo = $revision->renderRevisionForDB($newText);
-      $diff = $revision->makeDiff($newText);
-    } else {
-      $revisionInfo = null;
-      $diff = $this->renderDiff('', $newText);
+    $revisionInfoArray    = array();
+    $oldRevisionDataArray = array();
+    foreach ($newText as $key => $value) {
+      $oldRevisionData = $this->getRevisionData(null, $key, true, 1);
+      $oldRevisionDataArray = array_merge($oldRevisionDataArray, $oldRevisionData);
+      if (isset($oldRevisionData[$key])) {
+        $oldContentArray = array_shift($oldRevisionData[$key]);
+        $revisionData    = new RevisionData(array('currentContent' => $oldContentArray['value']));
+        $revisionInfo    = $revisionData->renderRevisionForDB($value);
+        $revisionInfoArray[$key] = $revisionInfo;
+      } else {
+        // revision doesn't exist yet
+        $revisionData    = new RevisionData(array('currentContent' => ''));
+        $revisionInfo    = $revisionData->renderRevisionForDB($value);
+        $revisionInfoArray[$key] = $revisionInfo;
+      }
     }
-    $this->saveRevision($revisionInfo, $newText, $oldContentArray);
-    return $diff;
+    $this->saveRevision($revisionInfoArray, $newText, $oldRevisionDataArray, $message, $createdBy);
   }
 
   /**
    * function to get and store revisions in the object
    * Defaults to pull the latest 10 revisions to cache in the object
    *
-   * function to make and store a revision
-   * @param  string $revisionDB    revision database name
-   * @param  string $revisionTable revision table name currenty working with
-   * @param  string $table         project table name used for distinguishing between tables if db is used for multiple table's revisions
-   * @param  integer $rowId        id of the row that the current content is in for complex databases
-   * @param  string $key           column name that is being worked with
-   * @param  integer $limit        how many revisions to go back
    * @return void
    */
-  private function populateObjectWithRevisions($limit = 10)
+  private function populateObjectWithRevisions()
   {
     $currentContent = null;
-    $revisions = $this->getRevisions($this->previousRevisionId, $limit);
-    if ($this->previousRevisionId === null) {
-      $this->currentContentInfo = array_shift($revisions);
-      $currentContent = $this->currentContentInfo['value'];
-    }
-    foreach ($revisions as $revision) {
+    $revisions = $this->getRevisions($this->findOldestRevisionNumberPulled());
+    foreach ($revisions as $revisionInfo) {
+      if (!$this->revisionsHaveBeenPulled) {
+        $splFixedArrayLength = $revisionInfo['revisionNumber'];
+        $this->revisionsHaveBeenPulled = true;
+        $this->revisions = new \SplFixedArray($splFixedArrayLength + 1);
+      }
+      $revisionData = $this->makeRevisionDataObjects($revisionInfo['id']);
       $params = array(
-        'revisionId'     => $revision['id'],
-        'revisionDate'   => $revision['createdOn'],
-        'currentContent' => $currentContent,
-        'revisionInfo'   => json_decode($revision['value'], true),
+        'revisionNumber'  => $revisionInfo['revisionNumber'],
+        'revisionDate'    => $revisionInfo['createdOn'],
+        'revisionMessage' => $revisionInfo['message'],
+        'createdBy'       => $revisionInfo['createdBy'],
+        'revisionData'    => $revisionData,
       );
-      $rev = new Revision($params);
-      $revDiff = $rev->makeRevisionContent(true);
-      $currentContent = $rev->makeRevisionContent(false);
-      $this->revisions[$revision['id']] = array(
-        'revision'        => $rev,
-        'revisionContent' => $currentContent,
-        'revisionDiff'    => $revDiff,
-      );
+      $revision = new Revision($params);
+      $this->revisions[$revisionInfo['revisionNumber']] = $revision;
     }
-    $this->previousRevisionId = isset($revision['id']) ? $revision['id'] : null;
-    $this->previousContent    = $currentContent;
+  }
+
+  /**
+   * function to make an array of revisionData objects keyed by column
+   * @param  integer $revisionId
+   * @return array
+   */
+  private function makeRevisionDataObjects($revisionId)
+  {
+    $revisionDataInfo = $this->getRevisionData($revisionId);
+    $revisionDataArray = array();
+    foreach ($revisionDataInfo as $key => $value) {
+      if (!isset($this->revisionDataHasBeenPulled[$key])) {
+        // first revisionData will be current text
+        $this->currentContent[$key] = $value['value'];
+        $this->revisionDataHasBeenPulled[$key] = true;
+        $this->previousContent[$key] = $value['value'];
+      }
+      $params = array(
+        'revisionNumber'  => $value['revisionNumber'],
+        'value'           => $value['value'],
+        'currentContent'  => $this->previousContent[$key],
+      );
+      $revisionData = new RevisionData($params);
+      $this->previousContent[$key] = $revisionData->makeRevisionContent();
+      $revisionDataArray[$key] = $revisionData;
+    }
+    return $revisionDataArray;
+  }
+
+  /**
+   * function to get the oldest revision number pulled into the object
+   * @return integer
+   */
+  private function findOldestRevisionNumberPulled()
+  {
+    if ($this->revisions === null) {
+      return null;
+    }
+    foreach ($this->revisions as $key => $value) {
+      if ($value !== null) {
+        return $key;
+      }
+    }
+    return null;
   }
 
   /**
    * pulls a specific revision out of the object to return
-   * @param  integer $id revision id you want
-   * @param  boolean $diff whether to return plain text or a diff
+   * @param  integer $revisionNumber revision number you want
    * @return string
    */
-  public function getRevision($id, $diff = false)
+  public function getRevisionByNumber($revisionNumber)
   {
-    if (!$this->revisionsHaveBeenPulled) {
-      $this->populateObjectWithRevisions();
-      $this->revisionsHaveBeenPulled = true;
-    } else if ($this->previousRevisionId !== null && $this->previousRevisionId > $id) {
+    if (!$this->revisionDataHasBeenPulled) {
+      // no revisions in the object
       $this->populateObjectWithRevisions();
     }
-    if (!isset($this->revisions[$id])) {
+    if ($this->revisions === null || count($this->revisions) <= $revisionNumber) {
       return null;
     }
-    if ($diff) {
-      $revContent = $this->revisions[$id]['revisionDiff'];
-    } else {
-      $revContent = $this->revisions[$id]['revisionContent'];
+    while ($this->revisions[$revisionNumber] === null) {
+      // keep pulling in revisions until the revision number is in the object
+      $this->populateObjectWithRevisions();
     }
-    $rev = $this->revisions[$id]['revision'];
-    return array(
-      'date' => $rev->getRevisionDate(),
-      'revisionContent' => $revContent,
-    );
+    return $this->revisions[$revisionNumber];
+  }
+
+  /**
+   * pulls revisions out of the object to return an array keyed by revision
+   * @return array of revisions
+   */
+  public function getRevisionObjects()
+  {
+    if (!$this->revisionDataHasBeenPulled) {
+      // no revisions in the object
+      $this->populateObjectWithRevisions();
+    }
+    return $this->revisions;
   }
 }

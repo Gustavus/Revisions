@@ -1,0 +1,60 @@
+revisionData:
+  -
+    id: 1
+    revisionId: 1
+    revisionNumber: 1
+    key: "name"
+    value: '[{"startIndex":1,"endIndex":null,"revisionContent":" Visto"}]'
+  -
+    id: 2
+    revisionId: 2
+    revisionNumber: 2
+    key: "age"
+    value: '[{"startIndex":0,"endIndex":1,"revisionContent":"22"}]'
+    createdOn:
+  -
+    id: 3
+    revisionId: 2
+    revisionNumber: 1
+    key: "name"
+    value: '[{"startIndex":1,"endIndex":2,"revisionContent":""}]'
+    createdOn:
+  -
+    id: 4
+    revisionId: 3
+    revisionNumber: 2
+    key: "age"
+    value: "23"
+    createdOn:
+  -
+    id: 5
+    revisionId: 3
+    revisionNumber: 3
+    key: "name"
+    value: 'Billy Visto'
+    createdOn:
+person-revision:
+  -
+    id: 1
+    table: "person"
+    rowId: 1
+    revisionNumber: 1
+    message:
+    createdBy:
+    createdOn:
+  -
+    id: 2
+    table: "person"
+    rowId: 1
+    revisionNumber: 2
+    message:
+    createdBy:
+    createdOn:
+  -
+    id: 3
+    table: "person"
+    rowId: 1
+    revisionNumber: 3
+    message:
+    createdBy:
+    createdOn:
