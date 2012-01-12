@@ -79,6 +79,29 @@ class Revision
   }
 
   /**
+   * @param string $column
+   * @return boolean
+   */
+  public function revisionContainsColumnRevisionData($column)
+  {
+    return isset($this->revisionData[$column]);
+  }
+
+  /**
+   * @param string $column
+   * @return boolean
+   */
+  public function getRevisionDataNumber($column)
+  {
+    if ($this->revisionContainsColumnRevisionData($column)) {
+      $revisionData = $this->revisionData[$column];
+      return $revisionData->getRevisionNumber();
+    } else {
+      return null;
+    }
+  }
+
+  /**
    * @param array $array
    * @return void
    */

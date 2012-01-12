@@ -25,6 +25,11 @@ class RevisionData
   private $revisionContent;
 
   /**
+   * @var integer of revision's revisionId
+   */
+  private $revisionId;
+
+  /**
    * startIndex, endIndex, revisionContent are keys for each revision
    *
    * @var array of revision information
@@ -48,7 +53,7 @@ class RevisionData
    */
   public function __destruct()
   {
-    unset($this->currentContent, $this->revisionInfo, $this->revisionNumber);
+    unset($this->currentContent, $this->revisionInfo, $this->revisionNumber, $this->revisionContent, $this->revisionId);
   }
 
   /**
@@ -65,11 +70,11 @@ class RevisionData
   }
 
   /**
-   * @return string
+   * @return integer
    */
   public function getRevisionNumber()
   {
-    return $this->revisionNumber;
+    return (int) $this->revisionNumber;
   }
 
   /**
@@ -97,6 +102,14 @@ class RevisionData
   }
 
   /**
+   * @return string
+   */
+  public function getRevisionId()
+  {
+    return $this->revisionId;
+  }
+
+  /**
    * @param string $content
    * @return void
    */
@@ -114,9 +127,23 @@ class RevisionData
    */
   protected function renderRevision($showChanges = false)
   {
-    $currContentArr = preg_split('`\b`', $this->getCurrentContent());
+    $revisionInfo = $this->getRevisionInfo();
+    $currentContent = $this->getCurrentContent();
+    if (empty($revisionInfo) && isset($currentContent)) {
+      // brand new content was added
+      if ($showChanges) {
+        if (is_string($currentContent)) {
+          return $this->renderContentChange($currentContent, true);
+        } else {
+          return $this->renderNonStringRevision(null, true);
+        }
+      } else {
+        return '';
+      }
+    }
+    $currContentArr = preg_split('`\b`', $currentContent);
     array_shift($currContentArr);
-    foreach ($this->getRevisionInfo() as $revision) {
+    foreach ($revisionInfo as $revision) {
       $revisionContent = ($showChanges) ? $this->renderContentChange($revision[2], false) : $revision[2];
       if (isset($revision[1])) {
         // content was deleted/replaced
@@ -130,6 +157,10 @@ class RevisionData
           $currContentArr[$i] = '';
         }
         $currContentArr[$revision[0]] = ($showChanges) ? $revisionContent.$this->renderContentChange($ins, true) : $revisionContent;
+      } else if (!isset($revision[0]) && count($revisionInfo) === 1) {
+        // full content change. As of now, this signifies a non string revision
+        return $this->renderNonStringRevision($revision[2], $showChanges);
+        //$currContentArr[$revision[0]] = $revisionContent.$currText;
       } else {
         //content was added
         $space = ($showChanges) ? '' : ' ' ;
@@ -138,6 +169,31 @@ class RevisionData
       }
     }
     return implode('', $currContentArr);
+  }
+
+  /**
+   * function to render a revision for non strings
+   * @param  mixed $revisionContent
+   * @param  boolean $showChanges
+   * @return mixed
+   */
+  private function renderNonStringRevision($revisionContent, $showChanges = false)
+  {
+    if ($showChanges) {
+      $currentContent = $this->getCurrentContent();
+      if (is_bool($revisionContent)) {
+        $revisionContent = ($revisionContent) ? 'true' : 'false';
+      }
+      if (is_bool($currentContent)) {
+        $currentContent = ($currentContent) ? 'true' : 'false';
+      }
+      $oldText = $this->renderContentChange((string) $currentContent, true);
+      $newText = ($revisionContent !== null) ? $this->renderContentChange((string) $revisionContent, false) : '';
+      $currText = $newText.$oldText;
+    } else {
+      $currText = $revisionContent;
+    }
+    return $currText;
   }
 
   /**
@@ -283,6 +339,22 @@ class RevisionData
   }
 
   /**
+   * function to mave revision information for non strings
+   * @param  mixed $newContent
+   * @return array
+   */
+  private function makeNonStringRevisionInfo($newContent)
+  {
+    if ($this->getCurrentContent() === $newContent) {
+      $diffInfo = array();
+    } else {
+      $diffInfo = array(array(null, null, $this->getCurrentContent()));
+    }
+    $this->revisionInfo = $diffInfo;
+    return $diffInfo;
+  }
+
+  /**
    * function to return diff information on how to roll back to a diff.
    * returns array of arrays of diffs.
    * returns info on how to get to revision from the new text
@@ -292,6 +364,9 @@ class RevisionData
    */
   protected function makeRevisionInfo($newContent)
   {
+    if (!is_string($newContent)) {
+      return $this->makeNonStringRevisionInfo($newContent);
+    }
     $currContentArr = preg_split('`\b`', $this->getCurrentContent());
     $newContentArr  = preg_split('`\b`', $newContent);
     $diffArr        = $this->myArrayDiff($currContentArr, $newContentArr);

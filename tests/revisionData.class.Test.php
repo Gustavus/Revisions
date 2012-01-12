@@ -27,6 +27,7 @@ class RevisionDataTest extends \Gustavus\Test\Test
   private $revisionDataProperties = array(
     'currentContent' => 'some test content',
     'revisionNumber' => 1,
+    'revisionId'  => 1,
     'revisionInfo' => array(array(
       2,
       null,
@@ -74,6 +75,14 @@ class RevisionDataTest extends \Gustavus\Test\Test
   public function getRevisionNumber()
   {
     $this->assertSame($this->revisionDataProperties['revisionNumber'], $this->revisionData->getRevisionNumber());
+  }
+
+  /**
+   * @test
+   */
+  public function getRevisionId()
+  {
+    $this->assertSame($this->revisionDataProperties['revisionId'], $this->revisionData->getRevisionId());
   }
 
   /**
@@ -249,6 +258,169 @@ class RevisionDataTest extends \Gustavus\Test\Test
   /**
    * @test
    */
+  public function renderRevisionBoolean()
+  {
+    $this->revisionDataProperties = array(
+      'currentContent' => true,
+      'revisionInfo' => array(array(
+        null,
+        null,
+        false,
+      )),
+    );
+    $this->setUp();
+    $expected = false;
+
+    $result = $this->call($this->revisionData, 'renderRevision');
+    $this->assertSame($expected, $result);
+  }
+
+  /**
+   * @test
+   */
+  public function renderRevisionInt()
+  {
+    $this->revisionDataProperties = array(
+      'currentContent' => 100101,
+      'revisionInfo' => array(array(
+        null,
+        null,
+        100010,
+      )),
+    );
+    $this->setUp();
+    $expected = 100010;
+
+    $result = $this->call($this->revisionData, 'renderRevision');
+    $this->assertSame($expected, $result);
+  }
+
+  /**
+   * @test
+   */
+  public function renderRevisionIntFirst()
+  {
+    $this->revisionDataProperties = array(
+      'currentContent' => 100101,
+      'revisionInfo' => array(),
+    );
+    $this->setUp();
+    $expected = '';
+
+    $result = $this->call($this->revisionData, 'renderRevision');
+    $this->assertSame($expected, $result);
+  }
+
+  /**
+   * @test
+   */
+  public function renderRevisionIntFirstChanges()
+  {
+    $this->revisionDataProperties = array(
+      'currentContent' => 100101,
+      'revisionInfo' => array(),
+    );
+    $this->setUp();
+    $expected = '<ins>100101</ins>';
+
+    $result = $this->call($this->revisionData, 'renderRevision', array(true));
+    $this->assertSame($expected, $result);
+  }
+
+  /**
+   * @test
+   */
+  public function renderRevisionBooleanFirstChanges()
+  {
+    $this->revisionDataProperties = array(
+      'currentContent' => false,
+      'revisionInfo' => array(),
+    );
+    $this->setUp();
+    $expected = '<ins>false</ins>';
+
+    $result = $this->call($this->revisionData, 'renderRevision', array(true));
+    $this->assertSame($expected, $result);
+  }
+
+  /**
+   * @test
+   */
+  public function renderNonStringRevisionInt()
+  {
+    $this->revisionDataProperties = array(
+      'currentContent' => 100101,
+    );
+    $this->setUp();
+    $expected = 100010;
+
+    $result = $this->call($this->revisionData, 'renderNonStringRevision', array(100010));
+    $this->assertSame($expected, $result);
+  }
+
+  /**
+   * @test
+   */
+  public function renderNonStringRevisionBoolean()
+  {
+    $this->revisionDataProperties = array(
+      'currentContent' => true,
+    );
+    $this->setUp();
+    $expected = false;
+
+    $result = $this->call($this->revisionData, 'renderNonStringRevision', array(false));
+    $this->assertSame($expected, $result);
+  }
+
+  /**
+   * @test
+   */
+  public function renderNonStringRevisionIntChanges()
+  {
+    $this->revisionDataProperties = array(
+      'currentContent' => 100101,
+    );
+    $this->setUp();
+    $expected = '<del>100010</del><ins>100101</ins>';
+
+    $result = $this->call($this->revisionData, 'renderNonStringRevision', array(100010, true));
+    $this->assertSame($expected, $result);
+  }
+
+  /**
+   * @test
+   */
+  public function renderNonStringRevisionBooleanChanges()
+  {
+    $this->revisionDataProperties = array(
+      'currentContent' => true,
+    );
+    $this->setUp();
+    $expected = '<del>false</del><ins>true</ins>';
+
+    $result = $this->call($this->revisionData, 'renderNonStringRevision', array(false, true));
+    $this->assertSame($expected, $result);
+  }
+
+  /**
+   * @test
+   */
+  public function renderNonStringRevisionBooleanChangesEmptyRevision()
+  {
+    $this->revisionDataProperties = array(
+      'currentContent' => true,
+    );
+    $this->setUp();
+    $expected = '<ins>true</ins>';
+
+    $result = $this->call($this->revisionData, 'renderNonStringRevision', array(null, true));
+    $this->assertSame($expected, $result);
+  }
+
+  /**
+   * @test
+   */
   public function makeRevisionContent()
   {
     $expected = 'some testing test content';
@@ -274,11 +446,57 @@ class RevisionDataTest extends \Gustavus\Test\Test
   {
     $this->revisionDataProperties = array(
       'currentContent' => 'some test content',
+      'revisionInfo' => array(),
     );
     $this->setUp();
     $expected = '<del>some</del><ins>new</ins> test content';
 
     $result = $this->call($this->revisionData, 'makeDiff', array('new test content'));
+    $this->assertSame($expected, $result);
+  }
+
+  /**
+   * @test
+   */
+  public function makeDiffNew()
+  {
+    $this->revisionDataProperties = array(
+      'currentContent' => '',
+    );
+    $this->setUp();
+    $expected = '<ins>new test content</ins>';
+
+    $result = $this->call($this->revisionData, 'makeDiff', array('new test content'));
+    $this->assertSame($expected, $result);
+  }
+
+  /**
+   * @test
+   */
+  public function makeDiffBoolean()
+  {
+    $this->revisionDataProperties = array(
+      'currentContent' => true,
+    );
+    $this->setUp();
+    $expected = '<del>true</del><ins>false</ins>';
+
+    $result = $this->call($this->revisionData, 'makeDiff', array(false));
+    $this->assertSame($expected, $result);
+  }
+
+  /**
+   * @test
+   */
+  public function makeDiffInteger()
+  {
+    $this->revisionDataProperties = array(
+      'currentContent' => 100010,
+    );
+    $this->setUp();
+    $expected = '<del>100010</del><ins>101010</ins>';
+
+    $result = $this->call($this->revisionData, 'makeDiff', array(101010));
     $this->assertSame($expected, $result);
   }
 
@@ -518,6 +736,54 @@ class RevisionDataTest extends \Gustavus\Test\Test
     $this->setUp();
     $result = $this->call($this->revisionData, 'makeRevisionInfo', array('some test content'));
     $expected = array();
+    $this->assertSame($expected, $result);
+  }
+
+  /**
+   * @test
+   */
+  public function makeNonStringRevisionInfo()
+  {
+    $this->revisionDataProperties['currentContent'] = true;
+    $this->setUp();
+    $result = $this->call($this->revisionData, 'makeNonStringRevisionInfo', array(false));
+    $expected = array(array(null, null, true));
+    $this->assertSame($expected, $result);
+  }
+
+  /**
+   * @test
+   */
+  public function makeNonStringRevisionInfoSame()
+  {
+    $this->revisionDataProperties['currentContent'] = true;
+    $this->setUp();
+    $result = $this->call($this->revisionData, 'makeNonStringRevisionInfo', array(true));
+    $expected = array();
+    $this->assertSame($expected, $result);
+  }
+
+  /**
+   * @test
+   */
+  public function makeRevisionInfoBoolean()
+  {
+    $this->revisionDataProperties['currentContent'] = true;
+    $this->setUp();
+    $result = $this->call($this->revisionData, 'makeRevisionInfo', array(false));
+    $expected = array(array(null, null, true));
+    $this->assertSame($expected, $result);
+  }
+
+  /**
+   * @test
+   */
+  public function makeRevisionInfoInt()
+  {
+    $this->revisionDataProperties['currentContent'] = 101001;
+    $this->setUp();
+    $result = $this->call($this->revisionData, 'makeRevisionInfo', array(100011));
+    $expected = array(array(null, null, 101001));
     $this->assertSame($expected, $result);
   }
 

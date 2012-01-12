@@ -139,7 +139,7 @@ class RevisionsPuller
     $db = $this->getDB();
     $dbDataName = "`$this->revisionDataTable`";
     $qb = $db->createQueryBuilder();
-    $qb->select('dataDB.`id`, dataDB.`revisionNumber`, dataDB.`key`, dataDB.`value`')
+    $qb->select('dataDB.`id`, dataDB.`revisionId`, dataDB.`revisionNumber`, dataDB.`key`, dataDB.`value`')
       ->from($dbDataName, 'dataDB');
     if ($revisionId === null && $column !== null) {
       if ($limit === null) {
@@ -186,14 +186,16 @@ class RevisionsPuller
     foreach ($resultArray as $result) {
       if ($column === null) {
         $return[$result['key']] = array(
-          'id'  => $result['id'],
+          'id'             => $result['id'],
+          'revisionId'     => $result['revisionId'],
           'revisionNumber' => $result['revisionNumber'],
-          'value' => $result['value'],
+          'value'          => $result['value'],
         );
       } else {
          $return[$result['key']][$result['revisionNumber']] = array(
-          'id'  => $result['id'],
-          'value' => $result['value'],
+          'id'         => $result['id'],
+          'revisionId' => $result['revisionId'],
+          'value'      => $result['value'],
         );
       }
     }
@@ -220,7 +222,6 @@ class RevisionsPuller
         ':revisionId'     => $revisionId,
         ':key'            => $column,
       ));
-
 
       $dbDataName = "`$this->revisionDataTable`";
       $qb = $db->createQueryBuilder();

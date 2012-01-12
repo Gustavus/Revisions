@@ -224,6 +224,74 @@ class RevisionsTest extends RevisionsHelper
   /**
    * @test
    */
+  public function populateObjectWithRevisionsColumn()
+  {
+    $conn = $this->getConnection();
+    $this->revisionsPullerInfo['limit'] = 1;
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+    //$this->call($this->revisions, 'populateObjectWithArray', array($this->revisionsPullerInfo));
+
+    $this->saveRevisionToDB('Billy Visto', 'Billy', 'name', $this->revisions);
+    $this->saveRevisionToDB('Billy', 'Billy Visto', 'name', $this->revisions);
+
+    $this->call($this->revisions, 'populateObjectWithRevisions', array('name'));
+    $this->call($this->revisions, 'populateObjectWithRevisions', array('name'));
+    $this->assertInstanceOf('\Gustavus\Revisions\Revision', $this->revisions->getRevisionByNumber(2));
+    $this->assertInstanceOf('\Gustavus\Revisions\Revision', $this->revisions->getRevisionByNumber(1));
+
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
+  public function populateObjectWithColumnRevisions()
+  {
+    $conn = $this->getConnection();
+    $this->revisionsPullerInfo['limit'] = 1;
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+    //$this->call($this->revisions, 'populateObjectWithArray', array($this->revisionsPullerInfo));
+
+    $this->saveRevisionToDB('Billy Visto', 'Billy', 'name', $this->revisions);
+    $this->saveRevisionToDB('Billy', 'Billy Visto', 'name', $this->revisions);
+
+    $this->call($this->revisions, 'populateObjectWithColumnRevisions', array('name'));
+    $this->assertInstanceOf('\Gustavus\Revisions\Revision', $this->revisions->getRevisionByNumber(2));
+    $this->assertInstanceOf('\Gustavus\Revisions\Revision', $this->revisions->getRevisionByNumber(1));
+
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
+  public function populateObjectWithColumnRevisions2()
+  {
+    $conn = $this->getConnection();
+    $this->revisionsPullerInfo['limit'] = 1;
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+    //$this->call($this->revisions, 'populateObjectWithArray', array($this->revisionsPullerInfo));
+
+    $this->saveRevisionToDB('Billy Visto', 'Billy', 'name', $this->revisions);
+    $this->saveRevisionToDB('Billy', 'Billy Visto', 'name', $this->revisions);
+
+    $this->call($this->revisions, 'populateObjectWithColumnRevisions', array('name'));
+    $this->call($this->revisions, 'populateObjectWithColumnRevisions', array('name'));
+    $this->assertInstanceOf('\Gustavus\Revisions\Revision', $this->revisions->getRevisionByNumber(2));
+    $this->assertInstanceOf('\Gustavus\Revisions\Revision', $this->revisions->getRevisionByNumber(1));
+
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
   public function findOldestRevisionNumberPulled()
   {
     $conn = $this->getConnection();
@@ -240,6 +308,102 @@ class RevisionsTest extends RevisionsHelper
     $this->assertSame(3, $this->call($this->revisions, 'findOldestRevisionNumberPulled'));
     $this->call($this->revisions, 'populateObjectWithRevisions');
     $this->assertSame(2, $this->call($this->revisions, 'findOldestRevisionNumberPulled'));
+
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
+  public function findOldestRevisionNumberPulledFullRevisions()
+  {
+    $conn = $this->getConnection();
+    $this->revisionsPullerInfo['limit'] = 10;
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $this->saveRevisionToDB('Billy Visto', 'Billy', 'name', $this->revisions);
+    $this->saveRevisionToDB('Billy', 'Billy Visto', 'name', $this->revisions);
+    $this->call($this->revisions, 'populateObjectWithRevisions');
+    $this->assertSame(1, $this->call($this->revisions, 'findOldestRevisionNumberPulled'));
+
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
+  public function findOldestRevisionNumberPulledColumn()
+  {
+    $conn = $this->getConnection();
+    $this->revisionsPullerInfo['limit'] = 10;
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $this->saveRevisionToDB('Billy Visto', 'Billy', 'name', $this->revisions);
+    $this->saveRevisionToDB('Billy', 'Billy Visto', 'name', $this->revisions);
+    $this->call($this->revisions, 'populateObjectWithRevisions');
+    $this->assertSame(1, $this->call($this->revisions, 'findOldestRevisionNumberPulled', array('name')));
+
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
+  public function findOldestRevisionNumberPulledColumn2()
+  {
+    $conn = $this->getConnection();
+    $this->revisionsPullerInfo['limit'] = 1;
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+    //$this->call($this->revisions, 'populateObjectWithArray', array($this->revisionsPullerInfo));
+
+    $this->saveRevisionToDB('Billy Visto', 'Billy', 'name', $this->revisions);
+    $this->saveRevisionToDB('Billy', 'Billy Visto', 'name', $this->revisions);
+
+    $this->call($this->revisions, 'populateObjectWithRevisions', array('name'));
+    $this->assertSame(2, $this->call($this->revisions, 'findOldestRevisionNumberPulled', array('name')));
+    $this->call($this->revisions, 'populateObjectWithRevisions', array('name'));
+    $this->assertSame(1, $this->call($this->revisions, 'findOldestRevisionNumberPulled', array('name')));
+
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
+  public function findOldestRevisionNumberPulledColumnEmpty()
+  {
+    $conn = $this->getConnection();
+    $this->revisionsPullerInfo['limit'] = 1;
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+    //$this->call($this->revisions, 'populateObjectWithArray', array($this->revisionsPullerInfo));
+
+    $this->call($this->revisions, 'populateObjectWithRevisions', array('name'));
+    $this->assertNull($this->call($this->revisions, 'findOldestRevisionNumberPulled', array('name')));
+
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
+  public function findOldestRevisionNumberPulledColumnNull()
+  {
+    $conn = $this->getConnection();
+    $this->revisionsPullerInfo['limit'] = 1;
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+    //$this->call($this->revisions, 'populateObjectWithArray', array($this->revisionsPullerInfo));
+
+    $this->assertNull($this->call($this->revisions, 'findOldestColumnRevisionNumberPulled', array('name')));
 
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }

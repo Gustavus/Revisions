@@ -111,69 +111,146 @@ class Revisions extends RevisionsPuller
    *
    * @return void
    */
-  private function populateObjectWithRevisions()
+  private function populateObjectWithRevisions($column = null)
   {
-    $currentContent = null;
-    $revisions = $this->getRevisions($this->findOldestRevisionNumberPulled());
-    foreach ($revisions as $revisionInfo) {
+    if ($column !== null) {
+      $this->populateObjectWithColumnRevisions($column);
+    } else {
+      $currentContent = null;
+      $revisions = $this->getRevisions($this->findOldestRevisionNumberPulled());
+      foreach ($revisions as $revisionInfo) {
+        if (!$this->revisionsHaveBeenPulled) {
+          $splFixedArrayLength = $revisionInfo['revisionNumber'];
+          $this->revisionsHaveBeenPulled = true;
+          $this->revisions = new \SplFixedArray($splFixedArrayLength + 1);
+        }
+        $revisionData = $this->makeRevisionDataObjects($revisionInfo['id']);
+        $params = array(
+          'revisionNumber'  => $revisionInfo['revisionNumber'],
+          'revisionDate'    => $revisionInfo['createdOn'],
+          'revisionMessage' => $revisionInfo['message'],
+          'createdBy'       => $revisionInfo['createdBy'],
+          'revisionData'    => $revisionData,
+        );
+        $revision = new Revision($params);
+        $this->revisions[$revisionInfo['revisionNumber']] = $revision;
+      }
+    }
+  }
+
+  private function populateObjectWithColumnRevisions($column)
+  {
+    $revisionDataHasBeenPulled = (isset($this->revisionDataHasBeenPulled[$column])) ? true : false;
+    $revisionData = $this->makeRevisionDataObjects(null, $column, $revisionDataHasBeenPulled, null, $this->findOldestRevisionNumberPulled($column));
+    foreach ($revisionData as $key => $value) {
       if (!$this->revisionsHaveBeenPulled) {
-        $splFixedArrayLength = $revisionInfo['revisionNumber'];
+        $splFixedArrayLength = $value->getRevisionNumber();
         $this->revisionsHaveBeenPulled = true;
         $this->revisions = new \SplFixedArray($splFixedArrayLength + 1);
       }
-      $revisionData = $this->makeRevisionDataObjects($revisionInfo['id']);
-      $params = array(
-        'revisionNumber'  => $revisionInfo['revisionNumber'],
-        'revisionDate'    => $revisionInfo['createdOn'],
-        'revisionMessage' => $revisionInfo['message'],
-        'createdBy'       => $revisionInfo['createdBy'],
-        'revisionData'    => $revisionData,
+      $revisionInfo   = $this->getRevisions(null, null, $value->getRevisionId());
+      $revisionParams = array(
+        'revisionNumber'  => $revisionInfo[0]['revisionNumber'],
+        'revisionDate'    => $revisionInfo[0]['createdOn'],
+        'revisionMessage' => $revisionInfo[0]['message'],
+        'createdBy'       => $revisionInfo[0]['createdBy'],
+        'revisionData'    => array($column => $value),
       );
-      $revision = new Revision($params);
-      $this->revisions[$revisionInfo['revisionNumber']] = $revision;
+      $revision = new Revision($revisionParams);
+      $this->revisions[$revisionInfo[0]['revisionNumber']] = $revision;
     }
   }
 
   /**
    * function to make an array of revisionData objects keyed by column
    * @param  integer $revisionId
+   * @param  string $column
+   * @param  boolean $revisionsHaveBeenPulled
+   * @param  integer $limit
+   * @param  integer $prevRevisionNumber
    * @return array
    */
-  private function makeRevisionDataObjects($revisionId)
+  private function makeRevisionDataObjects($revisionId, $column = null, $revisionsHaveBeenPulled = false, $limit = null, $prevRevisionNumber = null)
   {
-    $revisionDataInfo = $this->getRevisionData($revisionId);
+    $revisionDataInfo = $this->getRevisionData($revisionId, $column, $revisionsHaveBeenPulled, $limit, $prevRevisionNumber);
+    //var_dump($revisionDataInfo);
     $revisionDataArray = array();
     foreach ($revisionDataInfo as $key => $value) {
-      if (!isset($this->revisionDataHasBeenPulled[$key])) {
-        // first revisionData will be current text
-        $this->currentContent[$key] = $value['value'];
-        $this->revisionDataHasBeenPulled[$key] = true;
-        $this->previousContent[$key] = $value['value'];
+      if ($revisionId === null && $column !== null) {
+        foreach ($value as $subKey => $subValue) {
+          if (!isset($this->revisionDataHasBeenPulled[$key])) {
+            // first revisionData will be current text
+            $this->currentContent[$key] = $subValue['value'];
+            $this->revisionDataHasBeenPulled[$key] = true;
+            $this->previousContent[$key] = $subValue['value'];
+          }
+          $params = array(
+            'revisionId'      => $subValue['revisionId'],
+            'revisionNumber'  => $subKey,
+            'value'           => $subValue['value'],
+            'currentContent'  => $this->previousContent[$key],
+            );
+          $revisionData = new RevisionData($params);
+          $this->previousContent[$key] = $revisionData->makeRevisionContent();
+          $revisionDataArray[$subKey] = $revisionData;
+        }
+      } else {
+        if (!isset($this->revisionDataHasBeenPulled[$key])) {
+          // first revisionData will be current text
+          $this->currentContent[$key] = $value['value'];
+          $this->revisionDataHasBeenPulled[$key] = true;
+          $this->previousContent[$key] = $value['value'];
+        }
+        $params = array(
+          'revisionId'      => $revisionId,
+          'revisionNumber'  => $value['revisionNumber'],
+          'value'           => $value['value'],
+          'currentContent'  => $this->previousContent[$key],
+          );
+        $revisionData = new RevisionData($params);
+        $this->previousContent[$key] = $revisionData->makeRevisionContent();
+        $revisionDataArray[$key] = $revisionData;
       }
-      $params = array(
-        'revisionNumber'  => $value['revisionNumber'],
-        'value'           => $value['value'],
-        'currentContent'  => $this->previousContent[$key],
-      );
-      $revisionData = new RevisionData($params);
-      $this->previousContent[$key] = $revisionData->makeRevisionContent();
-      $revisionDataArray[$key] = $revisionData;
     }
     return $revisionDataArray;
   }
 
   /**
    * function to get the oldest revision number pulled into the object
+   * @param $column
    * @return integer
    */
-  private function findOldestRevisionNumberPulled()
+  private function findOldestRevisionNumberPulled($column = null)
+  {
+    if ($this->revisions === null) {
+      return null;
+    }
+    if ($column !== null) {
+      return $this->findOldestColumnRevisionNumberPulled($column);
+    }
+    foreach ($this->revisions as $key => $value) {
+      if ($value !== null) {
+        return $key;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * function to get the oldest column revision number pulled into the object
+   * @param $column
+   * @return integer
+   */
+  private function findOldestColumnRevisionNumberPulled($column = null)
   {
     if ($this->revisions === null) {
       return null;
     }
     foreach ($this->revisions as $key => $value) {
       if ($value !== null) {
-        return $key;
+        if ($value->revisionContainsColumnRevisionData($column)) {
+          return $value->getRevisionDataNumber($column);
+        }
       }
     }
     return null;

@@ -298,6 +298,7 @@ class RevisionsPullerTest extends RevisionsHelper
     $actual = $this->call($this->revisionsPullerMock, 'getRevisionData', array(1));
     $expected = array('name' => array(
         'id' => '1',
+        'revisionId' => '1',
         'revisionNumber' => '1',
         'value' => 'Billy Joel Visto',
       ),
@@ -324,6 +325,7 @@ class RevisionsPullerTest extends RevisionsHelper
     $expected = array('name' => array(
       '1' => array(
         'id' => '1',
+        'revisionId' => '1',
         'value' => 'Billy Joel Visto',
       ),
     ));
@@ -356,10 +358,12 @@ class RevisionsPullerTest extends RevisionsHelper
     $expected = array('name' => array(
       '2' => array(
         "id" => "2",
+        'revisionId' => '2',
         "value" =>  "Billy Visto",
       ),
       '1' => array(
         'id' => '1',
+        'revisionId' => '1',
         'value' => 'Billy Joel Visto',
         ),
       ),
@@ -394,6 +398,7 @@ class RevisionsPullerTest extends RevisionsHelper
     $expected = array('name' => array(
       '1' => array(
         'id' => '1',
+        'revisionId' => '1',
         'value' => 'Billy Joel Visto',
         ),
       ),
@@ -422,6 +427,7 @@ class RevisionsPullerTest extends RevisionsHelper
     $expected = array('name' => array(
       '1' => array(
         'id' => '1',
+        'revisionId' => '1',
         'value' => 'Billy Joel Visto',
       ),
     ));
@@ -436,12 +442,14 @@ class RevisionsPullerTest extends RevisionsHelper
   {
     $fetchAllResult =  array(array(
       "id" => "1",
+      'revisionId' => '1',
       "revisionNumber" => "1",
       "key" => "name",
       "value" => "Billy Joel Visto",
     ));
     $expected = array('name' => array(
         'id' => '1',
+        'revisionId' => '1',
         'revisionNumber' => '1',
         'value' => 'Billy Joel Visto',
       ),
@@ -457,12 +465,14 @@ class RevisionsPullerTest extends RevisionsHelper
   {
     $fetchAllResult =  array(array(
       "id" => "2",
+      'revisionId' => '2',
       "revisionNumber" => "2",
       "key" => "name",
       "value" =>  "Billy Visto",
     ),
     array(
       "id" => "1",
+      'revisionId' => '1',
       "revisionNumber" => "1",
       "key" => "name",
       "value" => "Billy Joel Visto",
@@ -470,10 +480,12 @@ class RevisionsPullerTest extends RevisionsHelper
     $expected = array('name' => array(
       '2' => array(
         "id" => "2",
+        'revisionId' => '2',
         "value" =>  "Billy Visto",
       ),
       '1' => array(
         'id' => '1',
+        'revisionId' => '1',
         'value' => 'Billy Joel Visto',
         ),
       ),

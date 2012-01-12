@@ -40,12 +40,12 @@ class RevisionTest extends \Gustavus\Test\Test
    * @var array to fill object with
    */
   private $revisionDataProperties = array(
-    'currentContent' => 'some test content',
+    'currentContent' => 'billy',
     'revisionNumber' => 1,
     'revisionInfo' => array(array(
-      2,
+      1,
       null,
-      'testing',
+      ' visto',
     )),
   );
 
@@ -56,7 +56,7 @@ class RevisionTest extends \Gustavus\Test\Test
   public function setUp()
   {
     $this->revisionData = new Revisions\RevisionData($this->revisionDataProperties);
-    $this->revisionProperties['revisionData'] = $this->revisionData;
+    $this->revisionProperties['revisionData'] = array('name' => $this->revisionData);
     $this->revision = new Revisions\Revision($this->revisionProperties);
   }
 
@@ -91,6 +91,50 @@ class RevisionTest extends \Gustavus\Test\Test
   public function getRevisionData()
   {
     $this->assertSame($this->revisionProperties['revisionData'], $this->revision->getRevisionData());
+  }
+
+  /**
+   * @test
+   */
+  public function getRevisionId()
+  {
+    $this->assertSame($this->revisionProperties['revisionData'], $this->revision->getRevisionData());
+  }
+
+  /**
+   * @test
+   */
+  public function revisionContainsColumnRevisionData()
+  {
+    $this->assertTrue($this->revision->revisionContainsColumnRevisionData('name'));
+  }
+
+  /**
+   * @test
+   */
+  public function revisionContainsColumnRevisionDataFalse()
+  {
+    $this->revisionProperties['revisionData'] = array();
+    $this->call($this->revision, 'populateObjectWithArray', array($this->revisionProperties));
+    $this->assertFalse($this->revision->revisionContainsColumnRevisionData('name'));
+  }
+
+  /**
+   * @test
+   */
+  public function getRevisionDataNumber()
+  {
+    $this->assertSame(1, $this->revision->getRevisionDataNumber('name'));
+  }
+
+  /**
+   * @test
+   */
+  public function getRevisionDataNumberNull()
+  {
+    $this->revisionProperties['revisionData'] = array();
+    $this->call($this->revision, 'populateObjectWithArray', array($this->revisionProperties));
+    $this->assertNull($this->revision->getRevisionDataNumber('name'));
   }
 
   /**
