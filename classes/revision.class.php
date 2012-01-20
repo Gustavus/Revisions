@@ -119,7 +119,8 @@ class Revision
    * @return array
    */
   public function getRevisionDataByColumn($column)
-  {if ($this->revisionContainsColumnRevisionData($column)) {
+  {
+    if ($this->revisionContainsColumnRevisionData($column)) {
       return $this->revisionData[$column];
     } else {
       return null;
