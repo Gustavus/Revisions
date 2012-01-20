@@ -37,6 +37,13 @@ class RevisionData
   private $revisionInfo = array();
 
   /**
+   * flag set to true if the hash doesn't compute correctly
+   *
+   * @var boolean
+   */
+  private $error = false;
+
+  /**
    * Class constructor
    *
    * @param array $params
@@ -90,6 +97,9 @@ class RevisionData
    */
   public function getRevisionContent()
   {
+    if (!isset($this->revisionContent)) {
+      $this->revisionContent = $this->renderRevision();
+    }
     return $this->revisionContent;
   }
 
@@ -106,7 +116,15 @@ class RevisionData
    */
   public function getRevisionId()
   {
-    return $this->revisionId;
+    return (int) $this->revisionId;
+  }
+
+  /**
+   * @return boolean
+   */
+  public function getError()
+  {
+    return $this->error;
   }
 
   /**
@@ -119,6 +137,15 @@ class RevisionData
   }
 
   /**
+   * @param boolean $isError
+   * @return void
+   */
+  public function setError($isError)
+  {
+    $this->error = $isError;
+  }
+
+  /**
    * renders revision based on the current text
    * tries to save space by only working with the parts that were modified
    *
@@ -128,6 +155,9 @@ class RevisionData
   protected function renderRevision($showChanges = false)
   {
     $revisionInfo = $this->getRevisionInfo();
+    if (!is_array($revisionInfo)) {
+      return $revisionInfo;
+    }
     $currentContent = $this->getCurrentContent();
     if (empty($revisionInfo) && isset($currentContent)) {
       // brand new content was added
@@ -345,7 +375,7 @@ class RevisionData
    */
   private function makeNonStringRevisionInfo($newContent)
   {
-    if ($this->getCurrentContent() === $newContent) {
+    if ($this->getCurrentContent() === $newContent || $this->getCurrentContent() === '') {
       $diffInfo = array();
     } else {
       $diffInfo = array(array(null, null, $this->getCurrentContent()));

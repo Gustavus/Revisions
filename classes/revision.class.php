@@ -10,6 +10,11 @@ namespace Gustavus\Revisions;
 class Revision
 {
   /**
+   * @var int revisionId
+   */
+  private $revisionId;
+
+  /**
    * @var int revisionNumber
    */
   private $revisionNumber;
@@ -35,6 +40,13 @@ class Revision
   private $revisionData;
 
   /**
+   * flag set to true if the hash doesn't compute correctly
+   *
+   * @var boolean
+   */
+  private $error = false;
+
+  /**
    * Class constructor
    *
    * @param array $params
@@ -55,11 +67,19 @@ class Revision
   }
 
   /**
-   * @return string
+   * @return integer
+   */
+  public function getRevisionId()
+  {
+    return (int) $this->revisionId;
+  }
+
+  /**
+   * @return integer
    */
   public function getRevisionNumber()
   {
-    return $this->revisionNumber;
+    return (int) $this->revisionNumber;
   }
 
   /**
@@ -79,6 +99,34 @@ class Revision
   }
 
   /**
+   * @return boolean
+   */
+  public function getError()
+  {
+    return $this->error;
+  }
+
+  /**
+   * @param boolean $isError
+   * @return void
+   */
+  public function setError($isError)
+  {
+    $this->error = $isError;
+  }
+
+  /**
+   * @return array
+   */
+  public function getRevisionDataByColumn($column)
+  {if ($this->revisionContainsColumnRevisionData($column)) {
+      return $this->revisionData[$column];
+    } else {
+      return null;
+    }
+  }
+
+  /**
    * @param string $column
    * @return boolean
    */
@@ -91,7 +139,7 @@ class Revision
    * @param string $column
    * @return boolean
    */
-  public function getRevisionDataNumber($column)
+  public function getRevisionDataRevisionNumber($column)
   {
     if ($this->revisionContainsColumnRevisionData($column)) {
       $revisionData = $this->revisionData[$column];
@@ -102,6 +150,18 @@ class Revision
   }
 
   /**
+   * @return array
+   */
+  public function getRevisionDataContentArray()
+  {
+    $return = array();
+    foreach ($this->revisionData as $column => $revisionData) {
+      $return[$column] = $revisionData->getRevisionContent();
+    }
+    return $return;
+  }
+
+  /**
    * @param array $array
    * @return void
    */
@@ -109,10 +169,6 @@ class Revision
   {
     foreach ($array as $key => $value) {
       if (property_exists($this, $key)) {
-        // if ($key === 'revisionData') {
-        //   $this->revisionData = new SplObjectStorage();
-        //   $this->revisionData
-        // }
         $this->$key = $value;
       }
     }

@@ -93,9 +93,10 @@ class RevisionsPuller
    * @param integer $prevRevisionNum
    * @param integer $limit
    * @param integer $revisionId
+   * @param string $column
    * @return array of revisions
    */
-  protected function getRevisions($prevRevisionNum = null, $limit = null, $revisionId = null)
+  protected function getRevisions($prevRevisionNum = null, $limit = null, $revisionId = null, $column = null)
   {
     if ($limit === null) {
       $limit = $this->limit;
@@ -103,24 +104,29 @@ class RevisionsPuller
     $db = $this->getDB();
     $dbName = "`$this->revisionsTable`";
     $qb = $db->createQueryBuilder();
-    $qb->addSelect('`id`, `table`, `rowId`, `revisionNumber`, `message`, `createdBy`, `createdOn`')
-      ->from($dbName, $dbName);
+    $qb->addSelect('rDB.`id`, rDB.`contentHash`, rDB.`table`, rDB.`rowId`, rDB.`revisionNumber`, rDB.`message`, rDB.`createdBy`, rDB.`createdOn`')
+      ->from($dbName, 'rDB');
     if ($revisionId === null) {
       $args = array(
         ':table' => $this->table,
         ':rowId' => $this->rowId,
       );
-      $qb->where('`table` = :table')
-        ->andWhere('`rowId` = :rowId')
-        ->orderBy('`id`', 'DESC')
+      if ($column !== null) {
+        $args[':key'] = $column;
+        $dbDataName = "`$this->revisionDataTable`";
+        $qb->leftJoin('rDB', $dbDataName, 'dataDB', 'rDB.`id` = dataDB.`revisionId` AND dataDB.`key` = :key');
+      }
+      $qb->where('rDB.`table` = :table')
+        ->andWhere('rDB.`rowId` = :rowId')
+        ->orderBy('rDB.`id`', 'DESC')
         ->setMaxResults($limit);
 
       if ($prevRevisionNum !== null) {
-        $qb->andWhere('`revisionNumber` < :revNum');
+        $qb->andWhere('rDB.`revisionNumber` < :revNum');
         $args[':revNum'] = $prevRevisionNum;
       }
     } else {
-      $qb->where('`id` = :revId');
+      $qb->where('rDB.`id` = :revId');
       $args = array(':revId' => $revisionId);
     }
     return $db->fetchAll($qb->getSQL(), $args);
@@ -132,14 +138,15 @@ class RevisionsPuller
    * @param boolean $revisionsHaveBeenPulled
    * @param integer $limit
    * @param integer $prevRevisionNum
+   * @param  boolean $forceSingleDimension  Whether to format as a 2 dimensional array or not
    * @return array of revisionData keyed by column
    */
-  protected function getRevisionData($revisionId, $column = null, $revisionsHaveBeenPulled = false, $limit = null, $prevRevisionNum = null)
+  protected function getRevisionData($revisionId, $column = null, $revisionsHaveBeenPulled = false, $limit = null, $prevRevisionNum = null, $forceSingleDimension = false)
   {
     $db = $this->getDB();
     $dbDataName = "`$this->revisionDataTable`";
     $qb = $db->createQueryBuilder();
-    $qb->select('dataDB.`id`, dataDB.`revisionId`, dataDB.`revisionNumber`, dataDB.`key`, dataDB.`value`')
+    $qb->select('dataDB.`id`, dataDB.`contentHash`, dataDB.`revisionId`, dataDB.`revisionNumber`, dataDB.`key`, dataDB.`value`')
       ->from($dbDataName, 'dataDB');
     if ($revisionId === null && $column !== null) {
       if ($limit === null) {
@@ -171,31 +178,55 @@ class RevisionsPuller
         ':revisionId' => $revisionId,
       );
     }
-    return $this->parseDataResult($db->fetchAll($qb->getSQL(), $args), $column);
+    return $this->parseDataResult($db->fetchAll($qb->getSQL(), $args), $column, $forceSingleDimension);
+  }
+
+  /**
+   * gets all of the columns stored
+   * @return array
+   */
+  protected function getRevisionDataColumns()
+  {
+    $db = $this->getDB();
+    $dbDataName = "`$this->revisionDataTable`";
+    $dbName = "`$this->revisionsTable`";
+    $args = array(
+      ':table'      => $this->table,
+      ':rowId'      => $this->rowId,
+    );
+    $qb = $db->createQueryBuilder();
+    $qb->select('dataDB.`key`')
+      ->from($dbDataName, 'dataDB')
+      ->leftJoin('dataDB', $dbName, 'rDB', 'rDB.`id` = dataDB.`revisionId` AND rDB.`table` = :table AND rDB.`rowId` = :rowId')
+      ->groupBy('dataDB.`key`');
+    return $db->fetchAll($qb->getSQL(), $args);
   }
 
   /**
    * parses fetchAll result into an array we can work with a bit better
    * @param  array  $resultArray fetchAll result
    * @param  string $column      column name we are looking for
+   * @param  boolean $forceSingleDimension  Whether to format as a 2 dimensional array or not
    * @return array keyed always keyed by column and revision number only if column is set
    */
-  private function parseDataResult(array $resultArray, $column = null)
+  private function parseDataResult(array $resultArray, $column = null, $forceSingleDimension = false)
   {
     $return = array();
     foreach ($resultArray as $result) {
-      if ($column === null) {
+      if ($column === null || $forceSingleDimension) {
         $return[$result['key']] = array(
           'id'             => $result['id'],
+          'contentHash'    => $result['contentHash'],
           'revisionId'     => $result['revisionId'],
           'revisionNumber' => $result['revisionNumber'],
-          'value'          => $result['value'],
+          'value'          => json_decode($result['value']),
         );
       } else {
          $return[$result['key']][$result['revisionNumber']] = array(
-          'id'         => $result['id'],
-          'revisionId' => $result['revisionId'],
-          'value'      => $result['value'],
+          'id'          => $result['id'],
+          'contentHash' => $result['contentHash'],
+          'revisionId'  => $result['revisionId'],
+          'value'       => json_decode($result['value']),
         );
       }
     }
@@ -208,24 +239,26 @@ class RevisionsPuller
    * @param integer $revisionId id of the revision in the revision db
    * @param string $revisionNumber current cells revision number
    * @param string $column column of the cell
+   * @param string $revisionContent content the revision was. Used to generate a hash
    * @param integer $oldRevisionId
    * @return void
    */
-  private function saveRevisionData($revisionInfo, $revisionId, $column, $oldRevisionId = null)
+  private function saveRevisionData($revisionInfo, $revisionId, $column, $revisionContent, $oldRevisionId = null)
   {
     $db = $this->getDB();
     $args = array(
-      ':value'          => $revisionInfo,
+      ':value' => $revisionInfo,
     );
     if ($oldRevisionId === null) {
       $args = array_merge($args, array(
         ':revisionId'     => $revisionId,
         ':key'            => $column,
+        ':hash'           => md5($revisionContent),
       ));
 
       $dbDataName = "`$this->revisionDataTable`";
       $qb = $db->createQueryBuilder();
-      $qb->select(':revisionId, COUNT(dataDB.`revisionNumber`) + 1, :key, :value')
+      $qb->select(':hash, :revisionId, COUNT(dataDB.`revisionNumber`) + 1, :key, :value')
         ->from($dbDataName, 'dataDB');
       $dbName = "`$this->revisionsTable`";
       $qb = $qb->leftJoin('dataDB', $dbName, 'rDB', 'rDB.`id` = dataDB.`revisionId` AND rDB.`table` = :table AND rDB.`rowId` = :rowId')
@@ -234,6 +267,7 @@ class RevisionsPuller
 
       $sql = sprintf('
         INSERT INTO `%1$s` (
+          `contentHash`,
           `revisionId`,
           `revisionNumber`,
           `key`,
@@ -257,12 +291,12 @@ class RevisionsPuller
   }
 
   /**
-   * @param integer $revisonNumber revision's revision number
+   * @param array $revisonContent revision's full content containing all of the columns keyed by column
    * @param string $message revision message
    * @param string $createdBy person who edited the revision
    * @return integer insertId
    */
-  private function saveRevisionContent($message = "", $createdBy = "")
+  private function saveRevisionContent($revisionContent, $message = "", $createdBy = "")
   {
     $db = $this->getDB();
     $args = array(
@@ -270,9 +304,11 @@ class RevisionsPuller
       ':rowId'          => $this->rowId,
       ':message'        => $message,
       ':createdBy'      => $createdBy,
+      ':contentHash'    => $this->generateHashFromArray($revisionContent),
     );
     $sql = sprintf('
       INSERT INTO `%1$s` (
+        `contentHash`,
         `table`,
         `rowId`,
         `revisionNumber`,
@@ -280,6 +316,7 @@ class RevisionsPuller
         `createdBy`,
         `createdOn`
       ) SELECT
+          :contentHash,
           :table,
           :rowId,
           COUNT(revisionNumber) + 1,
@@ -300,13 +337,14 @@ class RevisionsPuller
   /**
    * function to save a revision.
    * @param array $revisionInfo json revision info keyed by column
-   * @param array $newContent keyed by column
-   * @param array $oldRevisionDataArray keyed by column
+   * @param array $newContent array of full row keyed by column
+   * @param array $oldContent array of full row keyed by column
+   * @param array $oldRevisionData keyed by column
    * @param string $message
    * @param string $createdBy
    * @return void
    */
-  protected function saveRevision($revisionInfo, $newContent, $oldRevisionData = array(), $message = "", $createdBy = "")
+  protected function saveRevision($revisionInfo, $newContent, $oldContent, $oldRevisionData = array(), $message = "", $createdBy = "")
   {
     $revisionInfo = array_filter($revisionInfo);
     if (empty($revisionInfo)) {
@@ -314,37 +352,47 @@ class RevisionsPuller
       // don't do anything
       return false;
     }
-    $revisionId = $this->saveRevisionContent($message, $createdBy);
-    $revision = $this->getRevisions(null, null, $revisionId);
-    $revisionNum = $revision[0]['revisionNumber'];
-    if ((int) $revisionNum === 1) {
-      // first revision, also add the new content's revision
-      // for adding the current data in to know dates
-      $newRevisionId = $this->saveRevisionContent($message, $createdBy);
+    $oldContentFiltered = array_filter($oldContent);
+    if (empty($oldContentFiltered)) {
+      // no old content, so revision is the first one. Also add the new content in
+      $revContent = array_merge($newContent, $oldContent);
+      $revisionId = $this->saveRevisionContent($revContent, $message, $createdBy);
+      $newRevisionId = $this->saveRevisionContent($newContent, $message, $createdBy);
     } else {
-      $newRevisionId = $revisionId;
+      // revision exists already
+      $newRevisionId = $this->saveRevisionContent($newContent, $message, $createdBy);
+      $revisionId = $newRevisionId;
     }
-    foreach ($newContent as $key => $value) {
-      if (isset($revisionInfo[$key])) {
-        // revision content changed
-        if (!isset($oldRevisionData[$key])) {
-          // previous revision doesn't exist and needs to be pulled.
-          if ($revisionNum > 1) {
-            // previous revisions exist, so we might need to update one
-            $oldRevisionData = array_merge($oldRevisionData, $this->getRevisionData(null, $key, true, 1));
-          }
-        }
-        if (isset($oldRevisionData[$key])) {
-          $latestRevisionData = array_shift($oldRevisionData[$key]);
-          // update existing revisionData
-          // $revisionInfo, $revisionId, $column, $oldRevisionId = null
-          $this->saveRevisionData($revisionInfo[$key], $revisionId, $key, $latestRevisionData['id']);
-        } else {
-          $this->saveRevisionData($revisionInfo[$key], $revisionId, $key);
+    foreach ($revisionInfo as $key => $value) {
+      if (!isset($oldRevisionData[$key])) {
+        // previous revision not included and needs to be pulled.
+        if ($revisionId === $newRevisionId) {
+          // previous revisions exist, so we might need to update one
+          $oldRevisionData = array_merge($oldRevisionData, $this->getRevisionData(null, $key, true, 1));
         }
       }
+      if (isset($oldRevisionData[$key])) {
+        $latestRevisionData = array_shift($oldRevisionData[$key]);
+        // update existing revisionData
+        $this->saveRevisionData($value, $latestRevisionData['revisionId'], $key, $oldContent[$key], $latestRevisionData['id']);
+      } else {
+        // no existing revision exists so insert a new one
+        $this->saveRevisionData($value, $revisionId, $key, $oldContent[$key]);
+      }
       // insert new content to db
-      $this->saveRevisionData($value, $newRevisionId, $key);
+      $this->saveRevisionData(json_encode($newContent[$key]), $newRevisionId, $key, $newContent[$key]);
     }
+  }
+
+  /**
+   * function to take an associative array and turn it into an md5 hash
+   * @param  array $array array keyed by column
+   * @return string
+   */
+  protected function generateHashFromArray($array)
+  {
+    ksort($array);
+    $r = md5(json_encode($array));
+    return md5(json_encode($array));
   }
 }
