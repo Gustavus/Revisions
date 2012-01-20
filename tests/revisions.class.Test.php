@@ -212,14 +212,11 @@ class RevisionsTest extends RevisionsHelper
     $this->setUpMock('person-revision');
     $this->dbalConnection->query($this->getCreateQuery());
     $this->dbalConnection->query($this->getCreateDataQuery());
-    //$this->call($this->revisions, 'populateObjectWithArray', array($this->revisionsPullerInfo));
 
     $this->saveRevisionToDB('', 'Billy Visto', 'name', $this->revisions);
-    //$this->revisions->makeRevision(array('name' => 'Billy Visto'), '', 'name');
     $this->saveRevisionToDB('Billy Visto', 'Billy', 'name', $this->revisions);
     $this->saveRevisionToDB('Billy', 'Billy Visto', 'name', $this->revisions);
     $this->revisions->makeRevision(array('age' => 23));
-    //$this->saveRevisionToDB('', '23', 'age', $this->revisions);
 
     $this->call($this->revisions, 'populateObjectWithRevisions');
     $this->call($this->revisions, 'populateObjectWithRevisions');
@@ -248,14 +245,12 @@ class RevisionsTest extends RevisionsHelper
     $this->setUpMock('person-revision');
     $this->dbalConnection->query($this->getCreateQuery());
     $this->dbalConnection->query($this->getCreateDataQuery());
-    //$this->call($this->revisions, 'populateObjectWithArray', array($this->revisionsPullerInfo));
 
     $this->revisions->makeRevision(array('name' => 'Billy Visto'));
     $this->revisions->makeRevision(array('name' => 'Billy'));
     $this->revisions->makeRevision(array('name' => 'Billy Visto'));
     $this->saveRevisionToDB('Billy', 'Billy Visto', 'name', $this->revisions);
     $this->revisions->makeRevision(array('age' => '23'));
-    //$this->saveRevisionToDB('', '23', 'age', $this->revisions);
     $this->revisions->makeRevision(array('age' => 23));
     $this->revisions->makeRevision(array('age' => 29, 'name' => 'Billy Joel Visto'));
 
@@ -281,14 +276,12 @@ class RevisionsTest extends RevisionsHelper
     $this->setUpMock('person-revision');
     $this->dbalConnection->query($this->getCreateQuery());
     $this->dbalConnection->query($this->getCreateDataQuery());
-    //$this->call($this->revisions, 'populateObjectWithArray', array($this->revisionsPullerInfo));
 
     $this->revisions->makeRevision(array('name' => 'Billy Visto'));
     $this->revisions->makeRevision(array('name' => 'Billy'));
     $this->revisions->makeRevision(array('name' => 'Billy Visto'));
     $this->revisions->makeRevision(array('name' => 'Billy Visto'));
     $this->revisions->makeRevision(array('age' => '23'));
-    //$this->saveRevisionToDB('', '23', 'age', $this->revisions);
     $this->revisions->makeRevision(array('age' => 23));
     $this->revisions->makeRevision(array('age' => 29, 'name' => 'Billy Joel Visto'));
 
@@ -300,6 +293,7 @@ class RevisionsTest extends RevisionsHelper
 
     $errorRevisionData = $errorRevision->getRevisionDataByColumn('name');
     $this->assertFalse($errorRevisionData->getError());
+    var_dump($this->revisions->getRevisionObjects());
 
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }
@@ -314,7 +308,6 @@ class RevisionsTest extends RevisionsHelper
     $this->setUpMock('person-revision');
     $this->dbalConnection->query($this->getCreateQuery());
     $this->dbalConnection->query($this->getCreateDataQuery());
-    //$this->call($this->revisions, 'populateObjectWithArray', array($this->revisionsPullerInfo));
 
     $this->saveRevisionToDB('', 'Billy Visto', 'name', $this->revisions);
     $this->saveRevisionToDB('Billy Visto', 'Billy', 'name', $this->revisions);
