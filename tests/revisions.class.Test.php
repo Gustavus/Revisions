@@ -162,6 +162,33 @@ class RevisionsTest extends RevisionsHelper
   /**
    * @test
    */
+  public function makeRevisionNameAge()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $this->ymlFile = 'nameRevisionAdvanced.yml';
+    $expected = $this->getDataSet();
+
+    $this->revisions->makeRevision(array('name' => 'Billy Visto'));
+    $this->revisions->makeRevision(array('name' => 'Billy'));
+    $this->revisions->makeRevision(array('age' => 22));
+    $this->revisions->makeRevision(array('age' => 23, 'name' => 'Billy Visto'));
+
+    $actualDataSet = $conn->createDataSet(array('person-revision', 'revisionData'));
+    $actual = $this->getFilteredDataSet($actualDataSet, array('person-revision' => array('createdOn'), 'revisionData' => array('createdOn')));
+    $expected = $this->getFilteredDataSet($expected, array('person-revision' => array('createdOn'), 'revisionData' => array('createdOn')));
+
+    $this->assertDataSetsEqual($expected, $actual);
+    $this->assertTablesEqual($expected->getTable('person-revision'), $actual->getTable('person-revision'));
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
   public function getRevisionByNumber()
   {
     $conn = $this->getConnection();
@@ -293,7 +320,6 @@ class RevisionsTest extends RevisionsHelper
 
     $errorRevisionData = $errorRevision->getRevisionDataByColumn('name');
     $this->assertFalse($errorRevisionData->getError());
-    var_dump($this->revisions->getRevisionObjects());
 
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }
