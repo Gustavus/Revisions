@@ -174,11 +174,12 @@ class RevisionsPullerTest extends RevisionsHelper
     $this->dbalConnection->query($this->getCreateQuery());
 
     // modify
-    $this->call($this->revisionsPullerMock, 'saveRevisionContent', array());
+    $this->call($this->revisionsPullerMock, 'saveRevisionContent', array(array('name' => $currContent)));
     $actual = $this->call($this->revisionsPullerMock, 'getRevisions');
     $expected = array(
       array(
         'id' => '1',
+        'contentHash' => md5(json_encode(array('name' => $currContent))),
         'table' => 'person',
         'rowId' => '1',
         'revisionNumber' => '1',
@@ -204,11 +205,12 @@ class RevisionsPullerTest extends RevisionsHelper
     $this->dbalConnection->query($this->getCreateQuery());
 
     // modify
-    $this->call($this->revisionsPullerMock, 'saveRevisionContent', array());
+    $this->call($this->revisionsPullerMock, 'saveRevisionContent', array(array('name' => $currContent)));
     $actual = $this->call($this->revisionsPullerMock, 'getRevisions', array(2));
     $expected = array(
       array(
         'id' => '1',
+        'contentHash' => md5(json_encode(array('name' => $currContent))),
         'table' => 'person',
         'rowId' => '1',
         'revisionNumber' => '1',
@@ -234,11 +236,12 @@ class RevisionsPullerTest extends RevisionsHelper
     $this->dbalConnection->query($this->getCreateQuery());
 
     // modify
-    $this->call($this->revisionsPullerMock, 'saveRevisionContent', array());
+    $this->call($this->revisionsPullerMock, 'saveRevisionContent', array(array('name' => $currContent)));
     $actual = $this->call($this->revisionsPullerMock, 'getRevisions', array(null, null, 1));
     $expected = array(
       array(
         'id' => '1',
+        'contentHash' => md5(json_encode(array('name' => $currContent))),
         'table' => 'person',
         'rowId' => '1',
         'revisionNumber' => '1',
@@ -254,6 +257,38 @@ class RevisionsPullerTest extends RevisionsHelper
   /**
    * @test
    */
+  public function getRevisionsByColumn()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $currContent = 'Billy Visto';
+    $newContent = 'Billy Joel Visto';
+
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    // modify
+    $this->call($this->revisionsPullerMock, 'saveRevisionContent', array(array('name' => $currContent)));
+    $actual = $this->call($this->revisionsPullerMock, 'getRevisions', array(null, null, null, 'name'));
+    $expected = array(
+      array(
+        'id' => '1',
+        'contentHash' => md5(json_encode(array('name' => $currContent))),
+        'table' => 'person',
+        'rowId' => '1',
+        'revisionNumber' => '1',
+        'message' => '',
+        'createdBy' => '',
+        'createdOn' => $actual[0]['createdOn']
+      ),
+    );
+    $this->assertSame($expected, $actual);
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
   public function getRevisionsAlreadyPulled()
   {
     $conn = $this->getConnection();
@@ -264,11 +299,12 @@ class RevisionsPullerTest extends RevisionsHelper
     $this->dbalConnection->query($this->getCreateQuery());
 
     // modify
-    $this->call($this->revisionsPullerMock, 'saveRevisionContent', array());
+    $this->call($this->revisionsPullerMock, 'saveRevisionContent', array(array('name' => $currContent)));
     $actual = $this->call($this->revisionsPullerMock, 'getRevisions', array(null));
     $expected = array(
       array(
         'id' => '1',
+        'contentHash' => md5(json_encode(array('name' => $currContent))),
         'table' => 'person',
         'rowId' => '1',
         'revisionNumber' => '1',
@@ -294,10 +330,11 @@ class RevisionsPullerTest extends RevisionsHelper
     $this->dbalConnection->query($this->getCreateDataQuery());
     $this->dbalConnection->query($this->getCreateQuery());
 
-    $this->call($this->revisionsPullerMock, 'saveRevisionData', array($newContent, 1, 'name'));
+    $this->call($this->revisionsPullerMock, 'saveRevisionData', array(json_encode($newContent), 1, 'name', $currContent));
     $actual = $this->call($this->revisionsPullerMock, 'getRevisionData', array(1));
     $expected = array('name' => array(
         'id' => '1',
+        'contentHash' => md5($currContent),
         'revisionId' => '1',
         'revisionNumber' => '1',
         'value' => 'Billy Joel Visto',
@@ -320,11 +357,12 @@ class RevisionsPullerTest extends RevisionsHelper
     $this->dbalConnection->query($this->getCreateDataQuery());
     $this->dbalConnection->query($this->getCreateQuery());
 
-    $this->call($this->revisionsPullerMock, 'saveRevisionData', array($newContent, 1, 'name'));
+    $this->call($this->revisionsPullerMock, 'saveRevisionData', array(json_encode($newContent), 1, 'name', $currContent));
     $actual = $this->call($this->revisionsPullerMock, 'getRevisionData', array(null, 'name'));
     $expected = array('name' => array(
       '1' => array(
         'id' => '1',
+        'contentHash' => md5($currContent),
         'revisionId' => '1',
         'value' => 'Billy Joel Visto',
       ),
@@ -344,25 +382,27 @@ class RevisionsPullerTest extends RevisionsHelper
     $this->dbalConnection->query($this->getCreateDataQuery());
     $this->dbalConnection->query($this->getCreateQuery());
 
-    $insertId = $this->call($this->revisionsPullerMock, 'saveRevisionContent', array("", 'name'));
-    $this->call($this->revisionsPullerMock, 'saveRevisionData', array('Billy Joel Visto', $insertId, 'name'));
+    $insertId = $this->call($this->revisionsPullerMock, 'saveRevisionContent', array(array('name' => 'Billy Joel Visto'), "", 'name'));
+    $this->call($this->revisionsPullerMock, 'saveRevisionData', array(json_encode('Billy Joel Visto'), $insertId, 'name', 'Billy Joel Visto'));
 
-    $insertId = $this->call($this->revisionsPullerMock, 'saveRevisionContent', array("", 'name'));
-    $this->call($this->revisionsPullerMock, 'saveRevisionData', array('Billy Visto', $insertId, 'name'));
+    $insertId = $this->call($this->revisionsPullerMock, 'saveRevisionContent', array(array('name' => 'Billy Visto'), "", 'name'));
+    $this->call($this->revisionsPullerMock, 'saveRevisionData', array(json_encode('Billy Visto'), $insertId, 'name', 'Billy Visto'));
 
-    $insertId = $this->call($this->revisionsPullerMock, 'saveRevisionContent', array("", 'age'));
-    $this->call($this->revisionsPullerMock, 'saveRevisionData', array('23', $insertId, 'age'));
+    $insertId = $this->call($this->revisionsPullerMock, 'saveRevisionContent', array(array('age' => '23'), "", 'age'));
+    $this->call($this->revisionsPullerMock, 'saveRevisionData', array(json_encode(23), $insertId, 'age', 23));
 
     $actual = $this->call($this->revisionsPullerMock, 'getRevisionData', array(null, 'name'));
 
     $expected = array('name' => array(
       '2' => array(
         "id" => "2",
+        'contentHash' => md5('Billy Visto'),
         'revisionId' => '2',
         "value" =>  "Billy Visto",
       ),
       '1' => array(
         'id' => '1',
+        'contentHash' => md5('Billy Joel Visto'),
         'revisionId' => '1',
         'value' => 'Billy Joel Visto',
         ),
@@ -384,20 +424,21 @@ class RevisionsPullerTest extends RevisionsHelper
     $this->dbalConnection->query($this->getCreateDataQuery());
     $this->dbalConnection->query($this->getCreateQuery());
 
-    $insertId = $this->call($this->revisionsPullerMock, 'saveRevisionContent', array("", 'name'));
-    $this->call($this->revisionsPullerMock, 'saveRevisionData', array('Billy Joel Visto', $insertId, 'name'));
+    $insertId = $this->call($this->revisionsPullerMock, 'saveRevisionContent', array(array('name' => 'Billy Joel Visto'), "", 'name'));
+    $this->call($this->revisionsPullerMock, 'saveRevisionData', array(json_encode('Billy Joel Visto'), $insertId, 'name', 'Billy Joel Visto'));
 
-    $insertId = $this->call($this->revisionsPullerMock, 'saveRevisionContent', array("", 'name'));
-    $this->call($this->revisionsPullerMock, 'saveRevisionData', array('Billy Visto', $insertId, 'name'));
+    $insertId = $this->call($this->revisionsPullerMock, 'saveRevisionContent', array(array('name' => 'Billy Visto'), "", 'name'));
+    $this->call($this->revisionsPullerMock, 'saveRevisionData', array(json_encode('Billy Visto'), $insertId, 'name', 'Billy Visto'));
 
-    $insertId = $this->call($this->revisionsPullerMock, 'saveRevisionContent', array("", 'age'));
-    $this->call($this->revisionsPullerMock, 'saveRevisionData', array('23', $insertId, 'age'));
+    $insertId = $this->call($this->revisionsPullerMock, 'saveRevisionContent', array(array('name' => '23'), "", 'age'));
+    $this->call($this->revisionsPullerMock, 'saveRevisionData', array(json_encode(23), $insertId, 'age', 23));
 
     $actual = $this->call($this->revisionsPullerMock, 'getRevisionData', array(null, 'name', true, null, 2));
 
     $expected = array('name' => array(
       '1' => array(
         'id' => '1',
+        'contentHash' => md5('Billy Joel Visto'),
         'revisionId' => '1',
         'value' => 'Billy Joel Visto',
         ),
@@ -422,11 +463,12 @@ class RevisionsPullerTest extends RevisionsHelper
     $this->dbalConnection->query($this->getCreateDataQuery());
     $this->dbalConnection->query($this->getCreateQuery());
 
-    $this->call($this->revisionsPullerMock, 'saveRevisionData', array($newContent, 1, 'name'));
+    $this->call($this->revisionsPullerMock, 'saveRevisionData', array(json_encode($newContent), 1, 'name', $newContent));
     $actual = $this->call($this->revisionsPullerMock, 'getRevisionData', array(null, 'name', true));
     $expected = array('name' => array(
       '1' => array(
         'id' => '1',
+        'contentHash' => md5('Billy Joel Visto'),
         'revisionId' => '1',
         'value' => 'Billy Joel Visto',
       ),
@@ -442,13 +484,15 @@ class RevisionsPullerTest extends RevisionsHelper
   {
     $fetchAllResult =  array(array(
       "id" => "1",
+      'contentHash' => "Billy Joel Visto",
       'revisionId' => '1',
       "revisionNumber" => "1",
       "key" => "name",
-      "value" => "Billy Joel Visto",
+      "value" => '"Billy Joel Visto"',
     ));
     $expected = array('name' => array(
         'id' => '1',
+        'contentHash' => "Billy Joel Visto",
         'revisionId' => '1',
         'revisionNumber' => '1',
         'value' => 'Billy Joel Visto',
@@ -465,26 +509,30 @@ class RevisionsPullerTest extends RevisionsHelper
   {
     $fetchAllResult =  array(array(
       "id" => "2",
+      'contentHash' => "Billy Visto",
       'revisionId' => '2',
       "revisionNumber" => "2",
       "key" => "name",
-      "value" =>  "Billy Visto",
+      "value" =>  '"Billy Visto"',
     ),
     array(
       "id" => "1",
+      'contentHash' => "Billy Joel Visto",
       'revisionId' => '1',
       "revisionNumber" => "1",
       "key" => "name",
-      "value" => "Billy Joel Visto",
+      "value" => '"Billy Joel Visto"',
     ));
     $expected = array('name' => array(
       '2' => array(
         "id" => "2",
+        'contentHash' => "Billy Visto",
         'revisionId' => '2',
         "value" =>  "Billy Visto",
       ),
       '1' => array(
         'id' => '1',
+        'contentHash' => "Billy Joel Visto",
         'revisionId' => '1',
         'value' => 'Billy Joel Visto',
         ),
@@ -497,7 +545,7 @@ class RevisionsPullerTest extends RevisionsHelper
   /**
    * @test
    */
-  public function saveRevisionData()
+  public function saveRevisionData3()
   {
     $conn = $this->getConnection();
     $this->setUpMock('person-revision');
@@ -510,7 +558,7 @@ class RevisionsPullerTest extends RevisionsHelper
     $this->dbalConnection->query($this->getCreateQuery());
 
     //$this->saveRevisionToDB($currContent, $newContent, $this->revisionsPullerMock);
-    $this->call($this->revisionsPullerMock, 'saveRevisionData', array('[[1,null," Visto"]]', 1, 'name'));
+    $this->call($this->revisionsPullerMock, 'saveRevisionData', array('[[1,null," Visto"]]', 1, 'name', "Billy Visto"));
 
     $actualDataSet = $conn->createDataSet(array('revisionData'));
     $actual = $this->getFilteredDataSet($actualDataSet, array('revisionData' => array('createdOn')));
@@ -523,7 +571,7 @@ class RevisionsPullerTest extends RevisionsHelper
   /**
    * @test
    */
-  public function saveRevisionData2()
+  public function saveRevisionData()
   {
     $conn = $this->getConnection();
     $this->setUpMock('person-revision');
@@ -538,10 +586,9 @@ class RevisionsPullerTest extends RevisionsHelper
 
     //$this->saveRevisionToDB($currContent, $newContent, $this->revisionsPullerMock);
     //
-    $this->call($this->revisionsPullerMock, 'saveRevisionData', array($newContent, 1, 'name'));
-    $this->call($this->revisionsPullerMock, 'saveRevisionData', array('[[1,null," Visto"]]', 1, 'name', 1));
+    $this->call($this->revisionsPullerMock, 'saveRevisionData', array('[]', 1, 'name', ''));
     // add the new row to mimick a soon to be tested function
-    $this->call($this->revisionsPullerMock, 'saveRevisionData', array('Billy', 2, 'name'));
+    $this->call($this->revisionsPullerMock, 'saveRevisionData', array(json_encode('Billy'), 2, 'name', 'Billy'));
 
     $actualDataSet = $conn->createDataSet(array('revisionData'));
     $actual = $this->getFilteredDataSet($actualDataSet, array('revisionData' => array('createdOn')));
@@ -566,7 +613,7 @@ class RevisionsPullerTest extends RevisionsHelper
     $this->dbalConnection->query($this->getCreateQuery());
 
     //$this->saveRevisionToDB($currContent, $newContent, $this->revisionsPullerMock);
-    $insertId = $this->call($this->revisionsPullerMock, 'saveRevisionContent', array("", 'name'));
+    $insertId = $this->call($this->revisionsPullerMock, 'saveRevisionContent', array(array('name' => 'Billy Visto'), "", 'name'));
 
     $actualDataSet = $conn->createDataSet(array('person-revision'));
     $actual = $this->getFilteredDataSet($actualDataSet, array('person-revision' => array('createdOn')));
@@ -584,7 +631,6 @@ class RevisionsPullerTest extends RevisionsHelper
   {
     $conn = $this->getConnection();
     $this->setUpMock('person-revision');
-    $currContent = 'Billy Visto';
     $newContent = 'Billy';
 
     $this->ymlFile = 'nameRevision1.yml';
@@ -595,13 +641,13 @@ class RevisionsPullerTest extends RevisionsHelper
     $this->dbalConnection->query($this->getCreateDataQuery());
 
     $revisionData = new \Gustavus\Revisions\RevisionData(array(
-      'currentContent' => $currContent,
+      'currentContent' => '',
     ));
     $revisionInfo = $revisionData->renderRevisionForDB($newContent);
     $revisionInfoArray = array('name' => $revisionInfo);
 
     // modify
-    $this->call($this->revisionsPullerMock, 'saveRevision', array($revisionInfoArray, array('name' => $newContent), array(), '', 'name'));
+    $this->call($this->revisionsPullerMock, 'saveRevision', array($revisionInfoArray, array('name' => $newContent), array('name' => ''), array(), '', 'name'));
 
     //$this->saveRevisionToDB('Billy Visto', 'Billy', 'name', $this->revisionsPullerMock);
 
@@ -638,7 +684,7 @@ class RevisionsPullerTest extends RevisionsHelper
     $revisionInfoArray = array('name' => $revisionInfo);
 
     // modify
-    $this->call($this->revisionsPullerMock, 'saveRevision', array($revisionInfoArray, array('name' => $newContent), array(), '', 'name'));
+    $this->call($this->revisionsPullerMock, 'saveRevision', array($revisionInfoArray, array('name' => $newContent), array('name' => $currContent), array(), '', 'name'));
 
     $actualDataSet = $conn->createDataSet(array('person-revision', 'revisionData'));
     $actual = $this->getFilteredDataSet($actualDataSet, array('person-revision' => array('createdOn'), 'revisionData' => array('createdOn')));
@@ -666,6 +712,7 @@ class RevisionsPullerTest extends RevisionsHelper
     $this->dbalConnection->query($this->getCreateDataQuery());
     $this->dbalConnection->query($this->getCreateQuery());
 
+    $this->saveRevisionToDB('', 'Billy Visto', 'name', $this->revisionsPullerMock);
     $this->saveRevisionToDB('Billy Visto', 'Billy', 'name', $this->revisionsPullerMock);
     $this->saveRevisionToDB('Billy', 'Billy Visto', 'name', $this->revisionsPullerMock);
 
@@ -696,6 +743,7 @@ class RevisionsPullerTest extends RevisionsHelper
     $this->dbalConnection->query($this->getCreateDataQuery());
     $this->dbalConnection->query($this->getCreateQuery());
 
+    $this->saveRevisionToDB('', 'Billy Visto', 'name', $this->revisionsPullerMock);
     $this->saveRevisionToDB('Billy Visto', 'Billy', 'name', $this->revisionsPullerMock);
     $this->saveRevisionToDB('Billy', 'Billy Visto', 'name', $this->revisionsPullerMock, array());
 
@@ -725,6 +773,7 @@ class RevisionsPullerTest extends RevisionsHelper
     $this->dbalConnection->query($this->getCreateQuery());
     $this->dbalConnection->query($this->getCreateDataQuery());
 
+    $this->saveRevisionToDB('', 'Billy Visto', 'name', $this->revisionsPullerMock);
     $this->saveRevisionToDB('Billy Visto', 'Billy', 'name', $this->revisionsPullerMock);
     $this->saveRevisionToDB($currContent, $newContent, 'name', $this->revisionsPullerMock);
     $this->saveRevisionToDB($newContent, $newContent, 'name', $this->revisionsPullerMock);
@@ -736,5 +785,37 @@ class RevisionsPullerTest extends RevisionsHelper
     $this->assertDataSetsEqual($expected, $actual);
     $this->assertTablesEqual($expected->getTable('person-revision'), $actual->getTable('person-revision'));
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
+  public function generateHashFromArray()
+  {
+    $result = $this->call($this->revisionsPuller, 'generateHashFromArray', array(array('name' => 'billy', 'age' => '23')));
+    $expected = "a85c23dadd90c186eaf782ddfd839b58";
+    $this->assertSame($expected, $result);
+    $result = $this->call($this->revisionsPuller, 'generateHashFromArray', array(array('age' => '23', 'name' => 'billy')));
+    $expected = "a85c23dadd90c186eaf782ddfd839b58";
+    $this->assertSame($expected, $result);
+  }
+
+  /**
+   * @test
+   */
+  public function getRevisionDataColumns()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $this->saveRevisionToDB('', 'Billy Visto', 'name', $this->revisionsPullerMock);
+    $this->saveRevisionToDB('', '23', 'age', $this->revisionsPullerMock);
+    $this->saveRevisionToDB('', 'Food', 'aboutYou', $this->revisionsPullerMock);
+    $expected = array(array('key' =>  'aboutYou'), array('key' => 'age'), array('key' => 'name'));
+    $result = $this->call($this->revisionsPullerMock, 'getRevisionDataColumns');
+    $this->assertSame($expected, $result);
   }
 }

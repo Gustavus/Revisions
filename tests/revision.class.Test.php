@@ -31,6 +31,7 @@ class RevisionTest extends \Gustavus\Test\Test
    * @var array to fill object with
    */
   private $revisionProperties = array(
+    'revisionId' => 1,
     'currentContent' => 'some test content',
     'revisionNumber' => 1,
     'revisionDate' => '2012-01-05 23:34:15',
@@ -98,7 +99,24 @@ class RevisionTest extends \Gustavus\Test\Test
    */
   public function getRevisionId()
   {
-    $this->assertSame($this->revisionProperties['revisionData'], $this->revision->getRevisionData());
+    $this->assertSame($this->revisionProperties['revisionId'], $this->revision->getRevisionId());
+  }
+
+  /**
+   * @test
+   */
+  public function getError()
+  {
+    $this->assertFalse($this->revision->getError());
+  }
+
+  /**
+   * @test
+   */
+  public function setAndGetError()
+  {
+    $this->revision->setError(true);
+    $this->assertTrue($this->revision->getError());
   }
 
   /**
@@ -122,19 +140,47 @@ class RevisionTest extends \Gustavus\Test\Test
   /**
    * @test
    */
-  public function getRevisionDataNumber()
+  public function getRevisionDataRevisionNumber()
   {
-    $this->assertSame(1, $this->revision->getRevisionDataNumber('name'));
+    $this->assertSame(1, $this->revision->getRevisionDataRevisionNumber('name'));
   }
 
   /**
    * @test
    */
-  public function getRevisionDataNumberNull()
+  public function getRevisionDataRevisionNumberNull()
   {
     $this->revisionProperties['revisionData'] = array();
     $this->call($this->revision, 'populateObjectWithArray', array($this->revisionProperties));
-    $this->assertNull($this->revision->getRevisionDataNumber('name'));
+    $this->assertNull($this->revision->getRevisionDataRevisionNumber('name'));
+  }
+
+  /**
+   * @test
+   */
+  public function getRevisionDataByColumn()
+  {
+    $this->assertInstanceOf('\Gustavus\Revisions\RevisionData', $this->revision->getRevisionDataByColumn('name'));
+  }
+
+  /**
+   * @test
+   */
+  public function getRevisionDataByColumnNull()
+  {
+    $this->revisionProperties['revisionData'] = array();
+    $this->call($this->revision, 'populateObjectWithArray', array($this->revisionProperties));
+    $this->assertNull($this->revision->getRevisionDataByColumn('name'));
+  }
+
+  /**
+   * @test
+   */
+  public function getRevisionDataContentArray()
+  {
+    $expected = array('name' => 'billy visto');
+    $result = $this->revision->getRevisionDataContentArray();
+    $this->assertSame($expected, $result);
   }
 
   /**

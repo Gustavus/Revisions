@@ -88,10 +88,35 @@ class RevisionDataTest extends \Gustavus\Test\Test
   /**
    * @test
    */
+  public function getError()
+  {
+    $this->assertFalse($this->revisionData->getError());
+  }
+
+  /**
+   * @test
+   */
+  public function setAndGetError()
+  {
+    $this->revisionData->setError(true);
+    $this->assertTrue($this->revisionData->getError());
+  }
+
+  /**
+   * @test
+   */
   public function setAndGetRevisionContent()
   {
     $this->revisionData->setRevisionContent('Billy');
     $this->assertSame('Billy', $this->revisionData->getRevisionContent());
+  }
+
+  /**
+   * @test
+   */
+  public function getRevisionContentNotSet()
+  {
+    $this->assertSame('some testing test content', $this->revisionData->getRevisionContent());
   }
 
   /**
@@ -111,6 +136,18 @@ class RevisionDataTest extends \Gustavus\Test\Test
   public function renderRevision()
   {
     $expected = 'some testing test content';
+    $result = $this->call($this->revisionData, 'renderRevision');
+    $this->assertSame($expected, $result);
+  }
+
+  /**
+   * @test
+   */
+  public function renderRevisionString()
+  {
+    $this->revisionDataProperties['revisionInfo'] = 'Revision Info';
+    $this->setUp();
+    $expected = 'Revision Info';
     $result = $this->call($this->revisionData, 'renderRevision');
     $this->assertSame($expected, $result);
   }
@@ -810,6 +847,18 @@ class RevisionDataTest extends \Gustavus\Test\Test
     $this->setUp();
     $result = $this->call($this->revisionData, 'renderRevisionForDB', array('some tests contentss'));
     $expected = json_encode(array(array(2, 4, 'random content')));
+    $this->assertSame($expected, $result);
+  }
+
+  /**
+   * @test
+   */
+  public function renderRevisionForDBFirst()
+  {
+    $this->revisionDataProperties['currentContent'] = '';
+    $this->setUp();
+    $result = $this->call($this->revisionData, 'renderRevisionForDB', array(23));
+    $expected = json_encode(array());
     $this->assertSame($expected, $result);
   }
 

@@ -50,6 +50,7 @@ class RevisionsHelper extends \Gustavus\Test\TestDBPDO
   {
     $sql = 'CREATE TABLE IF NOT EXISTS `person-revision`
             (`id` INTEGER PRIMARY KEY,
+            `contentHash` VARCHAR,
             `table` VARCHAR,
             `rowId` INTEGER,
             `revisionNumber` INTEGER,
@@ -67,6 +68,7 @@ class RevisionsHelper extends \Gustavus\Test\TestDBPDO
   {
     $sql = 'CREATE TABLE IF NOT EXISTS `revisionData`
             (`id` INTEGER PRIMARY KEY,
+            `contentHash` VARCHAR,
             `revisionId` INTEGER,
             `revisionNumber` INTEGER,
             `key` VARCHAR,
@@ -88,6 +90,6 @@ class RevisionsHelper extends \Gustavus\Test\TestDBPDO
 
     $revisionInfo = $revisionData->renderRevisionForDB($newContent);
     $revisionInfoArray = array($column => $revisionInfo);
-    $this->call($object, 'saveRevision', array($revisionInfoArray, array($column => $newContent), $revisionDataArray, $message, $createdBy));
+    $this->call($object, 'saveRevision', array($revisionInfoArray, array($column => $newContent), array($column => $currContent), $revisionDataArray, $message, $createdBy));
   }
 }
