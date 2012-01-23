@@ -190,7 +190,6 @@ class RevisionData
       } else if (!isset($revision[0]) && count($revisionInfo) === 1) {
         // full content change. As of now, this signifies a non string revision
         return $this->renderNonStringRevision($revision[2], $showChanges);
-        //$currContentArr[$revision[0]] = $revisionContent.$currText;
       } else {
         //content was added
         $space = ($showChanges) ? '' : ' ' ;
