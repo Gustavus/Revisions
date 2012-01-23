@@ -43,7 +43,7 @@ class RevisionsPuller
   /**
    * @var integer limit of how many revisions to pull
    */
-  private $limit = 10;
+  private $limit = 1;
 
   /**
    * Class constructor
@@ -62,7 +62,7 @@ class RevisionsPuller
    */
   public function __destruct()
   {
-    unset($this->dbName, $this->revisionDataTable, $this->revisionsTable, $this->table, $this->column, $this->dbal, $this->rowId, $this->limit);
+    unset($this->dbName, $this->revisionsTable, $this->revisionDataTable, $this->table, $this->rowId, $this->dbal, $this->limit);
   }
 
   /**
@@ -90,6 +90,8 @@ class RevisionsPuller
   }
 
   /**
+   * Looks in the database for revisions
+   *
    * @param integer $prevRevisionNum
    * @param integer $limit
    * @param integer $revisionId
@@ -133,6 +135,8 @@ class RevisionsPuller
   }
 
   /**
+   * Looks in the database for revisionData
+   *
    * @param integer $revisionId
    * @param string $column
    * @param boolean $revisionsHaveBeenPulled
@@ -182,7 +186,8 @@ class RevisionsPuller
   }
 
   /**
-   * gets all of the columns stored
+   * Gets all of the columns stored
+   *
    * @return array
    */
   protected function getRevisionDataColumns()
@@ -203,7 +208,8 @@ class RevisionsPuller
   }
 
   /**
-   * parses fetchAll result into an array we can work with a bit better
+   * Parses fetchAll result into an array we can work with a bit better
+   *
    * @param  array  $resultArray fetchAll result
    * @param  string $column      column name we are looking for
    * @param  boolean $forceSingleDimension  Whether to format as a 2 dimensional array or not
@@ -235,6 +241,8 @@ class RevisionsPuller
   }
 
   /**
+   * Saves revisionData into DB
+   *
    * @param json $revisionInfo
    * @param integer $revisionId id of the revision in the revision db
    * @param string $revisionNumber current cells revision number
@@ -291,6 +299,8 @@ class RevisionsPuller
   }
 
   /**
+   * Saves revision into DB
+   *
    * @param array $revisonContent revision's full content containing all of the columns keyed by column
    * @param string $message revision message
    * @param string $createdBy person who edited the revision
@@ -335,7 +345,8 @@ class RevisionsPuller
   }
 
   /**
-   * function to save a revision.
+   * Saves revision and revisionData into DB
+   *
    * @param array $revisionInfo json revision info keyed by column
    * @param array $newContent array of full row keyed by column
    * @param array $oldContent array of full row keyed by column

@@ -60,7 +60,7 @@ class RevisionData
    */
   public function __destruct()
   {
-    unset($this->currentContent, $this->revisionInfo, $this->revisionNumber, $this->revisionContent, $this->revisionId);
+    unset($this->revisionNumber, $this->currentContent, $this->revisionContent, $this->revisionId, $this->revisionInfo, $this->error);
   }
 
   /**
@@ -146,11 +146,11 @@ class RevisionData
   }
 
   /**
-   * renders revision based on the current text
+   * Renders revision based on the current text
    * tries to save space by only working with the parts that were modified
    *
    * @param boolean $showChanges
-   * @return string of revision
+   * @return string
    */
   protected function renderRevision($showChanges = false)
   {
@@ -202,7 +202,8 @@ class RevisionData
   }
 
   /**
-   * function to render a revision for non strings
+   * Renders a revision for non strings
+   *
    * @param  mixed $revisionContent
    * @param  boolean $showChanges
    * @return mixed
@@ -227,7 +228,7 @@ class RevisionData
   }
 
   /**
-   * function to render changes to get from $currentContent to $newContent
+   * Renders changes to get from $currentContent to $newContent
    *
    * @param string $newContent
    * @return string
@@ -244,7 +245,7 @@ class RevisionData
   }
 
   /**
-   * renders revision content
+   * Renders revision content
    *
    * @param boolean $showChanges
    * @return string of revision
@@ -255,7 +256,7 @@ class RevisionData
   }
 
   /**
-   * highlights changes from revision to current
+   * Highlights changes from revision to current
    *
    * @param array $content
    * @param boolean $isInsert
@@ -279,7 +280,7 @@ class RevisionData
   }
 
   /**
-   * tries to save space by only saving the part that was modified
+   * Renders revision info as json for DB storage
    *
    * @param string $newContent
    * @return array of revision info or false if it's the same
@@ -335,7 +336,7 @@ class RevisionData
   }
 
   /**
-   * function to strip irrelevent information while maintaining keys for making the revision information
+   * Strips irrelevent information while maintaining keys for making the revision information
    *
    * @param array $old
    * @param array $new
@@ -369,7 +370,8 @@ class RevisionData
   }
 
   /**
-   * function to mave revision information for non strings
+   * Makes revision information for non strings
+   *
    * @param  mixed $newContent
    * @return array
    */
@@ -385,9 +387,8 @@ class RevisionData
   }
 
   /**
-   * function to return diff information on how to roll back to a diff.
-   * returns array of arrays of diffs.
-   * returns info on how to get to revision from the new text
+   * Makes information on how to roll back to a revision.
+   * Returns an array of arrays of diffs.
    *
    * @param string $newContent
    * @return array
