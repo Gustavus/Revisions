@@ -396,7 +396,8 @@ class RevisionsPuller
   }
 
   /**
-   * function to take an associative array and turn it into an md5 hash
+   * Takes an associative array and turn it into a json encoded md5 hash
+   *
    * @param  array $array array keyed by column
    * @return string
    */
