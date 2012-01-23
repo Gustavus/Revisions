@@ -198,12 +198,7 @@ class Revisions extends RevisionsPuller
 
     if ($this->revisionsHaveBeenPulled) {
       $missingColumns = $this->findMissingColumns($revisionDataInfo);
-      foreach ($missingColumns as $column) {
-        $oldestRevisionData = $this->getOldestRevisionDataPulled($column);
-        if ($oldestRevisionData->getRevisionNumber() !== 1 || ($oldestRevisionData->getRevisionNumber() === 1 && $oldestRevisionData->getRevisionId() < $this->findOldestRevisionNumberPulled())) {
-          $revisionDataArray[$column] = $oldestRevisionData;
-        }
-      }
+      $revisionDataArray = array_merge($revisionDataArray, $this->getMissingRevisionDataFromObject($missingColumns));
     }
     return $revisionDataArray;
   }
@@ -215,7 +210,7 @@ class Revisions extends RevisionsPuller
    * @param  integer $revisionId     current revision's id
    * @return array
    */
-  private function getMissingRevisionDataInfo($missingColumns, $revisionId)
+  private function getMissingRevisionDataInfo(array $missingColumns, $revisionId)
   {
     assert('is_int($revisionId)');
     $revisionDataInfo = array();
@@ -237,6 +232,24 @@ class Revisions extends RevisionsPuller
       $revisionDataInfo = array_merge($revisionDataInfo, $missingRevisionDataInfo);
     }
     return $revisionDataInfo;
+  }
+
+  /**
+   * Gets missing revisionData looking for the oldest revisionData pulled and uses that object.
+   *
+   * @param  array  $missingColumns
+   * @return array
+   */
+  private function getMissingRevisionDataFromObject(array $missingColumns = array())
+  {
+    $missingRevisionData = array();
+    foreach ($missingColumns as $column) {
+      $oldestRevisionData = $this->getOldestRevisionDataPulled($column);
+      if ($oldestRevisionData->getRevisionNumber() !== 1 || ($oldestRevisionData->getRevisionNumber() === 1 && $oldestRevisionData->getRevisionId() < $this->findOldestRevisionNumberPulled())) {
+        $missingRevisionData[$column] = $oldestRevisionData;
+      }
+    }
+    return $missingRevisionData;
   }
 
   /**
@@ -360,13 +373,12 @@ class Revisions extends RevisionsPuller
     }
     if ($this->revisions[$revisionNumber] === null) {
       $oldestRevNumPulled = $this->findOldestRevisionNumberPulled();
-      //for ($i = $oldestRevNumPulled; $i >= $revisionNumber; ++$i) {
       for ($i = $oldestRevNumPulled; $i >= $revisionNumber; --$i) {
+        // keep pulling in revisions until the revision number is in the object
         $oldestRevisionPulled = $this->getOldestRevisionPulled();
         if ($oldestRevisionPulled->getError()) {
           break;
         }
-        // keep pulling in revisions until the revision number is in the object
         $this->populateObjectWithRevisions();
       }
     }
