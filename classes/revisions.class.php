@@ -18,16 +18,6 @@ class Revisions extends RevisionsPuller
   private $revisions = null;
 
   /**
-   * @var array of current content info keyed by column
-   */
-  private $currentContent = array();
-
-  /**
-   * @var array keyed by column name of what the previous revision's content was
-   */
-  private $previousContent = array();
-
-  /**
    * @var array of booleans keyed by column on whether object has tried to pull revisions or not
    */
   private $revisionDataHasBeenPulled = array();
@@ -59,11 +49,11 @@ class Revisions extends RevisionsPuller
    */
   public function __destruct()
   {
-    unset($this->revisions, $this->previousRevisionNumber, $this->currentContentInfo, $this->previousContent);
+    unset($this->revisions, $this->revisionDataHasBeenPulled, $this->revisionsHaveBeenPulled);
   }
 
   /**
-   * function to render changes from oldText to newText
+   * Renders changes from oldText to newText
    *
    * @param string $oldText
    * @param string $newText
@@ -77,11 +67,12 @@ class Revisions extends RevisionsPuller
   }
 
   /**
-   * function to make and store a revision
+   * Makes and stores a revision
+   *
    * @param  array $newText       array of text that has replaced the old text keyed by column
    * @param  string $message      revision message
    * @param  string $createdBy    person creating revision
-   * @return string of the diff
+   * @return void
    */
   public function makeRevision(array $newText, $message = '', $createdBy = '')
   {
@@ -114,7 +105,7 @@ class Revisions extends RevisionsPuller
   }
 
   /**
-   * function to get and store revisions in the object
+   * Gets and stores revisions in the object
    * Defaults to pull the latest 10 revisions to cache in the object
    *
    * @param string $column
@@ -155,7 +146,8 @@ class Revisions extends RevisionsPuller
   }
 
   /**
-   * function to make an array of revisionData objects keyed by column
+   * Makes an array of revisionData objects keyed by column
+   *
    * @param  integer $revisionId
    * @return array
    */
@@ -218,12 +210,14 @@ class Revisions extends RevisionsPuller
 
   /**
    * Finds the missing columns' revision data
+   *
    * @param  array $missingColumns columns this revision doesnt have that others do
    * @param  integer $revisionId     current revision's id
    * @return array
    */
   private function getMissingRevisionDataInfo($missingColumns, $revisionId)
   {
+    assert('is_int($revisionId)');
     $revisionDataInfo = array();
     foreach ($missingColumns as $missingColumn) {
       if (isset($this->revisionDataHasBeenPulled[$missingColumn])) {
@@ -246,7 +240,8 @@ class Revisions extends RevisionsPuller
   }
 
   /**
-   * finds columns in the database that aren't in the revisionInfo
+   * Finds columns in the database that aren't in the revisionInfo
+   *
    * @param  array $revisionInfo revision info keyed by column
    * @return array
    */
@@ -263,8 +258,9 @@ class Revisions extends RevisionsPuller
   }
 
   /**
-   * function to get the oldest revision number pulled into the object
-   * @param $column
+   * Gets the oldest revision number pulled into the object
+   *
+   * @param string $column
    * @return integer
    */
   private function findOldestRevisionNumberPulled($column = null)
@@ -284,8 +280,9 @@ class Revisions extends RevisionsPuller
   }
 
   /**
-   * function to get the oldest column revision number pulled into the object
-   * @param $column
+   * Gets the oldest column revision number pulled into the object
+   *
+   * @param string $column
    * @return integer
    */
   private function findOldestColumnRevisionNumberPulled($column = null)
@@ -304,13 +301,15 @@ class Revisions extends RevisionsPuller
   }
 
   /**
-   * function to get the oldest revisionData pulled into the object
+   * Gets the oldest revisionData pulled into the object
+   *
    * @param string $column
    * @param integer $revisionId
    * @return integer
    */
   private function getOldestRevisionDataPulled($column = null, $revisionId = 0)
   {
+    assert('is_int($revisionId)');
     if ($this->revisions === null) {
       return null;
     }
@@ -325,8 +324,9 @@ class Revisions extends RevisionsPuller
   }
 
   /**
-   * function to get the oldest revision pulled into the object
-   * @param $column
+   * Gets the oldest revision pulled into the object
+   *
+   * @param string $column
    * @return integer
    */
   private function getOldestRevisionPulled($column = null)
@@ -343,12 +343,14 @@ class Revisions extends RevisionsPuller
   }
 
   /**
-   * pulls a specific revision out of the object to return
+   * Pulls a specific revision out of the object to return
+   *
    * @param  integer $revisionNumber revision number you want
    * @return string
    */
   public function getRevisionByNumber($revisionNumber)
   {
+    assert('is_int($revisionNumber)');
     if (!$this->revisionDataHasBeenPulled) {
       // no revisions in the object
       $this->populateObjectWithRevisions();
@@ -372,7 +374,8 @@ class Revisions extends RevisionsPuller
   }
 
   /**
-   * pulls revisions out of the object to return an array keyed by revision
+   * Pulls revisions out of the object to return an array keyed by revision
+   *
    * @return array of revisions
    */
   public function getRevisionObjects()
