@@ -640,7 +640,7 @@ class RevisionsPullerTest extends RevisionsHelper
     $this->dbalConnection->query($this->getCreateQuery());
     $this->dbalConnection->query($this->getCreateDataQuery());
 
-    $revisionData = new \Gustavus\Revisions\RevisionData(array(
+    $revisionData = new \Gustavus\Revisions\RevisionDataDiff(array(
       'currentContent' => '',
     ));
     $revisionInfo = $revisionData->renderRevisionForDB($newContent);
@@ -677,7 +677,7 @@ class RevisionsPullerTest extends RevisionsHelper
     $this->dbalConnection->query($this->getCreateQuery());
     $this->dbalConnection->query($this->getCreateDataQuery());
 
-    $revisionData = new \Gustavus\Revisions\RevisionData(array(
+    $revisionData = new \Gustavus\Revisions\RevisionDataDiff(array(
       'currentContent' => $currContent,
     ));
     $revisionInfo = $revisionData->renderRevisionForDB($newContent);

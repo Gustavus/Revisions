@@ -56,7 +56,7 @@ class RevisionTest extends \Gustavus\Test\Test
    */
   public function setUp()
   {
-    $this->revisionData = new Revisions\RevisionData($this->revisionDataProperties);
+    $this->revisionData = new Revisions\RevisionDataDiff($this->revisionDataProperties);
     $this->revisionProperties['revisionData'] = array('name' => $this->revisionData);
     $this->revision = new Revisions\Revision($this->revisionProperties);
   }

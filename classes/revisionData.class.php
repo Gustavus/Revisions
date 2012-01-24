@@ -3,81 +3,51 @@
  * @package Revisions
  */
 namespace Gustavus\Revisions;
-require_once 'revisions/classes/revisionDataUtil.class.php';
 
 /**
  * @package Revisions
  */
-class RevisionData extends revisionDataUtil
+abstract class RevisionData
 {
   /**
    * revisionData's revision number of how many times this specific value has changed
    *
    * @var int revisionNumber
    */
-  private $revisionNumber;
+  protected $revisionNumber;
 
   /**
+   * Current content if this is the latest revision, or the revision content of the previous revision
+   *
    * @var string current cell content
    */
-  private $currentContent;
+  protected $currentContent;
 
   /**
+   * Content of this revision before it was changed. Result of following the revision info from the currentContent back
+   *
    * @var string revision cell content
    */
-  private $revisionContent;
+  protected $revisionContent;
 
   /**
    * @var integer of revision's revisionId
    */
-  private $revisionId;
+  protected $revisionId;
 
   /**
    * array of keyless arrays of startIndex, endIndex, revisionContent in that order
    *
    * @var array of revision information
    */
-  private $revisionInfo = array();
+  protected $revisionInfo = array();
 
   /**
    * flag set to true if the hash doesn't compute correctly
    *
    * @var boolean
    */
-  private $error = false;
-
-  /**
-   * Class constructor
-   *
-   * @param array $params
-   */
-  public function __construct(array $params = array())
-  {
-    $this->populateObjectWithArray($params);
-  }
-
-  /**
-   * Class destructor
-   *
-   * @return void
-   */
-  public function __destruct()
-  {
-    unset($this->revisionNumber, $this->currentContent, $this->revisionContent, $this->revisionId, $this->revisionInfo, $this->error);
-  }
-
-  /**
-   * @param array $array
-   * @return void
-   */
-  private function populateObjectWithArray(Array $array)
-  {
-    foreach ($array as $key => $value) {
-      if (property_exists($this, $key)) {
-        $this->$key = $value;
-      }
-    }
-  }
+  protected $error = false;
 
   /**
    * @return integer

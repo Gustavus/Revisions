@@ -5,7 +5,7 @@
 namespace Gustavus\Revisions;
 require_once 'revisions/classes/revisionsPuller.class.php';
 require_once 'revisions/classes/revision.class.php';
-require_once 'revisions/classes/revisionData.class.php';
+require_once 'revisions/classes/revisionDataDiff.class.php';
 
 /**
  * @package Revisions
@@ -53,7 +53,7 @@ class Revisions extends RevisionsPuller
   }
 
   /**
-   * Makes new RevisionData for oldText and newText
+   * Makes new RevisionDataDiff for oldText and newText
    *
    * @param string $oldText
    * @param string $newText
@@ -61,7 +61,7 @@ class Revisions extends RevisionsPuller
    */
   public function makeRevisionData($oldText, $newText)
   {
-    $revisionData = new RevisionData(array('currentContent' => $oldText));
+    $revisionData = new RevisionDataDiff(array('currentContent' => $oldText));
     $revisionData->makeRevisionContent($newText);
     return $revisionData;
   }
@@ -118,13 +118,13 @@ class Revisions extends RevisionsPuller
       $oldRevisionDataArray = array_merge($oldRevisionDataArray, $oldRevisionData);
       if (isset($oldRevisionData[$key])) {
         $oldContentArray         = array_shift($oldRevisionData[$key]);
-        $revisionData            = new RevisionData(array('currentContent' => $oldContentArray['value']));
+        $revisionData            = new RevisionDataDiff(array('currentContent' => $oldContentArray['value']));
         $revisionInfo            = $revisionData->renderRevisionForDB($value);
         $revisionInfoArray[$key] = $revisionInfo;
         $oldText[$key]           = $oldContentArray['value'];
       } else {
         // revision doesn't exist yet
-        $revisionData            = new RevisionData(array('currentContent' => ''));
+        $revisionData            = new RevisionDataDiff(array('currentContent' => ''));
         $revisionInfo            = $revisionData->renderRevisionForDB($value);
         $revisionInfoArray[$key] = $revisionInfo;
         $oldText[$key]           = '';
@@ -220,7 +220,7 @@ class Revisions extends RevisionsPuller
             'revisionInfo'    => $revisionInfo,
             'currentContent'  => $previousContent,
           );
-          $revisionData = new RevisionData($params);
+          $revisionData = new RevisionDataDiff($params);
 
           if (md5($revisionData->getRevisionContent()) !== $value['contentHash']) {
             $revisionData->setError(true);
