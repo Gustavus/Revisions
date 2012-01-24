@@ -15,6 +15,8 @@ class Revision
   private $revisionId;
 
   /**
+   * data's revision number of how many times it has changed to get to this point
+   *
    * @var int revisionNumber
    */
   private $revisionNumber;
@@ -91,11 +93,16 @@ class Revision
   }
 
   /**
+   * @param string $column
    * @return array
    */
-  public function getRevisionData()
+  public function getRevisionData($column = null)
   {
-    return $this->revisionData;
+    if ($column === null) {
+      return $this->revisionData;
+    } else {
+      return $this->getRevisionDataByColumn($column);
+    }
   }
 
   /**
@@ -118,7 +125,7 @@ class Revision
   /**
    * @return array
    */
-  public function getRevisionDataByColumn($column)
+  private function getRevisionDataByColumn($column)
   {
     if ($this->revisionContainsColumnRevisionData($column)) {
       return $this->revisionData[$column];

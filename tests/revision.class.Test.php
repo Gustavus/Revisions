@@ -160,7 +160,7 @@ class RevisionTest extends \Gustavus\Test\Test
    */
   public function getRevisionDataByColumn()
   {
-    $this->assertInstanceOf('\Gustavus\Revisions\RevisionData', $this->revision->getRevisionDataByColumn('name'));
+    $this->assertInstanceOf('\Gustavus\Revisions\RevisionData', $this->revision->getRevisionData('name'));
   }
 
   /**
@@ -170,7 +170,7 @@ class RevisionTest extends \Gustavus\Test\Test
   {
     $this->revisionProperties['revisionData'] = array();
     $this->call($this->revision, 'populateObjectWithArray', array($this->revisionProperties));
-    $this->assertNull($this->revision->getRevisionDataByColumn('name'));
+    $this->assertNull($this->revision->getRevisionData('name'));
   }
 
   /**
