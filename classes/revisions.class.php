@@ -53,17 +53,51 @@ class Revisions extends RevisionsPuller
   }
 
   /**
-   * Renders changes from oldText to newText
+   * Makes new RevisionData for oldText and newText
    *
    * @param string $oldText
    * @param string $newText
-   * @return string
+   * @return Revision
    */
-  public function renderDiff($oldText, $newText)
+  public function makeRevisionData($oldText, $newText)
   {
     $revisionData = new RevisionData(array('currentContent' => $oldText));
-    $diff = $revisionData->makeDiff($newText);
-    return $diff;
+    $revisionData->makeRevisionContent($newText);
+    return $revisionData;
+  }
+
+  /**
+   * Makes new Revision with revisionData
+   *
+   * @param array $revisionData
+   * @return Revision
+   */
+  public function makeRevision(array $revisionData)
+  {
+    $revision = new Revision(array('revisionData' => $revisionData));
+    return $revision;
+  }
+
+  /**
+   * Takes two revisions and returns a new revision containing only the diff of the two
+   *
+   * @param  integer  $revisionANum revision number to compare against
+   * @param  integer  $revisionBNum revision number to compare
+   * @param  string  $column       column to compare if only looking for a specific column
+   * @return Revision
+   */
+  public function compareTwoRevisions($revisionANum, $revisionBNum, $column = null)
+  {
+    $revisionDataArray = array();
+    $revA = $this->getRevisionByNumber($revisionANum);
+    $revB = $this->getRevisionByNumber($revisionBNum);
+    foreach ($revA->getRevisionData($column) as $key => $revisionData) {
+      $revBDataContent = $revB->getRevisionData($key)->makeRevisionContent();
+      $revADataContent = $revisionData->makeRevisionContent();
+      $revisionDataArray[$key] = $this->makeRevisionData($revBDataContent, $revADataContent);
+    }
+    $revision = $this->makeRevision($revisionDataArray);
+    return $revision;
   }
 
   /**
@@ -74,7 +108,7 @@ class Revisions extends RevisionsPuller
    * @param  string $createdBy    person creating revision
    * @return void
    */
-  public function makeRevision(array $newText, $message = '', $createdBy = '')
+  public function makeAndSaveRevision(array $newText, $message = '', $createdBy = '')
   {
     $revisionInfoArray    = array();
     $oldRevisionDataArray = array();
@@ -329,7 +363,7 @@ class Revisions extends RevisionsPuller
     foreach ($this->revisions as $key => $value) {
       if ($value !== null) {
         if ($value->revisionContainsColumnRevisionData($column) && $value->getRevisionId() > $revisionId) {
-          return $value->getRevisionDataByColumn($column);
+          return $value->getRevisionData($column);
         }
       }
     }
@@ -359,14 +393,15 @@ class Revisions extends RevisionsPuller
    * Pulls a specific revision out of the object to return
    *
    * @param  integer $revisionNumber revision number you want
+   * @param  string $column
    * @return string
    */
-  public function getRevisionByNumber($revisionNumber)
+  public function getRevisionByNumber($revisionNumber, $column = null)
   {
     assert('is_int($revisionNumber)');
     if (!$this->revisionDataHasBeenPulled) {
       // no revisions in the object
-      $this->populateObjectWithRevisions();
+      $this->populateObjectWithRevisions($column);
     }
     if ($this->revisions === null) {
       return null;
@@ -375,11 +410,11 @@ class Revisions extends RevisionsPuller
       $oldestRevNumPulled = $this->findOldestRevisionNumberPulled();
       for ($i = $oldestRevNumPulled; $i >= $revisionNumber; --$i) {
         // keep pulling in revisions until the revision number is in the object
-        $oldestRevisionPulled = $this->getOldestRevisionPulled();
+        $oldestRevisionPulled = $this->getOldestRevisionPulled($column);
         if ($oldestRevisionPulled->getError()) {
           break;
         }
-        $this->populateObjectWithRevisions();
+        $this->populateObjectWithRevisions($column);
       }
     }
     return $this->revisions[$revisionNumber];
