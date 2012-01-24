@@ -488,7 +488,7 @@ class RevisionDataTest extends \Gustavus\Test\Test
     $this->setUp();
     $expected = '<del>some</del><ins>new</ins> test content';
 
-    $result = $this->call($this->revisionData, 'makeDiff', array('new test content'));
+    $result = $this->call($this->revisionData, 'makeDiff', array('new test content', true));
     $this->assertSame($expected, $result);
   }
 
@@ -503,7 +503,7 @@ class RevisionDataTest extends \Gustavus\Test\Test
     $this->setUp();
     $expected = '<ins>new test content</ins>';
 
-    $result = $this->call($this->revisionData, 'makeDiff', array('new test content'));
+    $result = $this->call($this->revisionData, 'makeDiff', array('new test content', true));
     $this->assertSame($expected, $result);
   }
 
@@ -518,7 +518,7 @@ class RevisionDataTest extends \Gustavus\Test\Test
     $this->setUp();
     $expected = '<del>true</del><ins>false</ins>';
 
-    $result = $this->call($this->revisionData, 'makeDiff', array(false));
+    $result = $this->call($this->revisionData, 'makeDiff', array(false, true));
     $this->assertSame($expected, $result);
   }
 
@@ -533,7 +533,7 @@ class RevisionDataTest extends \Gustavus\Test\Test
     $this->setUp();
     $expected = '<del>100010</del><ins>101010</ins>';
 
-    $result = $this->call($this->revisionData, 'makeDiff', array(101010));
+    $result = $this->call($this->revisionData, 'makeDiff', array(101010, true));
     $this->assertSame($expected, $result);
   }
 
@@ -548,7 +548,7 @@ class RevisionDataTest extends \Gustavus\Test\Test
     $this->setUp();
     $expected = '<del>some </del>test content';
 
-    $result = $this->call($this->revisionData, 'makeDiff', array('test content'));
+    $result = $this->call($this->revisionData, 'makeDiff', array('test content', true));
     $this->assertSame($expected, $result);
   }
 
@@ -563,7 +563,7 @@ class RevisionDataTest extends \Gustavus\Test\Test
     $this->setUp();
     $expected = 'some <ins>new </ins>test <del>content revision</del><ins>change</ins>';
 
-    $result = $this->call($this->revisionData, 'makeDiff', array('some new test change'));
+    $result = $this->call($this->revisionData, 'makeDiff', array('some new test change', true));
     $this->assertSame($expected, $result);
   }
 
@@ -578,7 +578,7 @@ class RevisionDataTest extends \Gustavus\Test\Test
     $this->setUp();
     $expected = 'Hello, <del>my name is</del><ins>I am</ins> Billy. I am writing <del>this </del>to test <del>some</del><ins>a new</ins> diff functions I wrote.';
 
-    $result = $this->call($this->revisionData, 'makeDiff', array('Hello, I am Billy. I am writing to test a new diff functions I wrote.'));
+    $result = $this->call($this->revisionData, 'makeDiff', array('Hello, I am Billy. I am writing to test a new diff functions I wrote.', true));
     $this->assertSame($expected, $result);
   }
 
