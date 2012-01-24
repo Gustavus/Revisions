@@ -150,8 +150,7 @@ class Revision
   public function getRevisionDataRevisionNumber($column)
   {
     if ($this->revisionContainsColumnRevisionData($column)) {
-      $revisionData = $this->revisionData[$column];
-      return $revisionData->getRevisionNumber();
+      return $this->revisionData[$column]->getRevisionNumber();
     } else {
       return null;
     }
