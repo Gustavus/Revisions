@@ -70,20 +70,19 @@ class RevisionDataDiff extends RevisionData
         return '';
       }
     }
-    return $this->putRevisionContentTogether($currentContent, $revisionInfo, $showChanges);
+    return $this->putRevisionContentTogether($revisionInfo, $showChanges);
   }
 
   /**
    * Helper for render revision that puts the revision together
-   * @param  string $currentContent content to build the revision back from
    * @param  array $revisionInfo   instructions on how to built the revision
    * @param  boolean $showChanges    whether to render a diff or not
    * @return string
    */
-  private function putRevisionContentTogether($currentContent, $revisionInfo, $showChanges)
+  private function putRevisionContentTogether($revisionInfo, $showChanges)
   {
-    $currContentArr = $this->splitWords($currentContent);
-    // currContentArr has space at the beginning from splitWords, so get rid of it
+    $currContentArr = $this->splitWords($this->getCurrentContent());
+    // currContentArr has empty index at the beginning from splitWords, so get rid of it
     array_shift($currContentArr);
     foreach ($revisionInfo as $revision) {
       $revisionContent = ($showChanges) ? $this->renderContentChange($revision[self::REVISION_INFO], false) : $revision[self::REVISION_INFO];

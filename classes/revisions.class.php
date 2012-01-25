@@ -3,14 +3,14 @@
  * @package Revisions
  */
 namespace Gustavus\Revisions;
-require_once 'revisions/classes/revisionsPuller.class.php';
+require_once 'revisions/classes/revisionsManager.class.php';
 require_once 'revisions/classes/revision.class.php';
 require_once 'revisions/classes/revisionDataDiff.class.php';
 
 /**
  * @package Revisions
  */
-class Revisions extends RevisionsPuller
+class Revisions extends RevisionsManager
 {
   /**
    * @var SplFixedArray of revisions keyed by revision number
@@ -108,7 +108,7 @@ class Revisions extends RevisionsPuller
    * @param  string $createdBy    person creating revision
    * @return void
    */
-  public function makeAndSaveRevision(array $newText, $message = '', $createdBy = '')
+  public function makeAndSaveRevision(array $newText, $message = null, $createdBy = null)
   {
     $revisionInfoArray    = array();
     $oldRevisionDataArray = array();
@@ -397,10 +397,7 @@ class Revisions extends RevisionsPuller
   public function getRevisionByNumber($revisionNumber, $column = null)
   {
     assert('is_int($revisionNumber)');
-    if (!$this->revisionDataHasBeenPulled) {
-      // no revisions in the object
-      $this->populateObjectWithRevisions($column);
-    }
+    $this->populateEmptyRevisions();
     if (!isset($this->revisions) || !array_key_exists($revisionNumber, $this->revisions)) {
       return null;
     }
@@ -425,10 +422,20 @@ class Revisions extends RevisionsPuller
    */
   public function getRevisionObjects()
   {
+    $this->populateEmptyRevisions();
+    return $this->revisions;
+  }
+
+  /**
+   * Populates revisions into the object if that hasn't happened already
+   *
+   * @return void
+   */
+  private function populateEmptyRevisions()
+  {
     if (!$this->revisionDataHasBeenPulled) {
       // no revisions in the object
       $this->populateObjectWithRevisions();
     }
-    return $this->revisions;
   }
 }

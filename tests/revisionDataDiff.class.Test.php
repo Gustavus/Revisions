@@ -886,4 +886,14 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
     $result = $this->call($this->revisionDataDiff, 'renderRevision');
     $this->assertSame($expected, $result);
   }
+
+  /**
+   * @test
+   */
+  public function splitWords()
+  {
+    $array = array('', 'some', ' ', 'text', '');
+    $result = $this->call($this->revisionDataDiff, 'splitWords', array('some text'));
+    $this->assertSame($array, $result);
+  }
 }

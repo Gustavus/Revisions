@@ -35,7 +35,7 @@ class RevisionsHelper extends \Gustavus\Test\TestDBPDO
   /**
    * @var array of revisionsPuller info
    */
-  protected $revisionsPullerInfo = array(
+  protected $revisionsManagerInfo = array(
     'dbName' => 'person-revision',
     'revisionsTable' => 'person-revision',
     'revisionDataTable' => 'revisionData',
@@ -82,7 +82,7 @@ class RevisionsHelper extends \Gustavus\Test\TestDBPDO
    * @param string $newContent
    * @return void
    */
-  protected function saveRevisionToDB($currContent, $newContent, $column, $object, $revisionDataArray = array(), $message = '', $createdBy = 'name')
+  protected function saveRevisionToDB($currContent, $newContent, $column, $object, $revisionDataArray = array(), $message = null, $createdBy = 'name')
   {
     $revisionData = new \Gustavus\Revisions\RevisionDataDiff(array(
       'currentContent' => $currContent,

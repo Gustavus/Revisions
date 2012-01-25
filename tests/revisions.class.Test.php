@@ -67,7 +67,7 @@ class RevisionsTest extends RevisionsHelper
       $this->dbalConnection = \Gustavus\DB\DBAL::getDBAL($tableName, self::$dbh);
     }
 
-    $this->revisions = $this->getMockWithDB('\Gustavus\Revisions\Revisions', 'getDB', array($this->revisionsPullerInfo), $this->dbalConnection);
+    $this->revisions = $this->getMockWithDB('\Gustavus\Revisions\Revisions', 'getDB', array($this->revisionsManagerInfo), $this->dbalConnection);
   }
 
   /**
@@ -94,7 +94,7 @@ class RevisionsTest extends RevisionsHelper
    */
   public function compareTwoRevisions()
   {
-    $this->revisionsPullerInfo['limit'] = 10;
+    $this->revisionsManagerInfo['limit'] = 10;
     $conn = $this->getConnection();
     $this->setUpMock('person-revision');
     $this->dbalConnection->query($this->getCreateQuery());
@@ -115,7 +115,7 @@ class RevisionsTest extends RevisionsHelper
    */
   public function compareTwoRevisionsColumn()
   {
-    $this->revisionsPullerInfo['limit'] = 10;
+    $this->revisionsManagerInfo['limit'] = 10;
     $conn = $this->getConnection();
     $this->setUpMock('person-revision');
     $this->dbalConnection->query($this->getCreateQuery());
@@ -280,7 +280,7 @@ class RevisionsTest extends RevisionsHelper
    */
   public function getRevisionByNumberMultiple()
   {
-    $this->revisionsPullerInfo['limit'] = 1;
+    $this->revisionsManagerInfo['limit'] = 1;
     $conn = $this->getConnection();
     $this->setUpMock('person-revision');
     $this->dbalConnection->query($this->getCreateQuery());
@@ -300,7 +300,7 @@ class RevisionsTest extends RevisionsHelper
   public function populateObjectWithRevisions1()
   {
     $conn = $this->getConnection();
-    $this->revisionsPullerInfo['limit'] = 1;
+    $this->revisionsManagerInfo['limit'] = 1;
     $this->setUpMock('person-revision');
     $this->dbalConnection->query($this->getCreateQuery());
     $this->dbalConnection->query($this->getCreateDataQuery());
@@ -333,7 +333,7 @@ class RevisionsTest extends RevisionsHelper
   public function populateObjectWithRevisionsError()
   {
     $conn = $this->getConnection();
-    $this->revisionsPullerInfo['limit'] = 1;
+    $this->revisionsManagerInfo['limit'] = 1;
     $this->setUpMock('person-revision');
     $this->dbalConnection->query($this->getCreateQuery());
     $this->dbalConnection->query($this->getCreateDataQuery());
@@ -364,7 +364,7 @@ class RevisionsTest extends RevisionsHelper
   public function populateObjectWithRevisionsNameAge()
   {
     $conn = $this->getConnection();
-    $this->revisionsPullerInfo['limit'] = 1;
+    $this->revisionsManagerInfo['limit'] = 1;
     $this->setUpMock('person-revision');
     $this->dbalConnection->query($this->getCreateQuery());
     $this->dbalConnection->query($this->getCreateDataQuery());
@@ -395,7 +395,7 @@ class RevisionsTest extends RevisionsHelper
   public function populateObjectWithRevisionsColumn()
   {
     $conn = $this->getConnection();
-    $this->revisionsPullerInfo['limit'] = 1;
+    $this->revisionsManagerInfo['limit'] = 1;
     $this->setUpMock('person-revision');
     $this->dbalConnection->query($this->getCreateQuery());
     $this->dbalConnection->query($this->getCreateDataQuery());
@@ -417,11 +417,11 @@ class RevisionsTest extends RevisionsHelper
   public function populateObjectWithRevisionsColumn2()
   {
     $conn = $this->getConnection();
-    $this->revisionsPullerInfo['limit'] = 1;
+    $this->revisionsManagerInfo['limit'] = 1;
     $this->setUpMock('person-revision');
     $this->dbalConnection->query($this->getCreateQuery());
     $this->dbalConnection->query($this->getCreateDataQuery());
-    //$this->call($this->revisions, 'populateObjectWithArray', array($this->revisionsPullerInfo));
+    //$this->call($this->revisions, 'populateObjectWithArray', array($this->revisionsManagerInfo));
 
     $this->saveRevisionToDB('', 'Billy Visto', 'name', $this->revisions);
     $this->saveRevisionToDB('Billy Visto', 'Billy', 'name', $this->revisions);
@@ -441,11 +441,11 @@ class RevisionsTest extends RevisionsHelper
   public function findOldestRevisionNumberPulled()
   {
     $conn = $this->getConnection();
-    $this->revisionsPullerInfo['limit'] = 1;
+    $this->revisionsManagerInfo['limit'] = 1;
     $this->setUpMock('person-revision');
     $this->dbalConnection->query($this->getCreateQuery());
     $this->dbalConnection->query($this->getCreateDataQuery());
-    //$this->call($this->revisions, 'populateObjectWithArray', array($this->revisionsPullerInfo));
+    //$this->call($this->revisions, 'populateObjectWithArray', array($this->revisionsManagerInfo));
 
     $this->saveRevisionToDB('', 'Billy Visto', 'name', $this->revisions);
     $this->saveRevisionToDB('Billy Visto', 'Billy', 'name', $this->revisions);
@@ -474,7 +474,7 @@ class RevisionsTest extends RevisionsHelper
   public function findOldestRevisionNumberPulledFullRevisions()
   {
     $conn = $this->getConnection();
-    $this->revisionsPullerInfo['limit'] = 10;
+    $this->revisionsManagerInfo['limit'] = 10;
     $this->setUpMock('person-revision');
     $this->dbalConnection->query($this->getCreateQuery());
     $this->dbalConnection->query($this->getCreateDataQuery());
@@ -494,7 +494,7 @@ class RevisionsTest extends RevisionsHelper
   public function findOldestColumnRevisionNumberPulled()
   {
     $conn = $this->getConnection();
-    $this->revisionsPullerInfo['limit'] = 2;
+    $this->revisionsManagerInfo['limit'] = 2;
     $this->setUpMock('person-revision');
     $this->dbalConnection->query($this->getCreateQuery());
     $this->dbalConnection->query($this->getCreateDataQuery());
@@ -514,7 +514,7 @@ class RevisionsTest extends RevisionsHelper
   public function findOldestColumnRevisionNumberPulledFull()
   {
     $conn = $this->getConnection();
-    $this->revisionsPullerInfo['limit'] = 10;
+    $this->revisionsManagerInfo['limit'] = 10;
     $this->setUpMock('person-revision');
     $this->dbalConnection->query($this->getCreateQuery());
     $this->dbalConnection->query($this->getCreateDataQuery());
@@ -534,7 +534,7 @@ class RevisionsTest extends RevisionsHelper
   public function findOldestColumnRevisionNumberPulledColumn()
   {
     $conn = $this->getConnection();
-    $this->revisionsPullerInfo['limit'] = 10;
+    $this->revisionsManagerInfo['limit'] = 10;
     $this->setUpMock('person-revision');
     $this->dbalConnection->query($this->getCreateQuery());
     $this->dbalConnection->query($this->getCreateDataQuery());
@@ -564,7 +564,7 @@ class RevisionsTest extends RevisionsHelper
   public function findOldestRevisionNumberPulledColumn()
   {
     $conn = $this->getConnection();
-    $this->revisionsPullerInfo['limit'] = 10;
+    $this->revisionsManagerInfo['limit'] = 10;
     $this->setUpMock('person-revision');
     $this->dbalConnection->query($this->getCreateQuery());
     $this->dbalConnection->query($this->getCreateDataQuery());
@@ -584,11 +584,11 @@ class RevisionsTest extends RevisionsHelper
   public function findOldestRevisionNumberPulledColumn2()
   {
     $conn = $this->getConnection();
-    $this->revisionsPullerInfo['limit'] = 1;
+    $this->revisionsManagerInfo['limit'] = 1;
     $this->setUpMock('person-revision');
     $this->dbalConnection->query($this->getCreateQuery());
     $this->dbalConnection->query($this->getCreateDataQuery());
-    //$this->call($this->revisions, 'populateObjectWithArray', array($this->revisionsPullerInfo));
+    //$this->call($this->revisions, 'populateObjectWithArray', array($this->revisionsManagerInfo));
 
     $this->saveRevisionToDB('', 'Billy Visto', 'name', $this->revisions);
     $this->saveRevisionToDB('Billy Visto', 'Billy', 'name', $this->revisions);
@@ -608,11 +608,11 @@ class RevisionsTest extends RevisionsHelper
   public function findOldestRevisionNumberPulledColumnEmpty()
   {
     $conn = $this->getConnection();
-    $this->revisionsPullerInfo['limit'] = 1;
+    $this->revisionsManagerInfo['limit'] = 1;
     $this->setUpMock('person-revision');
     $this->dbalConnection->query($this->getCreateQuery());
     $this->dbalConnection->query($this->getCreateDataQuery());
-    //$this->call($this->revisions, 'populateObjectWithArray', array($this->revisionsPullerInfo));
+    //$this->call($this->revisions, 'populateObjectWithArray', array($this->revisionsManagerInfo));
 
     $this->call($this->revisions, 'populateObjectWithRevisions', array('name'));
     $this->assertNull($this->call($this->revisions, 'findOldestRevisionNumberPulled', array('name')));
@@ -626,11 +626,11 @@ class RevisionsTest extends RevisionsHelper
   public function findOldestRevisionNumberPulledColumnNull()
   {
     $conn = $this->getConnection();
-    $this->revisionsPullerInfo['limit'] = 1;
+    $this->revisionsManagerInfo['limit'] = 1;
     $this->setUpMock('person-revision');
     $this->dbalConnection->query($this->getCreateQuery());
     $this->dbalConnection->query($this->getCreateDataQuery());
-    //$this->call($this->revisions, 'populateObjectWithArray', array($this->revisionsPullerInfo));
+    //$this->call($this->revisions, 'populateObjectWithArray', array($this->revisionsManagerInfo));
 
     $this->assertNull($this->call($this->revisions, 'findOldestColumnRevisionNumberPulled', array('name')));
 
@@ -643,7 +643,7 @@ class RevisionsTest extends RevisionsHelper
   public function getOldestRevisionDataPulledNull()
   {
     $conn = $this->getConnection();
-    $this->revisionsPullerInfo['limit'] = 10;
+    $this->revisionsManagerInfo['limit'] = 10;
     $this->setUpMock('person-revision');
     $this->dbalConnection->query($this->getCreateQuery());
     $this->dbalConnection->query($this->getCreateDataQuery());
@@ -661,7 +661,7 @@ class RevisionsTest extends RevisionsHelper
   public function getOldestRevisionDataPulled()
   {
     $conn = $this->getConnection();
-    $this->revisionsPullerInfo['limit'] = 10;
+    $this->revisionsManagerInfo['limit'] = 10;
     $this->setUpMock('person-revision');
     $this->dbalConnection->query($this->getCreateQuery());
     $this->dbalConnection->query($this->getCreateDataQuery());
@@ -691,7 +691,7 @@ class RevisionsTest extends RevisionsHelper
   public function getOldestRevisionPulledNull()
   {
     $conn = $this->getConnection();
-    $this->revisionsPullerInfo['limit'] = 10;
+    $this->revisionsManagerInfo['limit'] = 10;
     $this->setUpMock('person-revision');
     $this->dbalConnection->query($this->getCreateQuery());
     $this->dbalConnection->query($this->getCreateDataQuery());
@@ -709,7 +709,7 @@ class RevisionsTest extends RevisionsHelper
   public function getOldestRevisionPulled()
   {
     $conn = $this->getConnection();
-    $this->revisionsPullerInfo['limit'] = 10;
+    $this->revisionsManagerInfo['limit'] = 10;
     $this->setUpMock('person-revision');
     $this->dbalConnection->query($this->getCreateQuery());
     $this->dbalConnection->query($this->getCreateDataQuery());
@@ -772,7 +772,7 @@ class RevisionsTest extends RevisionsHelper
   public function getMissingRevisionDataFromObject()
   {
     $conn = $this->getConnection();
-    $this->revisionsPullerInfo['limit'] = 1;
+    $this->revisionsManagerInfo['limit'] = 1;
     $this->setUpMock('person-revision');
     $this->dbalConnection->query($this->getCreateQuery());
     $this->dbalConnection->query($this->getCreateDataQuery());
