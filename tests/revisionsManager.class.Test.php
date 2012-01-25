@@ -132,7 +132,7 @@ class RevisionsManagerTest extends RevisionsHelper
   public function setLimit()
   {
     $this->revisionsManager->setLimit(5);
-    $limit = $this->get($this->revisionsManager, 'limit', array(10));
+    $limit = $this->get($this->revisionsManager, 'limit');
     $this->assertSame(5, $limit);
   }
 
