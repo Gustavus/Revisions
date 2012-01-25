@@ -13,6 +13,6 @@ person-revision:
     table: "person"
     rowId: 1
     revisionNumber: 1
-    message: ""
+    message:
     createdBy: "name"
     createdOn:

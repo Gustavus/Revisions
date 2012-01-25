@@ -20,7 +20,7 @@ person-revision:
     table: "person"
     rowId: 1
     revisionNumber: 1
-    message: ""
+    message:
     createdBy: "name"
     createdOn:
   -
@@ -29,6 +29,6 @@ person-revision:
     table: "person"
     rowId: 1
     revisionNumber: 2
-    message: ""
+    message:
     createdBy: "name"
     createdOn:
