@@ -5,6 +5,8 @@
 namespace Gustavus\Revisions;
 
 /**
+ * A single RevisionData object
+ *
  * @package Revisions
  */
 abstract class RevisionData
@@ -13,10 +15,12 @@ abstract class RevisionData
    * index of the start index in the revisionInfo
    */
   const START_INDEX   = 0;
+
   /**
    * index of the end index in the revisionInfo
    */
   const END_INDEX     = 1;
+
   /**
    * index of the revision info in the revisionInfo
    */

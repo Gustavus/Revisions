@@ -5,6 +5,8 @@
 namespace Gustavus\Revisions;
 
 /**
+ * A single Revision object that contains many RevisionData objects
+ *
  * @package Revisions
  */
 class Revision

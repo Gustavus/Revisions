@@ -6,6 +6,8 @@ namespace Gustavus\Revisions;
 require_once 'revisions/classes/revisionData.class.php';
 
 /**
+ * Creates a RevisionData object
+ *
  * @package Revisions
  */
 class RevisionDataDiff extends RevisionData

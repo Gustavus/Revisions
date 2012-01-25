@@ -8,6 +8,8 @@ require_once 'revisions/classes/revision.class.php';
 require_once 'revisions/classes/revisionDataDiff.class.php';
 
 /**
+ * Creates Revision objects and sets things up for saving revisions
+ *
  * @package Revisions
  */
 class Revisions extends RevisionsManager

@@ -6,6 +6,8 @@ namespace Gustavus\Revisions;
 
 require_once 'db/DBAL.class.php';
 /**
+ * Interacts with the database
+ *
  * @package Revisions
  */
 class RevisionsManager
