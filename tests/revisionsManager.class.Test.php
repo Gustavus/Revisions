@@ -129,6 +129,16 @@ class RevisionsManagerTest extends RevisionsHelper
   /**
    * @test
    */
+  public function setLimit()
+  {
+    $this->revisionsManager->setLimit(5);
+    $limit = $this->get($this->revisionsManager, 'limit');
+    $this->assertSame(5, $limit);
+  }
+
+  /**
+   * @test
+   */
   public function getDBAlreadySet()
   {
     $conn = $this->getConnection();

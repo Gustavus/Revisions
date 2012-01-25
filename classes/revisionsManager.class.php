@@ -81,6 +81,15 @@ class RevisionsManager
   }
 
   /**
+   * @param integer $limit
+   * @return void
+   */
+  public function setLimit($limit = 1)
+  {
+    $this->limit = $limit;
+  }
+
+  /**
    * @return /Doctrine/DBAL connection
    */
   protected function getDB()
