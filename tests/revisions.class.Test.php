@@ -252,6 +252,20 @@ class RevisionsTest extends RevisionsHelper
 
   /**
    * @test
+   */
+  public function getRevisionByNumberRevisionNumberDoesntExist()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
+    $this->assertNull($this->revisions->getRevisionByNumber(5));
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
    * @expectedException PDOException
    */
   public function getRevisionByNumberWithNoTable()

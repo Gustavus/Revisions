@@ -104,10 +104,9 @@ class RevisionsPuller
       $limit = $this->limit;
     }
     $db = $this->getDB();
-    $dbName = "`$this->revisionsTable`";
     $qb = $db->createQueryBuilder();
     $qb->addSelect('rDB.`id`, rDB.`contentHash`, rDB.`table`, rDB.`rowId`, rDB.`revisionNumber`, rDB.`message`, rDB.`createdBy`, rDB.`createdOn`')
-      ->from($dbName, 'rDB');
+      ->from("`$this->revisionsTable`", 'rDB');
     if ($revisionId === null) {
       $args = array(
         ':table' => $this->table,
@@ -115,8 +114,7 @@ class RevisionsPuller
       );
       if ($column !== null) {
         $args[':key'] = $column;
-        $dbDataName = "`$this->revisionDataTable`";
-        $qb->leftJoin('rDB', $dbDataName, 'dataDB', 'rDB.`id` = dataDB.`revisionId` AND dataDB.`key` = :key');
+        $qb->leftJoin('rDB', "`$this->revisionDataTable`", 'dataDB', 'rDB.`id` = dataDB.`revisionId` AND dataDB.`key` = :key');
       }
       $qb->where('rDB.`table` = :table')
         ->andWhere('rDB.`rowId` = :rowId')
@@ -148,10 +146,9 @@ class RevisionsPuller
   protected function getRevisionData($revisionId, $column = null, $revisionsHaveBeenPulled = false, $limit = null, $prevRevisionNum = null, $forceSingleDimension = false)
   {
     $db = $this->getDB();
-    $dbDataName = "`$this->revisionDataTable`";
     $qb = $db->createQueryBuilder();
     $qb->select('dataDB.`id`, dataDB.`contentHash`, dataDB.`revisionId`, dataDB.`revisionNumber`, dataDB.`key`, dataDB.`value`')
-      ->from($dbDataName, 'dataDB');
+      ->from("`$this->revisionDataTable`", 'dataDB');
     if ($revisionId === null && $column !== null) {
       if ($limit === null) {
         if ($revisionsHaveBeenPulled) {
@@ -161,8 +158,7 @@ class RevisionsPuller
           $limit = $this->limit + 1;
         }
       }
-      $dbName = "`$this->revisionsTable`";
-      $qb = $qb->leftJoin('dataDB', $dbName, 'rDB', 'rDB.`id` = dataDB.`revisionId` AND rDB.`table` = :table AND rDB.`rowId` = :rowId');
+      $qb = $qb->leftJoin('dataDB', "`$this->revisionsTable`", 'rDB', 'rDB.`id` = dataDB.`revisionId` AND rDB.`table` = :table AND rDB.`rowId` = :rowId');
       $qb->where('dataDB.`key` = :key')
         ->orderBy('dataDB.`id`', 'DESC')
         ->setMaxResults($limit);
@@ -193,16 +189,14 @@ class RevisionsPuller
   protected function getRevisionDataColumns()
   {
     $db = $this->getDB();
-    $dbDataName = "`$this->revisionDataTable`";
-    $dbName = "`$this->revisionsTable`";
     $args = array(
       ':table'      => $this->table,
       ':rowId'      => $this->rowId,
     );
     $qb = $db->createQueryBuilder();
     $qb->select('dataDB.`key`')
-      ->from($dbDataName, 'dataDB')
-      ->leftJoin('dataDB', $dbName, 'rDB', 'rDB.`id` = dataDB.`revisionId` AND rDB.`table` = :table AND rDB.`rowId` = :rowId')
+      ->from("`$this->revisionDataTable`", 'dataDB')
+      ->leftJoin('dataDB', "`$this->revisionsTable`", 'rDB', 'rDB.`id` = dataDB.`revisionId` AND rDB.`table` = :table AND rDB.`rowId` = :rowId')
       ->groupBy('dataDB.`key`');
     return $db->fetchAll($qb->getSQL(), $args);
   }
@@ -264,12 +258,10 @@ class RevisionsPuller
         ':hash'           => md5($revisionContent),
       ));
 
-      $dbDataName = "`$this->revisionDataTable`";
       $qb = $db->createQueryBuilder();
       $qb->select(':hash, :revisionId, COUNT(dataDB.`revisionNumber`) + 1, :key, :value')
-        ->from($dbDataName, 'dataDB');
-      $dbName = "`$this->revisionsTable`";
-      $qb = $qb->leftJoin('dataDB', $dbName, 'rDB', 'rDB.`id` = dataDB.`revisionId` AND rDB.`table` = :table AND rDB.`rowId` = :rowId')
+        ->from("`$this->revisionDataTable`", 'dataDB');
+      $qb = $qb->leftJoin('dataDB', "`$this->revisionsTable`", 'rDB', 'rDB.`id` = dataDB.`revisionId` AND rDB.`table` = :table AND rDB.`rowId` = :rowId')
         ->where('`key` = :key');
       $select = $qb->getSQL();
 
@@ -347,7 +339,7 @@ class RevisionsPuller
   /**
    * Saves revision and revisionData into DB
    *
-   * @param array $revisionInfo json revision info keyed by column
+   * @param array $revisionInfo array of json revision info keyed by column
    * @param array $newContent array of full row keyed by column
    * @param array $oldContent array of full row keyed by column
    * @param array $oldRevisionData keyed by column

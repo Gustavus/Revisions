@@ -54,6 +54,7 @@ class RevisionDataDiff extends RevisionData
   {
     $revisionInfo = $this->getRevisionInfo();
     if (!is_array($revisionInfo)) {
+      // revision info is the latest content of a revision
       return $revisionInfo;
     }
     $currentContent = $this->getCurrentContent();
@@ -69,30 +70,43 @@ class RevisionDataDiff extends RevisionData
         return '';
       }
     }
-    $currContentArr = preg_split('`\b`', $currentContent);
+    return $this->putRevisionContentTogether($currentContent, $revisionInfo, $showChanges);
+  }
+
+  /**
+   * Helper for render revision that puts the revision together
+   * @param  string $currentContent content to build the revision back from
+   * @param  array $revisionInfo   instructions on how to built the revision
+   * @param  boolean $showChanges    whether to render a diff or not
+   * @return string
+   */
+  private function putRevisionContentTogether($currentContent, $revisionInfo, $showChanges)
+  {
+    $currContentArr = $this->splitWords($currentContent);
+    // currContentArr has space at the beginning from splitWords, so get rid of it
     array_shift($currContentArr);
     foreach ($revisionInfo as $revision) {
-      $revisionContent = ($showChanges) ? $this->renderContentChange($revision[2], false) : $revision[2];
-      if (isset($revision[1])) {
+      $revisionContent = ($showChanges) ? $this->renderContentChange($revision[self::REVISION_INFO], false) : $revision[self::REVISION_INFO];
+      if (isset($revision[self::END_INDEX])) {
         // content was deleted/replaced
         if ($showChanges) {
           $ins = '';
         }
-        for ($i = $revision[0]; $i <= $revision[1]; ++$i) {
+        for ($i = $revision[self::START_INDEX]; $i <= $revision[self::END_INDEX]; ++$i) {
           if ($showChanges) {
             $ins .= $currContentArr[$i];
           }
           $currContentArr[$i] = '';
         }
-        $currContentArr[$revision[0]] = ($showChanges) ? $revisionContent.$this->renderContentChange($ins, true) : $revisionContent;
-      } else if (!isset($revision[0]) && count($revisionInfo) === 1) {
+        $currContentArr[$revision[self::START_INDEX]] = ($showChanges) ? $revisionContent.$this->renderContentChange($ins, true) : $revisionContent;
+      } else if (!isset($revision[self::START_INDEX]) && count($revisionInfo) === 1) {
         // full content change. As of now, this signifies a non string revision
-        return $this->renderNonStringRevision($revision[2], $showChanges);
+        return $this->renderNonStringRevision($revision[self::REVISION_INFO], $showChanges);
       } else {
         //content was added
         $space = ($showChanges) ? '' : ' ' ;
-        $currText = (!empty($currContentArr[$revision[0]])) ? $space.$currContentArr[$revision[0]] : '';
-        $currContentArr[$revision[0]] = $revisionContent.$currText;
+        $currText = (!empty($currContentArr[$revision[self::START_INDEX]])) ? $space.$currContentArr[$revision[self::START_INDEX]] : '';
+        $currContentArr[$revision[self::START_INDEX]] = $revisionContent.$currText;
       }
     }
     $revisionContent = implode('', $currContentArr);
@@ -168,15 +182,10 @@ class RevisionDataDiff extends RevisionData
       return '';
     }
     if ($isInsert) {
-      $return = sprintf('<ins>%1$s</ins>',
-          $content
-      );
+      return sprintf('<ins>%1$s</ins>', $content);
     } else {
-      $return = sprintf('<del>%1$s</del>',
-          $content
-      );
+      return sprintf('<del>%1$s</del>', $content);
     }
-    return $return;
   }
 
   /**
@@ -211,7 +220,7 @@ class RevisionDataDiff extends RevisionData
    * @param array $new
    * @return array
    */
-  private function diff($old, $new)
+  private function diff(array $old, array $new)
   {
     $maxlen = 0;
     foreach ($old as $oindex => $oldv) {
@@ -226,7 +235,7 @@ class RevisionDataDiff extends RevisionData
       }
     }
     if ($maxlen === 0) {
-      return array(array('d'=>$old, 'i'=>$new));
+      return array(array('d' => $old, 'i' => $new));
     }
     return array_merge(
         $this->diff(array_slice($old, 0, $omax), array_slice($new, 0, $nmax)),
@@ -242,7 +251,7 @@ class RevisionDataDiff extends RevisionData
    * @param array $new
    * @return array
    */
-  private function myArrayDiff($old, $new)
+  private function myArrayDiff(array $old, array $new)
   {
     $diff = $this->diff($old, $new);
     //remove empty garbage from beginning and end
@@ -287,6 +296,17 @@ class RevisionDataDiff extends RevisionData
   }
 
   /**
+   * Splits a string at word boundaries
+   *
+   * @param  string $content
+   * @return array
+   */
+  private function splitWords($content)
+  {
+    return preg_split('`\b`', $content);
+  }
+
+  /**
    * Makes information on how to roll back to a revision.
    * Returns an array of arrays of diffs.
    *
@@ -298,29 +318,27 @@ class RevisionDataDiff extends RevisionData
     if (!is_string($newContent)) {
       return $this->makeNonStringRevisionInfo($newContent);
     }
-    $currContentArr = preg_split('`\b`', $this->getCurrentContent());
-    $newContentArr  = preg_split('`\b`', $newContent);
+    $currContentArr = $this->splitWords($this->getCurrentContent());
+    $newContentArr  = $this->splitWords($newContent);
     $diffArr        = $this->myArrayDiff($currContentArr, $newContentArr);
     $diffInfo       = array();
     foreach ($diffArr as $key => $value) {
+      $startInd        = $key;
       if (count($value['d']) === 0) {
         // content was added from the current text
-        $startInd        = $key;
         $endInd          = $key + count($value['i']) - 1;
         $revisionContent = '';
       } else if (count($value['i']) === 0) {
         // content was removed from the current text
-        $startInd        = $key;
         $endInd          = null;
         $revisionContent = implode('', $value['d']);
       } else {
         // content was replaced
-        $startInd = $key;
-        $endInd = $key + count($value['i']) - 1;
+        $endInd          = $key + count($value['i']) - 1;
         $revisionContent = implode('', $value['d']);
       }
 
-      $currDiff = array($startInd, $endInd, $revisionContent);
+      $currDiff   = array($startInd, $endInd, $revisionContent);
       $diffInfo[] = $currDiff;
     }
     $this->setRevisionInfo($diffInfo);

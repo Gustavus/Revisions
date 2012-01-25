@@ -15,7 +15,7 @@ class Revisions extends RevisionsPuller
   /**
    * @var SplFixedArray of revisions keyed by revision number
    */
-  private $revisions = null;
+  private $revisions;
 
   /**
    * @var array of booleans keyed by column on whether object has tried to pull revisions or not
@@ -117,18 +117,17 @@ class Revisions extends RevisionsPuller
       $oldRevisionData = $this->getRevisionData(null, $key, true, 1);
       $oldRevisionDataArray = array_merge($oldRevisionDataArray, $oldRevisionData);
       if (isset($oldRevisionData[$key])) {
+        // revision exists in DB, so the first item will be the full current content
         $oldContentArray         = array_shift($oldRevisionData[$key]);
         $revisionData            = new RevisionDataDiff(array('currentContent' => $oldContentArray['value']));
-        $revisionInfo            = $revisionData->renderRevisionForDB($value);
-        $revisionInfoArray[$key] = $revisionInfo;
         $oldText[$key]           = $oldContentArray['value'];
       } else {
         // revision doesn't exist yet
         $revisionData            = new RevisionDataDiff(array('currentContent' => ''));
-        $revisionInfo            = $revisionData->renderRevisionForDB($value);
-        $revisionInfoArray[$key] = $revisionInfo;
         $oldText[$key]           = '';
       }
+      $revisionInfo            = $revisionData->renderRevisionForDB($value);
+      $revisionInfoArray[$key] = $revisionInfo;
     }
     $missingColumns = $this->findMissingColumns($newText);
     foreach ($missingColumns as $column) {
@@ -153,9 +152,9 @@ class Revisions extends RevisionsPuller
     foreach ($revisions as $revisionInfo) {
       $revisionData = $this->makeRevisionDataObjects((int) $revisionInfo['id']);
       if (!$this->revisionsHaveBeenPulled) {
-        $splFixedArrayLength = $revisionInfo['revisionNumber'];
+        $splFixedArrayLength = $revisionInfo['revisionNumber'] + 1;
         $this->revisionsHaveBeenPulled = true;
-        $this->revisions = new \SplFixedArray($splFixedArrayLength + 1);
+        $this->revisions = new \SplFixedArray($splFixedArrayLength);
         $previousError = false;
       } else {
         $previousRevision = $this->getOldestRevisionPulled();
@@ -203,13 +202,12 @@ class Revisions extends RevisionsPuller
           $this->revisionDataHasBeenPulled[$key] = true;
         }
         $previousContent = $value['value'];
-        $revisionInfo = $value['value'];
       } else {
-        $revisionInfo = $value['value'];
         $previousRevision = $this->getOldestRevisionDataPulled($key, $revisionId);
         $previousContent = $previousRevision->makeRevisionContent();
         $previousError = $previousRevision->getError();
       }
+      $revisionInfo = $value['value'];
       if (!$previousError) {
         if (isset($previousRevision) && $previousRevision->getRevisionId() === $revisionId) {
           $revisionData = $previousRevision;
@@ -312,7 +310,7 @@ class Revisions extends RevisionsPuller
    */
   private function findOldestRevisionNumberPulled($column = null)
   {
-    if ($this->revisions === null) {
+    if (!isset($this->revisions)) {
       return null;
     }
     if ($column !== null) {
@@ -334,7 +332,7 @@ class Revisions extends RevisionsPuller
    */
   private function findOldestColumnRevisionNumberPulled($column = null)
   {
-    if ($this->revisions === null) {
+    if (!isset($this->revisions)) {
       return null;
     }
     foreach ($this->revisions as $key => $value) {
@@ -357,7 +355,7 @@ class Revisions extends RevisionsPuller
   private function getOldestRevisionDataPulled($column = null, $revisionId = 0)
   {
     assert('is_int($revisionId)');
-    if ($this->revisions === null) {
+    if (!isset($this->revisions)) {
       return null;
     }
     foreach ($this->revisions as $key => $value) {
@@ -378,7 +376,7 @@ class Revisions extends RevisionsPuller
    */
   private function getOldestRevisionPulled($column = null)
   {
-    if ($this->revisions === null) {
+    if (!isset($this->revisions)) {
       return null;
     }
     foreach ($this->revisions as $key => $value) {
@@ -403,7 +401,7 @@ class Revisions extends RevisionsPuller
       // no revisions in the object
       $this->populateObjectWithRevisions($column);
     }
-    if ($this->revisions === null) {
+    if (!isset($this->revisions) || !array_key_exists($revisionNumber, $this->revisions)) {
       return null;
     }
     if ($this->revisions[$revisionNumber] === null) {

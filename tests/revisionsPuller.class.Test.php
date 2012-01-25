@@ -9,7 +9,7 @@ use Gustavus\Revisions;
 
 require_once 'revisions/classes/revisionsPuller.class.php';
 require_once 'revisions/classes/revision.class.php';
-require_once 'revisions/classes/revisionData.class.php';
+require_once 'revisions/classes/revisionDataDiff.class.php';
 require_once 'revisions/tests/revisionsTestsHelper.class.Test.php';
 require_once '/cis/lib/db/DBAL.class.php';
 
