@@ -9,6 +9,7 @@ use Gustavus\Revisions;
 
 require_once '/cis/lib/test/test.class.php';
 require_once 'revisions/classes/revisionDataDiff.class.php';
+require_once 'revisions/classes/diffInfo.class.php';
 
 /**
  * @package Revisions
@@ -28,11 +29,15 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
     'currentContent' => 'some test content',
     'revisionNumber' => 1,
     'revisionId'  => 1,
-    'revisionInfo' => array(array(
-      1,
-      null,
-      ' testing',
-    )),
+  );
+
+  /**
+   * @var array to fill DiffInfo objectWith
+   */
+  private $diffInfoProperties = array(
+    'startIndex' => 1,
+    'endIndex'  => null,
+    'revisionInfo' =>' testing',
   );
 
   /**
@@ -41,7 +46,24 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
    */
   public function setUp()
   {
+    $diffInfo = new Revisions\DiffInfo($this->diffInfoProperties);
+    $this->revisionDataDiffProperties['revisionInfo'] = array($diffInfo);
     $this->revisionDataDiff = new Revisions\RevisionDataDiff($this->revisionDataDiffProperties);
+  }
+
+  /**
+   * compares revision info by looking at the objects individually since assertSame doesnt work on different instances of objects
+   * @param  array $expected
+   * @param  array $actual
+   * @return void
+   */
+  private function compareRevisionInfo(array $expected, array $actual)
+  {
+    foreach ($expected as $key => $diffInfo) {
+      $this->assertSame($diffInfo->getStartIndex(), $actual[$key]->getStartIndex());
+      $this->assertSame($diffInfo->getEndIndex(), $actual[$key]->getEndIndex());
+      $this->assertSame($diffInfo->getRevisionInfo(), $actual[$key]->getRevisionInfo());
+    }
   }
 
   /**
@@ -50,7 +72,7 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
    */
   public function tearDown()
   {
-    unset($this->revisionDataDiff, $this->revisionDataDiffProperties);
+    unset($this->revisionDataDiff, $this->revisionDataDiffProperties, $this->diffInfoProperties);
   }
 
   /**
@@ -145,8 +167,8 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
    */
   public function renderRevisionString()
   {
-    $this->revisionDataDiffProperties['revisionInfo'] = 'Revision Info';
     $this->setUp();
+    $this->set($this->revisionDataDiff, 'revisionInfo', 'Revision Info');
     $expected = 'Revision Info';
     $result = $this->call($this->revisionDataDiff, 'renderRevision');
     $this->assertSame($expected, $result);
@@ -159,11 +181,11 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
   {
     $this->revisionDataDiffProperties = array(
       'currentContent' => 'some testing content',
-      'revisionInfo' => array(array(
-        2,
-        2,
-        'test',
-      )),
+    );
+    $this->diffInfoProperties = array(
+      'startIndex' => 2,
+      'endIndex' => 2,
+      'revisionInfo' => 'test',
     );
     $this->setUp();
     $expected = 'some test content';
@@ -179,11 +201,11 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
   {
     $this->revisionDataDiffProperties = array(
       'currentContent' => 'Visto',
-      'revisionInfo' => array(array(
-        0,
-        null,
-        'Billy ',
-      )),
+    );
+    $this->diffInfoProperties = array(
+      'startIndex' => 0,
+      'endIndex' => null,
+      'revisionInfo' => 'Billy ',
     );
     $this->setUp();
     $expected = 'Billy Visto';
@@ -199,11 +221,11 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
   {
     $this->revisionDataDiffProperties = array(
       'currentContent' => 'Visto',
-      'revisionInfo' => array(array(
-        0,
-        null,
-        'Billy Joel ',
-      )),
+    );
+    $this->diffInfoProperties = array(
+      'startIndex' => 0,
+      'endIndex' => null,
+      'revisionInfo' => 'Billy Joel ',
     );
     $this->setUp();
     $expected = 'Billy Joel Visto';
@@ -219,11 +241,11 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
   {
     $this->revisionDataDiffProperties = array(
       'currentContent' => 'Billy Visto',
-      'revisionInfo' => array(array(
-        2,
-        null,
-        'Joel ',
-      )),
+    );
+    $this->diffInfoProperties = array(
+      'startIndex' => 2,
+      'endIndex' => null,
+      'revisionInfo' => 'Joel ',
     );
     $this->setUp();
 
@@ -240,11 +262,11 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
   {
     $this->revisionDataDiffProperties = array(
       'currentContent' => 'test content',
-      'revisionInfo' => array(array(
-        0,
-        null,
-        'some ',
-      )),
+    );
+    $this->diffInfoProperties = array(
+      'startIndex' => 0,
+      'endIndex' => null,
+      'revisionInfo' => 'some ',
     );
     $this->setUp();
     $expected = 'some test content';
@@ -260,11 +282,11 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
   {
     $this->revisionDataDiffProperties = array(
       'currentContent' => 'some more testing content',
-      'revisionInfo' => array(array(
-        2,
-        4,
-        'test',
-      )),
+    );
+    $this->diffInfoProperties = array(
+      'startIndex' => 2,
+      'endIndex' => 4,
+      'revisionInfo' => 'test',
     );
     $this->setUp();
     $expected = 'some test content';
@@ -280,11 +302,11 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
   {
     $this->revisionDataDiffProperties = array(
       'currentContent' => 'some test content',
-      'revisionInfo' => array(array(
-        2,
-        2,
-        'random other testing',
-      )),
+    );
+    $this->diffInfoProperties = array(
+      'startIndex' => 2,
+      'endIndex' => 2,
+      'revisionInfo' => 'random other testing',
     );
     $this->setUp();
     $expected = 'some random other testing content';
@@ -300,11 +322,11 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
   {
     $this->revisionDataDiffProperties = array(
       'currentContent' => 'some test content',
-      'revisionInfo' => array(array(
-        0,
-        null,
-        'hello ',
-      )),
+    );
+    $this->diffInfoProperties = array(
+      'startIndex' => 0,
+      'endIndex' => null,
+      'revisionInfo' => 'hello ',
     );
     $this->setUp();
     $expected = 'hello some test content';
@@ -320,11 +342,11 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
   {
     $this->revisionDataDiffProperties = array(
       'currentContent' => 'some test content',
-      'revisionInfo' => array(array(
-        1,
-        null,
-        ' hello',
-      )),
+    );
+    $this->diffInfoProperties = array(
+      'startIndex' => 1,
+      'endIndex' => null,
+      'revisionInfo' => ' hello',
     );
     $this->setUp();
     $expected = 'some hello test content';
@@ -340,11 +362,11 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
   {
     $this->revisionDataDiffProperties = array(
       'currentContent' => 'some',
-      'revisionInfo' => array(array(
-        1,
-        null,
-        ' test content',
-      )),
+    );
+    $this->diffInfoProperties = array(
+      'startIndex' => 1,
+      'endIndex' => null,
+      'revisionInfo' => ' test content',
     );
     $this->setUp();
     $expected = 'some test content';
@@ -360,11 +382,11 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
   {
     $this->revisionDataDiffProperties = array(
       'currentContent' => true,
-      'revisionInfo' => array(array(
-        null,
-        null,
-        false,
-      )),
+    );
+    $this->diffInfoProperties = array(
+      'startIndex' => null,
+      'endIndex' => null,
+      'revisionInfo' => false,
     );
     $this->setUp();
     $expected = false;
@@ -380,11 +402,11 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
   {
     $this->revisionDataDiffProperties = array(
       'currentContent' => 100101,
-      'revisionInfo' => array(array(
-        null,
-        null,
-        100010,
-      )),
+    );
+    $this->diffInfoProperties = array(
+      'startIndex' => null,
+      'endIndex' => null,
+      'revisionInfo' => 100010,
     );
     $this->setUp();
     $expected = 100010;
@@ -400,9 +422,9 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
   {
     $this->revisionDataDiffProperties = array(
       'currentContent' => 100101,
-      'revisionInfo' => array(),
     );
     $this->setUp();
+    $this->set($this->revisionDataDiff, 'revisionInfo', array());
     $expected = '';
 
     $result = $this->call($this->revisionDataDiff, 'renderRevision');
@@ -416,9 +438,9 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
   {
     $this->revisionDataDiffProperties = array(
       'currentContent' => 100101,
-      'revisionInfo' => array(),
     );
     $this->setUp();
+    $this->set($this->revisionDataDiff, 'revisionInfo', array());
     $expected = '<ins>100101</ins>';
 
     $result = $this->call($this->revisionDataDiff, 'renderRevision', array(true));
@@ -432,9 +454,9 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
   {
     $this->revisionDataDiffProperties = array(
       'currentContent' => false,
-      'revisionInfo' => array(),
     );
     $this->setUp();
+    $this->set($this->revisionDataDiff, 'revisionInfo', array());
     $expected = '<ins>false</ins>';
 
     $result = $this->call($this->revisionDataDiff, 'renderRevision', array(true));
@@ -544,9 +566,9 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
   {
     $this->revisionDataDiffProperties = array(
       'currentContent' => 'some test content',
-      'revisionInfo' => array(),
     );
     $this->setUp();
+    $this->set($this->revisionDataDiff, 'revisionInfo', array());
     $expected = '<del>some</del><ins>new</ins> test content';
 
     $result = $this->call($this->revisionDataDiff, 'makeDiff', array('new test content', true));
@@ -562,6 +584,7 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
       'currentContent' => '',
     );
     $this->setUp();
+    $this->set($this->revisionDataDiff, 'revisionInfo', null);
     $expected = '<ins>new test content</ins>';
 
     $result = $this->call($this->revisionDataDiff, 'makeDiff', array('new test content', true));
@@ -577,6 +600,7 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
       'currentContent' => true,
     );
     $this->setUp();
+    $this->set($this->revisionDataDiff, 'revisionInfo', null);
     $expected = '<del>true</del><ins>false</ins>';
 
     $result = $this->call($this->revisionDataDiff, 'makeDiff', array(false, true));
@@ -592,6 +616,7 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
       'currentContent' => 100010,
     );
     $this->setUp();
+    $this->set($this->revisionDataDiff, 'revisionInfo', null);
     $expected = '<del>100010</del><ins>101010</ins>';
 
     $result = $this->call($this->revisionDataDiff, 'makeDiff', array(101010, true));
@@ -607,6 +632,7 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
       'currentContent' => 'some test content',
     );
     $this->setUp();
+    $this->set($this->revisionDataDiff, 'revisionInfo', null);
     $expected = '<del>some </del>test content';
 
     $result = $this->call($this->revisionDataDiff, 'makeDiff', array('test content', true));
@@ -622,6 +648,7 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
       'currentContent' => 'some test content revision',
     );
     $this->setUp();
+    $this->set($this->revisionDataDiff, 'revisionInfo', null);
     $expected = 'some <ins>new </ins>test <del>content revision</del><ins>change</ins>';
 
     $result = $this->call($this->revisionDataDiff, 'makeDiff', array('some new test change', true));
@@ -637,6 +664,7 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
       'currentContent' => 'Hello, my name is Billy. I am writing this to test some diff functions I wrote.',
     );
     $this->setUp();
+    $this->set($this->revisionDataDiff, 'revisionInfo', null);
     $expected = 'Hello, <del>my name is</del><ins>I am</ins> Billy. I am writing <del>this </del>to test <del>some</del><ins>a new</ins> diff functions I wrote.';
 
     $result = $this->call($this->revisionDataDiff, 'makeDiff', array('Hello, I am Billy. I am writing to test a new diff functions I wrote.', true));
@@ -651,8 +679,9 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
     $this->revisionDataDiffProperties['currentContent'] = 'some testing test content';
     $this->setUp();
     $result = $this->call($this->revisionDataDiff, 'makeRevisionInfo', array('some test content'));
-    $expected = array(array(1, null, ' testing'));
-    $this->assertSame($expected, $result);
+    $diff = new Revisions\DiffInfo(array('startIndex' => 1, 'endIndex' => null, 'revisionInfo' => ' testing'));
+    $expected = array($diff);
+    $this->compareRevisionInfo($expected, $result);
   }
 
   /**
@@ -663,8 +692,9 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
     $this->revisionDataDiffProperties['currentContent'] = 'some test content';
     $this->setUp();
     $result = $this->call($this->revisionDataDiff, 'makeRevisionInfo', array('some'));
-    $expected = array(array(1, null, ' test content'));
-    $this->assertSame($expected, $result);
+    $diff = new Revisions\DiffInfo(array('startIndex' => 1, 'endIndex' => null, 'revisionInfo' => ' test content'));
+    $expected = array($diff);
+    $this->compareRevisionInfo($expected, $result);
   }
   /**
    * @test
@@ -675,10 +705,12 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
       'currentContent' => 'some test content revision',
     );
     $this->setUp();
-    $expected = array(array(2, 3, ''), array(6, 6, 'content revision'));
+    $diff = new Revisions\DiffInfo(array('startIndex' => 2, 'endIndex' => 3, 'revisionInfo' => ''));
+    $diff2 = new Revisions\DiffInfo(array('startIndex' => 6, 'endIndex' => 6, 'revisionInfo' => 'content revision'));
+    $expected = array($diff, $diff2);
 
     $result = $this->call($this->revisionDataDiff, 'makeRevisionInfo', array('some new test change'));
-    $this->assertSame($expected, $result);
+    $this->compareRevisionInfo($expected, $result);
   }
 
   /**
@@ -687,8 +719,9 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
   public function makeRevisionInfoAddedWord()
   {
     $result = $this->call($this->revisionDataDiff, 'makeRevisionInfo', array('some test new content'));
-    $expected = array(array(4, 5, ''));
-    $this->assertSame($expected, $result);
+    $diff = new Revisions\DiffInfo(array('startIndex' => 4, 'endIndex' => 5, 'revisionInfo' => ''));
+    $expected = array($diff);
+    $this->compareRevisionInfo($expected, $result);
   }
 
   /**
@@ -697,8 +730,9 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
   public function makeRevisionInfoAddedWords()
   {
     $result = $this->call($this->revisionDataDiff, 'makeRevisionInfo', array('some test new other content'));
-    $expected = array(array(4, 7, ''));
-    $this->assertSame($expected, $result);
+    $diff = new Revisions\DiffInfo(array('startIndex' => 4, 'endIndex' => 7, 'revisionInfo' => ''));
+    $expected = array($diff);
+    $this->compareRevisionInfo($expected, $result);
   }
 
   /**
@@ -707,8 +741,9 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
   public function makeRevisionInfoRemovedWord()
   {
     $result = $this->call($this->revisionDataDiff, 'makeRevisionInfo', array('some content'));
-    $expected = array(array(2, null, 'test '));
-    $this->assertSame($expected, $result);
+    $diff = new Revisions\DiffInfo(array('startIndex' => 2, 'endIndex' => null, 'revisionInfo' => 'test '));
+    $expected = array($diff);
+    $this->compareRevisionInfo($expected, $result);
   }
 
   /**
@@ -717,8 +752,9 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
   public function makeRevisionInfoRemovedWordsFromEnd()
   {
     $result = $this->call($this->revisionDataDiff, 'makeRevisionInfo', array('some'));
-    $expected = array(array(1, null, ' test content'));
-    $this->assertSame($expected, $result);
+    $diff = new Revisions\DiffInfo(array('startIndex' => 1, 'endIndex' => null, 'revisionInfo' => ' test content'));
+    $expected = array($diff);
+    $this->compareRevisionInfo($expected, $result);
   }
 
   /**
@@ -727,8 +763,9 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
   public function makeRevisionInfoRemovedWordsFromBeginning()
   {
     $result = $this->call($this->revisionDataDiff, 'makeRevisionInfo', array('content'));
-    $expected = array(array(0, null, 'some test '));
-    $this->assertSame($expected, $result);
+    $diff = new Revisions\DiffInfo(array('startIndex' => 0, 'endIndex' => null, 'revisionInfo' => 'some test '));
+    $expected = array($diff);
+    $this->compareRevisionInfo($expected, $result);
   }
 
   /**
@@ -737,8 +774,9 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
   public function makeRevisionInfoRemovedWordsFromEnd2()
   {
     $result = $this->call($this->revisionDataDiff, 'makeRevisionInfo', array('some more'));
-    $expected = array(array(2, 2, 'test content'));
-    $this->assertSame($expected, $result);
+    $diff = new Revisions\DiffInfo(array('startIndex' => 2, 'endIndex' => 2, 'revisionInfo' => 'test content'));
+    $expected = array($diff);
+    $this->compareRevisionInfo($expected, $result);
   }
 
   /**
@@ -747,8 +785,9 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
   public function makeRevisionInfoRemovedWordsFromBeginning2()
   {
     $result = $this->call($this->revisionDataDiff, 'makeRevisionInfo', array('content'));
-    $expected = array(array(0, null, 'some test '));
-    $this->assertSame($expected, $result);
+    $diff = new Revisions\DiffInfo(array('startIndex' => 0, 'endIndex' => null, 'revisionInfo' => 'some test '));
+    $expected = array($diff);
+    $this->compareRevisionInfo($expected, $result);
   }
 
   /**
@@ -759,8 +798,9 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
     $this->revisionDataDiffProperties['currentContent'] = 'some testr content';
     $this->setUp();
     $result = $this->call($this->revisionDataDiff, 'makeRevisionInfo', array('some tests content'));
-    $expected = array(array(2, 2, 'testr'));
-    $this->assertSame($expected, $result);
+    $diff = new Revisions\DiffInfo(array('startIndex' => 2, 'endIndex' => 2, 'revisionInfo' => 'testr'));
+    $expected = array($diff);
+    $this->compareRevisionInfo($expected, $result);
   }
 
 
@@ -772,8 +812,9 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
     $this->revisionDataDiffProperties['currentContent'] = 'some random testing content';
     $this->setUp();
     $result = $this->call($this->revisionDataDiff, 'makeRevisionInfo', array('some test content'));
-    $expected = array(array(2, 2, 'random testing'));
-    $this->assertSame($expected, $result);
+    $diff = new Revisions\DiffInfo(array('startIndex' => 2, 'endIndex' => 2, 'revisionInfo' => 'random testing'));
+    $expected = array($diff);
+    $this->compareRevisionInfo($expected, $result);
   }
 
   /**
@@ -784,8 +825,10 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
     $this->revisionDataDiffProperties['currentContent'] = 'some  tests content here and here';
     $this->setUp();
     $result = $this->call($this->revisionDataDiff, 'makeRevisionInfo', array('some test content'));
-    $expected = array(array(1, 2, '  tests'), array(5, null, ' here and here'));
-    $this->assertSame($expected, $result);
+    $diff = new Revisions\DiffInfo(array('startIndex' => 1, 'endIndex' => 2, 'revisionInfo' => '  tests'));
+    $diff2 = new Revisions\DiffInfo(array('startIndex' => 5, 'endIndex' => null, 'revisionInfo' => ' here and here'));
+    $expected = array($diff, $diff2);
+    $this->compareRevisionInfo($expected, $result);
   }
 
   /**
@@ -796,8 +839,9 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
     $this->revisionDataDiffProperties['currentContent'] = 'some test content';
     $this->setUp();
     $result = $this->call($this->revisionDataDiff, 'makeRevisionInfo', array('some test content here and here'));
-    $expected = array(array(5, 10, ''));
-    $this->assertSame($expected, $result);
+    $diff = new Revisions\DiffInfo(array('startIndex' => 5, 'endIndex' => 10, 'revisionInfo' => ''));
+    $expected = array($diff);
+    $this->compareRevisionInfo($expected, $result);
   }
 
   /**
@@ -808,8 +852,10 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
     $this->revisionDataDiffProperties['currentContent'] = 'some new test content';
     $this->setUp();
     $result = $this->call($this->revisionDataDiff, 'makeRevisionInfo', array('some test content here'));
-    $expected = array(array(1, null, ' new'), array(5, 6, ''));
-    $this->assertSame($expected, $result);
+    $diff = new Revisions\DiffInfo(array('startIndex' => 1, 'endIndex' => null, 'revisionInfo' => ' new'));
+    $diff2 = new Revisions\DiffInfo(array('startIndex' => 5, 'endIndex' => 6, 'revisionInfo' => ''));
+    $expected = array($diff, $diff2);
+    $this->compareRevisionInfo($expected, $result);
   }
 
   /**
@@ -820,9 +866,12 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
     $this->revisionDataDiffProperties['currentContent'] = 'Hello, my name is Billy. I am writing this to test some diff functions I wrote.';
     $this->setUp();
     $result = $this->call($this->revisionDataDiff, 'makeRevisionInfo', array('Hello, I am Billy. I am writing to test a new diff functions I wrote here.'));
-    $expected = array(array(2, 4, 'my name is'), array(14, null, 'this '), array(18, 20, 'some'), array(29, 30, ''));
-
-    $this->assertSame($expected, $result);
+    $diff = new Revisions\DiffInfo(array('startIndex' => 2, 'endIndex' => 4, 'revisionInfo' => 'my name is'));
+    $diff2 = new Revisions\DiffInfo(array('startIndex' => 14, 'endIndex' => null, 'revisionInfo' => 'this '));
+    $diff3 = new Revisions\DiffInfo(array('startIndex' => 18, 'endIndex' => 20, 'revisionInfo' => 'some'));
+    $diff4 = new Revisions\DiffInfo(array('startIndex' => 29, 'endIndex' => 30, 'revisionInfo' => ''));
+    $expected = array($diff, $diff2, $diff3, $diff4);
+    $this->compareRevisionInfo($expected, $result);
   }
 
   /**
@@ -845,8 +894,9 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
     $this->revisionDataDiffProperties['currentContent'] = true;
     $this->setUp();
     $result = $this->call($this->revisionDataDiff, 'makeNonStringRevisionInfo', array(false));
-    $expected = array(array(null, null, true));
-    $this->assertSame($expected, $result);
+    $diff = new Revisions\DiffInfo(array('startIndex' => null, 'endIndex' => null, 'revisionInfo' => true));
+    $expected = array($diff);
+    $this->compareRevisionInfo($expected, $result);
   }
 
   /**
@@ -856,6 +906,7 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
   {
     $this->revisionDataDiffProperties['currentContent'] = true;
     $this->setUp();
+    $this->set($this->revisionDataDiff, 'revisionInfo', null);
     $result = $this->call($this->revisionDataDiff, 'makeNonStringRevisionInfo', array(true));
     $expected = array();
     $this->assertSame($expected, $result);
@@ -869,8 +920,9 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
     $this->revisionDataDiffProperties['currentContent'] = true;
     $this->setUp();
     $result = $this->call($this->revisionDataDiff, 'makeRevisionInfo', array(false));
-    $expected = array(array(null, null, true));
-    $this->assertSame($expected, $result);
+    $diff = new Revisions\DiffInfo(array('startIndex' => null, 'endIndex' => null, 'revisionInfo' => true));
+    $expected = array($diff);
+    $this->compareRevisionInfo($expected, $result);
   }
 
   /**
@@ -881,8 +933,9 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
     $this->revisionDataDiffProperties['currentContent'] = 101001;
     $this->setUp();
     $result = $this->call($this->revisionDataDiff, 'makeRevisionInfo', array(100011));
-    $expected = array(array(null, null, 101001));
-    $this->assertSame($expected, $result);
+    $diff = new Revisions\DiffInfo(array('startIndex' => null, 'endIndex' => null, 'revisionInfo' => 101001));
+    $expected = array($diff);
+    $this->compareRevisionInfo($expected, $result);
   }
 
   /**
@@ -940,8 +993,9 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
     $this->revisionDataDiffProperties['currentContent'] = 'some random content';
     $this->setUp();
     $result = $this->call($this->revisionDataDiff, 'makeRevisionInfo', array('some tests contentss'));
-    $expected = array(array(2, 4, 'random content'));
-    $this->assertSame($expected, $result);
+    $diff = new Revisions\DiffInfo(array('startIndex' => 2, 'endIndex' => 4, 'revisionInfo' => 'random content'));
+    $expected = array($diff);
+    $this->compareRevisionInfo($expected, $result);
     $this->call($this->revisionDataDiff, 'populateObjectWithArray', array(array('revisionInfo' => $expected)));
     $expected = 'some random content';
     $result = $this->call($this->revisionDataDiff, 'renderRevision');

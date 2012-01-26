@@ -10,6 +10,7 @@ use \Gustavus\Revisions;
 require_once '/cis/lib/revisions/tests/revisionsTestsHelper.class.Test.php';
 require_once '/cis/lib/revisions/classes/revisions.class.php';
 require_once '/cis/lib/revisions/classes/revision.class.php';
+require_once '/cis/lib/revisions/classes/diffInfo.class.php';
 
 /**
  * @package Revisions
@@ -235,6 +236,19 @@ class RevisionsTest extends RevisionsHelper
     $this->assertDataSetsEqual($expected, $actual);
     $this->assertTablesEqual($expected->getTable('person-revision'), $actual->getTable('person-revision'));
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
+  public function makeDiffInfoObjects()
+  {
+    $diff = new Revisions\DiffInfo(array('startIndex' => 1, 'endIndex' => 2, 'revisionInfo' => ''));
+    $expected = array($diff);
+    $actual = $this->call($this->revisions, 'makeDiffInfoObjects', array(array(array(1,2,""))));
+    $this->assertSame($expected[0]->getStartIndex(), $actual[0]->getStartIndex());
+    $this->assertSame($expected[0]->getEndIndex(), $actual[0]->getEndIndex());
+    $this->assertSame($expected[0]->getRevisionInfo(), $actual[0]->getRevisionInfo());
   }
 
   /**

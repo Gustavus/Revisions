@@ -9,7 +9,7 @@ use Gustavus\Revisions;
 
 require_once '/cis/lib/test/test.class.php';
 require_once 'revisions/classes/revision.class.php';
-require_once 'revisions/classes/revisionData.class.php';
+require_once 'revisions/classes/revisionDataDiff.class.php';
 
 /**
  * @package Revisions
@@ -43,11 +43,15 @@ class RevisionTest extends \Gustavus\Test\Test
   private $revisionDataProperties = array(
     'currentContent' => 'billy',
     'revisionNumber' => 1,
-    'revisionInfo' => array(array(
-      1,
-      null,
-      ' visto',
-    )),
+  );
+
+  /**
+   * @var array to fill diffInfo object with
+   */
+  private $diffInfoProperties = array(
+    'startIndex' => 1,
+    'endIndex' => null,
+    'revisionInfo' => ' visto',
   );
 
   /**
@@ -56,6 +60,8 @@ class RevisionTest extends \Gustavus\Test\Test
    */
   public function setUp()
   {
+    $diffInfo = new Revisions\DiffInfo($this->diffInfoProperties);
+    $this->revisionDataProperties['revisionInfo'] = array($diffInfo);
     $this->revisionData = new Revisions\RevisionDataDiff($this->revisionDataProperties);
     $this->revisionProperties['revisionData'] = array('name' => $this->revisionData);
     $this->revision = new Revisions\Revision($this->revisionProperties);

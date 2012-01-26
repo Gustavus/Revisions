@@ -73,28 +73,30 @@ class RevisionDataDiff extends RevisionData
     $currContentArr = $this->splitWords($this->getCurrentContent());
     // currContentArr has empty index at the beginning from splitWords, so get rid of it
     array_shift($currContentArr);
-    foreach ($revisionInfo as $revision) {
-      $revisionContent = ($showChanges) ? $this->renderContentChange($revision[self::REVISION_INFO], false) : $revision[self::REVISION_INFO];
-      if (isset($revision[self::END_INDEX])) {
+    foreach ($revisionInfo as $diffInfo) {
+      $revisionContent = ($showChanges) ? $this->renderContentChange($diffInfo->getRevisionInfo(), false) : $diffInfo->getRevisionInfo();
+      $endIndex   = $diffInfo->getEndIndex();
+      $startIndex = $diffInfo->getStartIndex();
+      if (isset($endIndex)) {
         // content was deleted/replaced
         if ($showChanges) {
           $ins = '';
         }
-        for ($i = $revision[self::START_INDEX]; $i <= $revision[self::END_INDEX]; ++$i) {
+        for ($i = $startIndex; $i <= $endIndex; ++$i) {
           if ($showChanges) {
             $ins .= $currContentArr[$i];
           }
           $currContentArr[$i] = '';
         }
-        $currContentArr[$revision[self::START_INDEX]] = ($showChanges) ? $revisionContent.$this->renderContentChange($ins, true) : $revisionContent;
-      } else if (!isset($revision[self::START_INDEX]) && count($revisionInfo) === 1) {
+        $currContentArr[$startIndex] = ($showChanges) ? $revisionContent.$this->renderContentChange($ins, true) : $revisionContent;
+      } else if (!isset($startIndex) && count($revisionInfo) === 1) {
         // full content change. As of now, this signifies a non string revision
-        return $this->renderNonStringRevision($revision[self::REVISION_INFO], $showChanges);
+        return $this->renderNonStringRevision($diffInfo->getRevisionInfo(), $showChanges);
       } else {
         //content was added
-        $currText = (!empty($currContentArr[$revision[self::START_INDEX]])) ? $currContentArr[$revision[self::START_INDEX]] : '';
-        //var_dump($currContentArr[$revision[self::START_INDEX]], $currText, $revision);
-        $currContentArr[$revision[self::START_INDEX]] = $revisionContent.$currText;
+        $currText = (!empty($currContentArr[$startIndex])) ? $currContentArr[$startIndex] : '';
+        //var_dump($currContentArr[$startIndex], $currText, $revision);
+        $currContentArr[$startIndex] = $revisionContent.$currText;
       }
     }
     $revisionContent = implode('', $currContentArr);
@@ -187,7 +189,14 @@ class RevisionDataDiff extends RevisionData
     if ($newContent === $this->getCurrentContent()) {
       return null;
     } else {
-      return json_encode($this->makeRevisionInfo($newContent));
+      $return = array();
+      foreach ($this->makeRevisionInfo($newContent) as $diffInfo) {
+        if (is_object($diffInfo)) {
+          // brand new content will just be an array and not a DiffInfo object
+          $return[] = array($diffInfo->getStartIndex(), $diffInfo->getEndIndex(), $diffInfo->getRevisionInfo());
+        }
+      }
+      return json_encode($return);
     }
   }
 
@@ -277,10 +286,11 @@ class RevisionDataDiff extends RevisionData
     if ($this->getCurrentContent() === $newContent || $this->getCurrentContent() === '') {
       $diffInfo = array();
     } else {
-      $diffInfo = array(array(null, null, $this->getCurrentContent()));
+      $diffInfo = new DiffInfo(array('startIndex' => null, 'endIndex' => null, 'revisionInfo' => $this->getCurrentContent()));
+      $diffInfo = array($diffInfo);
     }
     $this->setRevisionInfo($diffInfo);
-    return $diffInfo;
+    return $this->getRevisionInfo();
   }
 
   /**
@@ -326,7 +336,7 @@ class RevisionDataDiff extends RevisionData
         $revisionContent = implode('', $value['d']);
       }
 
-      $currDiff   = array($startInd, $endInd, $revisionContent);
+      $currDiff   = new DiffInfo(array('startIndex' => $startInd, 'endIndex' => $endInd, 'revisionInfo' => $revisionContent));
       $diffInfo[] = $currDiff;
     }
     $this->setRevisionInfo($diffInfo);

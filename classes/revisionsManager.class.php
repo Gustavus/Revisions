@@ -105,7 +105,7 @@ class RevisionsManager extends RevisionsBase
     $db = $this->getDB();
     $qb = $db->createQueryBuilder();
     $qb->addSelect('rDB.`id`, rDB.`contentHash`, rDB.`table`, rDB.`rowId`, rDB.`revisionNumber`, rDB.`message`, rDB.`createdBy`, rDB.`createdOn`')
-      ->from("`$this->revisionsTable`", 'rDB');
+      ->from("`{$this->revisionsTable}`", 'rDB');
     if ($revisionId === null) {
       $args = array(
         ':table' => $this->table,
@@ -113,7 +113,7 @@ class RevisionsManager extends RevisionsBase
       );
       if ($column !== null) {
         $args[':key'] = $column;
-        $qb->leftJoin('rDB', "`$this->revisionDataTable`", 'dataDB', 'rDB.`id` = dataDB.`revisionId` AND dataDB.`key` = :key');
+        $qb->leftJoin('rDB', "`{$this->revisionDataTable}`", 'dataDB', 'rDB.`id` = dataDB.`revisionId` AND dataDB.`key` = :key');
       }
       $qb->where('rDB.`table` = :table')
         ->andWhere('rDB.`rowId` = :rowId')
@@ -147,7 +147,7 @@ class RevisionsManager extends RevisionsBase
     $db = $this->getDB();
     $qb = $db->createQueryBuilder();
     $qb->select('dataDB.`id`, dataDB.`contentHash`, dataDB.`revisionId`, dataDB.`revisionNumber`, dataDB.`key`, dataDB.`value`')
-      ->from("`$this->revisionDataTable`", 'dataDB');
+      ->from("`{$this->revisionDataTable}`", 'dataDB');
     if ($revisionId === null && $column !== null) {
       if ($limit === null) {
         if ($revisionsHaveBeenPulled) {
@@ -157,7 +157,7 @@ class RevisionsManager extends RevisionsBase
           $limit = $this->limit + 1;
         }
       }
-      $qb = $qb->leftJoin('dataDB', "`$this->revisionsTable`", 'rDB', 'rDB.`id` = dataDB.`revisionId` AND rDB.`table` = :table AND rDB.`rowId` = :rowId');
+      $qb = $qb->leftJoin('dataDB', "`{$this->revisionsTable}`", 'rDB', 'rDB.`id` = dataDB.`revisionId` AND rDB.`table` = :table AND rDB.`rowId` = :rowId');
       $qb->where('dataDB.`key` = :key')
         ->orderBy('dataDB.`id`', 'DESC')
         ->setMaxResults($limit);
@@ -194,8 +194,8 @@ class RevisionsManager extends RevisionsBase
     );
     $qb = $db->createQueryBuilder();
     $qb->select('dataDB.`key`')
-      ->from("`$this->revisionDataTable`", 'dataDB')
-      ->leftJoin('dataDB', "`$this->revisionsTable`", 'rDB', 'rDB.`id` = dataDB.`revisionId` AND rDB.`table` = :table AND rDB.`rowId` = :rowId')
+      ->from("`{$this->revisionDataTable}`", 'dataDB')
+      ->leftJoin('dataDB', "`{$this->revisionsTable}`", 'rDB', 'rDB.`id` = dataDB.`revisionId` AND rDB.`table` = :table AND rDB.`rowId` = :rowId')
       ->groupBy('dataDB.`key`');
     return $db->fetchAll($qb->getSQL(), $args);
   }
@@ -259,8 +259,8 @@ class RevisionsManager extends RevisionsBase
 
       $qb = $db->createQueryBuilder();
       $qb->select(':hash, :revisionId, COUNT(dataDB.`revisionNumber`) + 1, :key, :value')
-        ->from("`$this->revisionDataTable`", 'dataDB');
-      $qb = $qb->leftJoin('dataDB', "`$this->revisionsTable`", 'rDB', 'rDB.`id` = dataDB.`revisionId` AND rDB.`table` = :table AND rDB.`rowId` = :rowId')
+        ->from("`{$this->revisionDataTable}`", 'dataDB');
+      $qb = $qb->leftJoin('dataDB', "`{$this->revisionsTable}`", 'rDB', 'rDB.`id` = dataDB.`revisionId` AND rDB.`table` = :table AND rDB.`rowId` = :rowId')
         ->where('`key` = :key');
       $select = $qb->getSQL();
 

@@ -4,6 +4,7 @@
  */
 namespace Gustavus\Revisions;
 require_once 'revisions/classes/revisionsBase.class.php';
+require_once 'revisions/classes/diffInfo.class.php';
 
 /**
  * A single RevisionData object
@@ -53,9 +54,9 @@ abstract class RevisionData extends RevisionsBase
   protected $revisionId;
 
   /**
-   * array of keyless arrays of startIndex, endIndex, revisionContent in that order
+   * array of DiffInfo objects
    *
-   * @var array of revision information
+   * @var array
    */
   protected $revisionInfo = array();
 

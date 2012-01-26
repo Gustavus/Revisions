@@ -208,7 +208,6 @@ class Revisions extends RevisionsManager
         $previousContent = $previousRevision->makeRevisionContent();
         $previousError = $previousRevision->getError();
       }
-      $revisionInfo = $value['value'];
       if (!$previousError) {
         if (isset($previousRevision) && $previousRevision->getRevisionId() === $revisionId) {
           $revisionData = $previousRevision;
@@ -216,7 +215,7 @@ class Revisions extends RevisionsManager
           $params = array(
             'revisionId'      => $value['revisionId'],
             'revisionNumber'  => $value['revisionNumber'],
-            'revisionInfo'    => $revisionInfo,
+            'revisionInfo'    => $this->makeDiffInfoObjects($value['value']),
             'currentContent'  => $previousContent,
           );
           $revisionData = new RevisionDataDiff($params);
@@ -234,6 +233,18 @@ class Revisions extends RevisionsManager
       $revisionDataArray = array_merge($revisionDataArray, $this->getMissingRevisionDataFromObject($missingColumns));
     }
     return $revisionDataArray;
+  }
+
+  private function makeDiffInfoObjects($revisionInfo)
+  {
+    if (!is_array($revisionInfo)) {
+      return $revisionInfo;
+    }
+    $return = array();
+    foreach ($revisionInfo as $revInfo) {
+      $return[] = new DiffInfo(array('startIndex' => $revInfo[0], 'endIndex' => $revInfo[1], 'revisionInfo' => $revInfo[2]));
+    }
+    return $return;
   }
 
   /**
