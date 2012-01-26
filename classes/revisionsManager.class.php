@@ -344,7 +344,7 @@ class RevisionsManager extends RevisionsBase
    * @param array $oldRevisionData keyed by column
    * @param string $message
    * @param string $createdBy
-   * @return void
+   * @return boolean
    */
   protected function saveRevision(array $revisionInfo, array $newContent, array $oldContent, array $oldRevisionData = array(), $message = null, $createdBy = null)
   {
@@ -384,6 +384,7 @@ class RevisionsManager extends RevisionsBase
       // insert new content to db
       $this->saveRevisionData(json_encode($newContent[$key]), $newRevisionId, $key, $newContent[$key]);
     }
+    return true;
   }
 
   /**
