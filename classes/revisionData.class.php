@@ -14,20 +14,6 @@ require_once 'revisions/classes/diffInfo.class.php';
 abstract class RevisionData extends RevisionsBase
 {
   /**
-   * index of the start index in the revisionInfo
-   */
-  const START_INDEX   = 0;
-
-  /**
-   * index of the end index in the revisionInfo
-   */
-  const END_INDEX     = 1;
-
-  /**
-   * index of the revision info in the revisionInfo
-   */
-  const REVISION_INFO = 2;
-  /**
    * revisionData's revision number of how many times this specific value has changed
    *
    * @var int revisionNumber
