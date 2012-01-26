@@ -95,7 +95,6 @@ class RevisionDataDiff extends RevisionData
       } else {
         //content was added
         $currText = (!empty($currContentArr[$startIndex])) ? $currContentArr[$startIndex] : '';
-        //var_dump($currContentArr[$startIndex], $currText, $revision);
         $currContentArr[$startIndex] = $revisionContent.$currText;
       }
     }
