@@ -105,8 +105,8 @@ class RevisionDataDiff extends RevisionData
         return $this->renderNonStringRevision($revision[self::REVISION_INFO], $showChanges);
       } else {
         //content was added
-        $space = ($showChanges) ? '' : ' ' ;
-        $currText = (!empty($currContentArr[$revision[self::START_INDEX]])) ? $space.$currContentArr[$revision[self::START_INDEX]] : '';
+        $currText = (!empty($currContentArr[$revision[self::START_INDEX]])) ? $currContentArr[$revision[self::START_INDEX]] : '';
+        //var_dump($currContentArr[$revision[self::START_INDEX]], $currText, $revision);
         $currContentArr[$revision[self::START_INDEX]] = $revisionContent.$currText;
       }
     }

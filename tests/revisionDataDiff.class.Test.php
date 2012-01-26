@@ -29,9 +29,9 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
     'revisionNumber' => 1,
     'revisionId'  => 1,
     'revisionInfo' => array(array(
-      2,
+      1,
       null,
-      'testing',
+      ' testing',
     )),
   );
 
@@ -175,6 +175,67 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
   /**
    * @test
    */
+  public function renderRevisionTwoWords()
+  {
+    $this->revisionDataDiffProperties = array(
+      'currentContent' => 'Visto',
+      'revisionInfo' => array(array(
+        0,
+        null,
+        'Billy ',
+      )),
+    );
+    $this->setUp();
+    $expected = 'Billy Visto';
+
+    $result = $this->call($this->revisionDataDiff, 'renderRevision');
+    $this->assertSame($expected, $result);
+  }
+
+  /**
+   * @test
+   */
+  public function renderRevisionThreeWords()
+  {
+    $this->revisionDataDiffProperties = array(
+      'currentContent' => 'Visto',
+      'revisionInfo' => array(array(
+        0,
+        null,
+        'Billy Joel ',
+      )),
+    );
+    $this->setUp();
+    $expected = 'Billy Joel Visto';
+
+    $result = $this->call($this->revisionDataDiff, 'renderRevision');
+    $this->assertSame($expected, $result);
+  }
+
+  /**
+   * @test
+   */
+  public function renderRevisionThreeWordsMiddle()
+  {
+    $this->revisionDataDiffProperties = array(
+      'currentContent' => 'Billy Visto',
+      'revisionInfo' => array(array(
+        2,
+        null,
+        'Joel ',
+      )),
+    );
+    $this->setUp();
+
+    $expected = 'Billy Joel Visto';
+
+    $result = $this->call($this->revisionDataDiff, 'renderRevision');
+    $this->assertSame($expected, $result);
+  }
+
+  /**
+   * @test
+   */
   public function renderRevisionDeletionFromBeginning()
   {
     $this->revisionDataDiffProperties = array(
@@ -182,7 +243,7 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
       'revisionInfo' => array(array(
         0,
         null,
-        'some',
+        'some ',
       )),
     );
     $this->setUp();
@@ -242,7 +303,7 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
       'revisionInfo' => array(array(
         0,
         null,
-        'hello',
+        'hello ',
       )),
     );
     $this->setUp();
@@ -260,9 +321,9 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
     $this->revisionDataDiffProperties = array(
       'currentContent' => 'some test content',
       'revisionInfo' => array(array(
-        2,
+        1,
         null,
-        'hello',
+        ' hello',
       )),
     );
     $this->setUp();
@@ -470,7 +531,7 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
    */
   public function makeRevisionContentWithDiff()
   {
-    $expected = 'some <del>testing</del>test content';
+    $expected = 'some<del> testing</del> test content';
 
     $result = $this->call($this->revisionDataDiff, 'makeRevisionContent', array(true));
     $this->assertSame($expected, $result);
