@@ -81,7 +81,7 @@ class Revisions extends RevisionsManager
   }
 
   /**
-   * Takes two revisions and returns a new revision containing only the diff of the two
+   * Takes two revision numbers and returns a new revision containing only the diff of the two
    *
    * @param  integer  $revisionANum revision number to compare against
    * @param  integer  $revisionBNum revision number to compare
@@ -98,8 +98,7 @@ class Revisions extends RevisionsManager
       $revADataContent = $revisionData->makeRevisionContent();
       $revisionDataArray[$key] = $this->makeRevisionData($revBDataContent, $revADataContent);
     }
-    $revision = $this->makeRevision($revisionDataArray);
-    return $revision;
+    return $this->makeRevision($revisionDataArray);
   }
 
   /**

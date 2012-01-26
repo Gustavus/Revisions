@@ -3,13 +3,14 @@
  * @package Revisions
  */
 namespace Gustavus\Revisions;
+require_once 'revisions/classes/revisionsBase.class.php';
 
 /**
  * A single RevisionData object
  *
  * @package Revisions
  */
-abstract class RevisionData
+abstract class RevisionData extends RevisionsBase
 {
   /**
    * index of the start index in the revisionInfo

@@ -33,19 +33,6 @@ class RevisionDataDiff extends RevisionData
   }
 
   /**
-   * @param array $array
-   * @return void
-   */
-  private function populateObjectWithArray(Array $array)
-  {
-    foreach ($array as $key => $value) {
-      if (property_exists($this, $key)) {
-        $this->$key = $value;
-      }
-    }
-  }
-
-  /**
    * Renders revision based on the current text
    * tries to save space by only working with the parts that were modified
    *

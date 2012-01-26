@@ -3,52 +3,53 @@
  * @package Revisions
  */
 namespace Gustavus\Revisions;
+require_once 'revisions/classes/revisionsBase.class.php';
 
 /**
  * A single Revision object that contains many RevisionData objects
  *
  * @package Revisions
  */
-class Revision
+class Revision extends RevisionsBase
 {
   /**
    * @var int revisionId
    */
-  private $revisionId;
+  protected $revisionId;
 
   /**
    * data's revision number of how many times it has changed to get to this point
    *
    * @var int revisionNumber
    */
-  private $revisionNumber;
+  protected $revisionNumber;
 
   /**
    * @var DateTime when revision was made
    */
-  private $revisionDate;
+  protected $revisionDate;
 
   /**
    * @var string revisionMessage
    */
-  private $revisionMessage;
+  protected $revisionMessage;
 
   /**
    * @var string createdBy
    */
-  private $createdBy;
+  protected $createdBy;
 
   /**
    * @var array of RevisionData objects keyed by column
    */
-  private $revisionData;
+  protected $revisionData;
 
   /**
    * flag set to true if the hash doesn't compute correctly
    *
    * @var boolean
    */
-  private $error = false;
+  protected $error = false;
 
   /**
    * Class constructor
@@ -125,6 +126,7 @@ class Revision
   }
 
   /**
+   * @param string $column
    * @return array
    */
   private function getRevisionDataByColumn($column)
@@ -168,18 +170,5 @@ class Revision
       $return[$column] = $revisionData->getRevisionContent();
     }
     return $return;
-  }
-
-  /**
-   * @param array $array
-   * @return void
-   */
-  private function populateObjectWithArray(Array $array)
-  {
-    foreach ($array as $key => $value) {
-      if (property_exists($this, $key)) {
-        $this->$key = $value;
-      }
-    }
   }
 }

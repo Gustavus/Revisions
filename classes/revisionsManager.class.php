@@ -5,47 +5,48 @@
 namespace Gustavus\Revisions;
 
 require_once 'db/DBAL.class.php';
+require_once 'revisions/classes/revisionsBase.class.php';
 /**
  * Interacts with the database
  *
  * @package Revisions
  */
-class RevisionsManager
+class RevisionsManager extends RevisionsBase
 {
   /**
    * @var string database name where revisions are stored
    */
-  private $dbName;
+  protected $dbName;
 
   /**
    * @var string database table name where revisions are stored
    */
-  private $revisionsTable;
+  protected $revisionsTable;
 
   /**
    * @var string database table name where revisionData is stored
    */
-  private $revisionDataTable;
+  protected $revisionDataTable;
 
   /**
    * @var string database table name
    */
-  private $table;
+  protected $table;
 
   /**
    * @var int of the rowId in the table
    */
-  private $rowId;
+  protected $rowId;
 
   /**
    * @var DBAL connection
    */
-  private $dbal;
+  protected $dbal;
 
   /**
    * @var integer limit of how many revisions to pull
    */
-  private $limit = 1;
+  protected $limit = 1;
 
   /**
    * Class constructor
@@ -65,19 +66,6 @@ class RevisionsManager
   public function __destruct()
   {
     unset($this->dbName, $this->revisionsTable, $this->revisionDataTable, $this->table, $this->rowId, $this->dbal, $this->limit);
-  }
-
-  /**
-   * @param array $array
-   * @return void
-   */
-  protected function populateObjectWithArray(array $array)
-  {
-    foreach ($array as $key => $value) {
-      if (property_exists($this, $key)) {
-        $this->$key = $value;
-      }
-    }
   }
 
   /**
