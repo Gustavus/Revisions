@@ -235,6 +235,12 @@ class Revisions extends RevisionsManager
     return $revisionDataArray;
   }
 
+  /**
+   * Makes DiffInfo Objects with the revisionInfo
+   *
+   * @param  mixed $revisionInfo revisionInfo pulled from getRevisionData
+   * @return mixed
+   */
   private function makeDiffInfoObjects($revisionInfo)
   {
     if (!is_array($revisionInfo)) {

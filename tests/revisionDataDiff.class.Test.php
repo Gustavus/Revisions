@@ -706,8 +706,8 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
     );
     $this->setUp();
     $diff = new Revisions\DiffInfo(array('startIndex' => 2, 'endIndex' => 3, 'revisionInfo' => ''));
-    $diff2 = new Revisions\DiffInfo(array('startIndex' => 6, 'endIndex' => 6, 'revisionInfo' => 'content revision'));
-    $expected = array($diff, $diff2);
+    $diffTwo = new Revisions\DiffInfo(array('startIndex' => 6, 'endIndex' => 6, 'revisionInfo' => 'content revision'));
+    $expected = array($diff, $diffTwo);
 
     $result = $this->call($this->revisionDataDiff, 'makeRevisionInfo', array('some new test change'));
     $this->compareRevisionInfo($expected, $result);
@@ -826,8 +826,8 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
     $this->setUp();
     $result = $this->call($this->revisionDataDiff, 'makeRevisionInfo', array('some test content'));
     $diff = new Revisions\DiffInfo(array('startIndex' => 1, 'endIndex' => 2, 'revisionInfo' => '  tests'));
-    $diff2 = new Revisions\DiffInfo(array('startIndex' => 5, 'endIndex' => null, 'revisionInfo' => ' here and here'));
-    $expected = array($diff, $diff2);
+    $diffTwo = new Revisions\DiffInfo(array('startIndex' => 5, 'endIndex' => null, 'revisionInfo' => ' here and here'));
+    $expected = array($diff, $diffTwo);
     $this->compareRevisionInfo($expected, $result);
   }
 
@@ -853,8 +853,8 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
     $this->setUp();
     $result = $this->call($this->revisionDataDiff, 'makeRevisionInfo', array('some test content here'));
     $diff = new Revisions\DiffInfo(array('startIndex' => 1, 'endIndex' => null, 'revisionInfo' => ' new'));
-    $diff2 = new Revisions\DiffInfo(array('startIndex' => 5, 'endIndex' => 6, 'revisionInfo' => ''));
-    $expected = array($diff, $diff2);
+    $diffTwo = new Revisions\DiffInfo(array('startIndex' => 5, 'endIndex' => 6, 'revisionInfo' => ''));
+    $expected = array($diff, $diffTwo);
     $this->compareRevisionInfo($expected, $result);
   }
 
@@ -867,10 +867,10 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
     $this->setUp();
     $result = $this->call($this->revisionDataDiff, 'makeRevisionInfo', array('Hello, I am Billy. I am writing to test a new diff functions I wrote here.'));
     $diff = new Revisions\DiffInfo(array('startIndex' => 2, 'endIndex' => 4, 'revisionInfo' => 'my name is'));
-    $diff2 = new Revisions\DiffInfo(array('startIndex' => 14, 'endIndex' => null, 'revisionInfo' => 'this '));
-    $diff3 = new Revisions\DiffInfo(array('startIndex' => 18, 'endIndex' => 20, 'revisionInfo' => 'some'));
-    $diff4 = new Revisions\DiffInfo(array('startIndex' => 29, 'endIndex' => 30, 'revisionInfo' => ''));
-    $expected = array($diff, $diff2, $diff3, $diff4);
+    $diffTwo = new Revisions\DiffInfo(array('startIndex' => 14, 'endIndex' => null, 'revisionInfo' => 'this '));
+    $diffThree = new Revisions\DiffInfo(array('startIndex' => 18, 'endIndex' => 20, 'revisionInfo' => 'some'));
+    $diffFour = new Revisions\DiffInfo(array('startIndex' => 29, 'endIndex' => 30, 'revisionInfo' => ''));
+    $expected = array($diff, $diffTwo, $diffThree, $diffFour);
     $this->compareRevisionInfo($expected, $result);
   }
 

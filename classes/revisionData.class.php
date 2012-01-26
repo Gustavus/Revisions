@@ -7,7 +7,7 @@ require_once 'revisions/classes/revisionsBase.class.php';
 require_once 'revisions/classes/diffInfo.class.php';
 
 /**
- * A single RevisionData object
+ * A single RevisionData object containing DiffInfo objects
  *
  * @package Revisions
  */
