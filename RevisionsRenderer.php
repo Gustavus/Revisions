@@ -35,7 +35,7 @@ class RevisionsRenderer
   {
     switch ($name) {
       case 'revisions':
-        return $this->getItems();
+        return $this->revisions->getRevisionObjects();
 
       default:
         if ($this->__isset($name)) {
@@ -67,8 +67,8 @@ class RevisionsRenderer
   {
     $this->revisions->setLimit($limit);
     $return = '';
-    $twigFactory = new \Gustavus\TwigFactory\TwigFactory;
-    return $twigFactory->renderTwigFilesystemTemplate('/cis/lib/Gustavus/Revisions/views/revisions.twig', array('revisions' => $this->revisions->getRevisionObjects()));
+    \Gustavus\TwigFactory\TwigFactory::getTwigFilesystem('/cis/lib/Gustavus/Revisions/views')->clearCacheFiles();
+    return \Gustavus\TwigFactory\TwigFactory::renderTwigFilesystemTemplate('/cis/lib/Gustavus/Revisions/views/revisions.twig', array('revisions' => $this->revisions->getRevisionObjects()));
   }
 
   public function renderRevisionData($revision)

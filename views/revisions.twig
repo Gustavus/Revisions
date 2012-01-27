@@ -1,0 +1,28 @@
+{% macro revisions(revisions) %}
+{% if revisions|length > 0 %}
+<table class="fancy">
+  <thead>
+    <tr>
+      <th>Revision Number</th>
+      <th>Created On</th>
+      <th>Created By</th>
+      <th>Message</th>
+      <th>Modified Columns</th>
+    </tr>
+  </thead>
+  <tbody>
+{% for i in 0..revisions|length %}{% if revisions[revisions|length - i] != null %}{{ _self.revision(revisions[revisions|length - i].revisionNumber, revisions[revisions|length - i].revisionDate, revisions[revisions|length - i].createdBy, revisions[revisions|length - i].revisionMessage, revisions[revisions|length - i].modifiedColumns, revisions[revisions|length - i].error) }}{% endif %}{% endfor %}</tbody>
+</table>{% endif %}
+{% endmacro %}
+{% macro revision(revisionNumber, date, createdBy, message, modifiedColumns, error) %}{% if error %}<tr>Error</tr>
+  {% else %}
+  <tr>
+    <td>{{ revisionNumber }}</td>
+    <td>{{ date|date("F jS \\a\\t g:ia") }}</td>
+    <td>{{ createdBy }}</td>
+    <td>{{ message }}</td>
+    <td>{{ modifiedColumns|join(', ') }}</td>
+  </tr>
+  {% endif %}
+{% endmacro %}
+{{ _self.revisions(revisions) }}

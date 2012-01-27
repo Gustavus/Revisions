@@ -71,7 +71,7 @@ class RevisionsRendererTest extends RevisionsHelper
     $this->dbalConnection->query($this->getCreateDataQuery());
 
     $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
-    $this->revisions->makeAndSaveRevision(array('name' => 'Visto'));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Visto', 'age' => 23));
 
     var_dump($this->revisionsRenderer->renderRevisions(10));
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
