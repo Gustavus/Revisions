@@ -7,10 +7,10 @@
 namespace Gustavus\Revisions\Test;
 use \Gustavus\Revisions;
 
-require_once '/cis/lib/Gustavus/Revisions/tests/RevisionsTestsHelper.class.Test.php';
-require_once '/cis/lib/Gustavus/Revisions/classes/Revisions.class.php';
-require_once '/cis/lib/Gustavus/Revisions/classes/RevisionsRenderer.class.php';
-require_once '/cis/lib/Gustavus/Revisions/classes/Revision.class.php';
+require_once '/cis/lib/Gustavus/Revisions/Test/RevisionsTestsHelperTest.php';
+require_once '/cis/lib/Gustavus/Revisions/Revisions.php';
+require_once '/cis/lib/Gustavus/Revisions/RevisionsRenderer.php';
+require_once '/cis/lib/Gustavus/Revisions/Revision.php';
 
 /**
  * @package Revisions
@@ -73,7 +73,7 @@ class RevisionsRendererTest extends RevisionsHelper
     $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
     $this->revisions->makeAndSaveRevision(array('name' => 'Visto'));
 
-    $this->revisionsRenderer->renderRevisions(10);
+    var_dump($this->revisionsRenderer->renderRevisions(10));
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }
 

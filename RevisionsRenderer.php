@@ -3,6 +3,7 @@
  * @package Revisions
  */
 namespace Gustavus\Revisions;
+require_once 'Gustavus/TwigFactory/TwigFactory.php';
 
 /**
  * Renders out revisions to the application
@@ -28,6 +29,31 @@ class RevisionsRenderer
   }
 
   /**
+   * @return mixed
+   */
+  public function __get($name)
+  {
+    switch ($name) {
+      case 'revisions':
+        return $this->getItems();
+
+      default:
+        if ($this->__isset($name)) {
+          return $this->{$name};
+        }
+    }
+  }
+
+  /**
+   * @param string $name
+   * @return boolean
+   */
+  public function __isset($name)
+  {
+    return isset($this->{$name});
+  }
+
+  /**
    * Class destructor
    *
    * @return void
@@ -41,13 +67,8 @@ class RevisionsRenderer
   {
     $this->revisions->setLimit($limit);
     $return = '';
-    foreach ($this->revisions->getRevisionObjects() as $revision) {
-      if ($revision !== null) {
-        //$params = $this->buildRevisionViewParams($revision);
-        $return .= '';
-        //var_dump($revisionNumber, $revision);
-      }
-    }
+    $twigFactory = new \Gustavus\TwigFactory\TwigFactory;
+    return $twigFactory->renderTwigFilesystemTemplate('/cis/lib/Gustavus/Revisions/views/revisions.twig', array('revisions' => $this->revisions->getRevisionObjects()));
   }
 
   public function renderRevisionData($revision)

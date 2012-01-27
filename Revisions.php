@@ -3,9 +3,9 @@
  * @package Revisions
  */
 namespace Gustavus\Revisions;
-require_once 'Gustavus/Revisions/classes/RevisionsManager.class.php';
-require_once 'Gustavus/Revisions/classes/Revision.class.php';
-require_once 'Gustavus/Revisions/classes/RevisionDataDiff.class.php';
+require_once 'Gustavus/Revisions/RevisionsManager.php';
+require_once 'Gustavus/Revisions/Revision.php';
+require_once 'Gustavus/Revisions/RevisionDataDiff.php';
 
 /**
  * Creates Revision objects and sets things up for saving revisions
