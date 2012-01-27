@@ -7,9 +7,9 @@
 namespace Gustavus\Revisions\Test;
 use Gustavus\Revisions;
 
-require_once '/cis/lib/test/test.class.php';
-require_once 'revisions/classes/revision.class.php';
-require_once 'revisions/classes/revisionDataDiff.class.php';
+require_once '/cis/lib/Gustavus/Test/Test.class.php';
+require_once 'Gustavus/Revisions/classes/Revision.class.php';
+require_once 'Gustavus/Revisions/classes/RevisionDataDiff.class.php';
 
 /**
  * @package Revisions
@@ -35,6 +35,9 @@ class RevisionTest extends \Gustavus\Test\Test
     'currentContent' => 'some test content',
     'revisionNumber' => 1,
     'revisionDate' => '2012-01-05 23:34:15',
+    'createdBy' => 'Billy',
+    'revisionMessage' => 'Message',
+    'modifiedColumns' => array('name'),
   );
 
   /**
@@ -106,6 +109,30 @@ class RevisionTest extends \Gustavus\Test\Test
   public function getRevisionId()
   {
     $this->assertSame($this->revisionProperties['revisionId'], $this->revision->getRevisionId());
+  }
+
+  /**
+   * @test
+   */
+  public function getCreatedBy()
+  {
+    $this->assertSame($this->revisionProperties['createdBy'], $this->revision->getCreatedBy());
+  }
+
+  /**
+   * @test
+   */
+  public function getRevisionMessage()
+  {
+    $this->assertSame($this->revisionProperties['revisionMessage'], $this->revision->getRevisionMessage());
+  }
+
+  /**
+   * @test
+   */
+  public function getModifiedColumns()
+  {
+    $this->assertSame($this->revisionProperties['modifiedColumns'], $this->revision->getModifiedColumns());
   }
 
   /**

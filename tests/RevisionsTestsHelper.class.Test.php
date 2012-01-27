@@ -7,8 +7,8 @@
 namespace Gustavus\Revisions\Test;
 use Gustavus\Revisions;
 
-require_once '/cis/lib/test/testDBPDO.class.php';
-require_once 'revisions/classes/revision.class.php';
+require_once '/cis/lib/Gustavus/Test/TestDBPDO.class.php';
+require_once 'Gustavus/Revisions/classes/Revision.class.php';
 
 /**
  * @package Revisions

@@ -7,10 +7,10 @@
 namespace Gustavus\Revisions\Test;
 use Gustavus\Revisions;
 
-require_once 'revisions/classes/revisionsManager.class.php';
-require_once 'revisions/classes/revision.class.php';
-require_once 'revisions/classes/revisionDataDiff.class.php';
-require_once 'revisions/tests/revisionsTestsHelper.class.Test.php';
+require_once 'Gustavus/Revisions/classes/RevisionsManager.class.php';
+require_once 'Gustavus/Revisions/classes/Revision.class.php';
+require_once 'Gustavus/Revisions/classes/RevisionDataDiff.class.php';
+require_once 'Gustavus/Revisions/tests/RevisionsTestsHelper.class.Test.php';
 require_once '/cis/lib/db/DBAL.class.php';
 
 /**

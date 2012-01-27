@@ -3,7 +3,7 @@
  * @package Revisions
  */
 namespace Gustavus\Revisions;
-require_once 'revisions/classes/revisionsBase.class.php';
+require_once 'Gustavus/Revisions/classes/RevisionsBase.class.php';
 
 /**
  * A single Revision object that contains many RevisionData objects
@@ -45,6 +45,11 @@ class Revision extends RevisionsBase
   protected $revisionData;
 
   /**
+   * @var array of columns modified in this specific revision
+   */
+  protected $modifiedColumns;
+
+  /**
    * flag set to true if the hash doesn't compute correctly
    *
    * @var boolean
@@ -68,7 +73,7 @@ class Revision extends RevisionsBase
    */
   public function __destruct()
   {
-    unset($this->revisionId, $this->revisionNumber, $this->revisionDate, $this->revisonMessage, $this->createdBy, $this->revisionData, $this->error);
+    unset($this->revisionId, $this->revisionNumber, $this->revisionDate, $this->revisonMessage, $this->createdBy, $this->revisionData, $this->modifiedColumns, $this->error);
   }
 
   /**
@@ -96,6 +101,22 @@ class Revision extends RevisionsBase
   }
 
   /**
+   * @return string
+   */
+  public function getCreatedBy()
+  {
+    return $this->createdBy;
+  }
+
+  /**
+   * @return string
+   */
+  public function getRevisionMessage()
+  {
+    return $this->revisionMessage;
+  }
+
+  /**
    * @param string $column
    * @return array
    */
@@ -106,6 +127,14 @@ class Revision extends RevisionsBase
     } else {
       return $this->getRevisionDataByColumn($column);
     }
+  }
+
+  /**
+   * @return array
+   */
+  public function getModifiedColumns()
+  {
+    return $this->modifiedColumns;
   }
 
   /**

@@ -3,9 +3,9 @@
  * @package Revisions
  */
 namespace Gustavus\Revisions;
-require_once 'revisions/classes/revisionsManager.class.php';
-require_once 'revisions/classes/revision.class.php';
-require_once 'revisions/classes/revisionDataDiff.class.php';
+require_once 'Gustavus/Revisions/classes/RevisionsManager.class.php';
+require_once 'Gustavus/Revisions/classes/Revision.class.php';
+require_once 'Gustavus/Revisions/classes/RevisionDataDiff.class.php';
 
 /**
  * Creates Revision objects and sets things up for saving revisions
@@ -130,8 +130,8 @@ class Revisions extends RevisionsManager
       $revisionInfo            = $revisionData->renderRevisionForDB($value);
       $revisionInfoArray[$key] = $revisionInfo;
     }
-    $missingColumns = $this->findMissingColumns($newText);
-    foreach ($missingColumns as $column) {
+    $columnInfo = $this->getColumnInformation($newText);
+    foreach ($columnInfo['missingColumns'] as $column) {
       $missingRevisionDataInfo = $this->getRevisionData(null, $column, true, 1, null, true);
       $newText[$column] = $missingRevisionDataInfo[$column]['value'];
     }
@@ -168,7 +168,8 @@ class Revisions extends RevisionsManager
           'revisionDate'    => $revisionInfo['createdOn'],
           'revisionMessage' => $revisionInfo['message'],
           'createdBy'       => $revisionInfo['createdBy'],
-          'revisionData'    => $revisionData,
+          'revisionData'    => $revisionData['revisionData'],
+          'modifiedColumns' => $revisionData['modifiedColumns'],
         );
         $revision = new Revision($params);
         if ($this->generateHashFromArray($revision->getRevisionDataContentArray()) !== $revisionInfo['contentHash']) {
@@ -191,14 +192,16 @@ class Revisions extends RevisionsManager
     $revisionDataInfo = $this->getRevisionData($revisionId);
     $revisionDataArray = array();
 
-    $missingColumns = $this->findMissingColumns($revisionDataInfo);
-    $revisionDataInfo = array_merge($revisionDataInfo, $this->getMissingRevisionDataInfo($missingColumns, $revisionId));
+    $columnInfo       = $this->getColumnInformation($revisionDataInfo);
+    // set modified columns here so it doesn't get overwritten below if getColumnInformation gets called again
+    $modifiedColumns  = $columnInfo['modifiedColumns'];
+    $revisionDataInfo = array_merge($revisionDataInfo, $this->getMissingRevisionDataInfo($columnInfo['missingColumns'], $revisionId));
 
     foreach ($revisionDataInfo as $key => $value) {
       if (!isset($this->revisionDataHasBeenPulled[$key])) {
         // first revisionData will be current text
         $previousError = false;
-        if (!in_array($key, $missingColumns)) {
+        if (!in_array($key, $columnInfo['missingColumns'])) {
           // we dont want to say that revision has been pulled if we are just populating the latest revision with the missing fields
           $this->revisionDataHasBeenPulled[$key] = true;
         }
@@ -229,10 +232,10 @@ class Revisions extends RevisionsManager
     }
 
     if ($this->revisionsHaveBeenPulled) {
-      $missingColumns = $this->findMissingColumns($revisionDataInfo);
-      $revisionDataArray = array_merge($revisionDataArray, $this->getMissingRevisionDataFromObject($missingColumns));
+      $columnInfo = $this->getColumnInformation($revisionDataInfo);
+      $revisionDataArray = array_merge($revisionDataArray, $this->getMissingRevisionDataFromObject($columnInfo['missingColumns']));
     }
-    return $revisionDataArray;
+    return array('revisionData' => $revisionDataArray, 'modifiedColumns' => $modifiedColumns);
   }
 
   /**
@@ -303,21 +306,24 @@ class Revisions extends RevisionsManager
   }
 
   /**
-   * Finds columns in the database that aren't in the revisionInfo
+   * Finds columns in the database that aren't in the revisionInfo as well as columns modified for a certain revision
    *
    * @param  array $revisionInfo revision info keyed by column
    * @return array
    */
-  private function findMissingColumns($revisionInfo)
+  private function getColumnInformation($revisionInfo)
   {
     $allColumns = $this->getRevisionDataColumns();
     $missingColumns = array();
+    $modifiedColumns = array();
     foreach ($allColumns as $column) {
       if (!isset($revisionInfo[$column['key']])) {
         $missingColumns[] = $column['key'];
+      } else {
+        $modifiedColumns[] = $column['key'];
       }
     }
-    return $missingColumns;
+    return array('missingColumns' => $missingColumns, 'modifiedColumns' => $modifiedColumns);;
   }
 
   /**

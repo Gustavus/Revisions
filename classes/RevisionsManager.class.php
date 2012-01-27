@@ -5,7 +5,7 @@
 namespace Gustavus\Revisions;
 
 require_once 'db/DBAL.class.php';
-require_once 'revisions/classes/revisionsBase.class.php';
+require_once 'Gustavus/Revisions/classes/RevisionsBase.class.php';
 /**
  * Interacts with the database
  *

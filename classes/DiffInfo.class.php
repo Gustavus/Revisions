@@ -3,7 +3,7 @@
  * @package Revisions
  */
 namespace Gustavus\Revisions;
-require_once 'revisions/classes/revisionsBase.class.php';
+require_once 'Gustavus/Revisions/classes/RevisionsBase.class.php';
 
 /**
  * Contains information on how to roll back each specific part of a revision

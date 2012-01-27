@@ -7,10 +7,10 @@
 namespace Gustavus\Revisions\Test;
 use \Gustavus\Revisions;
 
-require_once '/cis/lib/revisions/tests/revisionsTestsHelper.class.Test.php';
-require_once '/cis/lib/revisions/classes/revisions.class.php';
-require_once '/cis/lib/revisions/classes/revision.class.php';
-require_once '/cis/lib/revisions/classes/diffInfo.class.php';
+require_once '/cis/lib/Gustavus/Revisions/tests/RevisionsTestsHelper.class.Test.php';
+require_once '/cis/lib/Gustavus/Revisions/classes/Revisions.class.php';
+require_once '/cis/lib/Gustavus/Revisions/classes/Revision.class.php';
+require_once '/cis/lib/Gustavus/Revisions/classes/DiffInfo.class.php';
 
 /**
  * @package Revisions
