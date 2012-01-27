@@ -344,9 +344,10 @@ class RevisionsManager extends RevisionsBase
    * @param array $oldRevisionData keyed by column
    * @param string $message
    * @param string $createdBy
+   * @param array $brandNewColumns columns that do not exist in db
    * @return boolean
    */
-  protected function saveRevision(array $revisionInfo, array $newContent, array $oldContent, array $oldRevisionData = array(), $message = null, $createdBy = null)
+  protected function saveRevision(array $revisionInfo, array $newContent, array $oldContent, array $oldRevisionData = array(), $message = null, $createdBy = null, array $brandNewColumns = array())
   {
     $revisionInfo = array_filter($revisionInfo);
     if (empty($revisionInfo)) {
@@ -355,6 +356,13 @@ class RevisionsManager extends RevisionsBase
       return false;
     }
     $oldContentFiltered = array_filter($oldContent);
+    if (!empty($brandNewColumns) && !empty($oldContentFiltered)) {
+      // new columns exist, and revision isn't the first. Need to get their initial revision in before continuing
+      $revisionId = $this->saveRevisionContent($oldContent, $message, $createdBy);
+      foreach ($brandNewColumns as $key) {
+        $this->saveRevisionData($revisionInfo[$key], $revisionId, $key, $oldContent[$key]);
+      }
+    }
     if (empty($oldContentFiltered)) {
       // no old content, so revision is the first one. Also add the new content in
       $revContent = array_merge($newContent, $oldContent);
@@ -368,8 +376,8 @@ class RevisionsManager extends RevisionsBase
     foreach ($revisionInfo as $key => $value) {
       if (!isset($oldRevisionData[$key])) {
         // previous revision not included and needs to be pulled.
-        if ($revisionId === $newRevisionId) {
-          // previous revisions exist, so we might need to update one
+        if ($revisionId === $newRevisionId && !in_array($key, $brandNewColumns)) {
+          // previous revisions that aren't brand new exist, so we might need to update one
           $oldRevisionData = array_merge($oldRevisionData, $this->getRevisionData(null, $key, true, 1));
         }
       }
