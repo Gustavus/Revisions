@@ -800,4 +800,22 @@ class RevisionsTest extends RevisionsHelper
     $this->assertSame($revisions[4]->getRevisionData(), $missingRevisionData);
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }
+
+  /**
+   * @test
+   */
+  public function makeAndSaveRevisionDataAndPull()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->revisions->setLimit(10);
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Visto', 'age' => 23));
+
+    $this->assertFalse($this->revisions->getRevisionByNumber(2)->getError());
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
 }

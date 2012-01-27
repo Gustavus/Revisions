@@ -114,6 +114,7 @@ class Revisions extends RevisionsManager
     $revisionInfoArray    = array();
     $oldRevisionDataArray = array();
     $oldText              = array();
+    $brandNewColumns      = array();
     foreach ($newText as $key => $value) {
       $oldRevisionData = $this->getRevisionData(null, $key, true, 1);
       $oldRevisionDataArray = array_merge($oldRevisionDataArray, $oldRevisionData);
@@ -126,6 +127,7 @@ class Revisions extends RevisionsManager
         // revision doesn't exist yet
         $revisionData            = new RevisionDataDiff(array('currentContent' => ''));
         $oldText[$key]           = '';
+        $brandNewColumns[]       = $key;
       }
       $revisionInfo            = $revisionData->renderRevisionForDB($value);
       $revisionInfoArray[$key] = $revisionInfo;
@@ -135,7 +137,7 @@ class Revisions extends RevisionsManager
       $missingRevisionDataInfo = $this->getRevisionData(null, $column, true, 1, null, true);
       $newText[$column] = $missingRevisionDataInfo[$column]['value'];
     }
-    $this->saveRevision($revisionInfoArray, $newText, $oldText, $oldRevisionDataArray, $message, $createdBy);
+    $this->saveRevision($revisionInfoArray, $newText, $oldText, $oldRevisionDataArray, $message, $createdBy, $brandNewColumns);
   }
 
   /**
@@ -298,7 +300,7 @@ class Revisions extends RevisionsManager
     $missingRevisionData = array();
     foreach ($missingColumns as $column) {
       $oldestRevisionData = $this->getOldestRevisionDataPulled($column);
-      if ($oldestRevisionData->getRevisionNumber() !== 1 || ($oldestRevisionData->getRevisionNumber() === 1 && $oldestRevisionData->getRevisionId() < $this->findOldestRevisionNumberPulled())) {
+      if ($oldestRevisionData->getRevisionNumber() !== 1 || ($oldestRevisionData->getRevisionNumber() === 1 && $oldestRevisionData->getRevisionId() < $this->getOldestRevisionPulled()->getRevisionId())) {
         $missingRevisionData[$column] = $oldestRevisionData;
       }
     }
