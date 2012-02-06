@@ -83,19 +83,28 @@ class Revisions extends RevisionsManager
   /**
    * Takes two revision numbers and returns a new revision containing only the diff of the two
    *
-   * @param  integer  $revisionANum revision number to compare against
-   * @param  integer  $revisionBNum revision number to compare
+   * @param  integer  $oldRevisionNum revision number to compare against
+   * @param  integer  $newRevisionNum revision number to compare
    * @param  string  $column       column to compare if only looking for a specific column
    * @return Revision
    */
-  public function compareTwoRevisions($revisionANum, $revisionBNum, $column = null)
+  public function compareTwoRevisions($oldRevisionNum, $newRevisionNum, $column = null)
   {
     $revisionDataArray = array();
-    $revA = $this->getRevisionByNumber($revisionANum);
-    $revB = $this->getRevisionByNumber($revisionBNum);
-    foreach ($revA->getRevisionData($column) as $key => $revisionData) {
-      $revBDataContent = $revB->getRevisionData($key)->makeRevisionContent();
-      $revADataContent = $revisionData->makeRevisionContent();
+    $revA = $this->getRevisionByNumber($oldRevisionNum);
+    if ($revA === null) {
+      // if revision number doesn't exist, or there was an error, use the oldest revision pulled
+      $revA = $this->getRevisionByNumber($this->findOldestRevisionNumberPulled());
+    }
+    $revB = $this->getRevisionByNumber($newRevisionNum);
+    if ($revB === null) {
+      // if revision number is higher than any revision numbers in the db, use the latest pulled
+      $revB = $this->getRevisionByNumber($this->findLatestRevisionNumberPulled());
+    }
+    foreach ($revB->getRevisionData($column) as $key => $revisionData) {
+      // revA might not have all the columns that B has
+      $revADataContent = ($revA->getRevisionData($key) === null) ? '' : $revA->getRevisionData($key)->makeRevisionContent();
+      $revBDataContent = $revisionData->makeRevisionContent();
       $revisionDataArray[$key] = $this->makeRevisionData($revBDataContent, $revADataContent);
     }
     return $this->makeRevision($revisionDataArray);
@@ -345,6 +354,24 @@ class Revisions extends RevisionsManager
     foreach ($this->revisions as $key => $value) {
       if ($value !== null) {
         return $key;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Gets the latest revision number pulled into the object
+   *
+   * @return integer
+   */
+  private function findLatestRevisionNumberPulled()
+  {
+    if (!isset($this->revisions)) {
+      return null;
+    }
+    for ($i = count($this->revisions) - 1; $i > 0; --$i) {
+      if ($this->revisions[$i] !== null) {
+        return $i;
       }
     }
     return null;

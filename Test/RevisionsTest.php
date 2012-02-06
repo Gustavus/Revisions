@@ -135,6 +135,27 @@ class RevisionsTest extends RevisionsHelper
   /**
    * @test
    */
+  public function compareTwoRevisionsColumnNumsDontExist()
+  {
+    $this->revisionsManagerInfo['limit'] = 10;
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy'));
+    $this->revisions->makeAndSaveRevision(array('age' => 22));
+    $this->revisions->makeAndSaveRevision(array('age' => 23, 'name' => 'Billy Visto'));
+
+    $result = $this->revisions->compareTwoRevisions(0, 20, 'name');
+    $this->assertInstanceOf('\Gustavus\Revisions\Revision', $result);
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
   public function makeAndSaveRevision1()
   {
     $conn = $this->getConnection();
@@ -482,6 +503,7 @@ class RevisionsTest extends RevisionsHelper
 
     $this->assertNull($this->call($this->revisions, 'findOldestRevisionNumberPulled'));
   }
+
   /**
    * @test
    */
@@ -816,6 +838,64 @@ class RevisionsTest extends RevisionsHelper
     $this->revisions->makeAndSaveRevision(array('name' => 'Visto', 'age' => 23));
 
     $this->assertFalse($this->revisions->getRevisionByNumber(2)->getError());
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
+  public function findLatestRevisionNumberPulled()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->revisions->setLimit(10);
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Visto', 'age' => 23));
+    $this->revisions->getRevisionObjects();
+
+    $result = $this->call($this->revisions, 'findLatestRevisionNumberPulled');
+    $this->assertSame(4, $result);
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
+  public function findLatestRevisionNumberPulledEmpty()
+  {
+    $this->set($this->revisions, 'revisions', array(null, null));
+
+    $this->assertNull($this->call($this->revisions, 'findLatestRevisionNumberPulled'));
+  }
+
+  /**
+   * @test
+   */
+  public function findLatestRevisionNumberPulledNotSet()
+  {
+    $this->assertNull($this->call($this->revisions, 'findLatestRevisionNumberPulled'));
+  }
+
+  /**
+   * @test
+   */
+  public function findLatestRevisionNumberPulledFullRevisions()
+  {
+    $conn = $this->getConnection();
+    $this->revisionsManagerInfo['limit'] = 10;
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $this->saveRevisionToDB('', 'Billy Visto', 'name', $this->revisions);
+    $this->saveRevisionToDB('Billy Visto', 'Billy', 'name', $this->revisions);
+    $this->saveRevisionToDB('Billy', 'Billy Visto', 'name', $this->revisions);
+    $this->call($this->revisions, 'populateObjectWithRevisions');
+    $this->assertSame(4, $this->call($this->revisions, 'findLatestRevisionNumberPulled'));
+
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }
 }
