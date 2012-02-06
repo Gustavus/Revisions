@@ -70,59 +70,131 @@ class RevisionsRendererTest extends RevisionsHelper
     $this->dbalConnection->query($this->getCreateQuery());
     $this->dbalConnection->query($this->getCreateDataQuery());
 
+    $now = Date("F jS \\a\\t g:ia");
     $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
     $this->revisions->makeAndSaveRevision(array('name' => 'Visto', 'age' => 23));
+    $expected = "<table class=\"fancy\">
+  <thead>
+    <tr>
+      <th>Revision Number</th>
+      <th>Created On</th>
+      <th>Created By</th>
+      <th>Message</th>
+      <th>Modified Columns</th>
+    </tr>
+  </thead>
+  <tbody>
+  <tr>
+    <td>4</td>
+    <td>$now</td>
+    <td></td>
+    <td></td>
+    <td>age, name</td>
+  </tr>
+    <tr>
+    <td>3</td>
+    <td>$now</td>
+    <td></td>
+    <td></td>
+    <td>age</td>
+  </tr>
+    <tr>
+    <td>2</td>
+    <td>$now</td>
+    <td></td>
+    <td></td>
+    <td>name</td>
+  </tr>
+    <tr>
+    <td>1</td>
+    <td>$now</td>
+    <td></td>
+    <td></td>
+    <td>name</td>
+  </tr>
+  </tbody>
+</table>";
 
-    var_dump($this->revisionsRenderer->renderRevisions(10));
+
+    $actual = $this->revisionsRenderer->renderRevisions(10);
+    $this->assertSame($expected, $actual);
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }
 
-  // /**
-  //  * @test
-  //  */
-  // public function buildRevisionViewParams()
-  // {
-  //   $conn = $this->getConnection();
-  //   $this->setUpMock('person-revision');
-  //   $this->dbalConnection->query($this->getCreateQuery());
-  //   $this->dbalConnection->query($this->getCreateDataQuery());
+  /**
+   * @test
+   */
+  public function renderRevisionComparisonText()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
 
-  //   $this->revisionsRenderer->makeAndSaveRevision(array('name' => 'Billy Visto'), 'Message', 'Billy Visto');
-  //   $this->revisionsRenderer->makeAndSaveRevision(array('name' => 'Visto'), 'Message2', 'Billy Visto');
+    $now = Date("F jS \\a\\t g:ia");
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Visto', 'age' => 23));
 
-  //   $expected = array(
-  //     'revisionNumber' => 3,
-  //     'createdBy' => 'Billy Visto',
-  //     'message' => 'Message2',
-  //     'error' => false,
-  //     'columns' => 'name',
-  //   );
+    $expected = "<table class=\"fancy\">
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Old Text</th>
+      <th>New Text</th>
+    </tr>
+  </thead>
+  <tbody>
+   <tr>
+    <td>age</td>
+    <td></td>
+    <td>23</td>
+  </tr>
+     <tr>
+    <td>name</td>
+    <td></td>
+    <td>Visto</td>
+  </tr>
+  </tbody>
+</table>";
+    $actual = $this->revisionsRenderer->renderRevisionComparisonText(2, 5);
+    $this->assertSame($expected, $actual);
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
 
-  //   $revision = $this->revisionsRenderer->getRevisionByNumber(3);
+  /**
+   * @test
+   */
+  public function renderRevisionComparisonDiff()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
 
-  //   $result = $this->call($this->revisionsRenderer, 'buildRevisionViewParams', array($revision));
-  //   $this->assertSame($expected, $result);
+    $now = Date("F jS \\a\\t g:ia");
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Visto', 'age' => 23));
 
-  //   $this->dropCreatedTables(array('person-revision', 'revisionData'));
-  // }
-
-  // /**
-  //  * @test
-  //  */
-  // public function parseRevisionColumnsModified()
-  // {
-  //   $conn = $this->getConnection();
-  //   $this->setUpMock('person-revision');
-  //   $this->dbalConnection->query($this->getCreateQuery());
-  //   $this->dbalConnection->query($this->getCreateDataQuery());
-
-  //   $this->revisionsRenderer->makeAndSaveRevision(array('name' => 'Billy Visto', 'age' => 23), 'Message', 'Billy Visto');
-
-  //   $expected = 'age, name';
-
-  //   $result = $this->call($this->revisionsRenderer, 'parseRevisionColumnsModified', array(2));
-  //   $this->assertSame($expected, $result);
-
-  //   $this->dropCreatedTables(array('person-revision', 'revisionData'));
-  // }
+    $expected = "<table class=\"fancy\">
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Diff</th>
+    </tr>
+  </thead>
+  <tbody>
+   <tr>
+    <td>age</td>
+    <td><ins>23</ins></td>
+  </tr>
+     <tr>
+    <td>name</td>
+    <td><ins>Visto</ins></td>
+  </tr>
+  </tbody>
+</table>";
+    $actual = $this->revisionsRenderer->renderRevisionComparisonDiff(2, 5);
+    $this->assertSame($expected, $actual);
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
 }

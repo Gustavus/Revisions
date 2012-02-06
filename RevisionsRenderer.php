@@ -26,6 +26,9 @@ class RevisionsRenderer
     if ($revisions !== null) {
         $this->revisions = $revisions;
     }
+    if (\Config::isBeta()) {
+      \Gustavus\TwigFactory\TwigFactory::getTwigFilesystem('/cis/lib/Gustavus/Revisions/views')->clearCacheFiles();
+    }
   }
 
   /**
@@ -63,52 +66,41 @@ class RevisionsRenderer
     unset($this->revisions);
   }
 
-  public function renderRevisions($limit = 1)
+  /**
+   * Renders out all the revisions with information about them
+   *
+   * @param  integer $limit
+   * @return string
+   */
+  public function renderRevisions($limit = 5)
   {
     $this->revisions->setLimit($limit);
-    $return = '';
-    \Gustavus\TwigFactory\TwigFactory::getTwigFilesystem('/cis/lib/Gustavus/Revisions/views')->clearCacheFiles();
     return \Gustavus\TwigFactory\TwigFactory::renderTwigFilesystemTemplate('/cis/lib/Gustavus/Revisions/views/revisions.twig', array('revisions' => $this->revisions->getRevisionObjects()));
   }
 
-  public function renderRevisionData($revision)
+  /**
+   * Renders out a table of revisionData for each column with the old content, and new content
+   *
+   * @param  integer oldRevNum
+   * @param  integer $newRevNum
+   * @param  string $column
+   * @return string
+   */
+  public function renderRevisionComparisonText($oldRevNum, $newRevNum, $column = null)
   {
-    foreach ($revision->getRevisionData() as $column => $revisionData) {
-
-    }
+    return \Gustavus\TwigFactory\TwigFactory::renderTwigFilesystemTemplate('/cis/lib/Gustavus/Revisions/views/revisionDataText.twig', array('revisions' => $this->revisions->compareTwoRevisions($oldRevNum, $newRevNum, $column)));
   }
 
-  // /**
-  //  * puts together associative array for passing to a view formatter
-  //  *
-  //  * @param  Revision $revision
-  //  * @return array
-  //  */
-  // private function buildRevisionViewParams($revision)
-  // {
-  //   $params = array(
-  //     'revisionNumber'  => $revision->getRevisionNumber(),
-  //     'createdBy'       => $revision->getCreatedBy(),
-  //     'message'         => $revision->getRevisionMessage(),
-  //     'error'           => $revision->getError(),
-  //     'columns'         => $revision->getModifiedColumns(),
-  //   );
-  //   return $params;
-  // }
-
-  // /**
-  //  * gets columns modified in a specific revision and formats it as a comma separated string
-  //  *
-  //  * @param  integer $revisionId
-  //  * @return string
-  //  */
-  // private function parseRevisionColumnsModified($revisionId)
-  // {
-  //   $columns = $this->getRevisionColumnsById($revisionId);
-  //   $return = array();
-  //   foreach ($columns as $column) {
-  //     $return[] = $column['key'];
-  //   }
-  //   return implode(', ', $return);
-  // }
+  /**
+   * Renders out a table of revisionData for each column with the diff of what changed from the old content to get the new content
+   *
+   * @param  integer oldRevNum
+   * @param  integer $newRevNum
+   * @param  string $column
+   * @return string
+   */
+  public function renderRevisionComparisonDiff($oldRevNum, $newRevNum, $column = null)
+  {
+    return \Gustavus\TwigFactory\TwigFactory::renderTwigFilesystemTemplate('/cis/lib/Gustavus/Revisions/views/revisionDataDiff.twig', array('revisions' => $this->revisions->compareTwoRevisions($oldRevNum, $newRevNum, $column)));
+  }
 }
