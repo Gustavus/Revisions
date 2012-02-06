@@ -5,7 +5,7 @@
 namespace Gustavus\Revisions;
 
 /**
- *
+ * Gets extended by other classes to use common functions
  *
  * @package Revisions
  */
