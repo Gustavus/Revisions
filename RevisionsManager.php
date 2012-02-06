@@ -307,6 +307,7 @@ class RevisionsManager extends RevisionsBase
       ':createdBy'      => $createdBy,
       ':contentHash'    => $this->generateHashFromArray($revisionContent),
     );
+    $nowExpression = ($db->getDatabasePlatform()->getName() === 'sqlite') ? 'datetime("now", "localtime")' : 'NOW()';
     $sql = sprintf('
       INSERT INTO `%1$s` (
         `contentHash`,
@@ -329,7 +330,7 @@ class RevisionsManager extends RevisionsBase
           AND `rowId` = :rowId;
         ',
         $this->revisionsTable,
-        $db->getDatabasePlatform()->getNowExpression()
+        $nowExpression
     );
     $db->executeUpdate($sql, $args);
     return (int) $db->lastInsertId();

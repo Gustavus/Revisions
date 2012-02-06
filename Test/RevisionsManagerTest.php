@@ -827,5 +827,6 @@ class RevisionsManagerTest extends RevisionsHelper
     $expected = array(array('key' =>  'aboutYou'), array('key' => 'age'), array('key' => 'name'));
     $result = $this->call($this->revisionsManagerMock, 'getRevisionDataColumns');
     $this->assertSame($expected, $result);
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }
 }
