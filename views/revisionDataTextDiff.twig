@@ -5,16 +5,18 @@
     <tr>
       <th>Field</th>
       <th>Old Text</th>
+      <th>Diff</th>
       <th>New Text</th>
     </tr>
   </thead>
   <tbody>
-{% for key in revisions.revisionData|keys %}{% if revisions.revisionData[key] != null %}{% set revisionData = revisions.revisionData[key] %} {{ _self.revisionData(key, revisionData.revisionContent, revisionData.currentContent, revisionData.error) }}{% endif %}{% endfor %}</tbody>
+{% for key in revisions.revisionData|keys %}{% if revisions.revisionData[key] != null %}{% set revisionData = revisions.revisionData[key] %} {{ _self.revisionData(key, revisionData.revisionContent, revisionData.makeRevisionContent(true), revisionData.currentContent, revisionData.error) }}{% endif %}{% endfor %}</tbody>
 </table>{% endif %}
 {% endmacro %}
-{% macro revisionData(column, oldContent, newContent, error) %}{% if error %}
+{% macro revisionData(column, oldContent, diff, newContent, error) %}{% if error %}
   <tr class="error">
     <td>{{ column }}</td>
+    <td>An unexpected error occured.</td>
     <td>An unexpected error occured.</td>
     <td>An unexpected error occured.</td>
   </tr>
@@ -22,6 +24,7 @@
   <tr>
     <td>{{ column }}</td>
     <td>{{ oldContent }}</td>
+    <td>{{ diff|raw }}</td>
     <td>{{ newContent }}</td>
   </tr>
   {% endif %}
