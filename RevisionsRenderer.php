@@ -21,11 +21,9 @@ class RevisionsRenderer
    * Class constructor
    * @param Revisions $revisions
    */
-  public function __construct($revisions = null)
+  public function __construct(Revisions $revisions)
   {
-    if ($revisions !== null) {
-        $this->revisions = $revisions;
-    }
+    $this->revisions = $revisions;
     if (\Config::isBeta()) {
       \Gustavus\TwigFactory\TwigFactory::getTwigFilesystem('/cis/lib/Gustavus/Revisions/views')->clearCacheFiles();
     }
