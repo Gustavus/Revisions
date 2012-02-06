@@ -103,4 +103,17 @@ class RevisionsRenderer
   {
     return \Gustavus\TwigFactory\TwigFactory::renderTwigFilesystemTemplate('/cis/lib/Gustavus/Revisions/views/revisionDataDiff.twig', array('revisions' => $this->revisions->compareTwoRevisions($oldRevNum, $newRevNum, $column)));
   }
+
+  /**
+   * Renders out a table of revisionData for each column with the diff of what changed from the old content to get the new content
+   *
+   * @param  integer oldRevNum
+   * @param  integer $newRevNum
+   * @param  string $column
+   * @return string
+   */
+  public function renderRevisionComparisonTextDiff($oldRevNum, $newRevNum, $column = null)
+  {
+    return \Gustavus\TwigFactory\TwigFactory::renderTwigFilesystemTemplate('/cis/lib/Gustavus/Revisions/views/revisionDataTextDiff.twig', array('revisions' => $this->revisions->compareTwoRevisions($oldRevNum, $newRevNum, $column)));
+  }
 }

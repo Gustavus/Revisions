@@ -195,4 +195,46 @@ class RevisionsRendererTest extends RevisionsHelper
     $this->assertSame($expected, $actual);
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }
+
+  /**
+   * @test
+   */
+  public function renderRevisionComparisonTextDiff()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Visto', 'age' => 23));
+
+    $expected = "<table class=\"fancy\">
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Old Text</th>
+      <th>Diff</th>
+      <th>New Text</th>
+    </tr>
+  </thead>
+  <tbody>
+   <tr>
+    <td>age</td>
+    <td></td>
+    <td><ins>23</ins></td>
+    <td>23</td>
+  </tr>
+     <tr>
+    <td>name</td>
+    <td></td>
+    <td><ins>Visto</ins></td>
+    <td>Visto</td>
+  </tr>
+  </tbody>
+</table>";
+    $actual = $this->revisionsRenderer->renderRevisionComparisonTextDiff(2, 5);
+    $this->assertSame($expected, $actual);
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
 }
