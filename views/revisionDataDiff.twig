@@ -11,7 +11,7 @@
 {% for key in revisions.revisionData|keys %}{% if revisions.revisionData[key] != null %}{% set revisionData = revisions.revisionData[key] %} {{ _self.revisionData(key, revisionData.makeRevisionContent(true), revisionData.error) }}{% endif %}{% endfor %}</tbody>
 </table>{% endif %}
 {% endmacro %}
-{% macro revisionData(column, diff, error) %}{% if error %}<tr>Error</tr>
+{% macro revisionData(column, diff, error) %}{% if error %}<tr class="error">An unexpected error occured.</tr>
   {% else %}
   <tr>
     <td>{{ column }}</td>
