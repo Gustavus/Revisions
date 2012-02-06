@@ -70,7 +70,7 @@ class RevisionsRendererTest extends RevisionsHelper
     $this->dbalConnection->query($this->getCreateQuery());
     $this->dbalConnection->query($this->getCreateDataQuery());
 
-    $now = Date("F jS \\a\\t g:ia");
+    $now = date("F jS \\a\\t g:ia");
     $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
     $this->revisions->makeAndSaveRevision(array('name' => 'Visto', 'age' => 23));
     $expected = "<table class=\"fancy\">
@@ -131,7 +131,6 @@ class RevisionsRendererTest extends RevisionsHelper
     $this->dbalConnection->query($this->getCreateQuery());
     $this->dbalConnection->query($this->getCreateDataQuery());
 
-    $now = Date("F jS \\a\\t g:ia");
     $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
     $this->revisions->makeAndSaveRevision(array('name' => 'Visto', 'age' => 23));
 
@@ -171,7 +170,6 @@ class RevisionsRendererTest extends RevisionsHelper
     $this->dbalConnection->query($this->getCreateQuery());
     $this->dbalConnection->query($this->getCreateDataQuery());
 
-    $now = Date("F jS \\a\\t g:ia");
     $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
     $this->revisions->makeAndSaveRevision(array('name' => 'Visto', 'age' => 23));
 

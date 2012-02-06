@@ -1,0 +1,22 @@
+{% macro revisions(revisions) %}
+{% if revisions|length > 0 %}
+<table class="fancy">
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Diff</th>
+    </tr>
+  </thead>
+  <tbody>
+{% for key in revisions.revisionData|keys %}{% if revisions.revisionData[key] != null %}{% set revisionData = revisions.revisionData[key] %} {{ _self.revisionData(key, revisionData.makeRevisionContent(true), revisionData.error) }}{% endif %}{% endfor %}</tbody>
+</table>{% endif %}
+{% endmacro %}
+{% macro revisionData(column, diff, error) %}{% if error %}<tr>Error</tr>
+  {% else %}
+  <tr>
+    <td>{{ column }}</td>
+    <td>{{ diff|raw }}</td>
+  </tr>
+  {% endif %}
+{% endmacro %}
+{{ _self.revisions(revisions) }}
