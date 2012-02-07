@@ -23,10 +23,8 @@ class RevisionsRenderer
    */
   public function __construct(Revisions $revisions)
   {
+    \Gustavus\TwigFactory\TwigFactory::getTwigFilesystem('/cis/lib/Gustavus/Revisions/views')->clearCacheFiles();
     $this->revisions = $revisions;
-    if (\Config::isBeta()) {
-      \Gustavus\TwigFactory\TwigFactory::getTwigFilesystem('/cis/lib/Gustavus/Revisions/views')->clearCacheFiles();
-    }
   }
 
   /**
@@ -73,7 +71,7 @@ class RevisionsRenderer
   public function renderRevisions($limit = 5)
   {
     $this->revisions->setLimit($limit);
-    return \Gustavus\TwigFactory\TwigFactory::renderTwigFilesystemTemplate('/cis/lib/Gustavus/Revisions/views/revisions.twig', array('revisions' => $this->revisions->getRevisionObjects()));
+    return $this->renderTwig('revisions.twig', $this->revisions->getRevisionObjects());
   }
 
   /**
@@ -86,7 +84,7 @@ class RevisionsRenderer
    */
   public function renderRevisionComparisonText($oldRevNum, $newRevNum, $column = null)
   {
-    return \Gustavus\TwigFactory\TwigFactory::renderTwigFilesystemTemplate('/cis/lib/Gustavus/Revisions/views/revisionDataText.twig', array('revisions' => $this->revisions->compareTwoRevisions($oldRevNum, $newRevNum, $column)));
+    return $this->renderTwig('revisionDataText.twig', $this->revisions->compareTwoRevisions($oldRevNum, $newRevNum, $column));
   }
 
   /**
@@ -99,7 +97,7 @@ class RevisionsRenderer
    */
   public function renderRevisionComparisonDiff($oldRevNum, $newRevNum, $column = null)
   {
-    return \Gustavus\TwigFactory\TwigFactory::renderTwigFilesystemTemplate('/cis/lib/Gustavus/Revisions/views/revisionDataDiff.twig', array('revisions' => $this->revisions->compareTwoRevisions($oldRevNum, $newRevNum, $column)));
+    return $this->renderTwig('revisionDataDiff.twig', $this->revisions->compareTwoRevisions($oldRevNum, $newRevNum, $column));
   }
 
   /**
@@ -112,6 +110,18 @@ class RevisionsRenderer
    */
   public function renderRevisionComparisonTextDiff($oldRevNum, $newRevNum, $column = null)
   {
-    return \Gustavus\TwigFactory\TwigFactory::renderTwigFilesystemTemplate('/cis/lib/Gustavus/Revisions/views/revisionDataTextDiff.twig', array('revisions' => $this->revisions->compareTwoRevisions($oldRevNum, $newRevNum, $column)));
+    return $this->renderTwig('revisionDataTextDiff.twig', $this->revisions->compareTwoRevisions($oldRevNum, $newRevNum, $column));
+  }
+
+  /**
+   * Renders out the template
+   *
+   * @param  string $filename  location of twig template
+   * @param  mixed $revisions array of revisions, or a single revision object
+   * @return string
+   */
+  private function renderTwig($filename, $revisions)
+  {
+    return \Gustavus\TwigFactory\TwigFactory::renderTwigFilesystemTemplate("/cis/lib/Gustavus/Revisions/views/$filename", array('revisions' => $revisions));
   }
 }
