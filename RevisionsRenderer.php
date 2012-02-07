@@ -23,7 +23,6 @@ class RevisionsRenderer
    */
   public function __construct(Revisions $revisions)
   {
-    \Gustavus\TwigFactory\TwigFactory::getTwigFilesystem('/cis/lib/Gustavus/Revisions/views')->clearCacheFiles();
     $this->revisions = $revisions;
   }
 
