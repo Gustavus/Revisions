@@ -117,7 +117,7 @@ class RevisionsRendererTest extends RevisionsHelper
 
 
     $actual = $this->revisionsRenderer->renderRevisions(10);
-    $this->assertSame($expected, $actual);
+    $this->assertXmlStringEqualsXmlString($expected, $actual);
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }
 
@@ -156,7 +156,7 @@ class RevisionsRendererTest extends RevisionsHelper
   </tbody>
 </table>";
     $actual = $this->revisionsRenderer->renderRevisionComparisonText(2, 5);
-    $this->assertSame($expected, $actual);
+    $this->assertXmlStringEqualsXmlString($expected, $actual);
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }
 
@@ -192,7 +192,7 @@ class RevisionsRendererTest extends RevisionsHelper
   </tbody>
 </table>";
     $actual = $this->revisionsRenderer->renderRevisionComparisonDiff(2, 5);
-    $this->assertSame($expected, $actual);
+    $this->assertXmlStringEqualsXmlString($expected, $actual);
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }
 
@@ -234,7 +234,7 @@ class RevisionsRendererTest extends RevisionsHelper
   </tbody>
 </table>";
     $actual = $this->revisionsRenderer->renderRevisionComparisonTextDiff(2, 5);
-    $this->assertSame($expected, $actual);
+    $this->assertXmlStringEqualsXmlString($expected, $actual);
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }
 }
