@@ -1,0 +1,13 @@
+{% extends 'baseTable.twig' %}
+
+{% block body %}
+  {% for key in revisions.revisionData|keys %}
+    {% if revisions.revisionData[key] != null %}
+      {% set revisionData = revisions.revisionData[key] %}
+      <tr{% if revisionData.error %} class="error"{% endif %}>
+        {% block rows %}
+        {% endblock rows %}
+      </tr>
+    {% endif %}
+  {% endfor %}
+{% endblock %}

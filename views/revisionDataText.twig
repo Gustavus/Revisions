@@ -1,29 +1,17 @@
-{% macro revisions(revisions) %}
-{% if revisions|length > 0 %}
-<table class="fancy">
-  <thead>
-    <tr>
-      <th>Field</th>
-      <th>Old Text</th>
-      <th>New Text</th>
-    </tr>
-  </thead>
-  <tbody>
-{% for key in revisions.revisionData|keys %}{% if revisions.revisionData[key] != null %}{% set revisionData = revisions.revisionData[key] %} {{ _self.revisionData(key, revisionData.revisionContent, revisionData.currentContent, revisionData.error) }}{% endif %}{% endfor %}</tbody>
-</table>{% endif %}
-{% endmacro %}
-{% macro revisionData(column, oldContent, newContent, error) %}{% if error %}
-  <tr class="error">
-    <td>{{ column }}</td>
-    <td>An unexpected error occured.</td>
-    <td>An unexpected error occured.</td>
-  </tr>
+{% extends 'revisionData.twig' %}
+
+{% block headers %}
+  <th>Field</th>
+  <th>Old Text</th>
+  <th>New Text</th>
+{% endblock %}
+
+{% block rows %}
+  <td>{{ key }}</td>
+  {% if revisionData.error %}
+    {{ _self.renderErrorColumns(2) }}
   {% else %}
-  <tr>
-    <td>{{ column }}</td>
-    <td>{{ oldContent }}</td>
-    <td>{{ newContent }}</td>
-  </tr>
+    <td>{{ revisionData.revisionContent }}</td>
+    <td>{{ revisionData.currentContent }}</td>
   {% endif %}
-{% endmacro %}
-{{ _self.revisions(revisions) }}
+{% endblock %}
