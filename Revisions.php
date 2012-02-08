@@ -107,7 +107,16 @@ class Revisions extends RevisionsManager
       $revBDataContent = $revisionData->makeRevisionContent();
       $revisionDataArray[$key] = $this->makeRevisionData($revBDataContent, $revADataContent);
     }
-    return $this->makeRevision($revisionDataArray);
+    if ($revB->getError() || $revA->getError()) {
+      // if either revisions being compared encountered an error, we want the new revision to also have an error
+      $error = true;
+      $revision = $this->makeRevision($revisionDataArray);
+      $revision->setError(true);
+      return $revision;
+    } else {
+      // this way we don't always set a variable to return
+      return $this->makeRevision($revisionDataArray);
+    }
   }
 
   /**
