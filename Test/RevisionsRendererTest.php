@@ -78,47 +78,65 @@ class RevisionsRendererTest extends RevisionsHelper
     $now = date("F jS \\a\\t g:ia");
     $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
     $this->revisions->makeAndSaveRevision(array('name' => 'Visto', 'age' => 23));
-    $expected = "<table class=\"fancy\">
+    $expected = "<form id=\"revisionsForm\">
+  <a href='#' id='compareRevisions' class='button'>Compare Selected Revisions</a>
+<table class=\"fancy\">
   <thead>
     <tr>
       <th>Revision Number</th>
+      <th></th>
+      <th></th>
       <th>Created On</th>
       <th>Created By</th>
       <th>Message</th>
       <th>Modified Columns</th>
+      <th></th>
     </tr>
   </thead>
   <tbody>
   <tr>
     <td>4</td>
+    <td><input id='oldNum-4' type='radio' class='compare' value='4' /></td>
+    <td><input id='newNum-4' type='radio' class='compareAgainst' value='4' /></td>
     <td>$now</td>
     <td></td>
     <td></td>
     <td>age, name</td>
+    <td><a href='#' id='rollback-4' class='rollback button' value='4'>Rollback</a></td>
   </tr>
     <tr>
     <td>3</td>
+    <td><input id='oldNum-3' type='radio' class='compare' value='3' /></td>
+    <td><input id='newNum-3' type='radio' class='compareAgainst' value='3' /></td>
     <td>$now</td>
     <td></td>
     <td></td>
     <td>age</td>
+    <td><a href='#' id='rollback-3' class='rollback button' value='3'>Rollback</a></td>
   </tr>
     <tr>
     <td>2</td>
+    <td><input id='oldNum-2' type='radio' class='compare' value='2' /></td>
+    <td><input id='newNum-2' type='radio' class='compareAgainst' value='2' /></td>
     <td>$now</td>
     <td></td>
     <td></td>
     <td>name</td>
+    <td><a href='#' id='rollback-2' class='rollback button' value='2'>Rollback</a></td>
   </tr>
     <tr>
     <td>1</td>
+    <td><input id='oldNum-1' type='radio' class='compare' value='1' /></td>
+    <td><input id='newNum-1' type='radio' class='compareAgainst' value='1' /></td>
     <td>$now</td>
     <td></td>
     <td></td>
     <td>name</td>
+    <td><a href='#' id='rollback-1' class='rollback button' value='1'>Rollback</a></td>
   </tr>
   </tbody>
-</table>";
+</table>
+</form>";
 
 
     $actual = $this->revisionsRenderer->renderRevisions(10);
@@ -140,47 +158,65 @@ class RevisionsRendererTest extends RevisionsHelper
     $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
     $this->saveRevisionToDB('Billy', 'Billy Visto', 'name', $this->revisions);
     $this->revisions->makeAndSaveRevision(array('name' => 'Visto', 'age' => 23));
-    $expected = "<table class=\"fancy\">
+    $expected = "<form id=\"revisionsForm\">
+  <a href='#' id='compareRevisions' class='button'>Compare Selected Revisions</a>
+      <table class=\"fancy\">
   <thead>
     <tr>
       <th>Revision Number</th>
+      <th></th>
+      <th></th>
       <th>Created On</th>
       <th>Created By</th>
       <th>Message</th>
       <th>Modified Columns</th>
+      <th></th>
     </tr>
   </thead>
   <tbody>
   <tr>
     <td>5</td>
+    <td><input id='oldNum-5' type='radio' class='compare' value='5' /></td>
+    <td><input id='newNum-5' type='radio' class='compareAgainst' value='5' /></td>
     <td>$now</td>
     <td></td>
     <td></td>
     <td>age, name</td>
+    <td><a href='#' id='rollback-5' class='rollback button' value='5'>Rollback</a></td>
   </tr>
   <tr>
     <td>4</td>
+    <td><input id='oldNum-4' type='radio' class='compare' value='4' /></td>
+    <td><input id='newNum-4' type='radio' class='compareAgainst' value='4' /></td>
     <td>$now</td>
     <td></td>
     <td></td>
     <td>age</td>
+    <td><a href='#' id='rollback-4' class='rollback button' value='4'>Rollback</a></td>
   </tr>
   <tr>
     <td>3</td>
+    <td><input id='oldNum-3' type='radio' class='compare' value='3' /></td>
+    <td><input id='newNum-3' type='radio' class='compareAgainst' value='3' /></td>
     <td>$now</td>
     <td>name</td>
     <td></td>
     <td>name</td>
+    <td><a href='#' id='rollback-3' class='rollback button' value='3'>Rollback</a></td>
   </tr>
   <tr class=\"error\">
     <td>2</td>
+    <td></td>
+    <td></td>
+    <td>{$this->error}</td>
     <td>{$this->error}</td>
     <td>{$this->error}</td>
     <td>{$this->error}</td>
     <td>{$this->error}</td>
   </tr>
   </tbody>
-</table>";
+</table>
+      </form>";
     $actual = $this->revisionsRenderer->renderRevisions(10);
     $this->assertXmlStringEqualsXmlString($expected, $actual);
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
@@ -199,7 +235,8 @@ class RevisionsRendererTest extends RevisionsHelper
     $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
     $this->revisions->makeAndSaveRevision(array('name' => 'Visto', 'age' => 23));
 
-    $expected = "<table class=\"fancy\">
+    $expected = "<form id=\"revisionsForm\">
+      <table class=\"fancy\">
   <thead>
     <tr>
       <th>Field</th>
@@ -219,7 +256,8 @@ class RevisionsRendererTest extends RevisionsHelper
     <td>Visto</td>
   </tr>
   </tbody>
-</table>";
+</table>
+      </form>";
     $actual = $this->revisionsRenderer->renderRevisionComparisonText(2, 5);
     $this->assertXmlStringEqualsXmlString($expected, $actual);
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
@@ -239,7 +277,8 @@ class RevisionsRendererTest extends RevisionsHelper
     $this->saveRevisionToDB('Billy', 'Billy Visto', 'name', $this->revisions);
     $this->revisions->makeAndSaveRevision(array('name' => 'Visto', 'age' => 23));
 
-    $expected = "<table class=\"fancy\">
+    $expected = "<form id=\"revisionsForm\">
+      <table class=\"fancy\">
   <thead>
     <tr>
       <th>Field</th>
@@ -259,7 +298,8 @@ class RevisionsRendererTest extends RevisionsHelper
     <td>{$this->error}</td>
   </tr>
   </tbody>
-</table>";
+</table>
+      </form>";
     $actual = $this->revisionsRenderer->renderRevisionComparisonText(2, 4);
     $this->assertXmlStringEqualsXmlString($expected, $actual);
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
@@ -278,7 +318,8 @@ class RevisionsRendererTest extends RevisionsHelper
     $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
     $this->revisions->makeAndSaveRevision(array('name' => 'Visto', 'age' => 23));
 
-    $expected = "<table class=\"fancy\">
+    $expected = "<form id=\"revisionsForm\">
+      <table class=\"fancy\">
   <thead>
     <tr>
       <th>Field</th>
@@ -295,7 +336,8 @@ class RevisionsRendererTest extends RevisionsHelper
     <td><ins>Visto</ins></td>
   </tr>
   </tbody>
-</table>";
+</table>
+      </form>";
     $actual = $this->revisionsRenderer->renderRevisionComparisonDiff(2, 5);
     $this->assertXmlStringEqualsXmlString($expected, $actual);
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
@@ -315,7 +357,8 @@ class RevisionsRendererTest extends RevisionsHelper
     $this->saveRevisionToDB('Billy', 'Billy Visto', 'name', $this->revisions);
     $this->revisions->makeAndSaveRevision(array('name' => 'Visto', 'age' => 23));
 
-    $expected = "<table class=\"fancy\">
+    $expected = "<form id=\"revisionsForm\">
+      <table class=\"fancy\">
   <thead>
     <tr>
       <th>Field</th>
@@ -332,7 +375,8 @@ class RevisionsRendererTest extends RevisionsHelper
     <td>{$this->error}</td>
   </tr>
   </tbody>
-</table>";
+</table>
+      </form>";
     $actual = $this->revisionsRenderer->renderRevisionComparisonDiff(2, 5);
     $this->assertXmlStringEqualsXmlString($expected, $actual);
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
@@ -351,7 +395,8 @@ class RevisionsRendererTest extends RevisionsHelper
     $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
     $this->revisions->makeAndSaveRevision(array('name' => 'Visto', 'age' => 23));
 
-    $expected = "<table class=\"fancy\">
+    $expected = "<form id=\"revisionsForm\">
+      <table class=\"fancy\">
   <thead>
     <tr>
       <th>Field</th>
@@ -374,7 +419,8 @@ class RevisionsRendererTest extends RevisionsHelper
     <td>Visto</td>
   </tr>
   </tbody>
-</table>";
+</table>
+      </form>";
     $actual = $this->revisionsRenderer->renderRevisionComparisonTextDiff(2, 5);
     $this->assertXmlStringEqualsXmlString($expected, $actual);
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
@@ -394,7 +440,8 @@ class RevisionsRendererTest extends RevisionsHelper
     $this->saveRevisionToDB('Billy', 'Billy Visto', 'name', $this->revisions);
     $this->revisions->makeAndSaveRevision(array('name' => 'Visto', 'age' => 23));
 
-    $expected = "<table class=\"fancy\">
+    $expected = "<form id=\"revisionsForm\">
+      <table class=\"fancy\">
   <thead>
     <tr>
       <th>Field</th>
@@ -417,7 +464,8 @@ class RevisionsRendererTest extends RevisionsHelper
     <td>{$this->error}</td>
   </tr>
   </tbody>
-</table>";
+</table>
+      </form>";
     $actual = $this->revisionsRenderer->renderRevisionComparisonTextDiff(2, 5);
     $this->assertXmlStringEqualsXmlString($expected, $actual);
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
@@ -436,7 +484,8 @@ class RevisionsRendererTest extends RevisionsHelper
     $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
     $this->revisions->makeAndSaveRevision(array('name' => 'Visto', 'age' => 23));
 
-    $expected = "<table class=\"fancy\">
+    $expected = "<form id=\"revisionsForm\">
+      <table class=\"fancy\">
   <thead>
     <tr>
       <th>Field</th>
@@ -449,7 +498,8 @@ class RevisionsRendererTest extends RevisionsHelper
       <td>Billy Visto</td>
     </tr>
   </tbody>
-</table>";
+</table>
+      </form>";
     $actual = $this->revisionsRenderer->renderRevisionData(2);
     $this->assertXmlStringEqualsXmlString($expected, $actual);
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
@@ -469,7 +519,8 @@ class RevisionsRendererTest extends RevisionsHelper
     $this->saveRevisionToDB('Billy', 'Billy Visto', 'name', $this->revisions);
     $this->revisions->makeAndSaveRevision(array('name' => 'Visto', 'age' => 23));
 
-    $expected = "<table class=\"fancy\">
+    $expected = "<form id=\"revisionsForm\">
+      <table class=\"fancy\">
   <thead>
     <tr>
       <th>Field</th>
@@ -482,7 +533,8 @@ class RevisionsRendererTest extends RevisionsHelper
       <td>{$this->error}</td>
     </tr>
   </tbody>
-</table>";
+</table>
+      </form>";
     $actual = $this->revisionsRenderer->renderRevisionData(2);
     $this->assertXmlStringEqualsXmlString($expected, $actual);
     $this->dropCreatedTables(array('person-revision', 'revisionData'));

@@ -1,24 +1,28 @@
 {% if revisions|length > 0 %}
-  <table class="fancy">
-    <thead>
-      <tr>
-        {% block headers %}
-        {% endblock %}
-      </tr>
-    </thead>
-    <tbody>
-      {% block body %}
-        {% for key in revisions|length..0 %}
-          {% if revisions[key] != null %}{% set revision = revisions[key] %}
-            <tr{% if revision.error %} class="error"{% endif %}>
-            {% block rows %}
-            {% endblock rows %}
-            </tr>
-          {% endif %}
-        {% endfor %}
-      {% endblock body %}
-    </tbody>
-  </table>
+  <form id="revisionsForm">
+    {% block actionButton %}
+    {% endblock %}
+    <table class="fancy">
+      <thead>
+        <tr>
+          {% block headers %}
+          {% endblock %}
+        </tr>
+      </thead>
+      <tbody>
+        {% block body %}
+          {% for key in revisions|length..0 %}
+            {% if revisions[key] != null %}{% set revision = revisions[key] %}
+              <tr{% if revision.error %} class="error"{% endif %}>
+              {% block rows %}
+              {% endblock rows %}
+              </tr>
+            {% endif %}
+          {% endfor %}
+        {% endblock body %}
+      </tbody>
+    </table>
+  </form>
 {% endif %}
 
 {% macro renderErrorColumns(num) %}
