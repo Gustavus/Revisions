@@ -11,7 +11,7 @@
 {% block rows %}
   <td>{{ revision.revisionNumber }}</td>
   {% if revision.error %}
-      {{ _self.renderErrorColumns(4) }}
+    {{ _self.renderErrorColumns(4) }}
   {% else %}
     <td>{{ revision.revisionDate|date("F jS \\a\\t g:ia") }}</td>
     <td>{{ revision.createdBy }}</td>
