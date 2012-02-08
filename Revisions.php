@@ -91,16 +91,8 @@ class Revisions extends RevisionsManager
   public function compareTwoRevisions($oldRevisionNum, $newRevisionNum, $column = null)
   {
     $revisionDataArray = array();
-    $revA = $this->getRevisionByNumber($oldRevisionNum);
-    if ($revA === null) {
-      // if revision number doesn't exist, or there was an error, use the oldest revision pulled
-      $revA = $this->getRevisionByNumber($this->findOldestRevisionNumberPulled());
-    }
-    $revB = $this->getRevisionByNumber($newRevisionNum);
-    if ($revB === null) {
-      // if revision number is higher than any revision numbers in the db, use the latest pulled
-      $revB = $this->getRevisionByNumber($this->findLatestRevisionNumberPulled());
-    }
+    $revA = $this->getRevisionForComparison($oldRevisionNum, false);
+    $revB = $this->getRevisionForComparison($newRevisionNum, true);
     foreach ($revB->getRevisionData($column) as $key => $revisionData) {
       // revA might not have all the columns that B has
       $revisionDataA = $revA->getRevisionData($key);
@@ -123,6 +115,23 @@ class Revisions extends RevisionsManager
       // this way we don't always set a variable to return
       return $this->makeRevision($revisionDataArray);
     }
+  }
+
+  /**
+   * Gets a revision by revision number, or it guesses what revision to return if that revision number is empty in the object.
+   *
+   * @param  integer  $revisionNum
+   * @param  boolean $isNewerRevision whether the revision is newer or older than the one it is compared against
+   * @return Revision
+   */
+  private function getRevisionForComparison($revisionNum, $isNewerRevision)
+  {
+    $revision = $this->getRevisionByNumber($revisionNum);
+    if ($revision === null) {
+      // if revision number doesn't exist, or there was an error, use the oldest revision pulled
+      $revision = ($isNewerRevision) ? $this->getRevisionByNumber($this->findLatestRevisionNumberPulled()) : $this->getRevisionByNumber($this->findOldestRevisionNumberPulled());
+    }
+    return $revision;
   }
 
   /**
