@@ -19,6 +19,11 @@ require_once '/cis/lib/Gustavus/Revisions/Revision.php';
 class RevisionsRendererTest extends RevisionsHelper
 {
   /**
+   * @var string
+   */
+  private $error = "An unexpected error occured.";
+
+  /**
    * @var RevisionsRenderer
    */
   private $revisionsRenderer;
@@ -124,6 +129,66 @@ class RevisionsRendererTest extends RevisionsHelper
   /**
    * @test
    */
+  public function renderRevisionsError()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $now = date("F jS \\a\\t g:ia");
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
+    $this->saveRevisionToDB('Billy', 'Billy Visto', 'name', $this->revisions);
+    $this->revisions->makeAndSaveRevision(array('name' => 'Visto', 'age' => 23));
+    $expected = "<table class=\"fancy\">
+  <thead>
+    <tr>
+      <th>Revision Number</th>
+      <th>Created On</th>
+      <th>Created By</th>
+      <th>Message</th>
+      <th>Modified Columns</th>
+    </tr>
+  </thead>
+  <tbody>
+  <tr>
+    <td>5</td>
+    <td>$now</td>
+    <td></td>
+    <td></td>
+    <td>age, name</td>
+  </tr>
+  <tr>
+    <td>4</td>
+    <td>$now</td>
+    <td></td>
+    <td></td>
+    <td>age</td>
+  </tr>
+  <tr>
+    <td>3</td>
+    <td>$now</td>
+    <td>name</td>
+    <td></td>
+    <td>name</td>
+  </tr>
+  <tr class=\"error\">
+    <td>2</td>
+    <td>{$this->error}</td>
+    <td>{$this->error}</td>
+    <td>{$this->error}</td>
+    <td>{$this->error}</td>
+  </tr>
+  </tbody>
+</table>";
+    $actual = $this->revisionsRenderer->renderRevisions(10);
+    $this->assertXmlStringEqualsXmlString($expected, $actual);
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
   public function renderRevisionComparisonText()
   {
     $conn = $this->getConnection();
@@ -156,6 +221,46 @@ class RevisionsRendererTest extends RevisionsHelper
   </tbody>
 </table>";
     $actual = $this->revisionsRenderer->renderRevisionComparisonText(2, 5);
+    $this->assertXmlStringEqualsXmlString($expected, $actual);
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
+  public function renderRevisionComparisonTextError()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
+    $this->saveRevisionToDB('Billy', 'Billy Visto', 'name', $this->revisions);
+    $this->revisions->makeAndSaveRevision(array('name' => 'Visto', 'age' => 23));
+
+    $expected = "<table class=\"fancy\">
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Old Text</th>
+      <th>New Text</th>
+    </tr>
+  </thead>
+  <tbody>
+  <tr>
+    <td>age</td>
+    <td></td>
+    <td></td>
+  </tr>
+     <tr class=\"error\">
+    <td>name</td>
+    <td>{$this->error}</td>
+    <td>{$this->error}</td>
+  </tr>
+  </tbody>
+</table>";
+    $actual = $this->revisionsRenderer->renderRevisionComparisonText(2, 4);
     $this->assertXmlStringEqualsXmlString($expected, $actual);
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }
@@ -199,7 +304,87 @@ class RevisionsRendererTest extends RevisionsHelper
   /**
    * @test
    */
+  public function renderRevisionComparisonDiffError()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
+    $this->saveRevisionToDB('Billy', 'Billy Visto', 'name', $this->revisions);
+    $this->revisions->makeAndSaveRevision(array('name' => 'Visto', 'age' => 23));
+
+    $expected = "<table class=\"fancy\">
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Diff</th>
+    </tr>
+  </thead>
+  <tbody>
+   <tr>
+    <td>age</td>
+    <td><ins>23</ins></td>
+  </tr>
+     <tr class=\"error\">
+    <td>name</td>
+    <td>{$this->error}</td>
+  </tr>
+  </tbody>
+</table>";
+    $actual = $this->revisionsRenderer->renderRevisionComparisonDiff(2, 5);
+    $this->assertXmlStringEqualsXmlString($expected, $actual);
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
   public function renderRevisionComparisonTextDiff()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
+    $this->saveRevisionToDB('Billy', 'Billy Visto', 'name', $this->revisions);
+    $this->revisions->makeAndSaveRevision(array('name' => 'Visto', 'age' => 23));
+
+    $expected = "<table class=\"fancy\">
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Old Text</th>
+      <th>Diff</th>
+      <th>New Text</th>
+    </tr>
+  </thead>
+  <tbody>
+   <tr>
+    <td>age</td>
+    <td></td>
+    <td><ins>23</ins></td>
+    <td>23</td>
+  </tr>
+     <tr class=\"error\">
+    <td>name</td>
+    <td>{$this->error}</td>
+    <td>{$this->error}</td>
+    <td>{$this->error}</td>
+  </tr>
+  </tbody>
+</table>";
+    $actual = $this->revisionsRenderer->renderRevisionComparisonTextDiff(2, 5);
+    $this->assertXmlStringEqualsXmlString($expected, $actual);
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
+  public function renderRevisionComparisonTextDiffError()
   {
     $conn = $this->getConnection();
     $this->setUpMock('person-revision');
