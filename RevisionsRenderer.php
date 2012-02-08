@@ -27,31 +27,6 @@ class RevisionsRenderer
   }
 
   /**
-   * @return mixed
-   */
-  public function __get($name)
-  {
-    switch ($name) {
-      case 'revisions':
-        return $this->revisions->getRevisionObjects();
-
-      default:
-        if ($this->__isset($name)) {
-          return $this->{$name};
-        }
-    }
-  }
-
-  /**
-   * @param string $name
-   * @return boolean
-   */
-  public function __isset($name)
-  {
-    return isset($this->{$name});
-  }
-
-  /**
    * Class destructor
    *
    * @return void
