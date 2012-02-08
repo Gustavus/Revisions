@@ -88,6 +88,18 @@ class RevisionsRenderer
   }
 
   /**
+   * Renders out a table of revisionData for each column
+   *
+   * @param  integer revNum
+   * @param  string $column
+   * @return string
+   */
+  public function renderRevisionData($revNum, $column = null)
+  {
+    return $this->renderTwig('revisionData.twig', $this->revisions->getRevisionByNumber($revNum, $column));
+  }
+
+  /**
    * Renders out the template
    *
    * @param  string $filename  location of twig template
