@@ -17,7 +17,7 @@
 {% endblock %}
 
 {% block rows %}
-  <td>{{ revision.revisionNumber }}</td>
+  <td><a href='#' class='revisionData button' value='{{ revision.revisionNumber }}'>{{ revision.revisionNumber }}</a></td>
   {% if revision.error %}
     <td></td>
     <td></td>

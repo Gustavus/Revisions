@@ -95,7 +95,7 @@ class RevisionsRendererTest extends RevisionsHelper
   </thead>
   <tbody>
   <tr>
-    <td>4</td>
+    <td><a href='#' class='revisionData button' value='4'>4</a></td>
     <td><input id='oldNum-4' type='radio' class='compare' value='4' /></td>
     <td><input id='newNum-4' type='radio' class='compareAgainst' value='4' /></td>
     <td>$now</td>
@@ -105,7 +105,7 @@ class RevisionsRendererTest extends RevisionsHelper
     <td><a href='#' id='rollback-4' class='rollback button' value='4'>Rollback</a></td>
   </tr>
     <tr>
-    <td>3</td>
+    <td><a href='#' class='revisionData button' value='3'>3</a></td>
     <td><input id='oldNum-3' type='radio' class='compare' value='3' /></td>
     <td><input id='newNum-3' type='radio' class='compareAgainst' value='3' /></td>
     <td>$now</td>
@@ -115,7 +115,7 @@ class RevisionsRendererTest extends RevisionsHelper
     <td><a href='#' id='rollback-3' class='rollback button' value='3'>Rollback</a></td>
   </tr>
     <tr>
-    <td>2</td>
+    <td><a href='#' class='revisionData button' value='2'>2</a></td>
     <td><input id='oldNum-2' type='radio' class='compare' value='2' /></td>
     <td><input id='newNum-2' type='radio' class='compareAgainst' value='2' /></td>
     <td>$now</td>
@@ -125,7 +125,7 @@ class RevisionsRendererTest extends RevisionsHelper
     <td><a href='#' id='rollback-2' class='rollback button' value='2'>Rollback</a></td>
   </tr>
     <tr>
-    <td>1</td>
+    <td><a href='#' class='revisionData button' value='1'>1</a></td>
     <td><input id='oldNum-1' type='radio' class='compare' value='1' /></td>
     <td><input id='newNum-1' type='radio' class='compareAgainst' value='1' /></td>
     <td>$now</td>
@@ -175,7 +175,7 @@ class RevisionsRendererTest extends RevisionsHelper
   </thead>
   <tbody>
   <tr>
-    <td>5</td>
+    <td><a href='#' class='revisionData button' value='5'>5</a></td>
     <td><input id='oldNum-5' type='radio' class='compare' value='5' /></td>
     <td><input id='newNum-5' type='radio' class='compareAgainst' value='5' /></td>
     <td>$now</td>
@@ -185,7 +185,7 @@ class RevisionsRendererTest extends RevisionsHelper
     <td><a href='#' id='rollback-5' class='rollback button' value='5'>Rollback</a></td>
   </tr>
   <tr>
-    <td>4</td>
+    <td><a href='#' class='revisionData button' value='4'>4</a></td>
     <td><input id='oldNum-4' type='radio' class='compare' value='4' /></td>
     <td><input id='newNum-4' type='radio' class='compareAgainst' value='4' /></td>
     <td>$now</td>
@@ -195,7 +195,7 @@ class RevisionsRendererTest extends RevisionsHelper
     <td><a href='#' id='rollback-4' class='rollback button' value='4'>Rollback</a></td>
   </tr>
   <tr>
-    <td>3</td>
+    <td><a href='#' class='revisionData button' value='3'>3</a></td>
     <td><input id='oldNum-3' type='radio' class='compare' value='3' /></td>
     <td><input id='newNum-3' type='radio' class='compareAgainst' value='3' /></td>
     <td>$now</td>
@@ -205,7 +205,7 @@ class RevisionsRendererTest extends RevisionsHelper
     <td><a href='#' id='rollback-3' class='rollback button' value='3'>Rollback</a></td>
   </tr>
   <tr class=\"error\">
-    <td>2</td>
+    <td><a href='#' class='revisionData button' value='2'>2</a></td>
     <td></td>
     <td></td>
     <td>{$this->error}</td>
