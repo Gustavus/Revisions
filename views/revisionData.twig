@@ -1,4 +1,10 @@
 {% extends 'baseTable.twig' %}
+{% import 'baseTable.twig' as baseTable %}
+
+{% block headers %}
+  <th>Field</th>
+  <th>Revision Content</th>
+{% endblock %}
 
 {% block body %}
   {% for key in revisions.revisionData|keys %}
@@ -6,6 +12,12 @@
       {% set revisionData = revisions.revisionData[key] %}
       <tr{% if revisionData.error %} class="error"{% endif %}>
         {% block rows %}
+          <td>{{ key }}</td>
+          {% if revisionData.error %}
+            {{ baseTable.renderErrorColumns(1) }}
+          {% else %}
+            <td>{{ revisionData.revisionContent }}</td>
+          {% endif %}
         {% endblock rows %}
       </tr>
     {% endif %}
