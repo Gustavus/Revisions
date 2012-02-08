@@ -1,4 +1,5 @@
 {% extends 'revisionData.twig' %}
+{% import 'baseTable.twig' as baseTable %}
 
 {% block headers %}
   <th>Field</th>
@@ -9,7 +10,7 @@
 {% block rows %}
   <td>{{ key }}</td>
   {% if revisionData.error %}
-    {{ _self.renderErrorColumns(2) }}
+    {{ baseTable.renderErrorColumns(2) }}
   {% else %}
     <td>{{ revisionData.revisionContent }}</td>
     <td>{{ revisionData.currentContent }}</td>

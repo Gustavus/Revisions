@@ -22,5 +22,7 @@
 {% endif %}
 
 {% macro renderErrorColumns(num) %}
-  {% for i in 1..num %}<td>An unexpected error occured.</td>{% endfor %}
+  {% for i in 1..num %}
+    <td>An unexpected error occured.</td>
+  {% endfor %}
 {% endmacro %}

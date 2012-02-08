@@ -1,4 +1,5 @@
 {% extends 'baseTable.twig' %}
+{% import 'baseTable.twig' as baseTable %}
 
 {% block headers %}
   <th>Revision Number</th>
@@ -11,7 +12,7 @@
 {% block rows %}
   <td>{{ revision.revisionNumber }}</td>
   {% if revision.error %}
-    {{ _self.renderErrorColumns(4) }}
+    {{ baseTable.renderErrorColumns(4) }}
   {% else %}
     <td>{{ revision.revisionDate|date("F jS \\a\\t g:ia") }}</td>
     <td>{{ revision.createdBy }}</td>
