@@ -103,9 +103,15 @@ class Revisions extends RevisionsManager
     }
     foreach ($revB->getRevisionData($column) as $key => $revisionData) {
       // revA might not have all the columns that B has
-      $revADataContent = ($revA->getRevisionData($key) === null) ? '' : $revA->getRevisionData($key)->makeRevisionContent();
-      $revBDataContent = $revisionData->makeRevisionContent();
-      $revisionDataArray[$key] = $this->makeRevisionData($revBDataContent, $revADataContent);
+      $revisionDataA = $revA->getRevisionData($key);
+      if ($revisionData->getError() || ($revisionDataA !== null && $revisionDataA->getError())) {
+        $revisionDataArray[$key] = $this->makeRevisionData('', '');
+        $revisionDataArray[$key]->setError(true);
+      } else {
+        $revADataContent = ($revisionDataA === null) ? '' : $revisionDataA->makeRevisionContent();
+        $revBDataContent = $revisionData->makeRevisionContent();
+        $revisionDataArray[$key] = $this->makeRevisionData($revBDataContent, $revADataContent);
+      }
     }
     if ($revB->getError() || $revA->getError()) {
       // if either revisions being compared encountered an error, we want the new revision to also have an error

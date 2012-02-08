@@ -156,6 +156,37 @@ class RevisionsTest extends RevisionsHelper
   /**
    * @test
    */
+  public function compareTwoRevisionsError()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy'));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
+    $this->saveRevisionToDB('Billy', 'Billy Visto', 'name', $this->revisions);
+    $this->revisions->makeAndSaveRevision(array('age' => '23'));
+    $this->revisions->makeAndSaveRevision(array('age' => 23));
+    $this->revisions->makeAndSaveRevision(array('age' => 29, 'name' => 'Billy Joel Visto'));
+
+    $this->assertNull($this->revisions->getRevisionByNumber(2));
+    $this->assertNull($this->revisions->getRevisionByNumber(1));
+    $errorRevision = $this->revisions->getRevisionByNumber(4);
+
+    $errorRevisionData = $errorRevision->getRevisionData('name');
+    $this->assertTrue($errorRevisionData->getError());
+    $this->assertNotNull($this->revisions->getRevisionByNumber(5));
+    $newRevision = $this->revisions->compareTwoRevisions(4, 5);
+    $this->assertTrue($newRevision->getError());
+
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
   public function makeAndSaveRevision1()
   {
     $conn = $this->getConnection();
