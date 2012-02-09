@@ -1,7 +1,7 @@
 <phpunit>
   <testsuites>
     <testsuite name="Gustavus Revisions">
-      <directory suffix="Test.php">/cis/lib/revisions/test/</directory>
+      <directory suffix="Test.php">/cis/lib/Gustavus/Revisions/Test/</directory>
     </testsuite>
   </testsuites>
 
