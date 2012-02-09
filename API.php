@@ -6,7 +6,6 @@ namespace Gustavus\Revisions;
 
 require_once 'Gustavus/Revisions/RevisionsRenderer.php';
 require_once 'Gustavus/Revisions/Revisions.php';
-require_once 'Gustavus/Revisions/RevisionsConfig.php';
 
 /**
  * API to interact with the revisions project
@@ -28,11 +27,19 @@ class API
   /**
    * Class constructor
    *
-   * @param string $appName
+   * @param array $params application's revision info
    */
-  public function __construct($appName)
+  public function __construct(array $params = array())
   {
-    $this->revisions = new Revisions(RevisionsConfig::getRevisionInfo($appName));
+    if (isset($params['dbName'],
+      $params['revisionsTable'],
+      $params['revisionDataTable'],
+      $params['table'],
+      $params['rowId'])) {
+        $this->revisions = new Revisions($params);
+    } else {
+      throw new \RuntimeException('Insufficient application information');
+    }
   }
 
   /**

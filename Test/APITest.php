@@ -39,7 +39,7 @@ class APITest extends RevisionsTestsHelper
    */
   public function setUp()
   {
-    $this->revisionsAPI = new Revisions\API('test');
+    $this->revisionsAPI = new Revisions\API($this->revisionsManagerInfo);
   }
 
   /**
@@ -77,7 +77,7 @@ class APITest extends RevisionsTestsHelper
    */
   public function testConstructionException()
   {
-    $this->revisionsAPI = new Revisions\API('');
+    $this->revisionsAPI = new Revisions\API();
     $this->assertInstanceOf('Gustavus\Revisions\Revisions', $this->get($this->revisionsAPI, 'revisions'));
   }
 
