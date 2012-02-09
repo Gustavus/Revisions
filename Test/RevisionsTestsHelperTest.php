@@ -14,7 +14,7 @@ require_once 'Gustavus/Revisions/Revision.php';
  * @package Revisions
  * @subpackage Tests
  */
-class RevisionsHelper extends \Gustavus\Test\TestDBPDO
+class RevisionsTestsHelper extends \Gustavus\Test\TestDBPDO
 {
   /**
    * sets up the object for each test

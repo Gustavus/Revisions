@@ -16,7 +16,7 @@ require_once '/cis/lib/Gustavus/Revisions/Revision.php';
  * @package Revisions
  * @subpackage Tests
  */
-class RevisionsRendererTest extends RevisionsHelper
+class RevisionsRendererTest extends RevisionsTestsHelper
 {
   /**
    * @var string

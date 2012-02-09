@@ -16,7 +16,7 @@ require_once '/cis/lib/Gustavus/Revisions/DiffInfo.php';
  * @package Revisions
  * @subpackage Tests
  */
-class RevisionsTest extends RevisionsHelper
+class RevisionsTest extends RevisionsTestsHelper
 {
   /**
    * @var yml file for expected results

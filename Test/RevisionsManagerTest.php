@@ -17,7 +17,7 @@ require_once '/cis/lib/db/DBAL.class.php';
  * @package Revisions
  * @subpackage Tests
  */
-class RevisionsManagerTest extends RevisionsHelper
+class RevisionsManagerTest extends RevisionsTestsHelper
 {
   /**
    * @var \Gustavus\Revisions\RevisionsManager
