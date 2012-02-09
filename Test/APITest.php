@@ -7,7 +7,7 @@
 namespace Gustavus\Revisions\Test;
 use \Gustavus\Revisions;
 
-require_once '/cis/lib/Gustavus/Revisions/RevisionsAPI.php';
+require_once '/cis/lib/Gustavus/Revisions/API.php';
 require_once '/cis/lib/Gustavus/Revisions/Test/RevisionsTestsHelperTest.php';
 require_once '/cis/lib/Gustavus/Revisions/Revision.php';
 require_once '/cis/lib/Gustavus/Revisions/DiffInfo.php';
@@ -16,7 +16,7 @@ require_once '/cis/lib/Gustavus/Revisions/DiffInfo.php';
  * @package Revisions
  * @subpackage Tests
  */
-class RevisionsAPITest extends RevisionsTestsHelper
+class APITest extends RevisionsTestsHelper
 {
   /**
    * @var string
@@ -39,7 +39,7 @@ class RevisionsAPITest extends RevisionsTestsHelper
    */
   public function setUp()
   {
-    $this->revisionsAPI = new Revisions\RevisionsAPI('test');
+    $this->revisionsAPI = new Revisions\API('test');
   }
 
   /**
@@ -77,7 +77,7 @@ class RevisionsAPITest extends RevisionsTestsHelper
    */
   public function testConstructionException()
   {
-    $this->revisionsAPI = new Revisions\RevisionsAPI('');
+    $this->revisionsAPI = new Revisions\API('');
     $this->assertInstanceOf('Gustavus\Revisions\Revisions', $this->get($this->revisionsAPI, 'revisions'));
   }
 

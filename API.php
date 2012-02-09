@@ -13,7 +13,7 @@ require_once 'Gustavus/Revisions/RevisionsConfig.php';
  *
  * @package Revisions
  */
-class RevisionsAPI
+class API
 {
   /**
    * @var Revisions
