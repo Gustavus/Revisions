@@ -350,6 +350,7 @@ class RevisionsManager extends RevisionsBase
    */
   protected function saveRevision(array $revisionInfo, array $newContent, array $oldContent, array $oldRevisionData = array(), $message = null, $createdBy = null, array $brandNewColumns = array())
   {
+    $affectedRows = 0;
     $revisionInfo = array_filter($revisionInfo);
     if (empty($revisionInfo)) {
       // revisions are the same as they used to be
@@ -361,7 +362,7 @@ class RevisionsManager extends RevisionsBase
       // new columns exist, and revision isn't the first. Need to get their initial revision in before continuing
       $revisionId = $this->saveRevisionContent($oldContent, $message, $createdBy);
       foreach ($brandNewColumns as $key) {
-        $this->saveRevisionData($revisionInfo[$key], $revisionId, $key, $oldContent[$key]);
+        $affectedRows += $this->saveRevisionData($revisionInfo[$key], $revisionId, $key, $oldContent[$key]);
       }
     }
     if (empty($oldContentFiltered)) {
@@ -385,15 +386,15 @@ class RevisionsManager extends RevisionsBase
       if (isset($oldRevisionData[$key])) {
         $latestRevisionData = array_shift($oldRevisionData[$key]);
         // update existing revisionData
-        $this->saveRevisionData($value, $latestRevisionData['revisionId'], $key, $oldContent[$key], $latestRevisionData['id']);
+        $affectedRows += $this->saveRevisionData($value, $latestRevisionData['revisionId'], $key, $oldContent[$key], $latestRevisionData['id']);
       } else {
         // no existing revision exists so insert a new one
-        $this->saveRevisionData($value, $revisionId, $key, $oldContent[$key]);
+        $affectedRows += $this->saveRevisionData($value, $revisionId, $key, $oldContent[$key]);
       }
       // insert new content to db
-      $this->saveRevisionData(json_encode($newContent[$key]), $newRevisionId, $key, $newContent[$key]);
+      $affectedRows += $this->saveRevisionData(json_encode($newContent[$key]), $newRevisionId, $key, $newContent[$key]);
     }
-    return true;
+    return ($affectedRows !== 0);
   }
 
   /**
