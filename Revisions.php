@@ -31,6 +31,7 @@ class Revisions extends RevisionsManager
 
   /**
    * Class constructor
+   *
    * @param array $params
    */
   public function __construct(array $params = array())
@@ -139,7 +140,7 @@ class Revisions extends RevisionsManager
    * @param  array $newText       array of text that has replaced the old text keyed by column
    * @param  string $message      revision message
    * @param  string $createdBy    person creating revision
-   * @return void
+   * @return boolean
    */
   public function makeAndSaveRevision(array $newText, $message = null, $createdBy = null)
   {
@@ -169,7 +170,7 @@ class Revisions extends RevisionsManager
       $missingRevisionDataInfo = $this->getRevisionData(null, $column, true, 1, null, true);
       $newText[$column] = $missingRevisionDataInfo[$column]['value'];
     }
-    $this->saveRevision($revisionInfoArray, $newText, $oldText, $oldRevisionDataArray, $message, $createdBy, $brandNewColumns);
+    return $this->saveRevision($revisionInfoArray, $newText, $oldText, $oldRevisionDataArray, $message, $createdBy, $brandNewColumns);
   }
 
   /**
