@@ -34,6 +34,11 @@ class APITest extends RevisionsTestsHelper
   private $dbalConnection;
 
   /**
+   * @var string
+   */
+  private $appUrl = 'https://gustavus.edu/billy';
+
+  /**
    * sets up the object for each test
    * @return void
    */
@@ -109,7 +114,7 @@ class APITest extends RevisionsTestsHelper
     $this->revisionsAPI->saveRevision(array('name' => 'Billy Visto'));
     $this->revisionsAPI->saveRevision(array('name' => 'Visto', 'age' => 23));
     $expected = "<form id=\"revisionsForm\">
-  <a href='#' id='compareRevisions' class='button'>Compare Selected Revisions</a>
+  <button id='compareRevisions'>Compare Selected Revisions</button>
 <table class=\"fancy\">
   <thead>
     <tr>
@@ -125,51 +130,52 @@ class APITest extends RevisionsTestsHelper
   </thead>
   <tbody>
   <tr>
-    <td><a href='#' class='revisionData button' value='4'>4</a></td>
+    <td><a href='{$this->appUrl}?revisionsAction=revision&amp;revisionNumber=4' class='revision' data-revisionNumber='4'>4</a></td>
     <td><input id='oldNum-4' type='radio' class='compare' value='4' /></td>
     <td><input id='newNum-4' type='radio' class='compareAgainst' value='4' /></td>
     <td>$now</td>
     <td></td>
     <td></td>
     <td>age, name</td>
-    <td><a href='#' id='rollback-4' class='rollback button' value='4'>Rollback</a></td>
+    <td><a href='{$this->appUrl}?revisionsAction=revision&amp;revisionNumber=4&amp;rollback=true' id='rollback-4' class='rollback button' data-revisionNumber='4'>Rollback</a></td>
   </tr>
     <tr>
-    <td><a href='#' class='revisionData button' value='3'>3</a></td>
+    <td><a href='{$this->appUrl}?revisionsAction=revision&amp;revisionNumber=3' class='revision' data-revisionNumber='3'>3</a></td>
     <td><input id='oldNum-3' type='radio' class='compare' value='3' /></td>
     <td><input id='newNum-3' type='radio' class='compareAgainst' value='3' /></td>
     <td>$now</td>
     <td></td>
     <td></td>
     <td>age</td>
-    <td><a href='#' id='rollback-3' class='rollback button' value='3'>Rollback</a></td>
+    <td><a href='{$this->appUrl}?revisionsAction=revision&amp;revisionNumber=3&amp;rollback=true' id='rollback-3' class='rollback button' data-revisionNumber='3'>Rollback</a></td>
   </tr>
     <tr>
-    <td><a href='#' class='revisionData button' value='2'>2</a></td>
+    <td><a href='{$this->appUrl}?revisionsAction=revision&amp;revisionNumber=2' class='revision' data-revisionNumber='2'>2</a></td>
     <td><input id='oldNum-2' type='radio' class='compare' value='2' /></td>
     <td><input id='newNum-2' type='radio' class='compareAgainst' value='2' /></td>
     <td>$now</td>
     <td></td>
     <td></td>
     <td>name</td>
-    <td><a href='#' id='rollback-2' class='rollback button' value='2'>Rollback</a></td>
+    <td><a href='{$this->appUrl}?revisionsAction=revision&amp;revisionNumber=2&amp;rollback=true' id='rollback-2' class='rollback button' data-revisionNumber='2'>Rollback</a></td>
   </tr>
     <tr>
-    <td><a href='#' class='revisionData button' value='1'>1</a></td>
+    <td><a href='{$this->appUrl}?revisionsAction=revision&amp;revisionNumber=1' class='revision' data-revisionNumber='1'>1</a></td>
     <td><input id='oldNum-1' type='radio' class='compare' value='1' /></td>
     <td><input id='newNum-1' type='radio' class='compareAgainst' value='1' /></td>
     <td>$now</td>
     <td></td>
     <td></td>
     <td>name</td>
-    <td><a href='#' id='rollback-1' class='rollback button' value='1'>Rollback</a></td>
+    <td><a href='{$this->appUrl}?revisionsAction=revision&amp;revisionNumber=1&amp;rollback=true' id='rollback-1' class='rollback button' data-revisionNumber='1'>Rollback</a></td>
   </tr>
   </tbody>
 </table>
 </form>";
 
-
-    $actual = $this->revisionsAPI->renderRevisions(10);
+    $urlParams = array('revisionsAction' => 'revisions', 'limit' => 10);
+    $actual = $this->revisionsAPI->render($urlParams, $this->appUrl);
+    //$actual = $this->revisionsAPI->renderRevisions(10);
     $this->assertXmlStringEqualsXmlString($expected, $actual);
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }
@@ -189,7 +195,7 @@ class APITest extends RevisionsTestsHelper
     $this->saveRevisionToDB('Billy', 'Billy Visto', 'name', $this->get($this->revisionsAPI, 'revisions'));
     $this->revisionsAPI->saveRevision(array('name' => 'Visto', 'age' => 23));
     $expected = "<form id=\"revisionsForm\">
-  <a href='#' id='compareRevisions' class='button'>Compare Selected Revisions</a>
+  <button id='compareRevisions'>Compare Selected Revisions</button>
       <table class=\"fancy\">
   <thead>
     <tr>
@@ -205,37 +211,37 @@ class APITest extends RevisionsTestsHelper
   </thead>
   <tbody>
   <tr>
-    <td><a href='#' class='revisionData button' value='5'>5</a></td>
+    <td><a href='{$this->appUrl}?revisionsAction=revision&amp;revisionNumber=5' class='revision' data-revisionNumber='5'>5</a></td>
     <td><input id='oldNum-5' type='radio' class='compare' value='5' /></td>
     <td><input id='newNum-5' type='radio' class='compareAgainst' value='5' /></td>
     <td>$now</td>
     <td></td>
     <td></td>
     <td>age, name</td>
-    <td><a href='#' id='rollback-5' class='rollback button' value='5'>Rollback</a></td>
+    <td><a href='{$this->appUrl}?revisionsAction=revision&amp;revisionNumber=5&amp;rollback=true' id='rollback-5' class='rollback button' data-revisionNumber='5'>Rollback</a></td>
   </tr>
   <tr>
-    <td><a href='#' class='revisionData button' value='4'>4</a></td>
+    <td><a href='{$this->appUrl}?revisionsAction=revision&amp;revisionNumber=4' class='revision' data-revisionNumber='4'>4</a></td>
     <td><input id='oldNum-4' type='radio' class='compare' value='4' /></td>
     <td><input id='newNum-4' type='radio' class='compareAgainst' value='4' /></td>
     <td>$now</td>
     <td></td>
     <td></td>
     <td>age</td>
-    <td><a href='#' id='rollback-4' class='rollback button' value='4'>Rollback</a></td>
+    <td><a href='{$this->appUrl}?revisionsAction=revision&amp;revisionNumber=4&amp;rollback=true' id='rollback-4' class='rollback button' data-revisionNumber='4'>Rollback</a></td>
   </tr>
   <tr>
-    <td><a href='#' class='revisionData button' value='3'>3</a></td>
+    <td><a href='{$this->appUrl}?revisionsAction=revision&amp;revisionNumber=3' class='revision' data-revisionNumber='3'>3</a></td>
     <td><input id='oldNum-3' type='radio' class='compare' value='3' /></td>
     <td><input id='newNum-3' type='radio' class='compareAgainst' value='3' /></td>
     <td>$now</td>
     <td>name</td>
     <td></td>
     <td>name</td>
-    <td><a href='#' id='rollback-3' class='rollback button' value='3'>Rollback</a></td>
+    <td><a href='{$this->appUrl}?revisionsAction=revision&amp;revisionNumber=3&amp;rollback=true' id='rollback-3' class='rollback button' data-revisionNumber='3'>Rollback</a></td>
   </tr>
   <tr class=\"error\">
-    <td><a href='#' class='revisionData button' value='2'>2</a></td>
+    <td><a href='{$this->appUrl}?revisionsAction=revision&amp;revisionNumber=2' class='revision' data-revisionNumber='2'>2</a></td>
     <td></td>
     <td></td>
     <td>{$this->error}</td>
@@ -247,7 +253,9 @@ class APITest extends RevisionsTestsHelper
   </tbody>
 </table>
       </form>";
-    $actual = $this->revisionsAPI->renderRevisions(10);
+    $urlParams = array('revisionsAction' => 'revisions', 'limit' => 10);
+    $actual = $this->revisionsAPI->render($urlParams, $this->appUrl);
+    //$actual = $this->revisionsAPI->renderRevisions(10);
     $this->assertXmlStringEqualsXmlString($expected, $actual);
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }
@@ -288,7 +296,9 @@ class APITest extends RevisionsTestsHelper
   </tbody>
 </table>
       </form>";
-    $actual = $this->revisionsAPI->renderRevisionComparisonText(2, 5);
+    $urlParams = array('revisionsAction' => 'text', 'oldRevisionNumber' => 2, 'newRevisionNumber' => 5);
+    $actual = $this->revisionsAPI->render($urlParams, $this->appUrl);
+    //$actual = $this->revisionsAPI->renderRevisionComparisonText(2, 5);
     $this->assertXmlStringEqualsXmlString($expected, $actual);
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }
@@ -330,7 +340,9 @@ class APITest extends RevisionsTestsHelper
   </tbody>
 </table>
       </form>";
-    $actual = $this->revisionsAPI->renderRevisionComparisonText(2, 4);
+    $urlParams = array('revisionsAction' => 'text', 'oldRevisionNumber' => 2, 'newRevisionNumber' => 4);
+    $actual = $this->revisionsAPI->render($urlParams, $this->appUrl);
+    //$actual = $this->revisionsAPI->renderRevisionComparisonText(2, 4);
     $this->assertXmlStringEqualsXmlString($expected, $actual);
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }
@@ -368,7 +380,9 @@ class APITest extends RevisionsTestsHelper
   </tbody>
 </table>
       </form>";
-    $actual = $this->revisionsAPI->renderRevisionComparisonDiff(2, 5);
+    $urlParams = array('revisionsAction' => 'diff', 'oldRevisionNumber' => 2, 'newRevisionNumber' => 5);
+    $actual = $this->revisionsAPI->render($urlParams, $this->appUrl);
+    //$actual = $this->revisionsAPI->renderRevisionComparisonDiff(2, 5);
     $this->assertXmlStringEqualsXmlString($expected, $actual);
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }
@@ -407,7 +421,9 @@ class APITest extends RevisionsTestsHelper
   </tbody>
 </table>
       </form>";
-    $actual = $this->revisionsAPI->renderRevisionComparisonDiff(2, 5);
+    $urlParams = array('revisionsAction' => 'diff', 'oldRevisionNumber' => 2, 'newRevisionNumber' => 5);
+    $actual = $this->revisionsAPI->render($urlParams, $this->appUrl);
+    //$actual = $this->revisionsAPI->renderRevisionComparisonDiff(2, 5);
     $this->assertXmlStringEqualsXmlString($expected, $actual);
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }
@@ -451,7 +467,9 @@ class APITest extends RevisionsTestsHelper
   </tbody>
 </table>
       </form>";
-    $actual = $this->revisionsAPI->renderRevisionComparisonTextDiff(2, 5);
+    $urlParams = array('revisionsAction' => 'textDiff', 'oldRevisionNumber' => 2, 'newRevisionNumber' => 5);
+    $actual = $this->revisionsAPI->render($urlParams, $this->appUrl);
+    //$actual = $this->revisionsAPI->renderRevisionComparisonTextDiff(2, 5);
     $this->assertXmlStringEqualsXmlString($expected, $actual);
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }
@@ -496,7 +514,9 @@ class APITest extends RevisionsTestsHelper
   </tbody>
 </table>
       </form>";
-    $actual = $this->revisionsAPI->renderRevisionComparisonTextDiff(2, 5);
+    $urlParams = array('revisionsAction' => 'textDiff', 'oldRevisionNumber' => 2, 'newRevisionNumber' => 5);
+    $actual = $this->revisionsAPI->render($urlParams, $this->appUrl);
+    //$actual = $this->revisionsAPI->renderRevisionComparisonTextDiff(2, 5);
     $this->assertXmlStringEqualsXmlString($expected, $actual);
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }
@@ -530,7 +550,9 @@ class APITest extends RevisionsTestsHelper
   </tbody>
 </table>
       </form>";
-    $actual = $this->revisionsAPI->renderRevisionData(2);
+    $urlParams = array('revisionsAction' => 'revision', 'revisionNumber' => 2);
+    $actual = $this->revisionsAPI->render($urlParams, $this->appUrl);
+    //$actual = $this->revisionsAPI->renderRevisionData(2);
     $this->assertXmlStringEqualsXmlString($expected, $actual);
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }
@@ -565,8 +587,180 @@ class APITest extends RevisionsTestsHelper
   </tbody>
 </table>
       </form>";
-    $actual = $this->revisionsAPI->renderRevisionData(2);
+    $urlParams = array('revisionsAction' => 'revision', 'revisionNumber' => 2);
+    $actual = $this->revisionsAPI->render($urlParams, $this->appUrl);
+    //$actual = $this->revisionsAPI->renderRevisionData(2);
     $this->assertXmlStringEqualsXmlString($expected, $actual);
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
+  public function renderRevisionComparisonDiffRevisions()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $now = date("F jS \\a\\t g:ia");
+    $this->revisionsAPI->saveRevision(array('name' => 'Billy Visto'));
+    $this->revisionsAPI->saveRevision(array('name' => 'Visto', 'age' => 23));
+    $expected = "<form id=\"revisionsForm\">
+  <button id='compareRevisions'>Compare Selected Revisions</button>
+<table class=\"fancy\">
+  <thead>
+    <tr>
+      <th>Revision Number</th>
+      <th></th>
+      <th></th>
+      <th>Created On</th>
+      <th>Created By</th>
+      <th>Message</th>
+      <th>Modified Columns</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+  <tr>
+    <td><a href='{$this->appUrl}?revisionsAction=revision&amp;revisionNumber=4' class='revision' data-revisionNumber='4'>4</a></td>
+    <td><input id='oldNum-4' type='radio' class='compare' value='4' /></td>
+    <td><input id='newNum-4' type='radio' class='compareAgainst' value='4' /></td>
+    <td>$now</td>
+    <td></td>
+    <td></td>
+    <td>age, name</td>
+    <td><a href='{$this->appUrl}?revisionsAction=revision&amp;revisionNumber=4&amp;rollback=true' id='rollback-4' class='rollback button' data-revisionNumber='4'>Rollback</a></td>
+  </tr>
+    <tr>
+    <td><a href='{$this->appUrl}?revisionsAction=revision&amp;revisionNumber=3' class='revision' data-revisionNumber='3'>3</a></td>
+    <td><input id='oldNum-3' type='radio' class='compare' value='3' /></td>
+    <td><input id='newNum-3' type='radio' class='compareAgainst' value='3' /></td>
+    <td>$now</td>
+    <td></td>
+    <td></td>
+    <td>age</td>
+    <td><a href='{$this->appUrl}?revisionsAction=revision&amp;revisionNumber=3&amp;rollback=true' id='rollback-3' class='rollback button' data-revisionNumber='3'>Rollback</a></td>
+  </tr>
+    <tr>
+    <td><a href='{$this->appUrl}?revisionsAction=revision&amp;revisionNumber=2' class='revision' data-revisionNumber='2'>2</a></td>
+    <td><input id='oldNum-2' type='radio' class='compare' value='2' /></td>
+    <td><input id='newNum-2' type='radio' class='compareAgainst' value='2' /></td>
+    <td>$now</td>
+    <td></td>
+    <td></td>
+    <td>name</td>
+    <td><a href='{$this->appUrl}?revisionsAction=revision&amp;revisionNumber=2&amp;rollback=true' id='rollback-2' class='rollback button' data-revisionNumber='2'>Rollback</a></td>
+  </tr>
+    <tr>
+    <td><a href='{$this->appUrl}?revisionsAction=revision&amp;revisionNumber=1' class='revision' data-revisionNumber='1'>1</a></td>
+    <td><input id='oldNum-1' type='radio' class='compare' value='1' /></td>
+    <td><input id='newNum-1' type='radio' class='compareAgainst' value='1' /></td>
+    <td>$now</td>
+    <td></td>
+    <td></td>
+    <td>name</td>
+    <td><a href='{$this->appUrl}?revisionsAction=revision&amp;revisionNumber=1&amp;rollback=true' id='rollback-1' class='rollback button' data-revisionNumber='1'>Rollback</a></td>
+  </tr>
+  </tbody>
+</table>
+</form>";
+
+    $urlParams = array('revisionsAction' => 'diff', 'limit' => 10);
+    $actual = $this->revisionsAPI->render($urlParams, $this->appUrl);
+    //$actual = $this->revisionsAPI->renderRevisions(10);
+    $this->assertXmlStringEqualsXmlString($expected, $actual);
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
+  public function renderRevisionRevisions()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $now = date("F jS \\a\\t g:ia");
+    $this->revisionsAPI->saveRevision(array('name' => 'Billy Visto'));
+    $this->revisionsAPI->saveRevision(array('name' => 'Visto', 'age' => 23));
+    $expected = "<form id=\"revisionsForm\">
+  <button id='compareRevisions'>Compare Selected Revisions</button>
+<table class=\"fancy\">
+  <thead>
+    <tr>
+      <th>Revision Number</th>
+      <th></th>
+      <th></th>
+      <th>Created On</th>
+      <th>Created By</th>
+      <th>Message</th>
+      <th>Modified Columns</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+  <tr>
+    <td><a href='{$this->appUrl}?revisionsAction=revision&amp;revisionNumber=4' class='revision' data-revisionNumber='4'>4</a></td>
+    <td><input id='oldNum-4' type='radio' class='compare' value='4' /></td>
+    <td><input id='newNum-4' type='radio' class='compareAgainst' value='4' /></td>
+    <td>$now</td>
+    <td></td>
+    <td></td>
+    <td>age, name</td>
+    <td><a href='{$this->appUrl}?revisionsAction=revision&amp;revisionNumber=4&amp;rollback=true' id='rollback-4' class='rollback button' data-revisionNumber='4'>Rollback</a></td>
+  </tr>
+    <tr>
+    <td><a href='{$this->appUrl}?revisionsAction=revision&amp;revisionNumber=3' class='revision' data-revisionNumber='3'>3</a></td>
+    <td><input id='oldNum-3' type='radio' class='compare' value='3' /></td>
+    <td><input id='newNum-3' type='radio' class='compareAgainst' value='3' /></td>
+    <td>$now</td>
+    <td></td>
+    <td></td>
+    <td>age</td>
+    <td><a href='{$this->appUrl}?revisionsAction=revision&amp;revisionNumber=3&amp;rollback=true' id='rollback-3' class='rollback button' data-revisionNumber='3'>Rollback</a></td>
+  </tr>
+    <tr>
+    <td><a href='{$this->appUrl}?revisionsAction=revision&amp;revisionNumber=2' class='revision' data-revisionNumber='2'>2</a></td>
+    <td><input id='oldNum-2' type='radio' class='compare' value='2' /></td>
+    <td><input id='newNum-2' type='radio' class='compareAgainst' value='2' /></td>
+    <td>$now</td>
+    <td></td>
+    <td></td>
+    <td>name</td>
+    <td><a href='{$this->appUrl}?revisionsAction=revision&amp;revisionNumber=2&amp;rollback=true' id='rollback-2' class='rollback button' data-revisionNumber='2'>Rollback</a></td>
+  </tr>
+    <tr>
+    <td><a href='{$this->appUrl}?revisionsAction=revision&amp;revisionNumber=1' class='revision' data-revisionNumber='1'>1</a></td>
+    <td><input id='oldNum-1' type='radio' class='compare' value='1' /></td>
+    <td><input id='newNum-1' type='radio' class='compareAgainst' value='1' /></td>
+    <td>$now</td>
+    <td></td>
+    <td></td>
+    <td>name</td>
+    <td><a href='{$this->appUrl}?revisionsAction=revision&amp;revisionNumber=1&amp;rollback=true' id='rollback-1' class='rollback button' data-revisionNumber='1'>Rollback</a></td>
+  </tr>
+  </tbody>
+</table>
+</form>";
+
+    $urlParams = array('revisionsAction' => 'revision', 'limit' => 10);
+    $actual = $this->revisionsAPI->render($urlParams, $this->appUrl);
+    //$actual = $this->revisionsAPI->renderRevisions(10);
+    $this->assertXmlStringEqualsXmlString($expected, $actual);
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
+  public function getApplicationUrlParams($value='')
+  {
+    $actual = $this->call($this->revisionsAPI, 'getApplicationUrlParams', array(array('revisionsAction' => 'revision', 'limit' => 10, 'pr' => 'manage')));
+    $expected = array('pr' => 'manage');
+    $this->assertSame($expected, $actual);
   }
 }

@@ -25,6 +25,20 @@ class API
   private $revisionsRenderer;
 
   /**
+   * array of possible query string parameters for revisions
+   *
+   * @var array
+   */
+  private $possibleRevisionsQueryParams = array(
+    'revisionsAction',
+    'revisionNumber',
+    'newRevisionNumber',
+    'oldRevisionNumber',
+    'column',
+    'limit',
+  );
+
+  /**
    * Class constructor
    *
    * @param array $params application's revision info
@@ -52,9 +66,105 @@ class API
     unset($this->revisions);
   }
 
-  private function constructRevisionsRenderer()
+  /**
+   * Renders out the revisions or revision requested
+   *
+   * @param  array  $urlParams $_GET syntax
+   * @param  string  $urlBase base location of the page requesting info
+   * @return string
+   */
+  public function render(array $urlParams, $urlBase = '')
   {
-    $this->revisionsRenderer = new RevisionsRenderer($this->revisions);
+    $this->constructRevisionsRenderer($urlParams, $urlBase);
+    return $this->doWorkRequstedInUrl($urlParams);
+  }
+
+  /**
+   * Figure out what application wants to do with what is in the url
+   * available actions: revisions, revision, text, diff, textDiff
+   *
+   * @param  array $urlParams associative array of url
+   * @return string
+   */
+  private function doWorkRequstedInUrl(array $urlParams)
+  {
+    switch ($urlParams['revisionsAction']) {
+      case 'revisions' :
+        return $this->renderRevisionsFromUrlParams($urlParams);
+      case 'revision' :
+        return $this->renderRevisionFromUrlParams($urlParams);
+      default :
+        return $this->renderRevisionComparisonFromUrlParams($urlParams);
+    }
+  }
+
+  /**
+   * Render Revisions list
+   *
+   * @param  array  $urlParams
+   * @return string
+   */
+  private function renderRevisionsFromUrlParams(array $urlParams)
+  {
+    return (isset($urlParams['limit'])) ? $this->renderRevisions($urlParams['limit']) : $this->renderRevisions();
+  }
+
+  /**
+   * Render Revision based on the params specified
+   *
+   * @param  array  $urlParams
+   * @return string
+   */
+  private function renderRevisionFromUrlParams(array $urlParams)
+  {
+    if (isset($urlParams['revisionNumber'])) {
+      return (isset($urlParams['column'])) ? $this->renderRevisionData($urlParams['revisionNumber'], $urlParams['column']) : $this->renderRevisionData($urlParams['revisionNumber']);
+    } else {
+      return $this->renderRevisionsFromUrlParams($urlParams);
+    }
+  }
+
+  /**
+   * Render Revision comparison based on params
+   *
+   * @param  array  $urlParams
+   * @return string
+   */
+  private function renderRevisionComparisonFromUrlParams(array $urlParams)
+  {
+    if (isset($urlParams['oldRevisionNumber'], $urlParams['newRevisionNumber'])) {
+      $function = 'renderRevisionComparison' . ucfirst($urlParams['revisionsAction']);
+      return (isset($urlParams['column'])) ? $this->{$function}($urlParams['oldRevisionNumber'], $urlParams['newRevisionNumber'], $urlParams['column']) : $this->{$function}($urlParams['oldRevisionNumber'], $urlParams['newRevisionNumber']);
+    } else {
+      return $this->renderRevisionsFromUrlParams($urlParams);
+    }
+  }
+
+  /**
+   * constructs revisionsRenderer object
+   *
+   * @return void
+   */
+  private function constructRevisionsRenderer(array $urlParams, $urlBase)
+  {
+    $this->revisionsRenderer = new RevisionsRenderer($this->revisions, $urlBase, $this->getApplicationUrlParams($urlParams));
+  }
+
+  /**
+   * make application url params
+   *
+   * @param  array $urlParams
+   * @return array
+   */
+  private function getApplicationUrlParams(array $urlParams)
+  {
+    $applicationUrlParams = array();
+    foreach ($urlParams as $key => $value) {
+      if (!in_array($key, $this->possibleRevisionsQueryParams)) {
+        $applicationUrlParams[$key] = $value;
+      }
+    }
+    return $applicationUrlParams;
   }
 
   /**
@@ -79,7 +189,6 @@ class API
   public function renderRevisions($limit = 5)
   {
     $this->revisions->setLimit($limit);
-    $this->constructRevisionsRenderer();
     return $this->revisionsRenderer->renderRevisions($limit);
   }
 
@@ -93,7 +202,6 @@ class API
    */
   public function renderRevisionComparisonText($oldRevNum, $newRevNum, $column = null)
   {
-    $this->constructRevisionsRenderer();
     return $this->revisionsRenderer->renderRevisionComparisonText($oldRevNum, $newRevNum, $column);
   }
 
@@ -107,7 +215,6 @@ class API
    */
   public function renderRevisionComparisonDiff($oldRevNum, $newRevNum, $column = null)
   {
-    $this->constructRevisionsRenderer();
     return $this->revisionsRenderer->renderRevisionComparisonDiff($oldRevNum, $newRevNum, $column);
   }
 
@@ -121,7 +228,6 @@ class API
    */
   public function renderRevisionComparisonTextDiff($oldRevNum, $newRevNum, $column = null)
   {
-    $this->constructRevisionsRenderer();
     return $this->revisionsRenderer->renderRevisionComparisonTextDiff($oldRevNum, $newRevNum, $column);
   }
 
@@ -134,7 +240,6 @@ class API
    */
   public function renderRevisionData($revNum, $column = null)
   {
-    $this->constructRevisionsRenderer();
     return $this->revisionsRenderer->renderRevisionData($revNum, $column);
   }
 }
