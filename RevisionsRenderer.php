@@ -45,7 +45,7 @@ class RevisionsRenderer
    */
   public function __destruct()
   {
-    unset($this->revisions);
+    unset($this->revisions, $this->applicationBaseUrl, $this->applicationUrlParams);
   }
 
   /**
