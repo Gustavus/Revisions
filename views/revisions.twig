@@ -2,7 +2,7 @@
 {% import 'baseTable.twig' as baseTable %}
 
 {% block actionButton %}
-  <a href='#' id='compareRevisions' class='button'>Compare Selected Revisions</a>
+  <button id="compareRevisions">Compare Selected Revisions</button>
 {% endblock %}
 
 {% block headers %}
@@ -17,18 +17,18 @@
 {% endblock %}
 
 {% block rows %}
-  <td><a href='#' class='revisionData button' value='{{ revision.revisionNumber }}'>{{ revision.revisionNumber }}</a></td>
+  <td><a href="{{ revisionUrl }}{{ revision.revisionNumber }}" class="revision" data-revisionNumber="{{ revision.revisionNumber }}">{{ revision.revisionNumber }}</a></td>
   {% if revision.error %}
     <td></td>
     <td></td>
     {{ baseTable.renderErrorColumns(5) }}
   {% else %}
-    <td><input id='oldNum-{{ revision.revisionNumber }}' type='radio' class='compare' value='{{ revision.revisionNumber }}' /></td>
-    <td><input id='newNum-{{ revision.revisionNumber }}' type='radio' class='compareAgainst' value='{{ revision.revisionNumber }}' /></td>
+    <td><input id="oldNum-{{ revision.revisionNumber }}" type="radio" class="compare" value="{{ revision.revisionNumber }}" /></td>
+    <td><input id="newNum-{{ revision.revisionNumber }}" type="radio" class="compareAgainst" value="{{ revision.revisionNumber }}" /></td>
     <td>{{ revision.revisionDate|date("F jS \\a\\t g:ia") }}</td>
     <td>{{ revision.createdBy }}</td>
     <td>{{ revision.message }}</td>
     <td>{{ revision.modifiedColumns|join(', ') }}</td>
-    <td><a href='#' id='rollback-{{ revision.revisionNumber }}' class='rollback button' value='{{ revision.revisionNumber }}'>Rollback</a></td>
+    <td><a href="{{ revisionUrl }}{{ revision.revisionNumber }}&amp;rollback=true" id="rollback-{{ revision.revisionNumber }}" class="rollback button" data-revisionNumber="{{ revision.revisionNumber }}">Rollback</a></td>
   {% endif %}
 {% endblock %}
