@@ -18,12 +18,24 @@ class RevisionsRenderer
   private $revisions;
 
   /**
+   * @var string
+   */
+  private $applicationBaseUrl;
+
+  /**
+   * @var array
+   */
+  private $applicationUrlParams;
+
+  /**
    * Class constructor
    * @param Revisions $revisions
    */
-  public function __construct(Revisions $revisions)
+  public function __construct(Revisions $revisions, $applicationBaseUrl = '', array $applicationUrlParams = array())
   {
     $this->revisions = $revisions;
+    $this->applicationBaseUrl = $applicationBaseUrl;
+    $this->applicationUrlParams = $applicationUrlParams;
   }
 
   /**
@@ -36,6 +48,14 @@ class RevisionsRenderer
     unset($this->revisions);
   }
 
+  private function makeUrl(array $urlParams)
+  {
+    $urlParams = array_merge($this->applicationUrlParams, $urlParams);
+    $queryString = http_build_query($urlParams);
+    $url = (empty($queryString)) ? $this->applicationBaseUrl : sprintf('%1$s?%2$s', $this->applicationBaseUrl, $queryString);
+    return $url;
+  }
+
   /**
    * Renders out all the revisions with information about them
    *
@@ -45,7 +65,7 @@ class RevisionsRenderer
   public function renderRevisions($limit = 5)
   {
     $this->revisions->setLimit($limit);
-    return $this->renderTwig('revisions.twig', $this->revisions->getRevisionObjects());
+    return $this->renderTwig('revisions.twig', $this->revisions->getRevisionObjects(), array('revisionUrl' => $this->makeUrl(array('revisionsAction' => 'revision', 'revisionNumber' => ''))));
   }
 
   /**
@@ -104,10 +124,11 @@ class RevisionsRenderer
    *
    * @param  string $filename  location of twig template
    * @param  mixed $revisions array of revisions, or a single revision object
+   * @param  array $params  array of additional params to pass to twig
    * @return string
    */
-  private function renderTwig($filename, $revisions)
+  private function renderTwig($filename, $revisions, array $params = array())
   {
-    return \Gustavus\TwigFactory\TwigFactory::renderTwigFilesystemTemplate("/cis/lib/Gustavus/Revisions/views/$filename", array('revisions' => $revisions));
+    return \Gustavus\TwigFactory\TwigFactory::renderTwigFilesystemTemplate("/cis/lib/Gustavus/Revisions/views/$filename", array_merge(array('revisions' => $revisions), $params));
   }
 }
