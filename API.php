@@ -63,7 +63,7 @@ class API
    */
   public function __destruct()
   {
-    unset($this->revisions);
+    unset($this->revisions, $this->revisionsRenderer);
   }
 
   /**
