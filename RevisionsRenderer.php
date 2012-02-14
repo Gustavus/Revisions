@@ -48,6 +48,12 @@ class RevisionsRenderer
     unset($this->revisions);
   }
 
+  /**
+   * makes the url based off of the application's base url and the application's query string
+   *
+   * @param  array  $urlParams
+   * @return string
+   */
   private function makeUrl(array $urlParams)
   {
     $urlParams = array_merge($this->applicationUrlParams, $urlParams);
