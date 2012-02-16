@@ -492,7 +492,9 @@ class Revisions extends RevisionsManager
     if (!isset($this->revisions) || !array_key_exists($revisionNumber, $this->revisions)) {
       return null;
     }
-    $this->pullRevisionsUntilRevisionNumber($revisionNumber, $column);
+    if ($this->revisions[$revisionNumber] === null) {
+      $this->pullRevisionsUntilRevisionNumber($revisionNumber, $column);
+    }
     return $this->revisions[$revisionNumber];
   }
 
@@ -505,16 +507,16 @@ class Revisions extends RevisionsManager
    */
   private function pullRevisionsUntilRevisionNumber($revisionNumber, $column = null)
   {
-    if ($this->revisions[$revisionNumber] === null) {
-      $oldestRevNumPulled = $this->findOldestRevisionNumberPulled();
-      for ($i = $oldestRevNumPulled; $i > $revisionNumber; --$i) {
-        // keep pulling in revisions until the revision number is in the object
-        $oldestRevisionPulled = $this->getOldestRevisionPulled($column);
-        if ($oldestRevisionPulled->getError()) {
-          break;
-        }
-        $this->populateObjectWithRevisions($column);
+    $i = $this->findOldestRevisionNumberPulled();
+    while ($i > $revisionNumber) {
+      // keep pulling in revisions until the revision number is in the object
+      $oldestRevisionPulled = $this->getOldestRevisionPulled($column);
+      if ($oldestRevisionPulled->getError()) {
+        break;
       }
+      $this->populateObjectWithRevisions($column);
+      // this way avoids pulling in the limit everytime and allows us to jump ahead to only pull in the necessary amount of revisions
+      $i = $i - $this->getLimit();
     }
   }
 
