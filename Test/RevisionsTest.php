@@ -127,7 +127,7 @@ class RevisionsTest extends RevisionsTestsHelper
     $this->revisions->makeAndSaveRevision(array('age' => 22));
     $this->revisions->makeAndSaveRevision(array('age' => 23, 'name' => 'Billy Visto'));
 
-    $result = $this->revisions->compareTwoRevisions(3, 1, 'name');
+    $result = $this->revisions->compareTwoRevisions(3, 2, 'name');
     $this->assertInstanceOf('\Gustavus\Revisions\Revision', $result);
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }
@@ -926,6 +926,119 @@ class RevisionsTest extends RevisionsTestsHelper
     $this->saveRevisionToDB('Billy', 'Billy Visto', 'name', $this->revisions);
     $this->call($this->revisions, 'populateObjectWithRevisions');
     $this->assertSame(4, $this->call($this->revisions, 'findLatestRevisionNumberPulled'));
+
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
+  public function getRevisionContentArray()
+  {
+    $conn = $this->getConnection();
+    $this->revisionsManagerInfo['limit'] = 10;
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Visto', 'age' => 22));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Joel Visto', 'age' => 23));
+    $this->call($this->revisions, 'populateObjectWithRevisions');
+    $expected = array('age' => 22, 'name' => 'Visto');
+    $actual = $this->revisions->getRevisionContentArray(4);
+    $this->assertSame($expected, $actual);
+
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
+  public function getRevisionObjectsStartingNum()
+  {
+    $conn = $this->getConnection();
+    $this->revisionsManagerInfo['limit'] = 1;
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Visto', 'age' => 22));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Joel Visto', 'age' => 23));
+    $this->revisions->getRevisionObjects();
+    $this->assertSame(5, $this->revisions->findOldestRevisionNumberPulled());
+    $this->revisions->getRevisionObjects(5);
+    $this->assertSame(4, $this->revisions->findOldestRevisionNumberPulled());
+
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
+  public function getRevisionObjectsStartingNumGoingPastZero()
+  {
+    $conn = $this->getConnection();
+    $this->revisionsManagerInfo['limit'] = 3;
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Visto', 'age' => 22));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Joel Visto', 'age' => 23));
+    $this->revisions->getRevisionObjects();
+    $this->assertSame(3, $this->revisions->findOldestRevisionNumberPulled());
+    $this->revisions->getRevisionObjects(2);
+    $this->assertSame(1, $this->revisions->findOldestRevisionNumberPulled());
+
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
+  public function revisionsHaveErrors()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy'));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
+    $this->revisions->makeAndSaveRevision(array('age' => '23'));
+    $this->revisions->makeAndSaveRevision(array('age' => 23));
+    $this->revisions->makeAndSaveRevision(array('age' => 29, 'name' => 'Billy Joel Visto'));
+
+    $this->assertNotNull($this->revisions->getRevisionByNumber(1));
+    $this->assertFalse($this->revisions->revisionsHaveErrors());
+
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
+  public function revisionsHaveErrorsError()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy'));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
+    $this->saveRevisionToDB('Billy', 'Billy Visto', 'name', $this->revisions);
+    $this->revisions->makeAndSaveRevision(array('age' => '23'));
+    $this->revisions->makeAndSaveRevision(array('age' => 23));
+    $this->revisions->makeAndSaveRevision(array('age' => 29, 'name' => 'Billy Joel Visto'));
+
+    $this->assertNull($this->revisions->getRevisionByNumber(1));
+    $this->assertTrue($this->revisions->revisionsHaveErrors());
 
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }

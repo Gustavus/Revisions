@@ -65,7 +65,7 @@ class Revisions extends RevisionsManager
   public function makeRevisionData($oldText, $newText)
   {
     $revisionData = new RevisionDataDiff(array('currentContent' => $oldText));
-    $revisionData->makeRevisionContent($newText);
+    $revisionData->makeRevisionDataInfo($newText);
     return $revisionData;
   }
 
@@ -92,9 +92,21 @@ class Revisions extends RevisionsManager
   public function compareTwoRevisions($oldRevisionNum, $newRevisionNum, $column = null)
   {
     $revisionDataArray = array();
+    if ($newRevisionNum < $oldRevisionNum) {
+      // to make sure we show how an older revision changed to get to the newer content
+      $num = $newRevisionNum;
+      $newRevisionNum = $oldRevisionNum;
+      $oldRevisionNum = $num;
+    }
     $revA = $this->getRevisionForComparison($oldRevisionNum, false);
     $revB = $this->getRevisionForComparison($newRevisionNum, true);
-    foreach ($revB->getRevisionData($column) as $key => $revisionDataB) {
+    if (empty($column)) {
+      $revBData = $revB->getRevisionData($column);
+    } else {
+      // this way we don't have to do something different for non arrays
+      $revBData = array($column => $revB->getRevisionData($column));
+    }
+    foreach ($revBData as $key => $revisionDataB) {
       // revA might not have all the columns that B has
       $revisionDataA = $revA->getRevisionData($key);
       if ($revisionDataB->getError() || ($revisionDataA !== null && $revisionDataA->getError())) {
@@ -103,7 +115,7 @@ class Revisions extends RevisionsManager
       } else {
         $revADataContent = ($revisionDataA === null) ? '' : $revisionDataA->makeRevisionContent();
         $revBDataContent = $revisionDataB->makeRevisionContent();
-        $revisionDataArray[$key] = $this->makeRevisionData($revBDataContent, $revADataContent);
+        $revisionDataArray[$key] = $this->makeRevisionData($revADataContent, $revBDataContent);
       }
     }
     if ($revB->getError() || $revA->getError()) {
@@ -175,7 +187,7 @@ class Revisions extends RevisionsManager
 
   /**
    * Gets and stores revisions in the object
-   * Defaults to pull the latest 10 revisions to cache in the object
+   * Defaults to pull the latest 5 revisions to cache in the object
    *
    * @param string $column
    * @return void
@@ -241,14 +253,15 @@ class Revisions extends RevisionsManager
           $this->revisionDataHasBeenPulled[$key] = true;
         }
         $previousContent = $value['value'];
+        $previousRevisionData = null;
       } else {
-        $previousRevision = $this->getOldestRevisionDataPulled($key, $revisionId);
-        $previousContent = $previousRevision->makeRevisionContent();
-        $previousError = $previousRevision->getError();
+        $previousRevisionData = $this->getOldestRevisionDataPulled($key, $revisionId);
+        $previousContent = $previousRevisionData->makeRevisionContent();
+        $previousError = $previousRevisionData->getError();
       }
       if (!$previousError) {
-        if (isset($previousRevision) && $previousRevision->getRevisionId() === $revisionId) {
-          $revisionData = $previousRevision;
+        if (isset($previousRevisionData) && $previousRevisionData->getRevisionId() === $revisionId) {
+          $revisionData = $previousRevisionData;
         } else {
           $params = array(
             'revisionId'      => $value['revisionId'],
@@ -270,6 +283,7 @@ class Revisions extends RevisionsManager
       $columnInfo = $this->getColumnInformation($revisionDataInfo);
       $revisionDataArray = array_merge($revisionDataArray, $this->getMissingRevisionDataFromObject($columnInfo['missingColumns']));
     }
+    ksort($revisionDataArray);
     return array('revisionData' => $revisionDataArray, 'modifiedColumns' => $modifiedColumns);
   }
 
@@ -367,7 +381,7 @@ class Revisions extends RevisionsManager
    * @param string $column
    * @return integer
    */
-  private function findOldestRevisionNumberPulled($column = null)
+  public function findOldestRevisionNumberPulled($column = null)
   {
     if (!isset($this->revisions)) {
       return null;
@@ -388,7 +402,7 @@ class Revisions extends RevisionsManager
    *
    * @return integer
    */
-  private function findLatestRevisionNumberPulled()
+  public function findLatestRevisionNumberPulled()
   {
     if (!isset($this->revisions)) {
       return null;
@@ -478,9 +492,22 @@ class Revisions extends RevisionsManager
     if (!isset($this->revisions) || !array_key_exists($revisionNumber, $this->revisions)) {
       return null;
     }
+    $this->pullRevisionsUntilRevisionNumber($revisionNumber, $column);
+    return $this->revisions[$revisionNumber];
+  }
+
+  /**
+   * Pulls in revisions until the specified revision number is in the object
+   *
+   * @param  integer $revisionNumber
+   * @param  string $column
+   * @return void
+   */
+  private function pullRevisionsUntilRevisionNumber($revisionNumber, $column = null)
+  {
     if ($this->revisions[$revisionNumber] === null) {
       $oldestRevNumPulled = $this->findOldestRevisionNumberPulled();
-      for ($i = $oldestRevNumPulled; $i >= $revisionNumber; --$i) {
+      for ($i = $oldestRevNumPulled; $i > $revisionNumber; --$i) {
         // keep pulling in revisions until the revision number is in the object
         $oldestRevisionPulled = $this->getOldestRevisionPulled($column);
         if ($oldestRevisionPulled->getError()) {
@@ -489,17 +516,53 @@ class Revisions extends RevisionsManager
         $this->populateObjectWithRevisions($column);
       }
     }
-    return $this->revisions[$revisionNumber];
+  }
+
+  /**
+   * check if any revisions with errors have been pulled
+   *
+   * @return boolean
+   */
+  public function revisionsHaveErrors()
+  {
+    foreach ($this->revisions as $revision) {
+      if ($revision !== null && $revision->getError()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * gets the revision content and returns an associative array for the application to use for saving
+   * @param  integer $revisionNumber
+   * @return array
+   */
+  public function getRevisionContentArray($revisionNumber)
+  {
+    $return = array();
+    foreach ($this->getRevisionByNumber($revisionNumber)->getRevisionData() as $column => $revisionData) {
+      $return[$column] = $revisionData->getRevisionContent();
+    }
+    return $return;
   }
 
   /**
    * Pulls revisions out of the object to return an array keyed by revision
    *
+   * @param integer $oldestRevisionNumberPulled
    * @return array of revisions
    */
-  public function getRevisionObjects()
+  public function getRevisionObjects($oldestRevisionNumberPulled = null)
   {
     $this->populateEmptyRevisions();
+    if ($oldestRevisionNumberPulled !== null) {
+      $oldestRevNumToPull = $oldestRevisionNumberPulled - $this->getLimit();
+      if ($oldestRevNumToPull <= 0) {
+        $oldestRevNumToPull = 1;
+      }
+      $this->pullRevisionsUntilRevisionNumber($oldestRevNumToPull);
+    }
     return $this->revisions;
   }
 
@@ -508,7 +571,7 @@ class Revisions extends RevisionsManager
    *
    * @return void
    */
-  private function populateEmptyRevisions()
+  public function populateEmptyRevisions()
   {
     if (!$this->revisionDataHasBeenPulled) {
       // no revisions in the object
