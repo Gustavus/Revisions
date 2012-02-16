@@ -78,6 +78,14 @@ class RevisionsManager extends RevisionsBase
   }
 
   /**
+   * @return integer
+   */
+  public function getLimit()
+  {
+    return $this->limit;
+  }
+
+  /**
    * @return /Doctrine/DBAL connection
    */
   protected function getDB()
@@ -355,7 +363,7 @@ class RevisionsManager extends RevisionsBase
     if (empty($revisionInfo)) {
       // revisions are the same as they used to be
       // don't do anything
-      return false;
+      return true;
     }
     $oldContentFiltered = array_filter($oldContent);
     if (!empty($brandNewColumns) && !empty($oldContentFiltered)) {
