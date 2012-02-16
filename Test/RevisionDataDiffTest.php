@@ -197,6 +197,22 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
   /**
    * @test
    */
+  public function renderRevisionSameAsWas()
+  {
+    $this->revisionDataDiffProperties = array(
+      'currentContent' => 'some testing content',
+    );
+    $this->setUp();
+    $this->set($this->revisionDataDiff, 'revisionInfo', null);
+    $expected = 'some testing content';
+
+    $result = $this->call($this->revisionDataDiff, 'renderRevision');
+    $this->assertSame($expected, $result);
+  }
+
+  /**
+   * @test
+   */
   public function renderRevisionTwoWords()
   {
     $this->revisionDataDiffProperties = array(
@@ -557,6 +573,23 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
 
     $result = $this->call($this->revisionDataDiff, 'makeRevisionContent', array(true));
     $this->assertSame($expected, $result);
+  }
+
+  /**
+   * @test
+   */
+  public function makeRevisionDataInfo()
+  {
+    $this->revisionDataDiffProperties['currentContent'] = 'some testing test content';
+    $this->setUp();
+    $this->revisionDataDiff->setRevisionInfo(array());
+    $this->revisionDataDiff->makeRevisionDataInfo('some test content');
+
+    $result = $this->revisionDataDiff->getRevisionInfo();
+    $this->assertTrue(is_array($result));
+    $this->assertInstanceOf('\Gustavus\Revisions\DiffInfo', $result[0]);
+    $this->assertSame('some testing test content', $this->revisionDataDiff->getRevisionContent());
+    $this->assertSame('some test content', $this->revisionDataDiff->getCurrentContent());
   }
 
   /**

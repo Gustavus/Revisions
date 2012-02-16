@@ -42,6 +42,10 @@ class RevisionDataDiff extends RevisionData
   protected function renderRevision($showChanges = false)
   {
     $revisionInfo = $this->getRevisionInfo();
+    if ($revisionInfo === null) {
+      // revisionInfo will be null if the current content is the same as the new content
+      return $this->getCurrentContent();
+    }
     if (!is_array($revisionInfo)) {
       // revision info is the latest content of a revision
       return $revisionInfo;
@@ -156,6 +160,25 @@ class RevisionDataDiff extends RevisionData
   public function makeRevisionContent($showChanges = false)
   {
     return $this->renderRevision($showChanges);
+  }
+
+  /**
+   * Makes RevisionInfo and sets the revisionData properties to be their respectful values
+   *
+   * @param  mixed $newContent
+   * @return void
+   */
+  public function makeRevisionDataInfo($newContent)
+  {
+    if (empty($this->revisionInfo) && isset($this->currentContent)) {
+      if ($newContent === $this->currentContent) {
+        $this->setRevisionInfo(null);
+      } else {
+        $this->makeRevisionInfo($newContent);
+      }
+      $this->setRevisionContent($this->getCurrentContent());
+      $this->setCurrentContent($newContent);
+    }
   }
 
   /**
