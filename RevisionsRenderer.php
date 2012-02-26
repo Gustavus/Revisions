@@ -35,6 +35,9 @@ class RevisionsRenderer
   /**
    * Class constructor
    * @param Revisions $revisions
+   * @param string applicationBaseUrl
+   * @param array applicationUrlParams
+   * @param array revisionsUrlParams
    */
   public function __construct(Revisions $revisions, $applicationBaseUrl = '', array $applicationUrlParams = array(), array $revisionsUrlParams = array())
   {
