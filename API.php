@@ -202,6 +202,8 @@ class API
   /**
    * constructs revisionsRenderer object
    *
+   * @param array urlParams
+   * @param string urlBase baseUrl for generating links
    * @return void
    */
   private function constructRevisionsRenderer(array $urlParams, $urlBase)
