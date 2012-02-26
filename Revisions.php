@@ -372,7 +372,7 @@ class Revisions extends RevisionsManager
     $missingRevisionData = array();
     foreach ($missingColumns as $column) {
       $oldestRevisionData = $this->getOldestRevisionDataPulled($column);
-      if ($oldestRevisionData->getRevisionNumber() !== 1 || ($oldestRevisionData->getRevisionNumber() === 1 && $oldestRevisionData->getRevisionId() < $this->getOldestRevisionPulled()->getRevisionId())) {
+      if ($oldestRevisionData->getRevisionNumber() !== 0 || ($oldestRevisionData->getRevisionNumber() === 0 && $oldestRevisionData->getRevisionId() < $this->getOldestRevisionPulled()->getRevisionId())) {
         $missingRevisionData[$column] = $oldestRevisionData;
       }
     }
@@ -432,7 +432,7 @@ class Revisions extends RevisionsManager
     if (!isset($this->revisions)) {
       return null;
     }
-    for ($i = count($this->revisions) - 1; $i > 0; --$i) {
+    for ($i = count($this->revisions) - 1; $i >= 0; --$i) {
       if ($this->revisions[$i] !== null) {
         return $i;
       }
@@ -586,8 +586,8 @@ class Revisions extends RevisionsManager
     if ($oldestRevisionNumberPulled !== null) {
       $oldestRevNumToPull = $oldestRevisionNumberPulled;
       $oldestRevPulled = $this->findOldestRevisionNumberPulled();
-      if ($oldestRevNumToPull <= 0) {
-        $oldestRevNumToPull = 1;
+      if ($oldestRevNumToPull < 0) {
+        $oldestRevNumToPull = 0;
       }
       $this->setLimit($oldestRevPulled - $oldestRevNumToPull);
       $this->pullRevisionsUntilRevisionNumber($oldestRevNumToPull);

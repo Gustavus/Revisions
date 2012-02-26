@@ -171,14 +171,14 @@ class RevisionsTest extends RevisionsTestsHelper
     $this->revisions->makeAndSaveRevision(array('age' => 23));
     $this->revisions->makeAndSaveRevision(array('age' => 29, 'name' => 'Billy Joel Visto'));
 
-    $this->assertNull($this->revisions->getRevisionByNumber(2));
     $this->assertNull($this->revisions->getRevisionByNumber(1));
-    $errorRevision = $this->revisions->getRevisionByNumber(4);
+    $this->assertNull($this->revisions->getRevisionByNumber(0));
+    $errorRevision = $this->revisions->getRevisionByNumber(3);
 
     $errorRevisionData = $errorRevision->getRevisionData('name');
     $this->assertTrue($errorRevisionData->getError());
-    $this->assertNotNull($this->revisions->getRevisionByNumber(5));
-    $newRevision = $this->revisions->compareTwoRevisions(4, 5);
+    $this->assertNotNull($this->revisions->getRevisionByNumber(4));
+    $newRevision = $this->revisions->compareTwoRevisions(3, 4);
     $this->assertTrue($newRevision->getError());
 
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
@@ -374,13 +374,12 @@ class RevisionsTest extends RevisionsTestsHelper
     $this->saveRevisionToDB('', 'Billy Visto', 'name', $this->revisions);
     $this->saveRevisionToDB('Billy Visto', 'Billy', 'name', $this->revisions);
     $this->saveRevisionToDB('Billy', 'Billy Visto', 'name', $this->revisions);
-    $this->revisions->makeAndSaveRevision(array('age' => 23));
 
     $this->call($this->revisions, 'populateObjectWithRevisions');
     $this->call($this->revisions, 'populateObjectWithRevisions');
 
     $this->assertInstanceOf('\Gustavus\Revisions\Revision', $this->revisions->getRevisionByNumber(2));
-    $this->assertInstanceOf('\Gustavus\Revisions\Revision', $this->revisions->getRevisionByNumber(1));
+    $this->assertInstanceOf('\Gustavus\Revisions\Revision', $this->revisions->getRevisionByNumber(0));
 
     // $actualDataSet = $conn->createDataSet(array('person-revision', 'revisionData'));
     // $actual = $this->getFilteredDataSet($actualDataSet, array('person-revision' => array('createdOn'), 'revisionData' => array('createdOn')));
@@ -414,9 +413,9 @@ class RevisionsTest extends RevisionsTestsHelper
 
     $this->call($this->revisions, 'populateObjectWithRevisions');
     $this->call($this->revisions, 'populateObjectWithRevisions');
-    $this->assertNull($this->revisions->getRevisionByNumber(2));
     $this->assertNull($this->revisions->getRevisionByNumber(1));
-    $errorRevision = $this->revisions->getRevisionByNumber(4);
+    $this->assertNull($this->revisions->getRevisionByNumber(0));
+    $errorRevision = $this->revisions->getRevisionByNumber(3);
 
     $errorRevisionData = $errorRevision->getRevisionData('name');
     $this->assertTrue($errorRevisionData->getError());
@@ -447,7 +446,7 @@ class RevisionsTest extends RevisionsTestsHelper
     $this->call($this->revisions, 'populateObjectWithRevisions');
     $this->assertInstanceOf('\Gustavus\Revisions\Revision', $this->revisions->getRevisionByNumber(2));
     $this->assertInstanceOf('\Gustavus\Revisions\Revision', $this->revisions->getRevisionByNumber(1));
-    $errorRevision = $this->revisions->getRevisionByNumber(4);
+    $errorRevision = $this->revisions->getRevisionByNumber(3);
 
     $errorRevisionData = $errorRevision->getRevisionData('name');
     $this->assertFalse($errorRevisionData->getError());
@@ -472,7 +471,7 @@ class RevisionsTest extends RevisionsTestsHelper
 
     $this->call($this->revisions, 'populateObjectWithRevisions', array('name'));
     $this->assertInstanceOf('\Gustavus\Revisions\Revision', $this->revisions->getRevisionByNumber(2));
-    $this->assertInstanceOf('\Gustavus\Revisions\Revision', $this->revisions->getRevisionByNumber(1));
+    $this->assertInstanceOf('\Gustavus\Revisions\Revision', $this->revisions->getRevisionByNumber(0));
 
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }
@@ -518,9 +517,9 @@ class RevisionsTest extends RevisionsTestsHelper
     $this->saveRevisionToDB('Billy', 'Billy Visto', 'name', $this->revisions);
 
     $this->call($this->revisions, 'populateObjectWithRevisions');
-    $this->assertSame(4, $this->call($this->revisions, 'findOldestRevisionNumberPulled'));
-    $this->call($this->revisions, 'populateObjectWithRevisions');
     $this->assertSame(3, $this->call($this->revisions, 'findOldestRevisionNumberPulled'));
+    $this->call($this->revisions, 'populateObjectWithRevisions');
+    $this->assertSame(2, $this->call($this->revisions, 'findOldestRevisionNumberPulled'));
 
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }
@@ -550,7 +549,7 @@ class RevisionsTest extends RevisionsTestsHelper
     $this->saveRevisionToDB('Billy Visto', 'Billy', 'name', $this->revisions);
     $this->saveRevisionToDB('Billy', 'Billy Visto', 'name', $this->revisions);
     $this->call($this->revisions, 'populateObjectWithRevisions');
-    $this->assertSame(1, $this->call($this->revisions, 'findOldestRevisionNumberPulled'));
+    $this->assertSame(0, $this->call($this->revisions, 'findOldestRevisionNumberPulled'));
 
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }
@@ -570,7 +569,7 @@ class RevisionsTest extends RevisionsTestsHelper
     $this->saveRevisionToDB('Billy Visto', 'Billy', 'name', $this->revisions);
     $this->saveRevisionToDB('Billy', 'Billy Visto', 'name', $this->revisions);
     $this->call($this->revisions, 'populateObjectWithRevisions');
-    $this->assertSame(3, $this->call($this->revisions, 'findOldestColumnRevisionNumberPulled', array('name')));
+    $this->assertSame(2, $this->call($this->revisions, 'findOldestColumnRevisionNumberPulled', array('name')));
 
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }
@@ -590,7 +589,7 @@ class RevisionsTest extends RevisionsTestsHelper
     $this->saveRevisionToDB('Billy Visto', 'Billy', 'name', $this->revisions);
     $this->saveRevisionToDB('Billy', 'Billy Visto', 'name', $this->revisions);
     $this->call($this->revisions, 'populateObjectWithRevisions');
-    $this->assertSame(1, $this->call($this->revisions, 'findOldestColumnRevisionNumberPulled', array('name')));
+    $this->assertSame(0, $this->call($this->revisions, 'findOldestColumnRevisionNumberPulled', array('name')));
 
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }
@@ -640,7 +639,7 @@ class RevisionsTest extends RevisionsTestsHelper
     $this->saveRevisionToDB('Billy Visto', 'Billy', 'name', $this->revisions);
     $this->saveRevisionToDB('Billy', 'Billy Visto', 'name', $this->revisions);
     $this->call($this->revisions, 'populateObjectWithRevisions');
-    $this->assertSame(1, $this->call($this->revisions, 'findOldestRevisionNumberPulled', array('name')));
+    $this->assertSame(0, $this->call($this->revisions, 'findOldestRevisionNumberPulled', array('name')));
 
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }
@@ -662,9 +661,9 @@ class RevisionsTest extends RevisionsTestsHelper
     $this->saveRevisionToDB('Billy', 'Billy Visto', 'name', $this->revisions);
 
     $this->call($this->revisions, 'populateObjectWithRevisions', array('name'));
-    $this->assertSame(4, $this->call($this->revisions, 'findOldestRevisionNumberPulled', array('name')));
-    $this->call($this->revisions, 'populateObjectWithRevisions', array('name'));
     $this->assertSame(3, $this->call($this->revisions, 'findOldestRevisionNumberPulled', array('name')));
+    $this->call($this->revisions, 'populateObjectWithRevisions', array('name'));
+    $this->assertSame(2, $this->call($this->revisions, 'findOldestRevisionNumberPulled', array('name')));
 
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }
@@ -827,9 +826,9 @@ class RevisionsTest extends RevisionsTestsHelper
     $this->saveRevisionToDB('Billy Visto', 'Billy', 'name', $this->revisions);
     $this->saveRevisionToDB('Billy', 'Billy Visto', 'name', $this->revisions);
 
-    $this->assertSame(5, count($this->revisions->getRevisionObjects()));
+    $this->assertSame(4, count($this->revisions->getRevisionObjects()));
     $revisions = $this->revisions->getRevisionObjects();
-    $this->assertSame($this->revisions->getRevisionByNumber(3), $revisions[3]);
+    $this->assertSame($this->revisions->getRevisionByNumber(2), $revisions[2]);
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }
 
@@ -850,7 +849,7 @@ class RevisionsTest extends RevisionsTestsHelper
 
     $revisions = $this->revisions->getRevisionObjects();
     $missingRevisionData = $this->call($this->revisions, 'getMissingRevisionDataFromObject', array(array('name')));
-    $this->assertSame($revisions[4]->getRevisionData(), $missingRevisionData);
+    $this->assertSame($revisions[3]->getRevisionData(), $missingRevisionData);
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }
 
@@ -868,7 +867,7 @@ class RevisionsTest extends RevisionsTestsHelper
     $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
     $this->revisions->makeAndSaveRevision(array('name' => 'Visto', 'age' => 23));
 
-    $this->assertFalse($this->revisions->getRevisionByNumber(2)->getError());
+    $this->assertFalse($this->revisions->getRevisionByNumber(1)->getError());
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }
 
@@ -888,7 +887,7 @@ class RevisionsTest extends RevisionsTestsHelper
     $this->revisions->getRevisionObjects();
 
     $result = $this->call($this->revisions, 'findLatestRevisionNumberPulled');
-    $this->assertSame(4, $result);
+    $this->assertSame(3, $result);
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }
 
@@ -925,7 +924,7 @@ class RevisionsTest extends RevisionsTestsHelper
     $this->saveRevisionToDB('Billy Visto', 'Billy', 'name', $this->revisions);
     $this->saveRevisionToDB('Billy', 'Billy Visto', 'name', $this->revisions);
     $this->call($this->revisions, 'populateObjectWithRevisions');
-    $this->assertSame(4, $this->call($this->revisions, 'findLatestRevisionNumberPulled'));
+    $this->assertSame(3, $this->call($this->revisions, 'findLatestRevisionNumberPulled'));
 
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }
@@ -946,7 +945,7 @@ class RevisionsTest extends RevisionsTestsHelper
     $this->revisions->makeAndSaveRevision(array('name' => 'Billy Joel Visto', 'age' => 23));
     $this->call($this->revisions, 'populateObjectWithRevisions');
     $expected = array('age' => 22, 'name' => 'Visto');
-    $actual = $this->revisions->getRevisionContentArray(4);
+    $actual = $this->revisions->getRevisionContentArray(3);
     $this->assertSame($expected, $actual);
 
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
@@ -967,9 +966,9 @@ class RevisionsTest extends RevisionsTestsHelper
     $this->revisions->makeAndSaveRevision(array('name' => 'Visto', 'age' => 22));
     $this->revisions->makeAndSaveRevision(array('name' => 'Billy Joel Visto', 'age' => 23));
     $this->revisions->getRevisionObjects();
-    $this->assertSame(5, $this->revisions->findOldestRevisionNumberPulled());
-    $this->revisions->getRevisionObjects(5);
-    $this->assertSame(5, $this->revisions->findOldestRevisionNumberPulled());
+    $this->assertSame(4, $this->revisions->findOldestRevisionNumberPulled());
+    $this->revisions->getRevisionObjects(4);
+    $this->assertSame(4, $this->revisions->findOldestRevisionNumberPulled());
 
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }
@@ -989,11 +988,11 @@ class RevisionsTest extends RevisionsTestsHelper
     $this->revisions->makeAndSaveRevision(array('name' => 'Visto', 'age' => 22));
     $this->revisions->makeAndSaveRevision(array('name' => 'Billy Joel Visto', 'age' => 23));
     $this->revisions->getRevisionObjects();
-    $this->assertSame(3, $this->revisions->findOldestRevisionNumberPulled());
-    $this->revisions->getRevisionObjects(2);
     $this->assertSame(2, $this->revisions->findOldestRevisionNumberPulled());
     $this->revisions->getRevisionObjects(1);
     $this->assertSame(1, $this->revisions->findOldestRevisionNumberPulled());
+    $this->revisions->getRevisionObjects(0);
+    $this->assertSame(0, $this->revisions->findOldestRevisionNumberPulled());
 
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }
@@ -1015,7 +1014,7 @@ class RevisionsTest extends RevisionsTestsHelper
     $this->revisions->makeAndSaveRevision(array('age' => 23));
     $this->revisions->makeAndSaveRevision(array('age' => 29, 'name' => 'Billy Joel Visto'));
 
-    $this->assertNotNull($this->revisions->getRevisionByNumber(1));
+    $this->assertNotNull($this->revisions->getRevisionByNumber(0));
     $this->assertFalse($this->revisions->revisionsHaveErrors());
 
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
@@ -1039,7 +1038,7 @@ class RevisionsTest extends RevisionsTestsHelper
     $this->revisions->makeAndSaveRevision(array('age' => 23));
     $this->revisions->makeAndSaveRevision(array('age' => 29, 'name' => 'Billy Joel Visto'));
 
-    $this->assertNull($this->revisions->getRevisionByNumber(1));
+    $this->assertNull($this->revisions->getRevisionByNumber(0));
     $this->assertTrue($this->revisions->revisionsHaveErrors());
 
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
