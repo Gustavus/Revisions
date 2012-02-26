@@ -28,6 +28,7 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
   private $revisionDataDiffProperties = array(
     'currentContent' => 'some test content',
     'revisionNumber' => 1,
+    'revisionRevisionNumber' => 1,
     'revisionId'  => 1,
   );
 
@@ -1043,5 +1044,13 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
     $array = array('', 'some', ' ', 'text', '');
     $result = $this->call($this->revisionDataDiff, 'splitWords', array('some text'));
     $this->assertSame($array, $result);
+  }
+
+  /**
+   * @test
+   */
+  public function getRevisionRevisionNumber()
+  {
+    $this->assertSame(1, $this->revisionDataDiff->getRevisionRevisionNumber());
   }
 }

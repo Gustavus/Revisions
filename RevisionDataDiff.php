@@ -60,6 +60,7 @@ class RevisionDataDiff extends RevisionData
           return $this->renderNonStringRevision(null, true);
         }
       } else {
+        $this->removedContentSize = strlen($currentContent);
         return '';
       }
     }
@@ -83,14 +84,17 @@ class RevisionDataDiff extends RevisionData
       $startIndex = $diffInfo->getStartIndex();
       if (isset($endIndex)) {
         // content was deleted/replaced
-        if ($showChanges) {
-          $ins = '';
-        }
+        $ins = '';
         for ($i = $startIndex; $i <= $endIndex; ++$i) {
-          if ($showChanges) {
-            $ins .= $currContentArr[$i];
-          }
+          $ins .= $currContentArr[$i];
           $currContentArr[$i] = '';
+        }
+        if (strlen($ins) < strlen($revisionContent)) {
+          // content was added
+          $this->addedContentSize += (strlen($revisionContent) - strlen($ins));
+        } else if (strlen($revisionContent) < strlen($ins)) {
+          // content was removed
+          $this->removedContentSize += (strlen($ins) - strlen($revisionContent));
         }
         $currContentArr[$startIndex] = ($showChanges) ? $revisionContent.$this->renderContentChange($ins, true) : $revisionContent;
       } else if (!isset($startIndex) && count($revisionInfo) === 1) {
@@ -99,6 +103,8 @@ class RevisionDataDiff extends RevisionData
       } else {
         //content was added
         $currText = (!empty($currContentArr[$startIndex])) ? $currContentArr[$startIndex] : '';
+        // add added content size to added content size
+        $this->addedContentSize += strlen($revisionContent);
         $currContentArr[$startIndex] = $revisionContent.$currText;
       }
     }
@@ -116,6 +122,7 @@ class RevisionDataDiff extends RevisionData
    */
   private function renderNonStringRevision($revisionContent, $showChanges = false)
   {
+    $currentContent = $this->getCurrentContent();
     if ($showChanges) {
       $currentContent = $this->getCurrentContent();
       if (is_bool($revisionContent)) {
@@ -128,6 +135,8 @@ class RevisionDataDiff extends RevisionData
       $newText = ($revisionContent !== null) ? $this->renderContentChange((string) $revisionContent, false) : '';
       $currText = $newText.$oldText;
     } else {
+      $this->removedContentSize = strlen($revisionContent);
+      $this->addedContentSize = strlen($currentContent);
       $currText = $revisionContent;
     }
     return $currText;
