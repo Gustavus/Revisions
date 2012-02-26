@@ -154,20 +154,20 @@ class RevisionsRenderer
   {
     $oldestRevisionNumber = ($oldestRevNum === null) ? $this->revisions->findOldestRevisionNumberPulled() - 1 : $oldestRevNum;
     $params = array_merge(
-      array(
-        'revision'             => $revision,
-        'revisions'            => $this->revisions->getRevisionObjects($oldestRevisionNumber),
-        'oldestRevisionNumber' => $oldestRevisionNumber,
-        'revisionUrl'          => $this->makeUrl(array(
-          'revisionsAction' => 'revision',
-          'revisionNumber'  => '',
-          )
+        array(
+          'revision'             => $revision,
+          'revisions'            => $this->revisions->getRevisionObjects($oldestRevisionNumber),
+          'oldestRevisionNumber' => $oldestRevisionNumber,
+          'revisionUrl'          => $this->makeUrl(array(
+            'revisionsAction' => 'revision',
+            'revisionNumber'  => '',
+            )
+          ),
+          'limit'           => $this->revisions->getLimit(),
+          'maxColumnSizes'  => $this->revisions->getMaxColumnSizes(),
+          'fullUrl'         => $this->makeUrl($this->revisionsUrlParams),
         ),
-        'limit'           => $this->revisions->getLimit(),
-        'maxColumnSizes'  => $this->revisions->getMaxColumnSizes(),
-        'fullUrl'         => $this->makeUrl($this->revisionsUrlParams),
-      ),
-      $params
+        $params
     );
     return \Gustavus\TwigFactory\TwigFactory::renderTwigFilesystemTemplate("/cis/lib/Gustavus/Revisions/views/$filename", $params);
   }
