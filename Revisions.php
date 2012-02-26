@@ -30,6 +30,13 @@ class Revisions extends RevisionsManager
   private $revisionsHaveBeenPulled = false;
 
   /**
+   * array of max column sizes pulled into the object in bytes
+   *
+   * @var array
+   */
+  private $maxColumnSizes = array();
+
+  /**
    * Class constructor
    *
    * @param array $params
@@ -52,7 +59,7 @@ class Revisions extends RevisionsManager
    */
   public function __destruct()
   {
-    unset($this->revisions, $this->revisionDataHasBeenPulled, $this->revisionsHaveBeenPulled);
+    unset($this->revisions, $this->revisionDataHasBeenPulled, $this->revisionsHaveBeenPulled, $this->maxColumnSizes);
   }
 
   /**
@@ -82,6 +89,16 @@ class Revisions extends RevisionsManager
   }
 
   /**
+   * returns maxColumnSizes array
+   *
+   * @return array
+   */
+  public function getMaxColumnSizes()
+  {
+    return $this->maxColumnSizes;
+  }
+
+  /**
    * Takes two revision numbers and returns a new revision containing only the diff of the two
    *
    * @param  integer  $oldRevisionNum revision number to compare against
@@ -91,6 +108,8 @@ class Revisions extends RevisionsManager
    */
   public function compareTwoRevisions($oldRevisionNum, $newRevisionNum, $column = null)
   {
+    assert('is_int($oldRevisionNum)');
+    assert('is_int($newRevisionNum)');
     $revisionDataArray = array();
     if ($newRevisionNum < $oldRevisionNum) {
       // to make sure we show how an older revision changed to get to the newer content
@@ -138,6 +157,7 @@ class Revisions extends RevisionsManager
    */
   private function getRevisionForComparison($revisionNum, $isNewerRevision)
   {
+    assert('is_int($revisionNum)');
     $revision = $this->getRevisionByNumber($revisionNum);
     if ($revision === null) {
       // if revision number doesn't exist, or there was an error, use the oldest revision pulled
@@ -256,7 +276,7 @@ class Revisions extends RevisionsManager
         $previousRevisionData = null;
       } else {
         $previousRevisionData = $this->getOldestRevisionDataPulled($key, $revisionId);
-        $previousContent = $previousRevisionData->makeRevisionContent();
+        $previousContent = $previousRevisionData->getRevisionContent();
         $previousError = $previousRevisionData->getError();
       }
       if (!$previousError) {
@@ -264,16 +284,21 @@ class Revisions extends RevisionsManager
           $revisionData = $previousRevisionData;
         } else {
           $params = array(
-            'revisionId'      => $value['revisionId'],
-            'revisionNumber'  => $value['revisionNumber'],
-            'revisionInfo'    => $this->makeDiffInfoObjects($value['value']),
-            'currentContent'  => $previousContent,
+            'revisionId'             => $value['revisionId'],
+            'revisionNumber'         => $value['revisionNumber'],
+            'revisionRevisionNumber' => $value['revisionRevisionNumber'],
+            'revisionInfo'           => $this->makeDiffInfoObjects($value['value']),
+            'currentContent'         => $previousContent,
           );
           $revisionData = new RevisionDataDiff($params);
 
           if (md5($revisionData->getRevisionContent()) !== $value['contentHash']) {
             $revisionData->setError(true);
           }
+        }
+        // set max column sizes
+        if (!isset($this->maxColumnSizes[$key]) || $this->maxColumnSizes[$key] < $revisionData->getRevisionContentSize()) {
+          $this->maxColumnSizes[$key] = $revisionData->getRevisionContentSize();
         }
         $revisionDataArray[$key] = $revisionData;
       }
@@ -559,10 +584,12 @@ class Revisions extends RevisionsManager
   {
     $this->populateEmptyRevisions();
     if ($oldestRevisionNumberPulled !== null) {
-      $oldestRevNumToPull = $oldestRevisionNumberPulled - $this->getLimit();
+      $oldestRevNumToPull = $oldestRevisionNumberPulled;
+      $oldestRevPulled = $this->findOldestRevisionNumberPulled();
       if ($oldestRevNumToPull <= 0) {
         $oldestRevNumToPull = 1;
       }
+      $this->setLimit($oldestRevPulled - $oldestRevNumToPull);
       $this->pullRevisionsUntilRevisionNumber($oldestRevNumToPull);
     }
     return $this->revisions;
@@ -571,13 +598,22 @@ class Revisions extends RevisionsManager
   /**
    * Populates revisions into the object if that hasn't happened already
    *
+   * @param integer $revNum
    * @return void
    */
-  public function populateEmptyRevisions()
+  public function populateEmptyRevisions($revNum = null)
   {
     if (!$this->revisionDataHasBeenPulled) {
       // no revisions in the object
-      $this->populateObjectWithRevisions();
+      if ($revNum !== null) {
+        $this->setLimit(1);
+        $this->populateObjectWithRevisions();
+        $limit = $this->findOldestRevisionNumberPulled() - $revNum;
+        $this->setLimit($limit);
+        $this->pullRevisionsUntilRevisionNumber($revNum);
+      } else {
+        $this->populateObjectWithRevisions();
+      }
     }
   }
 }

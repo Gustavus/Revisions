@@ -969,7 +969,7 @@ class RevisionsTest extends RevisionsTestsHelper
     $this->revisions->getRevisionObjects();
     $this->assertSame(5, $this->revisions->findOldestRevisionNumberPulled());
     $this->revisions->getRevisionObjects(5);
-    $this->assertSame(4, $this->revisions->findOldestRevisionNumberPulled());
+    $this->assertSame(5, $this->revisions->findOldestRevisionNumberPulled());
 
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }
@@ -991,6 +991,8 @@ class RevisionsTest extends RevisionsTestsHelper
     $this->revisions->getRevisionObjects();
     $this->assertSame(3, $this->revisions->findOldestRevisionNumberPulled());
     $this->revisions->getRevisionObjects(2);
+    $this->assertSame(2, $this->revisions->findOldestRevisionNumberPulled());
+    $this->revisions->getRevisionObjects(1);
     $this->assertSame(1, $this->revisions->findOldestRevisionNumberPulled());
 
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
