@@ -28,14 +28,20 @@ class RevisionsRenderer
   private $applicationUrlParams;
 
   /**
+   * @var array
+   */
+  private $revisionsUrlParams;
+
+  /**
    * Class constructor
    * @param Revisions $revisions
    */
-  public function __construct(Revisions $revisions, $applicationBaseUrl = '', array $applicationUrlParams = array())
+  public function __construct(Revisions $revisions, $applicationBaseUrl = '', array $applicationUrlParams = array(), array $revisionsUrlParams = array())
   {
     $this->revisions = $revisions;
     $this->applicationBaseUrl = $applicationBaseUrl;
     $this->applicationUrlParams = $applicationUrlParams;
+    $this->revisionsUrlParams = $revisionsUrlParams;
   }
 
   /**
@@ -66,12 +72,20 @@ class RevisionsRenderer
    * Renders out all the revisions with information about them
    *
    * @param  integer $limit
+   * @param  integer oldestRevNum oldestRevNum pulled into the revisions Object
    * @return string
    */
-  public function renderRevisions($limit = 5)
+  public function renderRevisions($limit = 5, $oldestRevNum = null)
   {
-    $this->revisions->setLimit($limit);
-    return $this->renderTwig('revisions.twig', $this->revisions->getRevisionObjects(), array('revisionUrl' => $this->makeUrl(array('revisionsAction' => 'revision', 'revisionNumber' => ''))));
+    $this->revisions->setLimit($limit + 1);
+    $this->revisions->populateEmptyRevisions($oldestRevNum);
+    $oldestRevNumPulled = $this->revisions->findOldestRevisionNumberPulled();
+    if ($oldestRevNumPulled !== null && $oldestRevNumPulled > 1 && !$this->revisions->revisionsHaveErrors()) {
+      $moreRevisionButton = $oldestRevNumPulled;
+    } else {
+      $moreRevisionButton = 1;
+    }
+    return $this->renderTwig('revisions.twig', null, array('oldestRevisionNumber' => $moreRevisionButton, 'limit' => $limit - 1), $oldestRevNumPulled);
   }
 
   /**
@@ -80,37 +94,12 @@ class RevisionsRenderer
    * @param  integer oldRevNum
    * @param  integer $newRevNum
    * @param  string $column
+   * @param  integer oldestRevNum oldestRevNum pulled into the revisions Object
    * @return string
    */
-  public function renderRevisionComparisonText($oldRevNum, $newRevNum, $column = null)
+  public function renderRevisionComparisonText($oldRevNum, $newRevNum, $column = null, $oldestRevNum)
   {
-    return $this->renderTwig('revisionDataText.twig', $this->revisions->compareTwoRevisions($oldRevNum, $newRevNum, $column));
-  }
-
-  /**
-   * Renders out a table of revisionData for each column with the diff of what changed from the old content to get the new content
-   *
-   * @param  integer oldRevNum
-   * @param  integer $newRevNum
-   * @param  string $column
-   * @return string
-   */
-  public function renderRevisionComparisonDiff($oldRevNum, $newRevNum, $column = null)
-  {
-    return $this->renderTwig('revisionDataDiff.twig', $this->revisions->compareTwoRevisions($oldRevNum, $newRevNum, $column));
-  }
-
-  /**
-   * Renders out a table of revisionData for each column with the diff of what changed from the old content to get the new content
-   *
-   * @param  integer oldRevNum
-   * @param  integer $newRevNum
-   * @param  string $column
-   * @return string
-   */
-  public function renderRevisionComparisonTextDiff($oldRevNum, $newRevNum, $column = null)
-  {
-    return $this->renderTwig('revisionDataTextDiff.twig', $this->revisions->compareTwoRevisions($oldRevNum, $newRevNum, $column));
+    return $this->renderTwig('revisionDataText.twig', $this->revisions->compareTwoRevisions($oldRevNum, $newRevNum, $column), array('visibleRevisions' => array($oldRevNum, $newRevNum)), $oldestRevNum);
   }
 
   /**
@@ -118,11 +107,38 @@ class RevisionsRenderer
    *
    * @param  integer revNum
    * @param  string $column
+   * @param  integer oldestRevNum oldestRevNum pulled into the revisions Object
    * @return string
    */
-  public function renderRevisionData($revNum, $column = null)
+  public function renderRevisionData($revNum, $column = null, $oldestRevNum)
   {
-    return $this->renderTwig('revisionData.twig', $this->revisions->getRevisionByNumber($revNum, $column));
+    return $this->renderTwig('revisionData.twig', $this->revisions->getRevisionByNumber($revNum, $column), array('visibleRevisions' => array($revNum)), $oldestRevNum);
+  }
+
+  /**
+   * Renders out a table of revisionData for each column with a button to confirm restore
+   *
+   * @param  integer revNum
+   * @param  integer oldestRevNum oldestRevNum pulled into the revisions Object
+   * @return string
+   */
+  public function renderRevisionRestore($revNum, $oldestRevNum)
+  {
+    return $this->renderTwig('revisionDataRestore.twig', $this->revisions->getRevisionByNumber($revNum), array('visibleRevisions' => array($revNum)), $oldestRevNum);
+  }
+
+  /**
+   * Renders out a table of revisionData for each column with a button to undo action
+   *
+   * @param  integer oldestRevNum oldestRevNum pulled into the revisions Object
+   * @return string
+   */
+  public function renderRevisionThankYou($oldestRevNum)
+  {
+    $this->revisions->setLimit(1);
+    $this->revisions->populateEmptyRevisions();
+    $revNum = $this->revisions->findLatestRevisionNumberPulled();
+    return $this->renderTwig('revisionThankYou.twig', $this->revisions->getRevisionByNumber($revNum), array('visibleRevisions' => array($revNum)), $oldestRevNum);
   }
 
   /**
@@ -131,10 +147,28 @@ class RevisionsRenderer
    * @param  string $filename  location of twig template
    * @param  mixed $revisions array of revisions, or a single revision object
    * @param  array $params  array of additional params to pass to twig
+   * @param  integer oldestRevNum oldestRevNum pulled into the revisions Object
    * @return string
    */
-  private function renderTwig($filename, $revisions, array $params = array())
+  private function renderTwig($filename, $revision, array $params = array(), $oldestRevNum = null)
   {
-    return \Gustavus\TwigFactory\TwigFactory::renderTwigFilesystemTemplate("/cis/lib/Gustavus/Revisions/views/$filename", array_merge(array('revisions' => $revisions), $params));
+    $oldestRevisionNumber = ($oldestRevNum === null) ? $this->revisions->findOldestRevisionNumberPulled() - 1 : $oldestRevNum;
+    $params = array_merge(
+      array(
+        'revision'             => $revision,
+        'revisions'            => $this->revisions->getRevisionObjects($oldestRevisionNumber),
+        'oldestRevisionNumber' => $oldestRevisionNumber,
+        'revisionUrl'          => $this->makeUrl(array(
+          'revisionsAction' => 'revision',
+          'revisionNumber'  => '',
+          )
+        ),
+        'limit'           => $this->revisions->getLimit(),
+        'maxColumnSizes'  => $this->revisions->getMaxColumnSizes(),
+        'fullUrl'         => $this->makeUrl($this->revisionsUrlParams),
+      ),
+      $params
+    );
+    return \Gustavus\TwigFactory\TwigFactory::renderTwigFilesystemTemplate("/cis/lib/Gustavus/Revisions/views/$filename", $params);
   }
 }
