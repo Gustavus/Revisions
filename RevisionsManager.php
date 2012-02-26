@@ -267,7 +267,7 @@ class RevisionsManager extends RevisionsBase
       ));
 
       $qb = $db->createQueryBuilder();
-      $qb->select(':hash, :revisionId, COUNT(dataDB.`revisionNumber`) + 1, :key, :value')
+      $qb->select(':hash, :revisionId, COUNT(dataDB.`revisionNumber`), :key, :value')
         ->from("`{$this->revisionDataTable}`", 'dataDB');
       $qb = $qb->leftJoin('dataDB', "`{$this->revisionsTable}`", 'rDB', 'rDB.`id` = dataDB.`revisionId` AND rDB.`table` = :table AND rDB.`rowId` = :rowId')
         ->where('`key` = :key');
@@ -330,7 +330,7 @@ class RevisionsManager extends RevisionsBase
           :contentHash,
           :table,
           :rowId,
-          COUNT(revisionNumber) + 1,
+          COUNT(revisionNumber),
           :message,
           :createdBy,
           %2$s

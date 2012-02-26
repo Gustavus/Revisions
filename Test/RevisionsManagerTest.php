@@ -192,7 +192,7 @@ class RevisionsManagerTest extends RevisionsTestsHelper
         'contentHash' => md5(json_encode(array('name' => $currContent))),
         'table' => 'person',
         'rowId' => '1',
-        'revisionNumber' => '1',
+        'revisionNumber' => '0',
         'message' => null,
         'createdBy' => null,
         'createdOn' => $actual[0]['createdOn']
@@ -223,7 +223,7 @@ class RevisionsManagerTest extends RevisionsTestsHelper
         'contentHash' => md5(json_encode(array('name' => $currContent))),
         'table' => 'person',
         'rowId' => '1',
-        'revisionNumber' => '1',
+        'revisionNumber' => '0',
         'message' => null,
         'createdBy' => null,
         'createdOn' => $actual[0]['createdOn']
@@ -254,7 +254,7 @@ class RevisionsManagerTest extends RevisionsTestsHelper
         'contentHash' => md5(json_encode(array('name' => $currContent))),
         'table' => 'person',
         'rowId' => '1',
-        'revisionNumber' => '1',
+        'revisionNumber' => '0',
         'message' => null,
         'createdBy' => null,
         'createdOn' => $actual[0]['createdOn']
@@ -286,7 +286,7 @@ class RevisionsManagerTest extends RevisionsTestsHelper
         'contentHash' => md5(json_encode(array('name' => $currContent))),
         'table' => 'person',
         'rowId' => '1',
-        'revisionNumber' => '1',
+        'revisionNumber' => '0',
         'message' => null,
         'createdBy' => null,
         'createdOn' => $actual[0]['createdOn']
@@ -317,7 +317,7 @@ class RevisionsManagerTest extends RevisionsTestsHelper
         'contentHash' => md5(json_encode(array('name' => $currContent))),
         'table' => 'person',
         'rowId' => '1',
-        'revisionNumber' => '1',
+        'revisionNumber' => '0',
         'message' => null,
         'createdBy' => null,
         'createdOn' => $actual[0]['createdOn']
@@ -346,7 +346,7 @@ class RevisionsManagerTest extends RevisionsTestsHelper
         'id' => '1',
         'contentHash' => md5($currContent),
         'revisionId' => '1',
-        'revisionNumber' => '1',
+        'revisionNumber' => '0',
         'value' => 'Billy Joel Visto',
         'revisionRevisionNumber' => null,
       ),
@@ -371,7 +371,7 @@ class RevisionsManagerTest extends RevisionsTestsHelper
     $this->call($this->revisionsManagerMock, 'saveRevisionData', array(json_encode($newContent), 1, 'name', $currContent));
     $actual = $this->call($this->revisionsManagerMock, 'getRevisionData', array(null, 'name'));
     $expected = array('name' => array(
-      '1' => array(
+      '0' => array(
         'id' => '1',
         'contentHash' => md5($currContent),
         'revisionId' => '1',
@@ -406,19 +406,19 @@ class RevisionsManagerTest extends RevisionsTestsHelper
     $actual = $this->call($this->revisionsManagerMock, 'getRevisionData', array(null, 'name'));
 
     $expected = array('name' => array(
-      '2' => array(
+      '1' => array(
         "id" => "2",
         'contentHash' => md5('Billy Visto'),
         'revisionId' => '2',
         "value" =>  "Billy Visto",
-        'revisionRevisionNumber' => '2',
+        'revisionRevisionNumber' => '1',
       ),
-      '1' => array(
+      '0' => array(
         'id' => '1',
         'contentHash' => md5('Billy Joel Visto'),
         'revisionId' => '1',
         'value' => 'Billy Joel Visto',
-        'revisionRevisionNumber' => '1',
+        'revisionRevisionNumber' => '0',
         ),
       ),
     );
@@ -447,15 +447,15 @@ class RevisionsManagerTest extends RevisionsTestsHelper
     $insertId = $this->call($this->revisionsManagerMock, 'saveRevisionContent', array(array('name' => '23'), "", 'age'));
     $this->call($this->revisionsManagerMock, 'saveRevisionData', array(json_encode(23), $insertId, 'age', 23));
 
-    $actual = $this->call($this->revisionsManagerMock, 'getRevisionData', array(null, 'name', true, null, 2));
+    $actual = $this->call($this->revisionsManagerMock, 'getRevisionData', array(null, 'name', true, null, 1));
 
     $expected = array('name' => array(
-      '1' => array(
+      '0' => array(
         'id' => '1',
         'contentHash' => md5('Billy Joel Visto'),
         'revisionId' => '1',
         'value' => 'Billy Joel Visto',
-        'revisionRevisionNumber' => '1',
+        'revisionRevisionNumber' => '0',
         ),
       ),
     );
@@ -481,7 +481,7 @@ class RevisionsManagerTest extends RevisionsTestsHelper
     $this->call($this->revisionsManagerMock, 'saveRevisionData', array(json_encode($newContent), 1, 'name', $newContent));
     $actual = $this->call($this->revisionsManagerMock, 'getRevisionData', array(null, 'name', true));
     $expected = array('name' => array(
-      '1' => array(
+      '0' => array(
         'id' => '1',
         'contentHash' => md5('Billy Joel Visto'),
         'revisionId' => '1',
@@ -502,18 +502,18 @@ class RevisionsManagerTest extends RevisionsTestsHelper
       "id" => "1",
       'contentHash' => "Billy Joel Visto",
       'revisionId' => '1',
-      "revisionNumber" => "1",
+      "revisionNumber" => "0",
       "key" => "name",
       "value" => '"Billy Joel Visto"',
-      'revisionRevisionNumber' => '1',
+      'revisionRevisionNumber' => '0',
     ));
     $expected = array('name' => array(
         'id' => '1',
         'contentHash' => "Billy Joel Visto",
         'revisionId' => '1',
-        'revisionNumber' => '1',
+        'revisionNumber' => '0',
         'value' => 'Billy Joel Visto',
-        'revisionRevisionNumber' => '1',
+        'revisionRevisionNumber' => '0',
       ),
     );
     $actual = $this->call($this->revisionsManager, 'parseDataResult', array($fetchAllResult));
@@ -529,34 +529,34 @@ class RevisionsManagerTest extends RevisionsTestsHelper
       "id" => "2",
       'contentHash' => "Billy Visto",
       'revisionId' => '2',
-      "revisionNumber" => "2",
+      "revisionNumber" => "1",
       "key" => "name",
       "value" =>  '"Billy Visto"',
-      'revisionRevisionNumber' => '2',
+      'revisionRevisionNumber' => '1',
     ),
     array(
       "id" => "1",
       'contentHash' => "Billy Joel Visto",
       'revisionId' => '1',
-      "revisionNumber" => "1",
+      "revisionNumber" => "0",
       "key" => "name",
       "value" => '"Billy Joel Visto"',
-      'revisionRevisionNumber' => '1',
+      'revisionRevisionNumber' => '0',
     ));
     $expected = array('name' => array(
-      '2' => array(
+      '1' => array(
         "id" => "2",
         'contentHash' => "Billy Visto",
         'revisionId' => '2',
         "value" =>  "Billy Visto",
-        'revisionRevisionNumber' => '2',
+        'revisionRevisionNumber' => '1',
       ),
-      '1' => array(
+      '0' => array(
         'id' => '1',
         'contentHash' => "Billy Joel Visto",
         'revisionId' => '1',
         'value' => 'Billy Joel Visto',
-        'revisionRevisionNumber' => '1',
+        'revisionRevisionNumber' => '0',
         ),
       ),
     );
