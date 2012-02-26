@@ -348,6 +348,7 @@ class RevisionsManagerTest extends RevisionsTestsHelper
         'revisionId' => '1',
         'revisionNumber' => '1',
         'value' => 'Billy Joel Visto',
+        'revisionRevisionNumber' => null,
       ),
     );
     $this->assertSame($expected, $actual);
@@ -375,6 +376,7 @@ class RevisionsManagerTest extends RevisionsTestsHelper
         'contentHash' => md5($currContent),
         'revisionId' => '1',
         'value' => 'Billy Joel Visto',
+        'revisionRevisionNumber' => null,
       ),
     ));
     $this->assertSame($expected, $actual);
@@ -409,12 +411,14 @@ class RevisionsManagerTest extends RevisionsTestsHelper
         'contentHash' => md5('Billy Visto'),
         'revisionId' => '2',
         "value" =>  "Billy Visto",
+        'revisionRevisionNumber' => '2',
       ),
       '1' => array(
         'id' => '1',
         'contentHash' => md5('Billy Joel Visto'),
         'revisionId' => '1',
         'value' => 'Billy Joel Visto',
+        'revisionRevisionNumber' => '1',
         ),
       ),
     );
@@ -451,6 +455,7 @@ class RevisionsManagerTest extends RevisionsTestsHelper
         'contentHash' => md5('Billy Joel Visto'),
         'revisionId' => '1',
         'value' => 'Billy Joel Visto',
+        'revisionRevisionNumber' => '1',
         ),
       ),
     );
@@ -481,6 +486,7 @@ class RevisionsManagerTest extends RevisionsTestsHelper
         'contentHash' => md5('Billy Joel Visto'),
         'revisionId' => '1',
         'value' => 'Billy Joel Visto',
+        'revisionRevisionNumber' => null,
       ),
     ));
     $this->assertSame($expected, $actual);
@@ -499,6 +505,7 @@ class RevisionsManagerTest extends RevisionsTestsHelper
       "revisionNumber" => "1",
       "key" => "name",
       "value" => '"Billy Joel Visto"',
+      'revisionRevisionNumber' => '1',
     ));
     $expected = array('name' => array(
         'id' => '1',
@@ -506,6 +513,7 @@ class RevisionsManagerTest extends RevisionsTestsHelper
         'revisionId' => '1',
         'revisionNumber' => '1',
         'value' => 'Billy Joel Visto',
+        'revisionRevisionNumber' => '1',
       ),
     );
     $actual = $this->call($this->revisionsManager, 'parseDataResult', array($fetchAllResult));
@@ -524,6 +532,7 @@ class RevisionsManagerTest extends RevisionsTestsHelper
       "revisionNumber" => "2",
       "key" => "name",
       "value" =>  '"Billy Visto"',
+      'revisionRevisionNumber' => '2',
     ),
     array(
       "id" => "1",
@@ -532,6 +541,7 @@ class RevisionsManagerTest extends RevisionsTestsHelper
       "revisionNumber" => "1",
       "key" => "name",
       "value" => '"Billy Joel Visto"',
+      'revisionRevisionNumber' => '1',
     ));
     $expected = array('name' => array(
       '2' => array(
@@ -539,12 +549,14 @@ class RevisionsManagerTest extends RevisionsTestsHelper
         'contentHash' => "Billy Visto",
         'revisionId' => '2',
         "value" =>  "Billy Visto",
+        'revisionRevisionNumber' => '2',
       ),
       '1' => array(
         'id' => '1',
         'contentHash' => "Billy Joel Visto",
         'revisionId' => '1',
         'value' => 'Billy Joel Visto',
+        'revisionRevisionNumber' => '1',
         ),
       ),
     );

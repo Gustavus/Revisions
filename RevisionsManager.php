@@ -154,8 +154,14 @@ class RevisionsManager extends RevisionsBase
   {
     $db = $this->getDB();
     $qb = $db->createQueryBuilder();
-    $qb->select('dataDB.`id`, dataDB.`contentHash`, dataDB.`revisionId`, dataDB.`revisionNumber`, dataDB.`key`, dataDB.`value`')
+    $qb->select('dataDB.`id`, dataDB.`contentHash`, dataDB.`revisionId`, dataDB.`revisionNumber`, dataDB.`key`, dataDB.`value`, rDB.`revisionNumber` as `revisionRevisionNumber`')
       ->from("`{$this->revisionDataTable}`", 'dataDB');
+
+    $qb = $qb->leftJoin('dataDB', "`{$this->revisionsTable}`", 'rDB', 'rDB.`id` = dataDB.`revisionId` AND rDB.`table` = :table AND rDB.`rowId` = :rowId');
+    $args = array(
+      ':table' => $this->table,
+      ':rowId' => $this->rowId,
+    );
     if ($revisionId === null && $column !== null) {
       if ($limit === null) {
         if ($revisionsHaveBeenPulled) {
@@ -165,15 +171,10 @@ class RevisionsManager extends RevisionsBase
           $limit = $this->limit + 1;
         }
       }
-      $qb = $qb->leftJoin('dataDB', "`{$this->revisionsTable}`", 'rDB', 'rDB.`id` = dataDB.`revisionId` AND rDB.`table` = :table AND rDB.`rowId` = :rowId');
       $qb->where('dataDB.`key` = :key')
         ->orderBy('dataDB.`id`', 'DESC')
         ->setMaxResults($limit);
-      $args = array(
-        ':key'        => $column,
-        ':table'      => $this->table,
-        ':rowId'      => $this->rowId,
-      );
+      $args[':key'] = $column;
       if ($prevRevisionNum !== null) {
         $qb->andWhere('dataDB.`revisionNumber` < :revNum');
         $args[':revNum'] = $prevRevisionNum;
@@ -181,9 +182,7 @@ class RevisionsManager extends RevisionsBase
     } else {
       $qb->orderBy('`key`', 'ASC')
         ->where('`revisionId` = :revisionId');
-      $args = array(
-        ':revisionId' => $revisionId,
-      );
+      $args[':revisionId'] = $revisionId;
     }
     return $this->parseDataResult($db->fetchAll($qb->getSQL(), $args), $column, $forceSingleDimension);
   }
@@ -227,6 +226,7 @@ class RevisionsManager extends RevisionsBase
           'revisionId'     => $result['revisionId'],
           'revisionNumber' => $result['revisionNumber'],
           'value'          => json_decode($result['value']),
+          'revisionRevisionNumber' => $result['revisionRevisionNumber'],
         );
       } else {
          $return[$result['key']][$result['revisionNumber']] = array(
@@ -234,6 +234,7 @@ class RevisionsManager extends RevisionsBase
           'contentHash' => $result['contentHash'],
           'revisionId'  => $result['revisionId'],
           'value'       => json_decode($result['value']),
+          'revisionRevisionNumber' => $result['revisionRevisionNumber'],
         );
       }
     }
