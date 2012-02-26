@@ -97,7 +97,7 @@ class RevisionsRenderer
    * @param  integer oldestRevNum oldestRevNum pulled into the revisions Object
    * @return string
    */
-  public function renderRevisionComparisonText($oldRevNum, $newRevNum, $column = null, $oldestRevNum)
+  public function renderRevisionComparisonText($oldRevNum, $newRevNum, $column = null, $oldestRevNum = null)
   {
     return $this->renderTwig('revisionDataText.twig', $this->revisions->compareTwoRevisions($oldRevNum, $newRevNum, $column), array('visibleRevisions' => array($oldRevNum, $newRevNum)), $oldestRevNum);
   }
@@ -110,7 +110,7 @@ class RevisionsRenderer
    * @param  integer oldestRevNum oldestRevNum pulled into the revisions Object
    * @return string
    */
-  public function renderRevisionData($revNum, $column = null, $oldestRevNum)
+  public function renderRevisionData($revNum, $column = null, $oldestRevNum = null)
   {
     return $this->renderTwig('revisionData.twig', $this->revisions->getRevisionByNumber($revNum, $column), array('visibleRevisions' => array($revNum)), $oldestRevNum);
   }
