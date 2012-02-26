@@ -21,6 +21,13 @@ abstract class RevisionData extends RevisionsBase
   protected $revisionNumber;
 
   /**
+   * revisionData's revision's revision number
+   *
+   * @var int revisionRevisionNumber
+   */
+  protected $revisionRevisionNumber;
+
+  /**
    * Current content if this is the latest revision, or the revision content of the previous revision
    *
    * @var string current cell content
@@ -54,11 +61,33 @@ abstract class RevisionData extends RevisionsBase
   protected $error = false;
 
   /**
+   * added content size
+   *
+   * @var integer
+   */
+  protected $addedContentSize = 0;
+
+  /**
+   * removed content size
+   *
+   * @var integer
+   */
+  protected $removedContentSize = 0;
+
+  /**
    * @return integer
    */
   public function getRevisionNumber()
   {
     return (int) $this->revisionNumber;
+  }
+
+  /**
+   * @return integer
+   */
+  public function getRevisionRevisionNumber()
+  {
+    return (int) $this->revisionRevisionNumber;
   }
 
   /**
@@ -138,5 +167,45 @@ abstract class RevisionData extends RevisionsBase
   public function setCurrentContent($currentContent)
   {
     $this->currentContent = $currentContent;
+  }
+
+  /**
+   * get size of revision content
+   *
+   * @return integer
+   */
+  public function getRevisionContentSize()
+  {
+    return strlen($this->getRevisionContent());
+  }
+
+  /**
+   * get size of current content
+   *
+   * @return integer
+   */
+  public function getCurrentContentSize()
+  {
+    return strlen($this->getCurrentContent());
+  }
+
+  /**
+   * get size of removed content
+   *
+   * @return integer
+   */
+  public function getRemovedContentSize()
+  {
+    return $this->removedContentSize;
+  }
+
+  /**
+   * get size of added content
+   *
+   * @return integer
+   */
+  public function getAddedContentSize()
+  {
+    return $this->addedContentSize;
   }
 }
