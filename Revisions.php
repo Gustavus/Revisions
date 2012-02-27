@@ -3,9 +3,6 @@
  * @package Revisions
  */
 namespace Gustavus\Revisions;
-require_once 'Gustavus/Revisions/RevisionsManager.php';
-require_once 'Gustavus/Revisions/Revision.php';
-require_once 'Gustavus/Revisions/RevisionDataDiff.php';
 
 /**
  * Creates Revision objects and sets things up for saving revisions
@@ -168,6 +165,7 @@ class Revisions extends RevisionsManager
 
   /**
    * Makes and stores a revision
+   * NewText array can be only fields that were edited. It will find missing fields and add them in when saving to get the correct hash
    *
    * @param  array $newText       array of text that has replaced the old text keyed by column
    * @param  string $message      revision message
@@ -207,7 +205,7 @@ class Revisions extends RevisionsManager
 
   /**
    * Gets and stores revisions in the object
-   * Defaults to pull the latest 5 revisions to cache in the object
+   * Pulls in 1 revision at a time unless the limit is set in construction
    *
    * @param string $column
    * @return void
@@ -532,16 +530,14 @@ class Revisions extends RevisionsManager
    */
   private function pullRevisionsUntilRevisionNumber($revisionNumber, $column = null)
   {
-    $i = $this->findOldestRevisionNumberPulled();
-    while ($i > $revisionNumber) {
+    // $i = $i - $this->getLimit() avoids pulling in the limit everytime and allows us to jump ahead to only pull in the necessary amount of revisions
+    for ($i = $this->findOldestRevisionNumberPulled(); $i > $revisionNumber; $i = $i - $this->getLimit()) {
       // keep pulling in revisions until the revision number is in the object
       $oldestRevisionPulled = $this->getOldestRevisionPulled($column);
       if ($oldestRevisionPulled->getError()) {
         break;
       }
       $this->populateObjectWithRevisions($column);
-      // this way avoids pulling in the limit everytime and allows us to jump ahead to only pull in the necessary amount of revisions
-      $i = $i - $this->getLimit();
     }
   }
 
@@ -577,20 +573,27 @@ class Revisions extends RevisionsManager
   /**
    * Pulls revisions out of the object to return an array keyed by revision
    *
-   * @param integer $oldestRevisionNumberPulled
+   * @param integer $oldestRevisionNumberToPull
    * @return array of revisions
    */
-  public function getRevisionObjects($oldestRevisionNumberPulled = null)
+  public function getRevisionObjects($oldestRevisionNumberToPull = null)
   {
     $this->populateEmptyRevisions();
-    if ($oldestRevisionNumberPulled !== null) {
-      $oldestRevNumToPull = $oldestRevisionNumberPulled;
+    if ($oldestRevisionNumberToPull !== null) {
+      $oldestRevNumToPull = $oldestRevisionNumberToPull;
       $oldestRevPulled = $this->findOldestRevisionNumberPulled();
       if ($oldestRevNumToPull < 0) {
         $oldestRevNumToPull = 0;
       }
-      $this->setLimit($oldestRevPulled - $oldestRevNumToPull);
-      $this->pullRevisionsUntilRevisionNumber($oldestRevNumToPull);
+      if ($oldestRevPulled !== $oldestRevNumToPull) {
+        // don't try to do anything if the oldest rev to pull is the oldest rev pulled
+        $limit = $this->getLimit();
+        // set limit to be the difference of the oldest revision pulled and the oldest revision to pull so it only makes one call to the DB
+        $this->setLimit($oldestRevPulled - $oldestRevNumToPull);
+        $this->pullRevisionsUntilRevisionNumber($oldestRevNumToPull);
+        // set limit to be what it used to be
+        $this->setLimit($limit);
+      }
     }
     return $this->revisions;
   }
@@ -606,11 +609,16 @@ class Revisions extends RevisionsManager
     if (!$this->revisionDataHasBeenPulled) {
       // no revisions in the object
       if ($revNum !== null) {
+        $oldLimit = $this->getLimit();
+        // set limit to be 1 so we can figure out how many revisions there are so we pull only the number of revisions we need
         $this->setLimit(1);
         $this->populateObjectWithRevisions();
         $limit = $this->findOldestRevisionNumberPulled() - $revNum;
+        // set limit to only pull the number of revisions we need
         $this->setLimit($limit);
         $this->pullRevisionsUntilRevisionNumber($revNum);
+        // set limit to what it originally was
+        $this->setLimit($oldLimit);
       } else {
         $this->populateObjectWithRevisions();
       }

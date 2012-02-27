@@ -1000,6 +1000,45 @@ class RevisionsTest extends RevisionsTestsHelper
   /**
    * @test
    */
+  public function getRevisionObjectsOldestRevNumGoingPastZero()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Visto', 'age' => 22));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Joel Visto', 'age' => 23));
+    $this->revisions->getRevisionObjects(4-5);
+    $this->revisions->getRevisionObjects(0);
+    $this->assertSame(0, $this->revisions->findOldestRevisionNumberPulled());
+
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
+  public function populateEmptyRevisions()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Visto', 'age' => 22));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Joel Visto', 'age' => 23));
+    $this->revisions->populateEmptyRevisions(2);
+    $this->assertSame(2, $this->revisions->findOldestRevisionNumberPulled());
+
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
   public function revisionsHaveErrors()
   {
     $conn = $this->getConnection();
@@ -1040,6 +1079,35 @@ class RevisionsTest extends RevisionsTestsHelper
 
     $this->assertNull($this->revisions->getRevisionByNumber(0));
     $this->assertTrue($this->revisions->revisionsHaveErrors());
+
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
+  public function getMaxColumnSizes()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy'));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
+    $this->revisions->makeAndSaveRevision(array('age' => '23'));
+    $this->revisions->makeAndSaveRevision(array('age' => 23));
+    $this->revisions->makeAndSaveRevision(array('age' => 29, 'name' => 'Billy Joel Visto'));
+
+    $this->revisions->populateEmptyRevisions(0);
+
+    $expected = array(
+      'age' => strlen('29'),
+      'name' => strlen('Billy Joel Visto'),
+    );
+
+    $this->assertSame($expected, $this->revisions->getMaxColumnSizes());
 
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }
