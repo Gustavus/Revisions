@@ -3,7 +3,6 @@
  * @package Revisions
  */
 namespace Gustavus\Revisions;
-require_once 'Gustavus/TwigFactory/TwigFactory.php';
 
 /**
  * Renders out revisions to the application
@@ -78,17 +77,22 @@ class RevisionsRenderer
    * @param  integer oldestRevNum oldestRevNum pulled into the revisions Object
    * @return string
    */
-  public function renderRevisions($limit = 5, $oldestRevNum = null)
+  public function renderRevisions($limit = null, $oldestRevNum = null)
   {
+    if ($limit === null) {
+      $limit = $this->revisions->getLimit();
+    }
+    // +1 so we pull in one more revision for calculating the added/removed bytes
     $this->revisions->setLimit($limit + 1);
     $this->revisions->populateEmptyRevisions($oldestRevNum);
     $oldestRevNumPulled = $this->revisions->findOldestRevisionNumberPulled();
-    if ($oldestRevNumPulled !== null && $oldestRevNumPulled > 1 && !$this->revisions->revisionsHaveErrors()) {
+    if ($oldestRevNumPulled !== null && $oldestRevNumPulled > 0 && !$this->revisions->revisionsHaveErrors()) {
       $moreRevisionButton = $oldestRevNumPulled;
     } else {
-      $moreRevisionButton = 1;
+      $moreRevisionButton = 0;
     }
-    return $this->renderTwig('revisions.twig', null, array('oldestRevisionNumber' => $moreRevisionButton, 'limit' => $limit - 1), $oldestRevNumPulled);
+    $this->revisions->setLimit($limit);
+    return $this->renderTwig('revisions.twig', null, array('oldestRevisionNumber' => $moreRevisionButton), $oldestRevNumPulled);
   }
 
   /**
