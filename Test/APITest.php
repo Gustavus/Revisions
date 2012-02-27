@@ -758,10 +758,52 @@ class APITest extends RevisionsTestsHelper
   /**
    * @test
    */
-  public function getApplicationUrlParams($value='')
+  public function getApplicationUrlParams()
   {
     $actual = $this->call($this->revisionsAPI, 'getApplicationUrlParams', array(array('revisionsAction' => 'revision', 'limit' => 10, 'pr' => 'manage')));
     $expected = array('pr' => 'manage');
     $this->assertSame($expected, $actual);
+  }
+
+  /**
+   * @test
+   */
+  public function getRevisionsUrlParams()
+  {
+    $actual = $this->call($this->revisionsAPI, 'getRevisionsUrlParams', array(array('revisionsAction' => 'revision', 'limit' => 10, 'pr' => 'manage')));
+    $expected = array('revisionsAction' => 'revision', 'limit' => 10);
+    $this->assertSame($expected, $actual);
+  }
+
+  /**
+   * @test
+   */
+  public function isRestore()
+  {
+    $this->assertTrue($this->call($this->revisionsAPI, 'isRestore', array(array('restore' => 'true'))));
+  }
+
+  /**
+   * @test
+   */
+  public function isRestoreFalse()
+  {
+    $this->assertFalse($this->call($this->revisionsAPI, 'isRestore', array(array('revisionsAction' => 'revision', 'limit' => 10))));
+  }
+
+  /**
+   * @test
+   */
+  public function isComparison()
+  {
+    $this->assertTrue($this->call($this->revisionsAPI, 'isComparison', array(array('revisionNumbersToCompare' => array(1, 2)))));
+  }
+
+  /**
+   * @test
+   */
+  public function isComparisonFalse()
+  {
+    $this->assertFalse($this->call($this->revisionsAPI, 'isComparison', array(array('revisionsAction' => 'revision', 'limit' => 10))));
   }
 }

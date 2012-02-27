@@ -4,10 +4,6 @@
  */
 namespace Gustavus\Revisions;
 
-require_once 'Gustavus/Revisions/RevisionsRenderer.php';
-require_once 'Gustavus/Revisions/Revisions.php';
-require_once 'Gustavus/Extensibility/Actions.php';
-
 /**
  * API to interact with the revisions project
  *
@@ -72,7 +68,7 @@ class API
   /**
    * Renders out the revisions or revision requested
    *
-   * @param  array  $urlParams $_GET syntax
+   * @param  array  $urlParams associative array
    * @param  string  $urlBase base location of the page requesting info
    * @return string
    */
@@ -98,17 +94,37 @@ class API
   private function handlePostAction(array $post, array $urlParams)
   {
     if ($_POST['revisionsAction'] === 'restore' && isset($_GET['revisionNumber'])) {
-      $revisionContent = $this->revisions->getRevisionContentArray((int) $_GET['revisionNumber']);
-      $oldMessage = $this->revisions->getRevisionByNumber((int) $_GET['revisionNumber'])->getRevisionMessage();
-      \Gustavus\Extensibility\Actions::apply(self::RESTORE_HOOK, $revisionContent, $oldMessage);
+      $this->handleRestoreAction();
     } else if ($_POST['revisionsAction'] === 'undo') {
-      $this->revisions->setLimit(2);
-      $this->revisions->populateEmptyRevisions();
-      $secondToLatestRevNum = $this->revisions->findOldestRevisionNumberPulled();
-      $revisionContent = $this->revisions->getRevisionContentArray($secondToLatestRevNum);
-      $oldMessage = $this->revisions->getRevisionByNumber($secondToLatestRevNum)->getRevisionMessage();
-      \Gustavus\Extensibility\Actions::apply(self::RESTORE_HOOK, $revisionContent, $oldMessage);
+      $this->handleUndoAction();
     }
+  }
+
+  /**
+   * Handles restore action
+   *
+   * @return void
+   */
+  private function handleRestoreAction()
+  {
+    $revisionContent = $this->revisions->getRevisionContentArray((int) $_GET['revisionNumber']);
+    $oldMessage = $this->revisions->getRevisionByNumber((int) $_GET['revisionNumber'])->getRevisionMessage();
+    \Gustavus\Extensibility\Actions::apply(self::RESTORE_HOOK, $revisionContent, $oldMessage);
+  }
+
+  /**
+   * Handles undo action
+   *
+   * @return void
+   */
+  private function handleUndoAction()
+  {
+    $this->revisions->setLimit(2);
+    $this->revisions->populateEmptyRevisions();
+    $secondToLatestRevNum = $this->revisions->findOldestRevisionNumberPulled();
+    $revisionContent = $this->revisions->getRevisionContentArray($secondToLatestRevNum);
+    $oldMessage = $this->revisions->getRevisionByNumber($secondToLatestRevNum)->getRevisionMessage();
+    \Gustavus\Extensibility\Actions::apply(self::RESTORE_HOOK, $revisionContent, $oldMessage);
   }
 
   /**
@@ -121,18 +137,34 @@ class API
   private function doWorkRequstedInUrl(array $urlParams)
   {
     if (!isset($urlParams['revisionsAction'])) {
-      $urlParams['revisionsAction'] = 'revisions';
+      $revisionsAction = 'revisions';
+    } else {
+      $revisionsAction = $urlParams['revisionsAction'];
     }
-    switch ($urlParams['revisionsAction']) {
+    switch ($revisionsAction) {
       case 'text' :
         return $this->renderRevisionComparisonFromUrlParams($urlParams);
       case 'revision' :
         return $this->renderRevisionFromUrlParams($urlParams);
       case 'thankYou' :
         return $this->renderThankYouMessage();
+      case 'revisions' :
+        return $this->renderRevisionsFromUrlParams($urlParams);
       default :
         return $this->renderRevisionsFromUrlParams($urlParams);
     }
+  }
+
+  /**
+   * Gets and returns the oldestRevisionNumber -1 from the urlParams or null if it is empty
+   *
+   * @param  array  $urlParams
+   * @return mixed
+   */
+  private function getOldestRevisionNumberToPullFromURL(array $urlParams)
+  {
+    // -1 so we have one more revision than we need so we can get what changed
+    return (isset($urlParams['oldestRevisionNumber'])) ? $urlParams['oldestRevisionNumber'] - 1 : null;
   }
 
   /**
@@ -143,13 +175,34 @@ class API
    */
   private function renderRevisionsFromUrlParams(array $urlParams)
   {
-    // -1 so we have one more revision than we need so we can get what changed
-    $oldestRevNumPulled = (isset($urlParams['oldestRevisionNumber'])) ? $urlParams['oldestRevisionNumber'] - 1 : null;
+    $oldestRevNumToPull = $this->getOldestRevisionNumberToPullFromURL($urlParams);
     if (isset($urlParams['limit'])) {
-      return $this->renderRevisions($oldestRevNumPulled, $urlParams['limit']);
+      return $this->renderRevisions($oldestRevNumToPull, $urlParams['limit']);
     } else {
-      return $this->renderRevisions($oldestRevNumPulled);
+      return $this->renderRevisions($oldestRevNumToPull);
     }
+  }
+
+  /**
+   * Checks the urlParams to see if it is a restore action
+   *
+   * @param  array   $urlParams
+   * @return boolean
+   */
+  private function isRestore(array $urlParams)
+  {
+    return (isset($urlParams['restore']) && $urlParams['restore'] === 'true');
+  }
+
+  /**
+   * Checks the urlParams to see if it is a comparison action
+   *
+   * @param  array   $urlParams
+   * @return boolean
+   */
+  private function isComparison(array $urlParams)
+  {
+    return (isset($urlParams['revisionNumbersToCompare'][0], $urlParams['revisionNumbersToCompare'][1]));
   }
 
   /**
@@ -160,16 +213,15 @@ class API
    */
   private function renderRevisionFromUrlParams(array $urlParams)
   {
-    // -1 so we have one more revision than we need so we can get what changed
-    $oldestRevNumPulled = (isset($urlParams['oldestRevisionNumber'])) ? $urlParams['oldestRevisionNumber'] - 1 : null;
+    $oldestRevNumToPull = $this->getOldestRevisionNumberToPullFromURL($urlParams);
     if (isset($urlParams['revisionNumber'])) {
-      if (isset($urlParams['restore']) && $urlParams['restore'] === 'true') {
-        return $this->renderRevisionRestore((int) $urlParams['revisionNumber'], $oldestRevNumPulled);
+      if ($this->isRestore($urlParams)) {
+        return $this->renderRevisionRestore((int) $urlParams['revisionNumber'], $oldestRevNumToPull);
       } else {
         if (isset($urlParams['column'])) {
-          return $this->renderRevisionData((int) $urlParams['revisionNumber'], $urlParams['column'], $oldestRevNumPulled);
+          return $this->renderRevisionData((int) $urlParams['revisionNumber'], $urlParams['column'], $oldestRevNumToPull);
         } else {
-          return $this->renderRevisionData((int) $urlParams['revisionNumber'], null, $oldestRevNumPulled);
+          return $this->renderRevisionData((int) $urlParams['revisionNumber'], null, $oldestRevNumToPull);
         }
       }
     } else {
@@ -185,14 +237,13 @@ class API
    */
   private function renderRevisionComparisonFromUrlParams(array $urlParams)
   {
-    // -1 so we have one more revision than we need so we can get what changed
-    $oldestRevNumPulled = (isset($urlParams['oldestRevisionNumber'])) ? $urlParams['oldestRevisionNumber'] - 1 : null;
-    if (isset($urlParams['revisionNumbersToCompare'][0], $urlParams['revisionNumbersToCompare'][1])) {
+    $oldestRevNumToPull = $this->getOldestRevisionNumberToPullFromURL($urlParams);
+    if ($this->isComparison($urlParams)) {
       $function = 'renderRevisionComparison' . ucfirst($urlParams['revisionsAction']);
       if (isset($urlParams['column'])) {
-        return $this->{$function}((int) $urlParams['revisionNumbersToCompare'][0], (int) $urlParams['revisionNumbersToCompare'][1], $urlParams['column'], $oldestRevNumPulled);
+        return $this->{$function}((int) $urlParams['revisionNumbersToCompare'][0], (int) $urlParams['revisionNumbersToCompare'][1], $urlParams['column'], $oldestRevNumToPull);
       } else {
-        return $this->{$function}((int) $urlParams['revisionNumbersToCompare'][0], (int) $urlParams['revisionNumbersToCompare'][1], null, $oldestRevNumPulled);
+        return $this->{$function}((int) $urlParams['revisionNumbersToCompare'][0], (int) $urlParams['revisionNumbersToCompare'][1], null, $oldestRevNumToPull);
       }
     } else {
       return $this->renderRevisionsFromUrlParams($urlParams);
@@ -261,16 +312,19 @@ class API
   /**
    * Renders out all the revisions with information about them
    *
-   * @param  integer $oldestRevNumPulled
+   * @param  integer $oldestRevNumToPull
    * @param  integer $limit
    * @return string
    */
-  private function renderRevisions($oldestRevNumPulled = null, $limit = 5)
+  private function renderRevisions($oldestRevNumToPull = null, $limit = null)
   {
-    if ($oldestRevNumPulled !== null) {
-      $oldestRevNumPulled = (int) $oldestRevNumPulled;
+    if ($limit === null) {
+      $limit = $this->revisions->getLimit();
     }
-    return $this->revisionsRenderer->renderRevisions($limit, $oldestRevNumPulled);
+    if ($oldestRevNumToPull !== null) {
+      $oldestRevNumToPull = (int) $oldestRevNumToPull;
+    }
+    return $this->revisionsRenderer->renderRevisions($limit, $oldestRevNumToPull);
   }
 
   /**
