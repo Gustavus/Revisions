@@ -3,7 +3,6 @@
  * @package Revisions
  */
 namespace Gustavus\Revisions;
-require_once 'Gustavus/Revisions/RevisionData.php';
 
 /**
  * Creates a RevisionData object
