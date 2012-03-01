@@ -93,8 +93,8 @@ class API
    */
   private function handlePostAction(array $post, array $urlParams)
   {
-    if ($_POST['revisionsAction'] === 'restore' && isset($_GET['revisionNumber'])) {
-      $this->handleRestoreAction();
+    if ($_POST['revisionsAction'] === 'restore' && isset($urlParams['revisionNumber'])) {
+      $this->handleRestoreAction($urlParams);
     } else if ($_POST['revisionsAction'] === 'undo') {
       $this->handleUndoAction();
     }
@@ -103,12 +103,13 @@ class API
   /**
    * Handles restore action
    *
+   * @param  array $urlParams
    * @return void
    */
-  private function handleRestoreAction()
+  private function handleRestoreAction(array $urlParams)
   {
-    $revisionContent = $this->revisions->getRevisionContentArray((int) $_GET['revisionNumber']);
-    $oldMessage = $this->revisions->getRevisionByNumber((int) $_GET['revisionNumber'])->getRevisionMessage();
+    $revisionContent = $this->revisions->getRevisionContentArray((int) $urlParams['revisionNumber']);
+    $oldMessage = $this->revisions->getRevisionByNumber((int) $urlParams['revisionNumber'])->getRevisionMessage();
     \Gustavus\Extensibility\Actions::apply(self::RESTORE_HOOK, $revisionContent, $oldMessage);
   }
 
@@ -150,7 +151,7 @@ class API
       case 'revision' :
         return $this->renderRevisionFromUrlParams($urlParams);
       case 'thankYou' :
-        return $this->renderThankYouMessage($this->getOldestRevisionNumberToPullFromURL($urlParams));
+        return $this->renderThankYouMessage();
       case 'revisions' :
         return $this->renderRevisionsFromUrlParams($urlParams);
       default :
@@ -167,7 +168,7 @@ class API
   private function getOldestRevisionNumberToPullFromURL(array $urlParams)
   {
     // -1 so we have one more revision than we need so we can get what changed
-    return (isset($urlParams['oldestRevisionNumber'])) ? $urlParams['oldestRevisionNumber'] - 1 : null;
+    return (isset($urlParams['oldestRevisionNumber'])) ? $urlParams['oldestRevisionNumber'] : null;
   }
 
   /**
@@ -354,12 +355,11 @@ class API
   /**
    * Renders out thank you message
    *
-   * @param  integer oldestRevNum oldestRevNum pulled into the revisions Object
    * @return string
    */
-  private function renderThankYouMessage($oldestRevNum = null)
+  private function renderThankYouMessage()
   {
-    return $this->revisionsRenderer->renderRevisionThankYou($oldestRevNum);
+    return $this->revisionsRenderer->renderRevisionThankYou();
   }
 
   /**
