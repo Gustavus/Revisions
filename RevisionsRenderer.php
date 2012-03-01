@@ -82,16 +82,22 @@ class RevisionsRenderer
     if ($limit === null) {
       $limit = $this->revisions->getLimit();
     }
-    // +1 so we pull in one more revision for calculating the added/removed bytes
-    $this->revisions->setLimit($limit + 1);
-    $this->revisions->populateEmptyRevisions($oldestRevNum);
+    if ($oldestRevNum === null) {
+      // +1 so we pull in one more revision for calculating the added/removed bytes
+      $this->revisions->setLimit($limit + 1);
+      $this->revisions->populateEmptyRevisions();
+      // reset limit
+      $this->revisions->setLimit($limit);
+    } else {
+      // -1 so we pull in one more revision for calculating the added/removed bytes
+      $this->revisions->populateEmptyRevisions($oldestRevNum - 1);
+    }
     $oldestRevNumPulled = $this->revisions->findOldestRevisionNumberPulled();
     if ($oldestRevNumPulled !== null && $oldestRevNumPulled > 0 && !$this->revisions->revisionsHaveErrors()) {
       $moreRevisionButton = $oldestRevNumPulled;
     } else {
       $moreRevisionButton = 0;
     }
-    $this->revisions->setLimit($limit);
     return $this->renderTwig('revisions.twig', null, array('oldestRevisionNumber' => $moreRevisionButton), $oldestRevNumPulled);
   }
 
@@ -142,10 +148,28 @@ class RevisionsRenderer
    */
   public function renderRevisionThankYou($oldestRevNum)
   {
+    $limit = $this->revisions->getLimit();
     $this->revisions->setLimit(1);
     $this->revisions->populateEmptyRevisions();
     $revNum = $this->revisions->findLatestRevisionNumberPulled();
+    // set limit to what the application initially set it to be
+    $this->revisions->setLimit($limit);
     return $this->renderTwig('revisionThankYou.twig', $this->revisions->getRevisionByNumber($revNum), array('visibleRevisions' => array($revNum)), $oldestRevNum);
+  }
+
+  /**
+   * Remove params that are in paramsToFilter
+   *
+   * @param  array  $params         [description]
+   * @param  array  $paramsToFilter [description]
+   * @return array
+   */
+  private function removeParams(array $params, array $paramsToFilter = array())
+  {
+    foreach ($paramsToFilter as $filter) {
+      unset($params[$filter]);
+    }
+    return $params;
   }
 
   /**
@@ -172,7 +196,7 @@ class RevisionsRenderer
           ),
           'limit'           => $this->revisions->getLimit(),
           'maxColumnSizes'  => $this->revisions->getMaxColumnSizes(),
-          'fullUrl'         => $this->makeUrl($this->revisionsUrlParams),
+          'fullUrl'         => $this->makeUrl($this->removeParams($this->revisionsUrlParams, array('oldestRevisionNumber'))),
         ),
         $params
     );
