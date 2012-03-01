@@ -1,25 +1,52 @@
-{% extends 'baseTable.twig' %}
-{% import 'baseTable.twig' as baseTable %}
+{% extends 'base.twig' %}
+{% import 'base.twig' as base %}
+{% import 'revisions.twig' as revisionsTwig %}
 
-{% block headers %}
-  <th>Field</th>
-  <th>Revision Content</th>
+{% block revisionTimeline %}
+  <h4>Revision History</h4>
+  {{ revisionsTwig.renderTimeline(revisions, revisionUrl, maxColumnSizes, visibleRevisions, fullUrl, oldestRevisionNumber, limit) }}
 {% endblock %}
 
-{% block body %}
-  {% for key in revisions.revisionData|keys %}
-    {% if revisions.revisionData[key] != null %}
-      {% set revisionData = revisions.revisionData[key] %}
-      <tr{% if revisionData.error %} class="error"{% endif %}>
-        {% block rows %}
-          <td>{{ key }}</td>
-          {% if revisionData.error %}
-            {{ baseTable.renderErrorColumns(1) }}
-          {% else %}
-            <td>{{ revisionData.revisionContent }}</td>
+{% block formExtras %}
+  {% block revisionData %}
+    <section class="clearfix revisionData">
+      <div class="clearfix headers">
+        {{ _self.renderHeader(revisions[visibleRevisions[0]]) }}
+      </div>
+      <dl class="clearfix">
+        {% for key in revision.revisionData|keys %}
+          {% if revision.revisionData[key] != null %}
+            {% set revisionData = revision.revisionData[key] %}
+            <dt{% if revisionData.error %} class="error"{% endif %}>{{ key }}</dt>
+            <dd>
+              {% if revisionData.error %}
+                {{ base.renderError() }}
+              {% else %}
+                {{ revisionData.makeRevisionContent(true)|raw }}
+              {% endif %}
+            </dd>
           {% endif %}
-        {% endblock rows %}
-      </tr>
-    {% endif %}
-  {% endfor %}
+        {% endfor %}
+      </dl>
+      {% block restoreButton %}
+        {{ _self.renderRestoreButton(revisionUrl, revisions|length, visibleRevisions[0]) }}
+      {% endblock %}
+    </section>
+  {% endblock revisionData %}
 {% endblock %}
+
+{% macro renderHeader(revision) %}
+  <header>
+    <hgroup>
+      <h1>{{ revision.getRevisionMessage() }}</h1>
+      <h2>{{ revision.getRevisionDate()|date("F jS \\a\\t g:ia") }}</h2>
+      <h2>by {{ revision.getCreatedBy() }}</h2>
+    </hgroup>
+  </header>
+{% endmacro %}
+
+{% macro renderRestoreButton(revisionUrl, revisionsLength, revisionNumber) %}
+  <footer>
+    <a href="{{ revisionUrl }}{{ revisionNumber }}&amp;restore=true" id="restore-{{ revisionNumber }}" class="restore button{% if revisionNumber == revisionsLength - 1 %} disabled{% endif %}" data-revisionNumber="{{ revisionNumber }}" title="Restore Revision {{ revisionNumber }}">Restore #{{ revisionNumber }}</a>
+  </footer>
+{% endmacro %}

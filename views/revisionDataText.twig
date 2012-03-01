@@ -1,18 +1,40 @@
 {% extends 'revisionData.twig' %}
-{% import 'baseTable.twig' as baseTable %}
+{% import 'base.twig' as base %}
+{% import 'revisionData.twig' as revisionDataTwig %}
 
-{% block headers %}
-  <th>Field</th>
-  <th>Old Text</th>
-  <th>New Text</th>
-{% endblock %}
+{% block revisionData %}
+  {% set column %}
+    {% for key in revision.revisionData|keys %}
+      {% if revision.revisionData[key] != null %}
+        {% set revisionData = revision.revisionData[key] %}
+        <dt{% if revisionData.error %} class="error"{% endif %}>{{ key }}</dt>
+        <dd>
+          {% if revisionData.error %}
+            {{ base.renderError() }}
+          {% else %}
+            {{ revisionData.makeRevisionContent(true)|raw }}
+          {% endif %}
+        </dd>
+        <dd>
+          {% if revisionData.error %}
+            {{ base.renderError() }}
+          {% else %}
+            {{ revisionData.makeRevisionContent(true)|raw }}
+          {% endif %}
+        </dd>
+      {% endif %}
+    {% endfor %}
+  {% endset %}
+  <section class="clearfix revisionData compare">
+    <div class="clearfix headers">
+      {{ revisionDataTwig.renderHeader(revisions[visibleRevisions[0]]) }}
+      {{ revisionDataTwig.renderHeader(revisions[visibleRevisions[1]]) }}
+    </div>
+    <dl class="clearfix">
+      {{ column }}
+    </dl>
+    {{ revisionDataTwig.renderRestoreButton(revisionUrl, revisions|length, visibleRevisions[0]) }}
+    {{ revisionDataTwig.renderRestoreButton(revisionUrl, revisions|length, visibleRevisions[1]) }}
+  </section>
 
-{% block rows %}
-  <td>{{ key }}</td>
-  {% if revisionData.error %}
-    {{ baseTable.renderErrorColumns(2) }}
-  {% else %}
-    <td>{{ revisionData.revisionContent }}</td>
-    <td>{{ revisionData.currentContent }}</td>
-  {% endif %}
-{% endblock %}
+{% endblock revisionData %}

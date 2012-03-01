@@ -1,0 +1,15 @@
+{% extends 'revisionData.twig' %}
+{% import 'base.twig' as base %}
+
+{% block formMethod %}method="POST"{% endblock %}
+
+{% block revisionTimeline %}
+{% endblock %}
+
+{% block formExtras %}
+  <p class="message">You are restoring to revision #{{ visibleRevisions[0] }}</p>
+  {{ parent() }}
+  {% block restoreButton %}
+  {% endblock %}
+  <button class="positive" type="submit" name="revisionsAction" value="restore">Confirm Restore</button>
+{% endblock %}

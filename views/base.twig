@@ -1,0 +1,39 @@
+{% if revisions|length > 0 %}
+  <form id="revisionsForm" {% block formMethod %}method="GET"{% endblock %}>
+    {% block revisionTimeline %}
+    {% endblock %}
+    {% block actionButton %}
+    {% endblock %}
+    {% block formExtras %}
+    {% endblock %}
+  </form>
+{% endif %}
+
+{% macro renderErrorColumns(num) %}
+  {% for i in 1..num %}
+    <td class="error">{{ _self.renderError() }}</td>
+  {% endfor %}
+{% endmacro %}
+
+{% macro renderError() %}
+  An unexpected error occured.
+{% endmacro %}
+
+{#{% macro renderRevisionTimeline(timelineArr, revisionUrl) %}
+  {% set revShowing = [] %}
+  {% for revisionNumber, timeline in timelineArr %}
+    {% if timeline == '&bull;' %}
+      {% set revShowing = revShowing|merge([revisionNumber]) %}
+    {% endif %}
+  {% endfor %}
+  <span id="timelineText">Showing
+  {% if revShowing|length > 1 %}
+    comparison of revision {{ revShowing[0] }} and {{ revShowing[1] }}
+  {% else %}
+    revision {{ revShowing[0] }}
+  {% endif %}
+  of {{ timelineArr|length }} revisions.</span>
+  {% for revisionNumber, timeline in timelineArr %}
+    <a href="{{ revisionUrl }}{{ revisionNumber }}" class="revision" data-revisionNumber="{{ revisionNumber }}" title="Look at Revision {{ revisionNumber }}">{{ timeline|raw }}</a>
+  {% endfor %}
+{% endmacro %}#}
