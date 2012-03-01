@@ -166,6 +166,35 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
   /**
    * @test
    */
+  public function getCurrentContentSize()
+  {
+    $expected = strlen($this->revisionDataDiffProperties['currentContent']);
+    $this->call($this->revisionDataDiff, 'renderRevision');
+    $this->assertSame($expected, $this->revisionDataDiff->getCurrentContentSize());
+  }
+
+  /**
+   * @test
+   */
+  public function getRemovedContentSize()
+  {
+    $this->call($this->revisionDataDiff, 'renderRevision');
+    $this->assertSame(0, $this->revisionDataDiff->getRemovedContentSize());
+  }
+
+  /**
+   * @test
+   */
+  public function getAddedContentSize()
+  {
+    $expected = strlen($this->diffInfoProperties['revisionInfo']);
+    $this->call($this->revisionDataDiff, 'renderRevision');
+    $this->assertSame($expected, $this->revisionDataDiff->getAddedContentSize());
+  }
+
+  /**
+   * @test
+   */
   public function renderRevisionString()
   {
     $this->setUp();
@@ -683,7 +712,7 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
     );
     $this->setUp();
     $this->set($this->revisionDataDiff, 'revisionInfo', null);
-    $expected = 'some <ins>new </ins>test <del>content revision</del><ins>change</ins>';
+    $expected = 'some<ins> new</ins> test <del>content revision</del><ins>change</ins>';
 
     $result = $this->call($this->revisionDataDiff, 'makeDiff', array('some new test change', true));
     $this->assertSame($expected, $result);
@@ -739,7 +768,7 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
       'currentContent' => 'some test content revision',
     );
     $this->setUp();
-    $diff = new Revisions\DiffInfo(array('startIndex' => 2, 'endIndex' => 3, 'revisionInfo' => ''));
+    $diff = new Revisions\DiffInfo(array('startIndex' => 1, 'endIndex' => 2, 'revisionInfo' => ''));
     $diffTwo = new Revisions\DiffInfo(array('startIndex' => 6, 'endIndex' => 6, 'revisionInfo' => 'content revision'));
     $expected = array($diff, $diffTwo);
 
@@ -916,8 +945,8 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
     $this->revisionDataDiffProperties['currentContent'] = '';
     $this->setUp();
     $result = $this->call($this->revisionDataDiff, 'makeRevisionInfo', array('some test content'));
-    $expected = array();
-    $this->assertSame($expected, $result);
+    $expected = array(new Revisions\DiffInfo(array('startIndex' => 0, 'endIndex' => 4, 'revisionInfo' => '')));
+    $this->compareRevisionInfo($expected, $result);
   }
 
   /**
@@ -980,8 +1009,9 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
     $this->revisionDataDiffProperties['currentContent'] = '';
     $this->setUp();
     $result = $this->call($this->revisionDataDiff, 'makeRevisionInfo', array('some test content'));
-    $expected = array();
-    $this->assertSame($expected, $result);
+    $expected = array(new Revisions\DiffInfo(array('startIndex' => 0, 'endIndex' => 4, 'revisionInfo' => '')));
+    $this->compareRevisionInfo($expected, $result);
+    $this->revisionDataDiff->setCurrentContent('some test content');
     $result = $this->call($this->revisionDataDiff, 'renderRevision');
     $this->assertSame('', $result);
   }
@@ -1041,7 +1071,7 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
    */
   public function splitWords()
   {
-    $array = array('', 'some', ' ', 'text', '');
+    $array = array('some', ' ', 'text');
     $result = $this->call($this->revisionDataDiff, 'splitWords', array('some text'));
     $this->assertSame($array, $result);
   }
@@ -1052,5 +1082,331 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
   public function getRevisionRevisionNumber()
   {
     $this->assertSame(1, $this->revisionDataDiff->getRevisionRevisionNumber());
+  }
+
+  /**
+   * @test
+   */
+  public function splitWords2()
+  {
+    $revisionContent = 'I like to eat food';
+    $currentContent = 'I like to eat a lot of food while triple jumping.';
+    $splitR = $this->call($this->revisionDataDiff, 'splitWords', array($revisionContent));
+    $expectedR = array('I', ' ', 'like', ' ', 'to', ' ', 'eat', ' ', 'food');
+    $this->assertSame($expectedR, $splitR);
+    $splitC = $this->call($this->revisionDataDiff, 'splitWords', array($currentContent));
+    $expectedC = array('I', ' ', 'like', ' ', 'to', ' ', 'eat', ' ', 'a', ' ', 'lot', ' ', 'of', ' ', 'food', ' ', 'while', ' ', 'triple', ' ', 'jumping', '.');
+    $this->assertSame($expectedC, $splitC);
+  }
+
+  /**
+   * @test
+   */
+  public function splitWordsPeriodBeginning()
+  {
+    $revisionContent = 'I like to eat food';
+    $currentContent = '.I like to eat a lot of food while triple jumping.';
+    $splitR = $this->call($this->revisionDataDiff, 'splitWords', array($revisionContent));
+    $expectedR = array('I', ' ', 'like', ' ', 'to', ' ', 'eat', ' ', 'food');
+    $this->assertSame($expectedR, $splitR);
+    $splitC = $this->call($this->revisionDataDiff, 'splitWords', array($currentContent));
+    $expectedC = array('.', 'I', ' ', 'like', ' ', 'to', ' ', 'eat', ' ', 'a', ' ', 'lot', ' ', 'of', ' ', 'food', ' ', 'while', ' ', 'triple', ' ', 'jumping', '.');
+    $this->assertSame($expectedC, $splitC);
+  }
+
+  /**
+   * @test
+   */
+  public function diff()
+  {
+    $revisionContent = 'I like to eat food';
+    $currentContent = 'I like to eat a lot of food while triple jumping.';
+    $diff = $this->call($this->revisionDataDiff, 'diff', array($this->call($this->revisionDataDiff, 'splitWords', array($revisionContent)), $this->call($this->revisionDataDiff, 'splitWords', array($currentContent))));
+
+    $expected = array(
+      array(
+        "d" => array(),
+        "i" => array(),
+      ),
+      "I",
+      " ",
+      "like",
+      " ",
+      "to",
+      " ",
+      "eat",
+      " ",
+      array(
+        "d" => array(),
+        "i" => array(
+          "a",
+          " ",
+          "lot",
+          " ",
+          "of",
+          " ",
+        ),
+      ),
+      "food",
+      array(
+        "d" => array(),
+        "i" => array(
+          " ",
+          "while",
+          " ",
+          "triple",
+          " ",
+          "jumping",
+          ".",
+        ),
+      ),
+    );
+    $this->assertSame($expected, $diff);
+  }
+
+  /**
+   * @test
+   */
+  public function diffNoPeriod()
+  {
+    $revisionContent = 'I like to eat food';
+    $currentContent = 'I like to eat a lot of food while triple jumping';
+    $diff = $this->call($this->revisionDataDiff, 'diff', array($this->call($this->revisionDataDiff, 'splitWords', array($revisionContent)), $this->call($this->revisionDataDiff, 'splitWords', array($currentContent))));
+
+    $expected = array(
+      array(
+        "d" => array(),
+        "i" => array(),
+      ),
+      "I",
+      " ",
+      "like",
+      " ",
+      "to",
+      " ",
+      "eat",
+      " ",
+      array(
+        "d" => array(),
+        "i" => array(
+          "a",
+          " ",
+          "lot",
+          " ",
+          "of",
+          " ",
+        ),
+      ),
+      "food",
+      array(
+        "d" => array(),
+        "i" => array(
+          " ",
+          "while",
+          " ",
+          "triple",
+          " ",
+          "jumping",
+        ),
+      ),
+    );
+    $this->assertSame($expected, $diff);
+  }
+
+  /**
+   * @test
+   */
+  public function myArrayDiff()
+  {
+    $revisionContent = 'I like to eat food';
+    $currentContent = 'I like to eat a lot of food while triple jumping.';
+    $diff = $this->call($this->revisionDataDiff, 'myArrayDiff', array($this->call($this->revisionDataDiff, 'splitWords', array($revisionContent)), $this->call($this->revisionDataDiff, 'splitWords', array($currentContent))));
+
+    $expected = array(
+      "8" => array(
+        "d" => array(),
+        "i" => array(
+          "a",
+          " ",
+          "lot",
+          " ",
+          "of",
+          " ",
+        ),
+      ),
+      "15" => array(
+        "d" => array(),
+        "i" => array(
+          " ",
+          "while",
+          " ",
+          "triple",
+          " ",
+          "jumping",
+          ".",
+        ),
+      ),
+    );
+    $this->assertSame($expected, $diff);
+  }
+
+  /**
+   * @test
+   */
+  public function myArrayDiffPeriodBeginning()
+  {
+    $revisionContent = 'I like to eat food';
+    $currentContent = '.I like to eat a lot of food while triple jumping.';
+    $diff = $this->call($this->revisionDataDiff, 'myArrayDiff', array($this->call($this->revisionDataDiff, 'splitWords', array($revisionContent)), $this->call($this->revisionDataDiff, 'splitWords', array($currentContent))));
+
+    $expected = array(
+      "0" => array(
+        "d" => array(),
+        "i" => array(
+          ".",
+        ),
+      ),
+      "9" => array(
+        "d" => array(),
+        "i" => array(
+          "a",
+          " ",
+          "lot",
+          " ",
+          "of",
+          " ",
+        ),
+      ),
+      "16" => array(
+        "d" => array(),
+        "i" => array(
+          " ",
+          "while",
+          " ",
+          "triple",
+          " ",
+          "jumping",
+          ".",
+        ),
+      ),
+    );
+    $this->assertSame($expected, $diff);
+  }
+
+  /**
+   * @test
+   */
+  public function myArrayDiffPunctuationBeginning()
+  {
+    $revisionContent = '?I like to eat food';
+    $currentContent = '.I like to eat a lot of food while triple jumping.';
+    $diff = $this->call($this->revisionDataDiff, 'myArrayDiff', array($this->call($this->revisionDataDiff, 'splitWords', array($revisionContent)), $this->call($this->revisionDataDiff, 'splitWords', array($currentContent))));
+
+    $expected = array(
+      "0" => array(
+        "d" => array(
+          "?",
+        ),
+        "i" => array(
+          ".",
+        ),
+      ),
+      "9" => array(
+        "d" => array(),
+        "i" => array(
+          "a",
+          " ",
+          "lot",
+          " ",
+          "of",
+          " ",
+        ),
+      ),
+      "16" => array(
+        "d" => array(),
+        "i" => array(
+          " ",
+          "while",
+          " ",
+          "triple",
+          " ",
+          "jumping",
+          ".",
+        ),
+      ),
+    );
+    $this->assertSame($expected, $diff);
+  }
+
+  /**
+   * @test
+   */
+  public function myArrayDiff2()
+  {
+    $revisionContent = 'I like to eat food';
+    $currentContent = 'I like to eat a lot of food while triple jumping';
+    $diff = $this->call($this->revisionDataDiff, 'myArrayDiff', array($this->call($this->revisionDataDiff, 'splitWords', array($revisionContent)), $this->call($this->revisionDataDiff, 'splitWords', array($currentContent))));
+
+    $expected = array(
+      "8" => array(
+        "d" => array(),
+        "i" => array(
+          "a",
+          " ",
+          "lot",
+          " ",
+          "of",
+          " ",
+        ),
+      ),
+      "15" => array(
+        "d" => array(),
+        "i" => array(
+          " ",
+          "while",
+          " ",
+          "triple",
+          " ",
+          "jumping",
+        ),
+      ),
+    );
+    $this->assertSame($expected, $diff);
+  }
+
+  /**
+   * @test
+   */
+  public function makeRevisionDataLargeChangeEndingWithPeriod()
+  {
+    $revisionData = new Revisions\RevisionDataDiff(array('currentContent' => 'I like to eat food'));
+    $currentContent = 'I like to eat a lot of food while triple jumping.';
+    $actual = $revisionData->renderRevisionForDB($currentContent);
+    $expected = json_encode(array(array(8, 13, ""), array(15, 21, "")));
+    $this->assertSame($expected, $actual);
+  }
+
+  /**
+   * @test
+   */
+  public function makeRevisionDataLargeChangeEndingWithExclamation()
+  {
+    $revisionData = new Revisions\RevisionDataDiff(array('currentContent' => 'I like to eat food'));
+    $currentContent = 'I like to eat a lot of food while triple jumping!';
+    $actual = $revisionData->renderRevisionForDB($currentContent);
+    $expected = json_encode(array(array(8, 13, ""), array(15, 21, "")));
+    $this->assertSame($expected, $actual);
+  }
+
+  /**
+   * @test
+   */
+  public function makeRevisionDataLargeChange()
+  {
+    $revisionData = new Revisions\RevisionDataDiff(array('currentContent' => 'I like to eat food'));
+    $currentContent = 'I like to eat a lot of food while triple jumping';
+    $actual = $revisionData->renderRevisionForDB($currentContent);
+    $expected = json_encode(array(array(8, 13, ""), array(15, 20, "")));
+    $this->assertSame($expected, $actual);
   }
 }

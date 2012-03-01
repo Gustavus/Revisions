@@ -74,7 +74,7 @@ class RevisionDataDiff extends RevisionData
    */
   private function putRevisionContentTogether($revisionInfo, $showChanges)
   {
-    $currContentArr = $this->splitWords($this->getCurrentContent());
+    $currContentArr = $this->splitWords($this->getCurrentContent(), false);
     // currContentArr has empty index at the beginning from splitWords, so get rid of it
     array_shift($currContentArr);
     foreach ($revisionInfo as $diffInfo) {
@@ -281,10 +281,16 @@ class RevisionDataDiff extends RevisionData
   private function myArrayDiff(array $old, array $new)
   {
     $diff = $this->diff($old, $new);
-    //remove empty garbage from beginning and end
-    array_shift($diff);
-    array_shift($diff);
-    array_pop($diff);
+    //remove possible empty garbage from beginning and end
+    if (empty($diff[0]['d']) && empty($diff[0]['i'])) {
+      // if the text starts with punctuation the first item will not be empty
+      // the diff returns a difference from the start of the content so we want to get rid of the empty diff
+      array_shift($diff);
+    }
+    if (empty($diff[count($diff) - 1]) || (empty($diff[count($diff) - 1]['d']) && empty($diff[count($diff) - 1]['i']))) {
+      // if the text ends with punctuation the last item will not be empty
+      array_pop($diff);
+    }
     $return  = array();
     $prevKey = null;
     $offset  = 0;
@@ -327,11 +333,21 @@ class RevisionDataDiff extends RevisionData
    * Splits a string at word boundaries
    *
    * @param  string $content
+   * @param  boolean $shouldFilter
    * @return array
    */
-  private function splitWords($content)
+  private function splitWords($content, $shouldFilter = true)
   {
-    return preg_split('`\b`', $content);
+    $split = preg_split('`\b`', $content);
+    if ($shouldFilter) {
+      if ($split[0] === '') {
+        array_shift($split);
+      }
+      if (!empty($split) && $split[count($split) - 1] === '') {
+        array_pop($split);
+      }
+    }
+    return $split;
   }
 
   /**
@@ -355,6 +371,10 @@ class RevisionDataDiff extends RevisionData
       if (count($value['d']) === 0) {
         // content was added from the current text
         $endInd          = $key + count($value['i']) - 1;
+        if (isset($value['i'][$endInd]) && $value['i'][$endInd] === '') {
+          // the diff shows the line ending. we don't want this index cause it won't exist
+          --$endInd;
+        }
         $revisionContent = '';
       } else if (count($value['i']) === 0) {
         // content was removed from the current text
