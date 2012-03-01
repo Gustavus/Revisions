@@ -119,12 +119,15 @@ class API
    */
   private function handleUndoAction()
   {
+    $limit = $this->revisions->getLimit();
     $this->revisions->setLimit(2);
     $this->revisions->populateEmptyRevisions();
     $secondToLatestRevNum = $this->revisions->findOldestRevisionNumberPulled();
     $revisionContent = $this->revisions->getRevisionContentArray($secondToLatestRevNum);
     $oldMessage = $this->revisions->getRevisionByNumber($secondToLatestRevNum)->getRevisionMessage();
     \Gustavus\Extensibility\Actions::apply(self::RESTORE_HOOK, $revisionContent, $oldMessage);
+    // reset limit to what it was originally at
+    $this->revisions->setLimit($limit);
   }
 
   /**
@@ -147,7 +150,7 @@ class API
       case 'revision' :
         return $this->renderRevisionFromUrlParams($urlParams);
       case 'thankYou' :
-        return $this->renderThankYouMessage();
+        return $this->renderThankYouMessage($this->getOldestRevisionNumberToPullFromURL($urlParams));
       case 'revisions' :
         return $this->renderRevisionsFromUrlParams($urlParams);
       default :
@@ -287,13 +290,7 @@ class API
    */
   private function getRevisionsUrlParams(array $urlParams)
   {
-    $revisionsUrlParams = array();
-    foreach ($urlParams as $key => $value) {
-      if (in_array($key, $this->possibleRevisionsQueryParams) && $key !== 'oldestRevisionNumber') {
-        $revisionsUrlParams[$key] = $value;
-      }
-    }
-    return $revisionsUrlParams;
+    return array_intersect_key($urlParams, array_flip($this->possibleRevisionsQueryParams));
   }
 
   /**
@@ -360,7 +357,7 @@ class API
    * @param  integer oldestRevNum oldestRevNum pulled into the revisions Object
    * @return string
    */
-  private function renderThankYouMessage($oldestRevNum)
+  private function renderThankYouMessage($oldestRevNum = null)
   {
     return $this->revisionsRenderer->renderRevisionThankYou($oldestRevNum);
   }
