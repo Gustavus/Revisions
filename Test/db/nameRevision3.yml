@@ -1,0 +1,50 @@
+revisionData:
+  -
+    id: 1
+    contentHash: "d41d8cd98f00b204e9800998ecf8427e"
+    revisionId: 1
+    revisionNumber: 0
+    key: "aboutYou"
+    value: '[[0,8,""]]'
+  -
+    id: 2
+    contentHash: "4d99b21c607ded383af0db8d14eadb34"
+    revisionId: 2
+    revisionNumber: 1
+    key: "aboutYou"
+    value: '[[8,13,""],[15,20,""]]'
+  -
+    id: 3
+    contentHash: "89ecb9229ed6f41f7260e383bd274119"
+    revisionId: 3
+    revisionNumber: 2
+    key: "aboutYou"
+    value: '"I like to eat a lot of food while triple jumping"'
+person-revision:
+  -
+    id: 1
+    contentHash: "be7fe726512928af11f2fe37cf0fbdcc"
+    table: "person"
+    rowId: 1
+    revisionNumber: 0
+    message:
+    createdBy:
+    createdOn:
+  -
+    id: 2
+    contentHash: "8ba6b30132d3a32a5a49d92b22d2d6e7"
+    table: "person"
+    rowId: 1
+    revisionNumber: 1
+    message:
+    createdBy:
+    createdOn:
+  -
+    id: 3
+    contentHash: "3110ea03d84e48ce597eecfb82a1d014"
+    table: "person"
+    rowId: 1
+    revisionNumber: 2
+    message:
+    createdBy:
+    createdOn:
