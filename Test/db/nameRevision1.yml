@@ -5,7 +5,7 @@ revisionData:
     revisionId: 1
     revisionNumber: 0
     key: "name"
-    value: '[]'
+    value: '[[0,0,""]]'
   -
     id: 2
     contentHash: "5ca49fbfb5ba90d2927d7f85f07ad74d"
