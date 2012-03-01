@@ -608,7 +608,7 @@ class RevisionsManagerTest extends RevisionsTestsHelper
 
     //$this->saveRevisionToDB($currContent, $newContent, $this->revisionsManagerMock);
     //
-    $this->call($this->revisionsManagerMock, 'saveRevisionData', array('[]', 1, 'name', ''));
+    $this->call($this->revisionsManagerMock, 'saveRevisionData', array('[[0,0,""]]', 1, 'name', ''));
     // add the new row to mimick a soon to be tested function
     $this->call($this->revisionsManagerMock, 'saveRevisionData', array(json_encode('Billy'), 2, 'name', 'Billy'));
 
