@@ -606,7 +606,7 @@ class Revisions extends RevisionsManager
    */
   public function populateEmptyRevisions($revNum = null)
   {
-    if (!$this->revisionDataHasBeenPulled) {
+    if (!$this->revisionsHaveBeenPulled) {
       // no revisions in the object
       if ($revNum !== null) {
         $oldLimit = $this->getLimit();

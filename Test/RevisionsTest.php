@@ -215,6 +215,34 @@ class RevisionsTest extends RevisionsTestsHelper
   /**
    * @test
    */
+  public function makeAndSaveRevisionLargerChange()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $revisionContent = 'I like to eat food';
+    $currentContent = 'I like to eat a lot of food while triple jumping';
+
+    $this->ymlFile = 'nameRevision3.yml';
+    $expected = $this->getDataSet();
+
+    $this->revisions->makeAndSaveRevision(array('aboutYou' => 'I like to eat food'));
+    $this->revisions->makeAndSaveRevision(array('aboutYou' => 'I like to eat a lot of food while triple jumping'));
+
+    $actualDataSet = $conn->createDataSet(array('person-revision', 'revisionData'));
+    $actual = $this->getFilteredDataSet($actualDataSet, array('person-revision' => array('createdOn'), 'revisionData' => array('createdOn')));
+    $expected = $this->getFilteredDataSet($expected, array('person-revision' => array('createdOn'), 'revisionData' => array('createdOn')));
+
+    $this->assertDataSetsEqual($expected, $actual);
+    $this->assertTablesEqual($expected->getTable('person-revision'), $actual->getTable('person-revision'));
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
   public function makeAndSaveRevisionFirst()
   {
     $conn = $this->getConnection();
@@ -856,6 +884,37 @@ class RevisionsTest extends RevisionsTestsHelper
   /**
    * @test
    */
+  public function getMissingRevisionDataInfo()
+  {
+    $conn = $this->getConnection();
+    $this->revisionsManagerInfo['limit'] = 5;
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto', 'age' => 23));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy'));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Joel Visto'));
+
+    $expected = array(
+      'age' => array(
+        'id' => '4',
+        'contentHash' => md5(23),
+        'revisionId' => '2',
+        'revisionNumber' => '1',
+        'value' => 23,
+        'revisionRevisionNumber' => '1',
+      ),
+    );
+    $actual = $this->call($this->revisions, 'getMissingRevisionDataInfo', array(array('age'), 3));
+    $this->assertSame($expected, $actual);
+
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
   public function makeAndSaveRevisionDataAndPull()
   {
     $conn = $this->getConnection();
@@ -1013,6 +1072,46 @@ class RevisionsTest extends RevisionsTestsHelper
     $this->revisions->getRevisionObjects(4-5);
     $this->revisions->getRevisionObjects(0);
     $this->assertSame(0, $this->revisions->findOldestRevisionNumberPulled());
+
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
+  public function getRevisionObjectsWithOldestRevisionNumber()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Visto', 'age' => 22));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Joel Visto', 'age' => 23));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto', 'age' => 24));
+    $this->revisions->getRevisionObjects(2);
+    $this->assertSame(2, $this->revisions->findOldestRevisionNumberPulled());
+
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
+  public function populateEmptyRevisionsWithRevisionNumber()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Visto', 'age' => 22));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Joel Visto', 'age' => 23));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto', 'age' => 24));
+    $this->revisions->populateEmptyRevisions(2);
+    $this->assertSame(2, $this->revisions->findOldestRevisionNumberPulled());
 
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }
