@@ -132,12 +132,11 @@ class RevisionsRenderer
    * Renders out a table of revisionData for each column with a button to confirm restore
    *
    * @param  integer revNum
-   * @param  integer oldestRevNum oldestRevNum pulled into the revisions Object
    * @return string
    */
-  public function renderRevisionRestore($revNum, $oldestRevNum)
+  public function renderRevisionRestore($revNum)
   {
-    return $this->renderTwig('revisionDataRestore.twig', $this->revisions->getRevisionByNumber($revNum), array('visibleRevisions' => array($revNum)), $oldestRevNum);
+    return $this->renderTwig('revisionDataRestore.twig', $this->revisions->getRevisionByNumber($revNum), array('visibleRevisions' => array($revNum)));
   }
 
   /**

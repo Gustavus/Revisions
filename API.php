@@ -219,7 +219,7 @@ class API
     $oldestRevNumToPull = $this->getOldestRevisionNumberToPullFromURL($urlParams);
     if (isset($urlParams['revisionNumber'])) {
       if ($this->isRestore($urlParams)) {
-        return $this->renderRevisionRestore((int) $urlParams['revisionNumber'], $oldestRevNumToPull);
+        return $this->renderRevisionRestore((int) $urlParams['revisionNumber']);
       } else {
         if (isset($urlParams['column'])) {
           return $this->renderRevisionData((int) $urlParams['revisionNumber'], $urlParams['column'], $oldestRevNumToPull);
@@ -366,11 +366,10 @@ class API
    * Renders out a table of revisionData for each column with a confirm restore button
    *
    * @param  integer revNum
-   * @param  integer oldestRevNum oldestRevNum pulled into the revisions Object
    * @return string
    */
-  private function renderRevisionRestore($revNum, $oldestRevNum)
+  private function renderRevisionRestore($revNum)
   {
-    return $this->revisionsRenderer->renderRevisionRestore($revNum, $oldestRevNum);
+    return $this->revisionsRenderer->renderRevisionRestore($revNum);
   }
 }
