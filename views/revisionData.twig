@@ -19,11 +19,11 @@
             {% set revisionData = revision.revisionData[key] %}
             <dt{% if revisionData.error %} class="error"{% endif %}>{{ key }}</dt>
             <dd>
-              {% if revisionData.error %}
-                {{ base.renderError() }}
-              {% else %}
-                {{ revisionData.makeRevisionContent(true)|raw }}
-              {% endif %}
+              {%- if revisionData.error -%}
+                {{- base.renderError() -}}
+              {%- else -%}
+                {{- revisionData.makeRevisionContent(true)|raw -}}
+              {%- endif -%}
             </dd>
           {% endif %}
         {% endfor %}

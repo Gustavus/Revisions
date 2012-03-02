@@ -1,12 +1,14 @@
 {% if revisions|length > 0 %}
-  <form id="revisionsForm" {% block formMethod %}method="GET"{% endblock %}>
-    {% block revisionTimeline %}
-    {% endblock %}
-    {% block actionButton %}
-    {% endblock %}
-    {% block formExtras %}
-    {% endblock %}
-  </form>
+  {% spaceless %}
+    <form id="revisionsForm" {% block formMethod %}method="GET"{% endblock %}>
+      {% block revisionTimeline %}
+      {% endblock %}
+      {% block actionButton %}
+      {% endblock %}
+      {% block formExtras %}
+      {% endblock %}
+    </form>
+  {% endspaceless %}
 {% endif %}
 
 {% macro renderErrorColumns(num) %}
@@ -15,9 +17,7 @@
   {% endfor %}
 {% endmacro %}
 
-{% macro renderError() %}
-  An unexpected error occured.
-{% endmacro %}
+{% macro renderError() %}An unexpected error occured.{% endmacro %}
 
 {#{% macro renderRevisionTimeline(timelineArr, revisionUrl) %}
   {% set revShowing = [] %}

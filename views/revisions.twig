@@ -6,7 +6,6 @@
 {% endblock %}
 
 {% block formExtras %}
-
 {% endblock %}
 
 {% macro renderTimeline(revisions, revisionUrl, maxColumnSizes, visibleRevisions, fullUrl, oldestRevisionNumber, limit) %}
@@ -34,14 +33,8 @@
             {% if revision.error %}
               {% import 'base.twig' as base %}
               {{ base.renderErrorColumns(1) }}
-            {% elseif revision == null or revisionNumber == oldestRevisionNumber or revisionNumber < 1 %}
-              {% if revisionNumber != 0 %}
-                <td class="bytes {{ revisionNumber }}{% if revisionNumber in visibleRevisions %} visibleRevision{% endif %}">
-                  <a href="{{ fullUrl }}{% if visibleRevisions|length > 0 %}&amp;{% else %}?{% endif %}oldestRevisionNumber={{ revisionNumber }}" class="missingRevisions button" title="Show Revision {{ revisionNumber }} in table"></a>
-                </td>
-              {% endif %}
-            {% else %}
-              <td class="bytes {{ revisionNumber }}{% if revisionNumber in visibleRevisions %} {% if visibleRevisions|length > 1 and revisionNumber == visibleRevisions[1] or visibleRevisions|length == 1 and revisionNumber == visibleRevisions[0] %}young{% else %}old{% endif %}{% endif %}"><a href="{{ revisionUrl }}{{ revisionNumber }}" class="revision" data-revisionNumber="{{ revisionNumber }}" title="Look at Revision {{ revisionNumber }}">
+            {% elseif revision != null and revisionNumber > oldestRevisionNumber and revisionNumber != 0 %}
+              <td class="bytes {{ revisionNumber }}{% if revisionNumber in visibleRevisions and visibleRevisions|length > 1 and revisionNumber == visibleRevisions[1] or visibleRevisions|length == 1 and revisionNumber == visibleRevisions[0] %}young{% else %}old{% endif %}"><a href="{{ revisionUrl }}{{ revisionNumber }}" class="revision" data-revisionNumber="{{ revisionNumber }}" title="Look at Revision {{ revisionNumber }}">
               {% if revision.getRevisionData(column).getRevisionRevisionNumber() == revision.getRevisionNumber() %}
                 {#{% if revisions[revisionNumber - 1].getRevisionData(column).getCurrentContentSize() == 0 %}
                   {{ _self.renderCell(revision.getRevisionNumber(), revisions[revisionNumber].getRevisionData(column).getCurrentContentSize(), revision.getRevisionData(column).getRevisionContentSize(), maxColumnSizes[column], 0, revision.getRevisionData(column).getRevisionContentSize()) }}
@@ -50,6 +43,12 @@
                 {#{% endif %}#}
               {% else %}
                 {{ _self.renderCell(revision.getRevisionNumber(), revisions[revisionNumber - 1].getRevisionData(column).getRevisionContentSize(), revision.getRevisionData(column).getRevisionContentSize(), maxColumnSizes[column], 0, 0) }}
+              {% endif %}
+            {% else %}
+              {% if revisionNumber != 0 %}
+                <td class="bytes {{ revisionNumber }}{% if revisionNumber in visibleRevisions %} visibleRevision{% endif %}">
+                  <a href="{{ fullUrl }}{% if visibleRevisions|length > 0 %}&amp;{% else %}?{% endif %}oldestRevisionNumber={{ revisionNumber }}" class="missingRevisions button" title="Show Revision {{ revisionNumber }} in table"></a>
+                </td>
               {% endif %}
               </a></td>
             {% endif %}
@@ -61,7 +60,7 @@
       <tr class="compare">
         <th><button class="positive" name="revisionsAction" value="text">Compare</button></th>
         {% for revisionNumber, revision in revisions %}
-          {% if revision != null and revisionNumber != oldestRevisionNumber and not revision.error and revisionNumber != 0 %}
+          {% if revision != null and revisionNumber > oldestRevisionNumber and not revision.error and revisionNumber != 0 %}
             <td class="{{ revisionNumber }}{% if revisionNumber in visibleRevisions %} {% if visibleRevisions|length > 1 and revisionNumber == visibleRevisions[1] or visibleRevisions|length == 1 and revisionNumber == visibleRevisions[0] %}young{% else %}old{% endif %}{% endif %}">
               <input id="revisionNum-{{ revisionNumber }}" type="checkbox" name="revisionNumbersToCompare[]" title="Revision {{ revisionNumber }}" class="compare" value="{{ revisionNumber }}"{% if revisionNumber in visibleRevisions %} checked="true"{% endif %}/>
             </td>
