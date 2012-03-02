@@ -261,38 +261,6 @@ class RevisionsManagerTest extends RevisionsTestsHelper
   /**
    * @test
    */
-  public function getRevisionsByColumn()
-  {
-    $conn = $this->getConnection();
-    $this->setUpMock('person-revision');
-    $currContent = 'Billy Visto';
-    $newContent = 'Billy Joel Visto';
-
-    $this->dbalConnection->query($this->getCreateQuery());
-    $this->dbalConnection->query($this->getCreateDataQuery());
-
-    // modify
-    $this->call($this->revisionsManagerMock, 'saveRevisionContent', array(array('name' => $currContent)));
-    $actual = $this->call($this->revisionsManagerMock, 'getRevisions', array(null, null, null, 'name'));
-    $expected = array(
-      array(
-        'id' => '1',
-        'contentHash' => md5(json_encode(array('name' => $currContent))),
-        'table' => 'person',
-        'rowId' => '1',
-        'revisionNumber' => '0',
-        'message' => null,
-        'createdBy' => null,
-        'createdOn' => $actual[0]['createdOn']
-      ),
-    );
-    $this->assertSame($expected, $actual);
-    $this->dropCreatedTables(array('person-revision', 'revisionData'));
-  }
-
-  /**
-   * @test
-   */
   public function getRevisionsAlreadyPulled()
   {
     $conn = $this->getConnection();

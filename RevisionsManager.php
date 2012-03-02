@@ -100,10 +100,9 @@ class RevisionsManager extends RevisionsBase
    * @param integer $prevRevisionNum
    * @param integer $limit
    * @param integer $revisionId
-   * @param string $column
    * @return array of revisions
    */
-  protected function getRevisions($prevRevisionNum = null, $limit = null, $revisionId = null, $column = null)
+  protected function getRevisions($prevRevisionNum = null, $limit = null, $revisionId = null)
   {
     if ($limit === null) {
       $limit = $this->limit;
@@ -117,10 +116,6 @@ class RevisionsManager extends RevisionsBase
         ':table' => $this->table,
         ':rowId' => $this->rowId,
       );
-      if ($column !== null) {
-        $args[':key'] = $column;
-        $qb->leftJoin('rDB', "`{$this->revisionDataTable}`", 'dataDB', 'rDB.`id` = dataDB.`revisionId` AND dataDB.`key` = :key');
-      }
       $qb->where('rDB.`table` = :table')
         ->andWhere('rDB.`rowId` = :rowId')
         ->orderBy('rDB.`id`', 'DESC')
