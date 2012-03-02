@@ -44,13 +44,12 @@
               {% else %}
                 {{ _self.renderCell(revision.getRevisionNumber(), revisions[revisionNumber - 1].getRevisionData(column).getRevisionContentSize(), revision.getRevisionData(column).getRevisionContentSize(), maxColumnSizes[column], 0, 0) }}
               {% endif %}
+              </a></td>
             {% else %}
               {% if revisionNumber != 0 %}
                 <td class="bytes {{ revisionNumber }}{% if revisionNumber in visibleRevisions %} visibleRevision{% endif %}">
-                  <a href="{{ fullUrl }}{% if visibleRevisions|length > 0 %}&amp;{% else %}?{% endif %}oldestRevisionNumber={{ revisionNumber }}" class="missingRevisions button" title="Show Revision {{ revisionNumber }} in table"></a>
-                </td>
+                  <a href="{{ fullUrl }}{% if visibleRevisions|length > 0 %}&amp;{% else %}?{% endif %}oldestRevisionNumber={{ revisionNumber }}" class="missingRevisions button" title="Show Revision {{ revisionNumber }} in table"></a></td>
               {% endif %}
-              </a></td>
             {% endif %}
           {% endfor %}
         </tr>
