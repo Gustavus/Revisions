@@ -162,6 +162,17 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
   /**
    * @test
    */
+  public function renderRevisionNewContent()
+  {
+    $this->revisionDataDiff->setRevisionInfo(array());
+    $expected = '<ins>some test content</ins>';
+    $result = $this->call($this->revisionDataDiff, 'renderRevision', array(true));
+    $this->assertSame($expected, $result);
+  }
+
+  /**
+   * @test
+   */
   public function getCurrentContentSize()
   {
     $expected = strlen($this->revisionDataDiffProperties['currentContent']);

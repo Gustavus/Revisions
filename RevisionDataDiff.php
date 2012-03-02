@@ -371,10 +371,6 @@ class RevisionDataDiff extends RevisionData
       if (count($value['d']) === 0) {
         // content was added from the current text
         $endInd          = $key + count($value['i']) - 1;
-        if (isset($value['i'][$endInd]) && $value['i'][$endInd] === '') {
-          // the diff shows the line ending. we don't want this index cause it won't exist
-          --$endInd;
-        }
         $revisionContent = '';
       } else if (count($value['i']) === 0) {
         // content was removed from the current text
