@@ -4,7 +4,6 @@
  */
 namespace Gustavus\Revisions;
 
-require_once 'db/DBAL.class.php';
 /**
  * Interacts with the database
  *
@@ -90,7 +89,7 @@ class RevisionsManager extends RevisionsBase
   protected function getDB()
   {
     if (!isset($this->dbal)) {
-      $this->dbal = \Gustavus\DB\DBAL::getDBAL($this->dbName);
+      $this->dbal = \Gustavus\Doctrine\DBAL::getDBAL($this->dbName);
     }
     return $this->dbal;
   }
