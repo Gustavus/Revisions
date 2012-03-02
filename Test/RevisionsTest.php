@@ -109,7 +109,7 @@ class RevisionsTest extends RevisionsTestsHelper
   /**
    * @test
    */
-  public function compareTwoRevisionsColumn()
+  public function compareTwoRevisionsColumns()
   {
     $this->revisionsManagerInfo['limit'] = 10;
     $conn = $this->getConnection();
@@ -122,8 +122,9 @@ class RevisionsTest extends RevisionsTestsHelper
     $this->revisions->makeAndSaveRevision(array('age' => 22));
     $this->revisions->makeAndSaveRevision(array('age' => 23, 'name' => 'Billy Visto'));
 
-    $result = $this->revisions->compareTwoRevisions(3, 2, 'name');
+    $result = $this->revisions->compareTwoRevisions(3, 2, array('name'));
     $this->assertInstanceOf('\Gustavus\Revisions\Revision', $result);
+    $this->assertNull($result->getRevisionData('age'));
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }
 
@@ -143,8 +144,9 @@ class RevisionsTest extends RevisionsTestsHelper
     $this->revisions->makeAndSaveRevision(array('age' => 22));
     $this->revisions->makeAndSaveRevision(array('age' => 23, 'name' => 'Billy Visto'));
 
-    $result = $this->revisions->compareTwoRevisions(0, 20, 'name');
+    $result = $this->revisions->compareTwoRevisions(0, 20, array('name'));
     $this->assertInstanceOf('\Gustavus\Revisions\Revision', $result);
+    $this->assertNull($result->getRevisionData('age'));
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }
 
@@ -492,7 +494,7 @@ class RevisionsTest extends RevisionsTestsHelper
     $this->saveRevisionToDB('Billy Visto', 'Billy', 'name', $this->revisions);
     $this->saveRevisionToDB('Billy', 'Billy Visto', 'name', $this->revisions);
 
-    $this->call($this->revisions, 'populateObjectWithRevisions', array('name'));
+    $this->call($this->revisions, 'populateObjectWithRevisions', array());
     $this->assertInstanceOf('\Gustavus\Revisions\Revision', $this->revisions->getRevisionByNumber(2));
     $this->assertInstanceOf('\Gustavus\Revisions\Revision', $this->revisions->getRevisionByNumber(0));
 
@@ -515,8 +517,8 @@ class RevisionsTest extends RevisionsTestsHelper
     $this->saveRevisionToDB('Billy Visto', 'Billy', 'name', $this->revisions);
     $this->saveRevisionToDB('Billy', 'Billy Visto', 'name', $this->revisions);
 
-    $this->call($this->revisions, 'populateObjectWithRevisions', array('name'));
-    $this->call($this->revisions, 'populateObjectWithRevisions', array('name'));
+    $this->call($this->revisions, 'populateObjectWithRevisions', array());
+    $this->call($this->revisions, 'populateObjectWithRevisions', array());
     $this->assertInstanceOf('\Gustavus\Revisions\Revision', $this->revisions->getRevisionByNumber(2));
     $this->assertInstanceOf('\Gustavus\Revisions\Revision', $this->revisions->getRevisionByNumber(1));
 
@@ -683,9 +685,9 @@ class RevisionsTest extends RevisionsTestsHelper
     $this->saveRevisionToDB('Billy Visto', 'Billy', 'name', $this->revisions);
     $this->saveRevisionToDB('Billy', 'Billy Visto', 'name', $this->revisions);
 
-    $this->call($this->revisions, 'populateObjectWithRevisions', array('name'));
+    $this->call($this->revisions, 'populateObjectWithRevisions', array());
     $this->assertSame(3, $this->call($this->revisions, 'findOldestRevisionNumberPulled', array('name')));
-    $this->call($this->revisions, 'populateObjectWithRevisions', array('name'));
+    $this->call($this->revisions, 'populateObjectWithRevisions', array());
     $this->assertSame(2, $this->call($this->revisions, 'findOldestRevisionNumberPulled', array('name')));
 
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
@@ -703,7 +705,7 @@ class RevisionsTest extends RevisionsTestsHelper
     $this->dbalConnection->query($this->getCreateDataQuery());
     //$this->call($this->revisions, 'populateObjectWithArray', array($this->revisionsManagerInfo));
 
-    $this->call($this->revisions, 'populateObjectWithRevisions', array('name'));
+    $this->call($this->revisions, 'populateObjectWithRevisions', array());
     $this->assertNull($this->call($this->revisions, 'findOldestRevisionNumberPulled', array('name')));
 
     $this->dropCreatedTables(array('person-revision', 'revisionData'));

@@ -100,10 +100,10 @@ class Revisions extends RevisionsManager
    *
    * @param  integer  $oldRevisionNum revision number to compare against
    * @param  integer  $newRevisionNum revision number to compare
-   * @param  string  $column       column to compare if only looking for a specific column
+   * @param  array  $columns       columns to compare if only looking for specific columns
    * @return Revision
    */
-  public function compareTwoRevisions($oldRevisionNum, $newRevisionNum, $column = null)
+  public function compareTwoRevisions($oldRevisionNum, $newRevisionNum, array $columns = array())
   {
     assert('is_int($oldRevisionNum)');
     assert('is_int($newRevisionNum)');
@@ -116,11 +116,14 @@ class Revisions extends RevisionsManager
     }
     $revA = $this->getRevisionForComparison($oldRevisionNum, false);
     $revB = $this->getRevisionForComparison($newRevisionNum, true);
-    if (empty($column)) {
-      $revBData = $revB->getRevisionData($column);
+    if (empty($columns)) {
+      $revBData = $revB->getRevisionData();
     } else {
       // this way we don't have to do something different for non arrays
-      $revBData = array($column => $revB->getRevisionData($column));
+      $revBData = array();
+      foreach ($columns as $column) {
+        $revBData[$column] = $revB->getRevisionData($column);
+      }
     }
     foreach ($revBData as $key => $revisionDataB) {
       // revA might not have all the columns that B has
@@ -207,13 +210,12 @@ class Revisions extends RevisionsManager
    * Gets and stores revisions in the object
    * Pulls in 1 revision at a time unless the limit is set in construction
    *
-   * @param string $column
    * @return void
    */
-  private function populateObjectWithRevisions($column = null)
+  private function populateObjectWithRevisions()
   {
     $currentContent = null;
-    $revisions = $this->getRevisions($this->findOldestRevisionNumberPulled(), null, null, $column);
+    $revisions = $this->getRevisions($this->findOldestRevisionNumberPulled(), null, null);
 
     foreach ($revisions as $revisionInfo) {
       $revisionData = $this->makeRevisionDataObjects((int) $revisionInfo['id']);
@@ -485,10 +487,9 @@ class Revisions extends RevisionsManager
   /**
    * Gets the oldest revision pulled into the object
    *
-   * @param string $column
    * @return integer
    */
-  private function getOldestRevisionPulled($column = null)
+  private function getOldestRevisionPulled()
   {
     if (!isset($this->revisions)) {
       return null;
@@ -505,7 +506,6 @@ class Revisions extends RevisionsManager
    * Pulls a specific revision out of the object to return
    *
    * @param  integer $revisionNumber revision number you want
-   * @param  string $column
    * @return string
    */
   public function getRevisionByNumber($revisionNumber, $column = null)
@@ -516,7 +516,7 @@ class Revisions extends RevisionsManager
       return null;
     }
     if ($this->revisions[$revisionNumber] === null) {
-      $this->pullRevisionsUntilRevisionNumber($revisionNumber, $column);
+      $this->pullRevisionsUntilRevisionNumber($revisionNumber);
     }
     return $this->revisions[$revisionNumber];
   }
@@ -525,19 +525,18 @@ class Revisions extends RevisionsManager
    * Pulls in revisions until the specified revision number is in the object
    *
    * @param  integer $revisionNumber
-   * @param  string $column
    * @return void
    */
-  private function pullRevisionsUntilRevisionNumber($revisionNumber, $column = null)
+  private function pullRevisionsUntilRevisionNumber($revisionNumber)
   {
     // $i = $i - $this->getLimit() avoids pulling in the limit everytime and allows us to jump ahead to only pull in the necessary amount of revisions
     for ($i = $this->findOldestRevisionNumberPulled(); $i > $revisionNumber; $i = $i - $this->getLimit()) {
       // keep pulling in revisions until the revision number is in the object
-      $oldestRevisionPulled = $this->getOldestRevisionPulled($column);
+      $oldestRevisionPulled = $this->getOldestRevisionPulled();
       if ($oldestRevisionPulled->getError()) {
         break;
       }
-      $this->populateObjectWithRevisions($column);
+      $this->populateObjectWithRevisions();
     }
   }
 
