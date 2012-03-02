@@ -32,7 +32,7 @@ class API
     'revisionsAction',
     'revisionNumber',
     'revisionNumbersToCompare',
-    'column',
+    'columns',
     'limit',
     'oldestRevisionNumber',
   );
@@ -222,10 +222,10 @@ class API
       if ($this->isRestore($urlParams)) {
         return $this->renderRevisionRestore((int) $urlParams['revisionNumber']);
       } else {
-        if (isset($urlParams['column'])) {
-          return $this->renderRevisionData((int) $urlParams['revisionNumber'], $urlParams['column'], $oldestRevNumToPull);
+        if (isset($urlParams['columns'])) {
+          return $this->renderRevisionData((int) $urlParams['revisionNumber'], $urlParams['columns'], $oldestRevNumToPull);
         } else {
-          return $this->renderRevisionData((int) $urlParams['revisionNumber'], null, $oldestRevNumToPull);
+          return $this->renderRevisionData((int) $urlParams['revisionNumber'], array(), $oldestRevNumToPull);
         }
       }
     } else {
@@ -244,10 +244,10 @@ class API
     $oldestRevNumToPull = $this->getOldestRevisionNumberToPullFromURL($urlParams);
     if ($this->isComparison($urlParams)) {
       $function = 'renderRevisionComparison' . ucfirst($urlParams['revisionsAction']);
-      if (isset($urlParams['column'])) {
-        return $this->{$function}((int) $urlParams['revisionNumbersToCompare'][0], (int) $urlParams['revisionNumbersToCompare'][1], $urlParams['column'], $oldestRevNumToPull);
+      if (isset($urlParams['columns'])) {
+        return $this->{$function}((int) $urlParams['revisionNumbersToCompare'][0], (int) $urlParams['revisionNumbersToCompare'][1], $urlParams['columns'], $oldestRevNumToPull);
       } else {
-        return $this->{$function}((int) $urlParams['revisionNumbersToCompare'][0], (int) $urlParams['revisionNumbersToCompare'][1], null, $oldestRevNumToPull);
+        return $this->{$function}((int) $urlParams['revisionNumbersToCompare'][0], (int) $urlParams['revisionNumbersToCompare'][1], array(), $oldestRevNumToPull);
       }
     } else {
       return $this->renderRevisionsFromUrlParams($urlParams);
@@ -330,26 +330,26 @@ class API
    *
    * @param  integer oldRevNum
    * @param  integer $newRevNum
-   * @param  string $column
+   * @param  array $columns
    * @param  integer oldestRevNum oldestRevNum pulled into the revisions Object
    * @return string
    */
-  private function renderRevisionComparisonText($oldRevNum, $newRevNum, $column = null, $oldestRevNum = null)
+  private function renderRevisionComparisonText($oldRevNum, $newRevNum, array $columns = array(), $oldestRevNum = null)
   {
-    return $this->revisionsRenderer->renderRevisionComparisonText($oldRevNum, $newRevNum, $column, $oldestRevNum);
+    return $this->revisionsRenderer->renderRevisionComparisonText($oldRevNum, $newRevNum, $columns, $oldestRevNum);
   }
 
   /**
    * Renders out a table of revisionData for each column
    *
    * @param  integer revNum
-   * @param  string $column
+   * @param  array $columns
    * @param  integer oldestRevNum oldestRevNum pulled into the revisions Object
    * @return string
    */
-  private function renderRevisionData($revNum, $column = null, $oldestRevNum = null)
+  private function renderRevisionData($revNum, array $columns = array(), $oldestRevNum = null)
   {
-    return $this->revisionsRenderer->renderRevisionData($revNum, $column, $oldestRevNum);
+    return $this->revisionsRenderer->renderRevisionData($revNum, $columns, $oldestRevNum);
   }
 
   /**

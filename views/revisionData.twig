@@ -14,7 +14,12 @@
         {{ _self.renderHeader(revisions[visibleRevisions[0]]) }}
       </div>
       <dl class="clearfix">
-        {% for key in revision.revisionData|keys %}
+        {% if columns|length > 0 %}
+          {% set keys = columns %}
+        {% else %}
+          {% set keys = revision.revisionData|keys %}
+        {% endif %}
+        {% for key in keys %}
           {% if revision.revisionData[key] != null %}
             {% set revisionData = revision.revisionData[key] %}
             <dt{% if revisionData.error %} class="error"{% endif %}>{{ key }}</dt>

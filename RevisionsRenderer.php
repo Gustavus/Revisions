@@ -96,30 +96,30 @@ class RevisionsRenderer
    *
    * @param  integer oldRevNum
    * @param  integer $newRevNum
-   * @param  string $column
+   * @param  array $columns
    * @param  integer oldestRevNum oldestRevNum pulled into the revisions Object
    * @return string
    */
-  public function renderRevisionComparisonText($oldRevNum, $newRevNum, $column = null, $oldestRevNum = null)
+  public function renderRevisionComparisonText($oldRevNum, $newRevNum, array $columns = array(), $oldestRevNum = null)
   {
     // - 1 so we pull in one more revision for rendering content changes
     $this->revisions->populateEmptyRevisions(min($oldRevNum, $newRevNum) - 1);
-    return $this->renderTwig('revisionDataText.twig', $this->revisions->compareTwoRevisions($oldRevNum, $newRevNum, $column), array('visibleRevisions' => array($oldRevNum, $newRevNum)), $oldestRevNum);
+    return $this->renderTwig('revisionDataText.twig', $this->revisions->compareTwoRevisions($oldRevNum, $newRevNum, $columns), array('visibleRevisions' => array($oldRevNum, $newRevNum), 'columns' => $columns), $oldestRevNum);
   }
 
   /**
    * Renders out a table of revisionData for each column
    *
    * @param  integer revNum
-   * @param  string $column
+   * @param  array $columns
    * @param  integer oldestRevNum oldestRevNum pulled into the revisions Object
    * @return string
    */
-  public function renderRevisionData($revNum, $column = null, $oldestRevNum = null)
+  public function renderRevisionData($revNum, array $columns = array(), $oldestRevNum = null)
   {
     // - 1 so we pull in one more revision for rendering content changes
     $this->revisions->populateEmptyRevisions($revNum - 1);
-    return $this->renderTwig('revisionData.twig', $this->revisions->getRevisionByNumber($revNum, $column), array('visibleRevisions' => array($revNum)), $oldestRevNum);
+    return $this->renderTwig('revisionData.twig', $this->revisions->getRevisionByNumber($revNum), array('visibleRevisions' => array($revNum), 'columns' => $columns), $oldestRevNum);
   }
 
   /**
