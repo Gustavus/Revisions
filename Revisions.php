@@ -511,7 +511,7 @@ class Revisions extends RevisionsManager
   public function getRevisionByNumber($revisionNumber, $column = null)
   {
     assert('is_int($revisionNumber)');
-    $this->populateEmptyRevisions();
+    $this->populateEmptyRevisions($revisionNumber);
     if (!isset($this->revisions) || !array_key_exists($revisionNumber, $this->revisions)) {
       return null;
     }
