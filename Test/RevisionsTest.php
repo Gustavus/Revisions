@@ -65,7 +65,7 @@ class RevisionsTest extends RevisionsTestsHelper
   private function setUpMock($tableName)
   {
     if (!isset($this->dbalConnection)) {
-      $this->dbalConnection = \Gustavus\DB\DBAL::getDBAL($tableName, self::$dbh);
+      $this->dbalConnection = \Gustavus\Doctrine\DBAL::getDBAL($tableName, self::$dbh);
     }
 
     $this->revisions = $this->getMockWithDB('\Gustavus\Revisions\Revisions', 'getDB', array($this->revisionsManagerInfo), $this->dbalConnection);

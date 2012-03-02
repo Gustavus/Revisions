@@ -11,7 +11,6 @@ require_once 'Gustavus/Revisions/RevisionsManager.php';
 require_once 'Gustavus/Revisions/Revision.php';
 require_once 'Gustavus/Revisions/RevisionDataDiff.php';
 require_once __DIR__ . '/RevisionsTestsHelperTest.php';
-require_once '/cis/lib/db/DBAL.class.php';
 
 /**
  * @package Revisions
@@ -81,7 +80,7 @@ class RevisionsManagerTest extends RevisionsTestsHelper
   private function setUpMock($tableName)
   {
     if (!isset($this->dbalConnection)) {
-      $this->dbalConnection = \Gustavus\DB\DBAL::getDBAL($tableName, self::$dbh);
+      $this->dbalConnection = \Gustavus\Doctrine\DBAL::getDBAL($tableName, self::$dbh);
     }
 
     $this->revisionsManagerMock = $this->getMockWithDB('\Gustavus\Revisions\RevisionsManager', 'getDB', array($this->revisionsManagerInfo), $this->dbalConnection);
