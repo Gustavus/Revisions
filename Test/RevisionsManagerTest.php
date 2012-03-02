@@ -7,11 +7,6 @@
 namespace Gustavus\Revisions\Test;
 use Gustavus\Revisions;
 
-require_once 'Gustavus/Revisions/RevisionsManager.php';
-require_once 'Gustavus/Revisions/Revision.php';
-require_once 'Gustavus/Revisions/RevisionDataDiff.php';
-require_once __DIR__ . '/RevisionsTestsHelperTest.php';
-
 /**
  * @package Revisions
  * @subpackage Tests

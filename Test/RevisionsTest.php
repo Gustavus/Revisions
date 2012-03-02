@@ -7,11 +7,6 @@
 namespace Gustavus\Revisions\Test;
 use \Gustavus\Revisions;
 
-require_once '/cis/lib/Gustavus/Revisions/Test/RevisionsTestsHelperTest.php';
-require_once '/cis/lib/Gustavus/Revisions/Revisions.php';
-require_once '/cis/lib/Gustavus/Revisions/Revision.php';
-require_once '/cis/lib/Gustavus/Revisions/DiffInfo.php';
-
 /**
  * @package Revisions
  * @subpackage Tests
