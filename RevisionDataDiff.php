@@ -340,7 +340,7 @@ class RevisionDataDiff extends RevisionData
   {
     $split = preg_split('`\b`', $content);
     if ($shouldFilter) {
-      if ($split[0] === '') {
+      if (empty($split[0])) {
         array_shift($split);
       }
       if (!empty($split) && $split[count($split) - 1] === '') {
