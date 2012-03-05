@@ -213,7 +213,7 @@ class APITest extends RevisionsTestsHelper
     <tfoot>
       <tr class=\"compare\">
         <th>
-          <button class=\"positive\" name=\"revisionsAction\" value=\"text\">Compare</button>
+          <button id=\"compareButton\" class=\"positive\" name=\"revisionsAction\" value=\"text\">Compare</button>
         </th>
         <td class=\"1\">
           <input id=\"revisionNum-1\" type=\"checkbox\" name=\"revisionNumbersToCompare[]\" title=\"Revision 1\" class=\"compare\" value=\"1\"/>
@@ -352,7 +352,7 @@ class APITest extends RevisionsTestsHelper
     <tfoot>
       <tr class=\"compare\">
         <th>
-          <button class=\"positive\" name=\"revisionsAction\" value=\"text\">Compare</button>
+          <button id=\"compareButton\" class=\"positive\" name=\"revisionsAction\" value=\"text\">Compare</button>
         </th>
         <td class=\"1\">
           <input id=\"revisionNum-1\" type=\"checkbox\" name=\"revisionNumbersToCompare[]\" title=\"Revision 1\" class=\"compare\" value=\"1\"/>
@@ -459,7 +459,7 @@ class APITest extends RevisionsTestsHelper
     <tfoot>
       <tr class=\"compare\">
         <th>
-          <button class=\"positive\" name=\"revisionsAction\" value=\"text\">Compare</button>
+          <button id=\"compareButton\" class=\"positive\" name=\"revisionsAction\" value=\"text\">Compare</button>
         </th>
         <td/>
         <td/>
@@ -600,7 +600,7 @@ class APITest extends RevisionsTestsHelper
     <tfoot>
       <tr class=\"compare\">
         <th>
-          <button class=\"positive\" name=\"revisionsAction\" value=\"text\">Compare</button>
+          <button id=\"compareButton\" class=\"positive\" name=\"revisionsAction\" value=\"text\">Compare</button>
         </th>
         <td/>
         <td class=\"2\">
@@ -738,7 +738,7 @@ class APITest extends RevisionsTestsHelper
     <tfoot>
       <tr class=\"compare\">
         <th>
-          <button class=\"positive\" name=\"revisionsAction\" value=\"text\">Compare</button>
+          <button id=\"compareButton\" class=\"positive\" name=\"revisionsAction\" value=\"text\">Compare</button>
         </th>
         <td class=\"1\">
           <input id=\"revisionNum-1\" type=\"checkbox\" name=\"revisionNumbersToCompare[]\" title=\"Revision 1\" class=\"compare\" value=\"1\"/>
@@ -880,7 +880,7 @@ class APITest extends RevisionsTestsHelper
     <tfoot>
       <tr class=\"compare\">
         <th>
-          <button class=\"positive\" name=\"revisionsAction\" value=\"text\">Compare</button>
+          <button id=\"compareButton\" class=\"positive\" name=\"revisionsAction\" value=\"text\">Compare</button>
         </th>
         <td class=\"1 old\">
           <input id=\"revisionNum-1\" type=\"checkbox\" name=\"revisionNumbersToCompare[]\" title=\"Revision 1\" class=\"compare\" value=\"1\" checked=\"true\"/>
@@ -1057,7 +1057,7 @@ class APITest extends RevisionsTestsHelper
     <tfoot>
       <tr class=\"compare\">
         <th>
-          <button class=\"positive\" name=\"revisionsAction\" value=\"text\">Compare</button>
+          <button id=\"compareButton\" class=\"positive\" name=\"revisionsAction\" value=\"text\">Compare</button>
         </th>
         <td class=\"1 old\">
           <input id=\"revisionNum-1\" type=\"checkbox\" name=\"revisionNumbersToCompare[]\" title=\"Revision 1\" class=\"compare\" value=\"1\" checked=\"true\"/>
@@ -1235,7 +1235,7 @@ class APITest extends RevisionsTestsHelper
     <tfoot>
       <tr class=\"compare\">
         <th>
-          <button class=\"positive\" name=\"revisionsAction\" value=\"text\">Compare</button>
+          <button id=\"compareButton\" class=\"positive\" name=\"revisionsAction\" value=\"text\">Compare</button>
         </th>
         <td/>
         <td class=\"2\">
@@ -1392,7 +1392,7 @@ class APITest extends RevisionsTestsHelper
     <tfoot>
       <tr class=\"compare\">
         <th>
-          <button class=\"positive\" name=\"revisionsAction\" value=\"text\">Compare</button>
+          <button id=\"compareButton\" class=\"positive\" name=\"revisionsAction\" value=\"text\">Compare</button>
         </th>
         <td/>
         <td class=\"2 young\">
@@ -1562,7 +1562,7 @@ class APITest extends RevisionsTestsHelper
     <tfoot>
       <tr class=\"compare\">
         <th>
-          <button class=\"positive\" name=\"revisionsAction\" value=\"text\">Compare</button>
+          <button id=\"compareButton\" class=\"positive\" name=\"revisionsAction\" value=\"text\">Compare</button>
         </th>
         <td/>
         <td class=\"2\">
@@ -1704,7 +1704,7 @@ class APITest extends RevisionsTestsHelper
     <tfoot>
       <tr class=\"compare\">
         <th>
-          <button class=\"positive\" name=\"revisionsAction\" value=\"text\">Compare</button>
+          <button id=\"compareButton\" class=\"positive\" name=\"revisionsAction\" value=\"text\">Compare</button>
         </th>
         <td/>
         <td class=\"2 young\">
@@ -1775,7 +1775,7 @@ class APITest extends RevisionsTestsHelper
       <dd><del>Billy </del>Visto</dd>
     </dl>
   </section>
-  <button class=\"positive\" type=\"submit\" name=\"revisionsAction\" value=\"restore\">Confirm Restore</button>
+  <button id=\"restoreButton\" class=\"positive\" type=\"submit\" name=\"revisionsAction\" value=\"restore\">Confirm Restore</button>
   </form>";
     $urlParams = array('revisionNumber' => '2');
     $_GET = array('revisionsAction' => 'revision', 'restore' => 'true');
