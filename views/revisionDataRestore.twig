@@ -1,7 +1,7 @@
 {% extends 'revisionData.twig' %}
 {% import 'base.twig' as base %}
 
-{% block formMethod %}method="POST"{% endblock %}
+{% block formMethod %}POST{% endblock %}
 
 {% block revisionTimeline %}
 {% endblock %}
@@ -11,5 +11,5 @@
   {{ parent() }}
   {% block restoreButton %}
   {% endblock %}
-  <button class="positive" type="submit" name="revisionsAction" value="restore">Confirm Restore</button>
+  <button id="restoreButton" class="positive" type="submit" name="revisionsAction" value="restore">Confirm Restore</button>
 {% endblock %}

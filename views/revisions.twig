@@ -36,11 +36,7 @@
             {% elseif revision != null and revisionNumber > oldestRevisionNumber and revisionNumber != 0 %}
               <td class="bytes {{ revisionNumber }}{% if revisionNumber in visibleRevisions and visibleRevisions|length > 1 and revisionNumber == visibleRevisions[1] or visibleRevisions|length == 1 and revisionNumber == visibleRevisions[0] %}young{% else %}old{% endif %}"><a href="{{ revisionUrl }}{{ revisionNumber }}" class="revision" data-revisionNumber="{{ revisionNumber }}" title="Look at Revision {{ revisionNumber }}">
               {% if revision.getRevisionData(column).getRevisionRevisionNumber() == revision.getRevisionNumber() %}
-                {#{% if revisions[revisionNumber - 1].getRevisionData(column).getCurrentContentSize() == 0 %}
-                  {{ _self.renderCell(revision.getRevisionNumber(), revisions[revisionNumber].getRevisionData(column).getCurrentContentSize(), revision.getRevisionData(column).getRevisionContentSize(), maxColumnSizes[column], 0, revision.getRevisionData(column).getRevisionContentSize()) }}
-                {% else %}#}
-                  {{ _self.renderCell(revision.getRevisionNumber(), revisions[revisionNumber - 1].getRevisionData(column).getRevisionContentSize(), revision.getRevisionData(column).getRevisionContentSize(), maxColumnSizes[column], revisions[revisionNumber - 1].getRevisionData(column).getAddedContentSize(), revisions[revisionNumber - 1].getRevisionData(column).getRemovedContentSize()) }}
-                {#{% endif %}#}
+                {{ _self.renderCell(revision.getRevisionNumber(), revisions[revisionNumber - 1].getRevisionData(column).getRevisionContentSize(), revision.getRevisionData(column).getRevisionContentSize(), maxColumnSizes[column], revisions[revisionNumber - 1].getRevisionData(column).getAddedContentSize(), revisions[revisionNumber - 1].getRevisionData(column).getRemovedContentSize()) }}
               {% else %}
                 {{ _self.renderCell(revision.getRevisionNumber(), revisions[revisionNumber - 1].getRevisionData(column).getRevisionContentSize(), revision.getRevisionData(column).getRevisionContentSize(), maxColumnSizes[column], 0, 0) }}
               {% endif %}
@@ -57,7 +53,7 @@
     </tbody>
     <tfoot>
       <tr class="compare">
-        <th><button class="positive" name="revisionsAction" value="text">Compare</button></th>
+        <th><button id="compareButton" class="positive" name="revisionsAction" value="text">Compare</button></th>
         {% for revisionNumber, revision in revisions %}
           {% if revision != null and revisionNumber > oldestRevisionNumber and not revision.error and revisionNumber != 0 %}
             <td class="{{ revisionNumber }}{% if revisionNumber in visibleRevisions %} {% if visibleRevisions|length > 1 and revisionNumber == visibleRevisions[1] or visibleRevisions|length == 1 and revisionNumber == visibleRevisions[0] %}young{% else %}old{% endif %}{% endif %}">
@@ -102,4 +98,3 @@
     </span>
   </span>
 {% endmacro %}
-
