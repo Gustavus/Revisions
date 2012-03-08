@@ -3,8 +3,10 @@
 {% import 'revisions.twig' as revisionsTwig %}
 
 {% block revisionTimeline %}
-  <h4>Revision History</h4>
-  {{ revisionsTwig.renderTimeline(revisions, revisionUrl, maxColumnSizes, visibleRevisions, fullUrl, oldestRevisionNumber, limit) }}
+  {% if shouldRenderTimeline %}
+    <h4>Revision History</h4>
+    {{ revisionsTwig.renderTimeline(revisions, maxColumnSizes, visibleRevisions, oldestRevisionNumber, limit) }}
+  {% endif %}
 {% endblock %}
 
 {% block formExtras %}
@@ -34,7 +36,7 @@
         {% endfor %}
       </dl>
       {% block restoreButton %}
-        {{ _self.renderRestoreButton(revisionUrl, revisions|length, visibleRevisions[0]) }}
+        {{ _self.renderRestoreButton(revisions|length, visibleRevisions[0]) }}
       {% endblock %}
     </section>
   {% endblock revisionData %}
@@ -50,8 +52,8 @@
   </header>
 {% endmacro %}
 
-{% macro renderRestoreButton(revisionUrl, revisionsLength, revisionNumber) %}
+{% macro renderRestoreButton(revisionsLength, revisionNumber) %}
   <footer>
-    <a href="{{ revisionUrl }}{{ revisionNumber }}&amp;restore=true" id="restore-{{ revisionNumber }}" class="restore button{% if revisionNumber == revisionsLength - 1 %} disabled{% endif %}" data-revisionNumber="{{ revisionNumber }}" title="Restore Revision {{ revisionNumber }}">Restore #{{ revisionNumber }}</a>
+    <button name="restore" value="{{ revisionNumber }}" id="restore-{{ revisionNumber }}" class="restore{% if revisionNumber == revisionsLength - 1 %} disabled{% endif %}" title="Restore Revision {{ revisionNumber }}">Restore #{{ revisionNumber }}</button>
   </footer>
 {% endmacro %}

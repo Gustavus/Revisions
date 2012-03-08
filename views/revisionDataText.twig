@@ -25,7 +25,7 @@
       {% endif %}
     {% endfor %}
   {% endset %}
-  <section class="clearfix revisionData compare">
+  <section class="clearfix revisionData comparison">
     <div class="clearfix headers">
       {{ revisionDataTwig.renderHeader(revisions[visibleRevisions[0]]) }}
       {{ revisionDataTwig.renderHeader(revisions[visibleRevisions[1]]) }}
@@ -33,8 +33,7 @@
     <dl class="clearfix">
       {{ column }}
     </dl>
-    {{ revisionDataTwig.renderRestoreButton(revisionUrl, revisions|length, visibleRevisions[0]) }}
-    {{ revisionDataTwig.renderRestoreButton(revisionUrl, revisions|length, visibleRevisions[1]) }}
+    {{ revisionDataTwig.renderRestoreButton(revisions|length, visibleRevisions[0]) }}
+    {{ revisionDataTwig.renderRestoreButton(revisions|length, visibleRevisions[1]) }}
   </section>
-
 {% endblock revisionData %}

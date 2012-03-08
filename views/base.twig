@@ -1,12 +1,29 @@
-{% if revisions|length > 0 %}
+{% if revisions|length > 0 or not shouldRenderTimeline %}
   {% spaceless %}
     <form id="revisionsForm" method="{% block formMethod %}GET{% endblock %}">
+      {% block hiddenFields %}
+        <div id="hiddenFields">
+          {% for key, value in hiddenFields %}
+            {% if value|keys|length > 0 %}
+              {% for arrValue in value %}
+                <input type="hidden" name="{{ key }}[]" value="{{ arrValue }}" />
+              {% endfor %}
+            {% else %}
+              <input type="hidden" name="{{ key }}" value="{{ value }}" />
+            {% endif %}
+          {% endfor %}
+        </div>
+      {% endblock %}
       {% block revisionTimeline %}
       {% endblock %}
       {% block actionButton %}
       {% endblock %}
-      {% block formExtras %}
-      {% endblock %}
+      {% if shouldRenderRevisionData %}
+        <div id="formExtras">
+          {% block formExtras %}
+          {% endblock %}
+        </div>
+      {% endif %}
     </form>
   {% endspaceless %}
 {% endif %}

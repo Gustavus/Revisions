@@ -4,6 +4,10 @@
 {% block formMethod %}POST{% endblock %}
 
 {% block revisionTimeline %}
+  {% if shouldRenderTimeline %}
+    <div id="revisionTimeline">
+    </div>
+  {% endif %}
 {% endblock %}
 
 {% block formExtras %}
@@ -11,5 +15,5 @@
   {{ parent() }}
   {% block restoreButton %}
   {% endblock %}
-  <button id="restoreButton" class="positive" type="submit" name="revisionsAction" value="restore">Confirm Restore</button>
+  <button id="restoreButton" class="positive" type="submit" name="restore" value="{{ visibleRevisions[0] }}">Confirm Restore</button>
 {% endblock %}
