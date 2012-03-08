@@ -60,9 +60,9 @@ function makeVisibleRevisionsArray()
 function replaceSectionsWithData($data)
 {
   $('#revisionsForm').attr('method', $data.attr('method'));
+
   $data.children().each(function(i, element) {
     $('#' + $(element).attr('id')).html($(element).html());
-    console.log($(element));
 
     if ($(element).attr('id') === 'formExtras') {
       restoreButtons = $(element).find('footer button')
@@ -85,6 +85,7 @@ function replaceSectionsWithData($data)
     }
     if ($(element).find('#revisionTimeline')) {
       Extend.apply('page', $('#revisionTimeline'));
+      $('#compareButton').attr('disabled', 'disabled');
     }
   });
 }
@@ -124,7 +125,6 @@ function makeAjaxRequest(url, data)
   data['oldestRevisionInTimeline'] = $('tfoot td label input').first().val();
   data['visibleRevisions'] = makeVisibleRevisionsArray();
 
-  console.log('ajax');
   if (url !== '') {
     $.ajax({
       url: url,
@@ -140,7 +140,7 @@ function makeAjaxRequest(url, data)
 function makeHistory($element)
 {
   var data = makeDataObject($element);
-  var url = window.location.origin + window.location.pathname + '?' + $.param(data);
+  var url = '?' + $.param(data);
   if (window.History.enabled) {
     window.History.pushState(data, null, url);
   } else {
@@ -150,7 +150,6 @@ function makeHistory($element)
 }
 
 window.History.Adapter.bind(window, 'statechange', function() {
-  console.log('statechange');
   var State = window.History.getState();
   makeAjaxRequest(State.url, State.data);
 });
@@ -159,10 +158,6 @@ function handleClickAction($element)
 {
   // call make history to throw the new url to the stack and trigger the statechange event that calls makeAjaxRequest
   makeHistory($element);
-  if ($element.hasClass('revision')) {
-    $('.young').removeClass('young');
-    $('.' + $element.val()).addClass('young');
-  }
 }
 
 $('#revisionsForm').on('click', 'button', function() {
