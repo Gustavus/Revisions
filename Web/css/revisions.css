@@ -1,0 +1,350 @@
+/*ins {
+  color: green;
+}
+del {
+  color: red;
+}*/
+
+/* Revision Timeline */
+span.bytes {
+  display: block;
+}
+td.bytes {
+  padding-left: 0;
+  padding-right: 0;
+  min-width: 15px;
+}
+#revisionsForm th, #revisionsForm td {
+  vertical-align: middle;
+}
+#revisionTimeline button.revision {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  -o-box-shadow: none;
+  box-shadow: none;
+}
+#revisionTimeline button.missingRevisions {
+  height: .3em;
+  width: .3em;
+  padding: 0;
+  margin: 3px;
+  border: 0;
+  background: transparent;
+}
+#revisionTimeline {
+  margin-top: .5em;
+}
+#revisionTimeline thead th {
+  font-size: 9px;
+}
+#revisionTimeline thead th button {
+  color: #ddd;
+}
+#revisionTimeline thead th #showMoreRevisions {
+  color: #222;
+}
+#revisionTimeline thead th.hover button, #revisionTimeline thead th.selected button, #revisionTimeline thead th.old button, #revisionTimeline thead th.young button {
+  color: #888;
+}
+#revisionTimeline tbody th, #revisionTimeline tfoot th {
+  text-align: right;
+  border-right: 1px solid #eee;
+}
+#revisionTimeline tfoot th, #revisionTimeline tfoot td {
+  background-color: rgba(0, 0, 0, .06);
+}
+#revisionTimeline input {
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+}
+#revisionTimeline tfoot tr td label {
+  display: block;
+  height: 2.5em;
+  line-height: 2.5em;
+}
+
+/* Timeline Revision Changes */
+.bytes {
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+.removed.bytes, .added.bytes {
+  text-indent: -9999px;
+  border-left: 1px solid rgba(255, 255, 255, .4);
+}
+.positive.bytes {
+  position: relative;
+  top: 0;
+  height: 50%;
+  width: 100%;
+  border-bottom: 1px solid #999;
+}
+.negative.bytes {
+  position: absolute;
+  bottom: 0;
+  height: 50%;
+  width: 100%;
+}
+.unchanged.bytes {
+  position: absolute;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, .13);
+  border-left: 1px solid rgba(255, 255, 255, .4);
+  width: 100%;
+  z-index: 1;
+  border-radius: 1px 1px 0 0;
+  box-shadow: inset 0 1px 5px rgba(0, 0, 0, .08);
+}
+.added.bytes {
+  position: absolute;
+  bottom: 0;
+  background-color: #0b0;
+  width: 100%;
+  z-index: 2;
+  border-radius: 1px 1px 0 0;
+  box-shadow: inset 0 1px 5px rgba(0, 0, 0, .1);
+}
+.removed.bytes {
+  top: 0;
+  background-color: #b00;
+  width: 100%;
+  border-radius: 0 0 1px 1px;
+  box-shadow: inset 0 2px 4px -2px rgba(0, 0, 0, .5);
+}
+.bytes.container {
+  position: relative;
+  height: 30px;
+  width: 100%;
+}
+#revisionTimeline button {
+  font-size: 2.5em;
+  margin: 0;
+  padding: 0;
+}
+#revisionTimeline th button {
+  font-size: 1em;
+}
+#revisionTimeline #compareButton {
+  font-size: 1.5em;
+  padding: 4px;
+}
+#revisionTimeline button:focus, #revisionTimeline button:hover {
+  text-decoration: none;
+}
+#revisionTimeline #timelineText {
+  font-size: 1em;
+  display: block;
+}
+
+/* Table Column Hover */
+#revisionTimeline td.hover, #revisionTimeline th.hover {
+  background-color: rgba(0, 0, 0, .05);
+}
+#revisionTimeline tr.odd td.hover, #revisionTimeline tr.odd th.hover {
+  background-color: rgba(0, 0, 0, .1);
+}
+
+/* Table Column Hover and Selected */
+#revisionTimeline td.hover.selected, #revisionTimeline th.hover.selected {
+  background-color: rgba(0, 0, 0, .1);
+}
+#revisionTimeline tr.odd td.hover.selected, #revisionTimeline tr.odd th.hover.selected {
+  background-color: rgba(0, 0, 0, .15);
+}
+
+/* Table Column Selected */
+#revisionTimeline td.selected, #revisionTimeline th.selected {
+  background-color: rgba(0, 0, 0, .05);
+}
+#revisionTimeline tr.odd td.selected, #revisionTimeline tr.odd th.selected {
+  background-color: rgba(0, 0, 0, .1);
+}
+
+/* Revision highlighting */
+#revisionTimeline .old {
+  background-color: rgba(190, 190, 0, .15);
+}
+#revisionTimeline .odd .old {
+  background-color: rgba(190, 190, 0, .225);
+}
+#revisionTimeline tfoot td.old {
+  background-color: rgba(190, 190, 0, .3);
+}
+#revisionTimeline .young {
+  background-color: rgba(0, 80, 230, .1);
+}
+#revisionTimeline .odd .young {
+  background-color: rgba(0, 80, 230, .15);
+}
+#revisionTimeline tfoot td.young {
+  background-color: rgba(0, 80, 230, .2);
+}
+
+#revisionTimeline thead th, #revisionTimeline tfoot td {
+  text-align: center;
+  padding: 2px;
+}
+tr.compare td {
+  padding-left: 0px;
+}
+
+/* Revision Data */
+.revisionData {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  border-radius: .5em;
+  border: 1px solid rgba(0, 0, 0, .25);
+  background-color: rgba(0, 80, 230, .15);
+  margin: 1em 0;
+}
+
+.revisionData .headers {
+  box-shadow: inset 0 -10px 20px -10px rgba(0, 0, 0, .2);
+  background-color: rgba(0, 0, 0, .03);
+}
+.revisionData header {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  padding: 10px;
+  border-radius: .5em .5em 0 0;
+}
+.revisionData h1, .revisionData h2 {
+  display: inline;
+  font-family: Arial, "Helvetica Nueue", Helvetica, sans-serif;
+  vertical-align: middle;
+  margin: 0;
+}
+.revisionData h1 {
+  font-size: 1.35em;
+  font-weight: bold;
+  margin-right: .5em;
+}
+.revisionData h2 {
+  font-size: .85em;
+  font-style: italic;
+  margin-right: .25em;
+}
+.revisionData header p {
+  margin: 0;
+}
+.revisionData footer button {
+  display: block;
+  font-size: 1.4em;
+  font-weight: bold;
+  margin: 0;
+  border-radius: 0 0 .35em .35em;
+}
+.revisionData dt {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  background-color: rgba(255, 255, 255, .5);
+  margin: 0;
+  padding: 1em 10px .25em 10px;
+  clear: both;
+  box-shadow: inset 0 10px 20px -10px rgba(0, 0, 0, .1);
+  border-top: 1px solid rgba(0, 0, 0, .2);
+  font-size: 1.1em;
+  font-weight: bold;
+}
+.revisionData dd {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  padding: 10px;
+  margin: 0;
+}
+.revisionData ins {
+  display: none;
+}
+.revisionData del {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Comparing */
+.revisionData.comparison {
+  background: -webkit-linear-gradient(
+      0deg,
+      rgba(190, 190, 0, .15) 0px,
+      rgba(190, 190, 0, .15) 49.99999%,
+      rgba(0, 80, 230, .15) 49.99999%,
+      rgba(0, 80, 230, .15) 100%
+    ) 0 0 no-repeat;
+  background: -moz-linear-gradient(
+      0deg,
+      rgba(190, 190, 0, .15) 0px,
+      rgba(190, 190, 0, .15) 49.99999%,
+      rgba(0, 80, 230, .15) 49.99999%,
+      rgba(0, 80, 230, .15) 100%
+    ) 0 0 no-repeat;
+  background: -ms-linear-gradient(
+      0deg,
+      rgba(190, 190, 0, .15) 0px,
+      rgba(190, 190, 0, .15) 49.99999%,
+      rgba(0, 80, 230, .15) 49.99999%,
+      rgba(0, 80, 230, .15) 100%
+    ) 0 0 no-repeat;
+  background: -o-linear-gradient(
+      0deg,
+      rgba(190, 190, 0, .15) 0px,
+      rgba(190, 190, 0, .15) 49.99999%,
+      rgba(0, 80, 230, .15) 49.99999%,
+      rgba(0, 80, 230, .15) 100%
+    ) 0 0 no-repeat;
+  background: linear-gradient(
+      0deg,
+      rgba(190, 190, 0, .15) 0px,
+      rgba(190, 190, 0, .15) 49.99999%,
+      rgba(0, 80, 230, .15) 49.99999%,
+      rgba(0, 80, 230, .15) 100%
+    ) 0 0 no-repeat;
+}
+.revisionData.comparison header, .revisionData.comparison dd, .revisionData.comparison footer {
+  width: 50%;
+  float: left;
+}
+.revisionData.comparison header:first-child {
+  border-radius: .5em 0 0 0;
+}
+.revisionData.comparison header:nth-child(2) {
+  border-radius: 0 .5em 0 0;
+}
+
+.revisionData.comparison footer button {
+  border-radius: 0 0 0 .35em;
+}
+.revisionData.comparison footer + footer button {
+  border-radius: 0 0 .35em 0;
+}
+
+/* Revision A */
+.revisionData.comparison dt + dd ins {
+  display: none;
+}
+.revisionData.comparison dt + dd del {
+  display: inline;
+  color: red;
+  text-decoration: line-through;
+}
+
+/* Revision B */
+.revisionData.comparison dd + dd del {
+  display: none;
+}
+.revisionData.comparison dd + dd ins {
+  display: inline;
+  color: green;
+}
