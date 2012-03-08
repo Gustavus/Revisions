@@ -240,6 +240,7 @@ tr.compare td {
   margin: 0;
 }
 .revisionData footer button {
+  width: 100%;
   display: block;
   font-size: 1.4em;
   font-weight: bold;
