@@ -17,11 +17,6 @@ class RevisionsRenderer
   private $revisions;
 
   /**
-   * @var string
-   */
-  private $applicationBaseUrl;
-
-  /**
    * @var array
    */
   private $applicationUrlParams;
@@ -32,16 +27,24 @@ class RevisionsRenderer
   private $revisionsUrlParams;
 
   /**
+   * @var boolean
+   */
+  private $shouldRenderTimeline = true;
+
+  /**
+   * @var boolean
+   */
+  private $shouldRenderRevisionData = true;
+
+  /**
    * Class constructor
    * @param Revisions $revisions
-   * @param string applicationBaseUrl
    * @param array applicationUrlParams
    * @param array revisionsUrlParams
    */
-  public function __construct(Revisions $revisions, $applicationBaseUrl = '', array $applicationUrlParams = array(), array $revisionsUrlParams = array())
+  public function __construct(Revisions $revisions, array $applicationUrlParams = array(), array $revisionsUrlParams = array())
   {
     $this->revisions = $revisions;
-    $this->applicationBaseUrl = $applicationBaseUrl;
     $this->applicationUrlParams = $applicationUrlParams;
     $this->revisionsUrlParams = $revisionsUrlParams;
   }
@@ -53,21 +56,29 @@ class RevisionsRenderer
    */
   public function __destruct()
   {
-    unset($this->revisions, $this->applicationBaseUrl, $this->applicationUrlParams);
+    unset($this->revisions, $this->revisionsUrlParams, $this->applicationUrlParams);
   }
 
   /**
-   * makes the url based off of the application's base url and the application's query string
+   * Set shouldRenderTimeline
    *
-   * @param  array  $urlParams
-   * @return string
+   * @param boolean $value
+   * @return void
    */
-  private function makeUrl(array $urlParams)
+  public function setShouldRenderTimeline($value)
   {
-    $urlParams = array_merge($this->applicationUrlParams, $urlParams);
-    $queryString = http_build_query($urlParams);
-    $url = (empty($queryString)) ? $this->applicationBaseUrl : sprintf('%1$s?%2$s', $this->applicationBaseUrl, $queryString);
-    return $url;
+    $this->shouldRenderTimeline = $value;
+  }
+
+  /**
+   * Set shouldRenderRevisionData
+   *
+   * @param boolean $value
+   * @return void
+   */
+  public function setShouldRenderRevisionData($value)
+  {
+    $this->shouldRenderRevisionData = $value;
   }
 
   /**
@@ -146,8 +157,8 @@ class RevisionsRenderer
   /**
    * Remove params that are in paramsToFilter
    *
-   * @param  array  $params         [description]
-   * @param  array  $paramsToFilter [description]
+   * @param  array  $params
+   * @param  array  $paramsToFilter
    * @return array
    */
   private function removeParams(array $params, array $paramsToFilter = array())
@@ -170,20 +181,20 @@ class RevisionsRenderer
   private function renderTwig($filename, $revision, array $params = array(), $oldestRevNum = null)
   {
     $oldestRevisionNumber = ($oldestRevNum === null) ? $this->revisions->findOldestRevisionNumberPulled() : $oldestRevNum - 1;
+    if ($this->shouldRenderTimeline) {
+      // don't bother pulling all the revisions for the timeline
+      $params['revisions'] = $this->revisions->getRevisionObjects($oldestRevisionNumber);
+    }
     $params = array_merge(
         $params,
         array(
-          'revision'             => $revision,
-          'revisions'            => $this->revisions->getRevisionObjects($oldestRevisionNumber),
-          'oldestRevisionNumber' => $oldestRevisionNumber,
-          'revisionUrl'          => $this->makeUrl(array(
-            'revisionsAction' => 'revision',
-            'revisionNumber'  => '',
-            )
-          ),
-          'limit'           => $this->revisions->getLimit(),
-          'maxColumnSizes'  => $this->revisions->getMaxColumnSizes(),
-          'fullUrl'         => $this->makeUrl($this->removeParams($this->revisionsUrlParams, array('oldestRevisionNumber'))),
+          'revision'              => $revision,
+          'oldestRevisionNumber'  => $oldestRevisionNumber,
+          'limit'                 => $this->revisions->getLimit(),
+          'maxColumnSizes'        => $this->revisions->getMaxColumnSizes(),
+          'hiddenFields'          => $this->removeParams(array_merge(array('oldestRevisionNumber' => $oldestRevisionNumber + 1), $this->revisionsUrlParams), array('barebones', 'oldestRevisionInTimeline', 'visibleRevisions', 'revisionNumbers')),
+          'shouldRenderTimeline'      => $this->shouldRenderTimeline,
+          'shouldRenderRevisionData'  => $this->shouldRenderRevisionData,
         )
     );
     return \Gustavus\TwigFactory\TwigFactory::renderTwigFilesystemTemplate("/cis/lib/Gustavus/Revisions/views/$filename", $params);
