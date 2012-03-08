@@ -96,6 +96,22 @@ class APITest extends RevisionsTestsHelper
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }
 
+  /**
+   * @test
+   */
+  public function getOldestRevisionNumberToPullFromURL()
+  {
+    $this->assertSame('1', $this->call($this->revisionsAPI, 'getOldestRevisionNumberToPullFromURL', array(array('oldestRevisionNumber' => '1'))));
+  }
+
+  /**
+   * @test
+   */
+  public function getOldestRevisionNumberToPullFromURLNull()
+  {
+    $this->assertNull($this->call($this->revisionsAPI, 'getOldestRevisionNumberToPullFromURL', array(array())));
+  }
+
 //   /**
 //    * @test
 //    */

@@ -74,4 +74,24 @@ class RevisionsRendererTest extends RevisionsTestsHelper
     $actual = $this->call($this->revisionsRenderer, 'removeParams', array(array('revisionsAction' => 'revision', 'oldestRevisionNumber' => '2'), array('oldestRevisionNumber')));
     $this->assertSame($expected, $actual);
   }
+
+  /**
+   * @test
+   */
+  public function setShouldRenderTimeline()
+  {
+    $this->assertTrue($this->get($this->revisionsRenderer, 'shouldRenderTimeline'));
+    $this->revisionsRenderer->setShouldRenderTimeline(false);
+    $this->assertFalse($this->get($this->revisionsRenderer, 'shouldRenderTimeline'));
+  }
+
+  /**
+   * @test
+   */
+  public function setShouldRenderRevisionData()
+  {
+    $this->assertTrue($this->get($this->revisionsRenderer, 'shouldRenderRevisionData'));
+    $this->revisionsRenderer->setShouldRenderRevisionData(false);
+    $this->assertFalse($this->get($this->revisionsRenderer, 'shouldRenderRevisionData'));
+  }
 }
