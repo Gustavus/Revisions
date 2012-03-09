@@ -19,11 +19,6 @@ class RevisionsRenderer
   /**
    * @var array
    */
-  private $applicationUrlParams;
-
-  /**
-   * @var array
-   */
   private $revisionsUrlParams;
 
   /**
@@ -39,13 +34,11 @@ class RevisionsRenderer
   /**
    * Class constructor
    * @param Revisions $revisions
-   * @param array applicationUrlParams
    * @param array revisionsUrlParams
    */
-  public function __construct(Revisions $revisions, array $applicationUrlParams = array(), array $revisionsUrlParams = array())
+  public function __construct(Revisions $revisions, array $revisionsUrlParams = array())
   {
     $this->revisions = $revisions;
-    $this->applicationUrlParams = $applicationUrlParams;
     $this->revisionsUrlParams = $revisionsUrlParams;
   }
 
@@ -56,7 +49,7 @@ class RevisionsRenderer
    */
   public function __destruct()
   {
-    unset($this->revisions, $this->revisionsUrlParams, $this->applicationUrlParams);
+    unset($this->revisions, $this->revisionsUrlParams, $this->shouldRenderTimeline, $this->shouldRenderRevisionData);
   }
 
   /**

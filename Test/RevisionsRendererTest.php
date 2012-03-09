@@ -29,18 +29,13 @@ class RevisionsRendererTest extends RevisionsTestsHelper
   private $revisions;
 
   /**
-   * @var array
-   */
-  private $appUrlParams = array();
-
-  /**
    * sets up the object for each test
    * @return void
    */
   public function setUp()
   {
     $this->revisions = new Revisions\Revisions($this->revisionsManagerInfo);
-    $this->revisionsRenderer = new Revisions\RevisionsRenderer($this->revisions, $this->appUrlParams);
+    $this->revisionsRenderer = new Revisions\RevisionsRenderer($this->revisions);
   }
 
   /**
@@ -62,7 +57,7 @@ class RevisionsRendererTest extends RevisionsTestsHelper
     }
 
     $this->revisions = $this->getMockWithDB('\Gustavus\Revisions\Revisions', 'getDB', array($this->revisionsManagerInfo), $this->dbalConnection);
-    $this->revisionsRenderer = new Revisions\RevisionsRenderer($this->revisions, $this->appUrlParams);
+    $this->revisionsRenderer = new Revisions\RevisionsRenderer($this->revisions);
   }
 
   /**
