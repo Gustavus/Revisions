@@ -67,7 +67,7 @@ class API
    */
   public function __destruct()
   {
-    unset($this->revisions, $this->revisionsRenderer);
+    unset($this->revisions, $this->revisionsRenderer, $this->possibleRevisionsQueryParams);
   }
 
   /**
@@ -164,6 +164,11 @@ class API
     }
   }
 
+  /**
+   * Set up Javascript and CSS in the template
+   *
+   * @return void
+   */
   private function setUpTemplate()
   {
     $this->addJS();
@@ -212,7 +217,7 @@ class API
   {
     $revisionsScripts = array(
       '/js/history/scripts/bundled/html4+html5/jquery.history.js',
-      sprintf('/revisions/js/revisions.js',
+      sprintf('/min/f=/revisions/js/revisions.js&%1$s',
           self::REVISIONS_JS_VERSION
       ),
     );
@@ -452,25 +457,8 @@ class API
    */
   private function constructRevisionsRenderer(array $urlParams)
   {
-    $this->revisionsRenderer = new RevisionsRenderer($this->revisions, $this->getApplicationUrlParams($urlParams), $this->getRevisionsUrlParams($urlParams));
+    $this->revisionsRenderer = new RevisionsRenderer($this->revisions, $this->getRevisionsUrlParams($urlParams));
     $this->setUpItemsToRender($urlParams);
-  }
-
-  /**
-   * make application url params
-   *
-   * @param  array $urlParams
-   * @return array
-   */
-  private function getApplicationUrlParams(array $urlParams)
-  {
-    $applicationUrlParams = array();
-    foreach ($urlParams as $key => $value) {
-      if (!in_array($key, $this->possibleRevisionsQueryParams)) {
-        $applicationUrlParams[$key] = $value;
-      }
-    }
-    return $applicationUrlParams;
   }
 
   /**

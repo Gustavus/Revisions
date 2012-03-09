@@ -1926,16 +1926,6 @@ class APITest extends RevisionsTestsHelper
   /**
    * @test
    */
-  public function getApplicationUrlParams()
-  {
-    $actual = $this->call($this->revisionsAPI, 'getApplicationUrlParams', array(array('revisionsAction' => 'revision', 'limit' => 10, 'pr' => 'manage')));
-    $expected = array('pr' => 'manage');
-    $this->assertSame($expected, $actual);
-  }
-
-  /**
-   * @test
-   */
   public function getRevisionsUrlParams()
   {
     $actual = $this->call($this->revisionsAPI, 'getRevisionsUrlParams', array(array('revisionsAction' => 'revision', 'limit' => 10, 'pr' => 'manage')));
