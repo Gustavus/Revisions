@@ -313,8 +313,18 @@ tr.compare td {
       rgba(0, 80, 230, .15) 100%
     ) 0 0 no-repeat;
 }
-.revisionData.comparison header, .revisionData.comparison dd, .revisionData.comparison footer {
+.revisionData.comparison header, .revisionData.comparison dd {
   width: 50%;
+  float: left;
+}
+/* Old Restore Button */
+.revisionData.comparison footer {
+  width: 49.99999%;
+  float: left;
+}
+/* Young Restore Button */
+.revisionData.comparison footer + footer {
+  width: 50.2%;
   float: left;
 }
 .revisionData.comparison header:first-child {
