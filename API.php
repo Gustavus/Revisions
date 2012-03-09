@@ -437,16 +437,12 @@ class API
   private function renderRevisionComparisonFromUrlParams(array $urlParams)
   {
     $oldestRevNumToPull = $this->getOldestRevisionNumberToPullFromURL($urlParams);
-    if ($this->isComparison($urlParams)) {
-      return $this->renderRevisionComparisonText(
-          (int) $urlParams['revisionNumbers'][0],
-          (int) $urlParams['revisionNumbers'][1],
-          (isset($urlParams['columns'])) ? $urlParams['columns'] : array(),
-          $oldestRevNumToPull
-      );
-    } else {
-      return $this->renderRevisionsFromUrlParams($urlParams);
-    }
+    return $this->renderRevisionComparisonText(
+        (int) $urlParams['revisionNumbers'][0],
+        (int) $urlParams['revisionNumbers'][1],
+        (isset($urlParams['columns'])) ? $urlParams['columns'] : array(),
+        $oldestRevNumToPull
+    );
   }
 
   /**
@@ -498,6 +494,7 @@ class API
       $limit = $this->revisions->getLimit();
     }
     if ($oldestRevNumToPull !== null) {
+      // make sure oldestRevNumToPull is an int if it isn't null
       $oldestRevNumToPull = (int) $oldestRevNumToPull;
     }
     return $this->revisionsRenderer->renderRevisions($limit, $oldestRevNumToPull);
