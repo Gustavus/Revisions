@@ -349,16 +349,16 @@ class RevisionsManager extends RevisionsBase
    */
   private function myArrayFilter(array $revisionInfo, array $brandNewColumns)
   {
-    array_walk(&$revisionInfo,
-      function($value, $key, $array)
-      {
-        if (!in_array($key, $array[0]) && empty($value)) {
-          unset($array[1][$key]);
-        } else if (empty($value)) {
-          $array[1][$key] = json_encode('');
-        }
-      }
-      , array($brandNewColumns, &$revisionInfo)
+    array_walk($revisionInfo,
+        function($value, $key, $array)
+        {
+          if (!in_array($key, $array[0]) && empty($value)) {
+            unset($array[1][$key]);
+          } else if (empty($value)) {
+            $array[1][$key] = json_encode('');
+          }
+        },
+        array($brandNewColumns, &$revisionInfo)
     );
     return $revisionInfo;
   }
@@ -395,6 +395,7 @@ class RevisionsManager extends RevisionsBase
 
     $changes = array_diff($newContent, $oldContent);
     if (!empty($changes)) {
+      // newContent is different from oldContent
       $newRevisionId = $this->saveRevisionContent($newContent, $message, $createdBy);
       if (!isset($revisionId)) {
         $revisionId = $newRevisionId;
