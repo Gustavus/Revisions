@@ -453,7 +453,7 @@ class RevisionsTest extends RevisionsTestsHelper
   }
 
   /**
-   *
+   * @test
    */
   public function makeAndSaveRevisionFromPostDeleted()
   {
@@ -462,7 +462,7 @@ class RevisionsTest extends RevisionsTestsHelper
     $this->dbalConnection->query($this->getCreateQuery());
     $this->dbalConnection->query($this->getCreateDataQuery());
 
-    $this->ymlFile = 'nameRevisionEmpty.yml';
+    $this->ymlFile = 'nameRevisionDeleted.yml';
     $expected = $this->getDataSet();
 
     $post = array('age' => 23, 'city' => '', 'name' => 'Billy Visto');

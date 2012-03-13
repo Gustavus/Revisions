@@ -1,0 +1,71 @@
+revisionData:
+  -
+    id: 1
+    contentHash: "d41d8cd98f00b204e9800998ecf8427e"
+    revisionId: 1
+    revisionNumber: 0
+    key: "age"
+    value: '[[null,null,""]]'
+  -
+    id: 2
+    contentHash: d41d8cd98f00b204e9800998ecf8427e
+    revisionId: 1
+    revisionNumber: 0
+    key: "city"
+    value: '""'
+  -
+    id: 3
+    contentHash: "d41d8cd98f00b204e9800998ecf8427e"
+    revisionId: 1
+    revisionNumber: 0
+    key: "name"
+    value: '[[0,2,""]]'
+  -
+    id: 4
+    contentHash: "37693cfc748049e45d87b8c7d8b9aacd"
+    revisionId: 2
+    revisionNumber: 1
+    key: "age"
+    value: '23'
+  -
+    id: 5
+    contentHash: "afe3690ec4cda7e262f0ca81858777df"
+    revisionId: 2
+    revisionNumber: 1
+    key: "name"
+    value: '[[1,null," Visto"]]'
+  -
+    id: 6
+    contentHash: "5ca49fbfb5ba90d2927d7f85f07ad74d"
+    revisionId: 3
+    revisionNumber: 2
+    key: "name"
+    value: '"Billy"'
+person-revision:
+  -
+    id: 1
+    contentHash: "6514b0fbcf41202c20513efe1285ad73"
+    table: "person"
+    rowId: 1
+    revisionNumber: 0
+    message:
+    createdBy:
+    createdOn:
+  -
+    id: 2
+    contentHash: 2c91818a13f3cb8830e6fd99fea825fc
+    table: "person"
+    rowId: 1
+    revisionNumber: 1
+    message:
+    createdBy:
+    createdOn:
+  -
+    id: 3
+    contentHash: ae38ac06d3966cf1fcc8808881cb876b
+    table: "person"
+    rowId: 1
+    revisionNumber: 2
+    message:
+    createdBy:
+    createdOn:
