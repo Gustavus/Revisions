@@ -222,7 +222,6 @@ class RevisionDataDiff extends RevisionData
       $return = array();
       foreach ($this->makeRevisionInfo($newContent) as $diffInfo) {
         if (is_object($diffInfo)) {
-          // brand new content will just be an array and not a DiffInfo object
           $return[] = array($diffInfo->getStartIndex(), $diffInfo->getEndIndex(), $diffInfo->getRevisionInfo());
         }
       }
@@ -319,7 +318,7 @@ class RevisionDataDiff extends RevisionData
    */
   private function makeNonStringRevisionInfo($newContent)
   {
-    if ($this->getCurrentContent() === $newContent || $this->getCurrentContent() === '') {
+    if ($this->getCurrentContent() === $newContent) {
       $diffInfo = array();
     } else {
       $diffInfo = new DiffInfo(array('startIndex' => null, 'endIndex' => null, 'revisionInfo' => $this->getCurrentContent()));

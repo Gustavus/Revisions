@@ -1043,7 +1043,19 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
     $this->revisionDataDiffProperties['currentContent'] = '';
     $this->setUp();
     $result = $this->call($this->revisionDataDiff, 'renderRevisionForDB', array(23));
-    $expected = json_encode(array());
+    $expected = json_encode(array(array(null,null,"")));
+    $this->assertSame($expected, $result);
+  }
+
+  /**
+   * @test
+   */
+  public function renderRevisionForDBFirstAndSecondSame()
+  {
+    $this->revisionDataDiffProperties['currentContent'] = 23;
+    $this->setUp();
+    $result = $this->call($this->revisionDataDiff, 'renderRevisionForDB', array(23));
+    $expected = null;
     $this->assertSame($expected, $result);
   }
 
