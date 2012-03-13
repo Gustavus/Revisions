@@ -92,9 +92,15 @@
   {% else %}
     {% set removedPercentage = removedContentSize/revisionContentSize*100 %}
   {% endif %}
+
+  {% if maxColumnSize == 0 %}
+    {% set unchangedPercentage = 0 %}
+  {% else %}
+    {% set unchangedPercentage = revisionContentSize/maxColumnSize*100 %}
+  {% endif %}
   <span class="bytes container">
     <span class="bytes positive">
-      <span class="bytes unchanged" title="{{ revisionContentSize - addedContentSize }} Bytes unchanged" style="height:{{ revisionContentSize/maxColumnSize*100 }}%;">
+      <span class="bytes unchanged" title="{{ revisionContentSize - addedContentSize }} Bytes unchanged" style="height:{{ unchangedPercentage }}%;">
       </span>
       <span class="bytes added" title="{{ addedContentSize }} Bytes added" style="height:{{ addedPercentage }}%;">
       </span>
