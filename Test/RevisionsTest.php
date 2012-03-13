@@ -212,6 +212,34 @@ class RevisionsTest extends RevisionsTestsHelper
   /**
    * @test
    */
+  public function makeAndSaveRevisionPDOArray()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $this->saveRevisionToDB('', 'Billy Visto', 'name', $this->revisions);
+    $this->saveRevisionToDB('Billy Visto', 'Billy', 'name', $this->revisions);
+    $this->saveRevisionToDB('Billy', 'Billy Visto', 'name', $this->revisions);
+
+    $this->ymlFile = 'nameRevision2.yml';
+    $expected = $this->getDataSet();
+
+    $this->revisions->makeAndSaveRevision(array(':name' => 'Billy Visto'));
+
+    $actualDataSet = $conn->createDataSet(array('person-revision', 'revisionData'));
+    $actual = $this->getFilteredDataSet($actualDataSet, array('person-revision' => array('createdOn'), 'revisionData' => array('createdOn')));
+    $expected = $this->getFilteredDataSet($expected, array('person-revision' => array('createdOn'), 'revisionData' => array('createdOn')));
+
+    $this->assertDataSetsEqual($expected, $actual);
+    $this->assertTablesEqual($expected->getTable('person-revision'), $actual->getTable('person-revision'));
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
   public function makeAndSaveRevisionLargerChange()
   {
     $conn = $this->getConnection();
@@ -305,6 +333,63 @@ class RevisionsTest extends RevisionsTestsHelper
     $this->revisions->makeAndSaveRevision(array('name' => 'Billy'));
     $this->revisions->makeAndSaveRevision(array('age' => 22));
     $this->revisions->makeAndSaveRevision(array('age' => 23, 'name' => 'Billy Visto'));
+
+    $actualDataSet = $conn->createDataSet(array('person-revision', 'revisionData'));
+    $actual = $this->getFilteredDataSet($actualDataSet, array('person-revision' => array('createdOn'), 'revisionData' => array('createdOn')));
+    $expected = $this->getFilteredDataSet($expected, array('person-revision' => array('createdOn'), 'revisionData' => array('createdOn')));
+
+    $this->assertDataSetsEqual($expected, $actual);
+    $this->assertTablesEqual($expected->getTable('person-revision'), $actual->getTable('person-revision'));
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
+  public function makeAndSaveRevisionNameAgeCityWithUndo()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $this->ymlFile = 'nameRevisionAdvanced2.yml';
+    $expected = $this->getDataSet();
+
+    $this->revisions->makeAndSaveRevision(array('age' => 23, 'name' => 'Billy Visto'));
+    $this->revisions->makeAndSaveRevision(array('age' => 23, 'city' => 'North Mankato', 'name' => 'Billy Visto'));
+    $this->revisions->makeAndSaveRevision(array('age' => 23, 'city' => '', 'name' => 'Billy Visto'));
+    $this->revisions->makeAndSaveRevision(array('age' => 23, 'city' => 'North Mankato', 'name' => 'Billy Visto'));
+
+    $actualDataSet = $conn->createDataSet(array('person-revision', 'revisionData'));
+    $actual = $this->getFilteredDataSet($actualDataSet, array('person-revision' => array('createdOn'), 'revisionData' => array('createdOn')));
+    $expected = $this->getFilteredDataSet($expected, array('person-revision' => array('createdOn'), 'revisionData' => array('createdOn')));
+
+    $this->assertDataSetsEqual($expected, $actual);
+    $this->assertTablesEqual($expected->getTable('person-revision'), $actual->getTable('person-revision'));
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
+  public function makeAndSaveRevisionMoreThanOneRow()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $this->ymlFile = 'nameRevisionAdvanced2RowIds.yml';
+    $expected = $this->getDataSet();
+
+    $this->revisions->makeAndSaveRevision(array('age' => 23, 'name' => 'Billy Visto'));
+    $this->revisions->makeAndSaveRevision(array('age' => 23, 'name' => 'Billy Joel Visto'));
+
+    $this->revisionsManagerInfo['rowId'] = 2;
+    $this->setUpMock('person-revision');
+
+    $this->revisions->makeAndSaveRevision(array('age' => 23, 'name' => 'Joy Visto'));
 
     $actualDataSet = $conn->createDataSet(array('person-revision', 'revisionData'));
     $actual = $this->getFilteredDataSet($actualDataSet, array('person-revision' => array('createdOn'), 'revisionData' => array('createdOn')));
