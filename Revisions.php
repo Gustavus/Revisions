@@ -182,6 +182,10 @@ class Revisions extends RevisionsManager
     $oldText              = array();
     $brandNewColumns      = array();
     foreach ($newText as $key => $value) {
+      if (substr($key, 0, 1) === ':') {
+        // if passing in the same array as you would to a pdo or doctrine query
+        $key = substr($key, 1);
+      }
       $oldRevisionData = $this->getRevisionData(null, $key, true, 1);
       $oldRevisionDataArray = array_merge($oldRevisionDataArray, $oldRevisionData);
       if (isset($oldRevisionData[$key])) {
