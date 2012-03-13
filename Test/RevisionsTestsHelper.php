@@ -79,7 +79,7 @@ class RevisionsTestsHelper extends \Gustavus\Test\TestDBPDO
    * @param string $newContent
    * @return void
    */
-  protected function saveRevisionToDB($currContent, $newContent, $column, $object, $revisionDataArray = array(), $message = null, $createdBy = 'name')
+  protected function saveRevisionToDB($currContent, $newContent, $column, $object, $revisionDataArray = array(), $message = null, $createdBy = 'name', array $newColumns = array())
   {
     $revisionData = new \Gustavus\Revisions\RevisionDataDiff(array(
       'currentContent' => $currContent,
@@ -87,6 +87,6 @@ class RevisionsTestsHelper extends \Gustavus\Test\TestDBPDO
 
     $revisionInfo = $revisionData->renderRevisionForDB($newContent);
     $revisionInfoArray = array($column => $revisionInfo);
-    $this->call($object, 'saveRevision', array($revisionInfoArray, array($column => $newContent), array($column => $currContent), $revisionDataArray, $message, $createdBy));
+    $this->call($object, 'saveRevision', array($revisionInfoArray, array($column => $newContent), array($column => $currContent), $revisionDataArray, $message, $createdBy, $newColumns));
   }
 }

@@ -341,6 +341,29 @@ class RevisionsManager extends RevisionsBase
   }
 
   /**
+   * Function to filter an array while keeping empty values if it is a brand new column
+   *
+   * @param  array  $revisionInfo
+   * @param  array  $brandNewColumns
+   * @return array
+   */
+  private function myArrayFilter(array $revisionInfo, array $brandNewColumns)
+  {
+    array_walk(&$revisionInfo,
+      function($value, $key, $array)
+      {
+        if (!in_array($key, $array[0]) && empty($value)) {
+          unset($array[1][$key]);
+        } else if (empty($value)) {
+          $array[1][$key] = json_encode('');
+        }
+      }
+      , array($brandNewColumns, &$revisionInfo)
+    );
+    return $revisionInfo;
+  }
+
+  /**
    * Saves revision and revisionData into DB
    *
    * @param array $revisionInfo array of json revision info keyed by column
@@ -355,48 +378,47 @@ class RevisionsManager extends RevisionsBase
   protected function saveRevision(array $revisionInfo, array $newContent, array $oldContent, array $oldRevisionData = array(), $message = null, $createdBy = null, array $brandNewColumns = array())
   {
     $affectedRows = 0;
-    $revisionInfo = array_filter($revisionInfo);
+    $revisionInfo = $this->myArrayFilter($revisionInfo, $brandNewColumns);
     if (empty($revisionInfo)) {
       // revisions are the same as they used to be
       // don't do anything
       return true;
     }
-    $oldContentFiltered = array_filter($oldContent);
-    if (!empty($brandNewColumns) && !empty($oldContentFiltered)) {
+    if (!empty($brandNewColumns)) {
       // new columns exist, and revision isn't the first. Need to get their initial revision in before continuing
-      $revisionId = $this->saveRevisionContent($oldContent, $message, $createdBy);
+      $revContent = array_merge($newContent, $oldContent);
+      $revisionId = $this->saveRevisionContent($revContent, $message, $createdBy);
       foreach ($brandNewColumns as $key) {
         $affectedRows += $this->saveRevisionData($revisionInfo[$key], $revisionId, $key, $oldContent[$key]);
       }
     }
-    if (empty($oldContentFiltered)) {
-      // no old content, so revision is the first one. Also add the new content in
-      $revContent = array_merge($newContent, $oldContent);
-      $revisionId = $this->saveRevisionContent($revContent, $message, $createdBy);
+
+    $changes = array_diff($newContent, $oldContent);
+    if (!empty($changes)) {
       $newRevisionId = $this->saveRevisionContent($newContent, $message, $createdBy);
-    } else {
-      // revision exists already
-      $newRevisionId = $this->saveRevisionContent($newContent, $message, $createdBy);
-      $revisionId = $newRevisionId;
-    }
-    foreach ($revisionInfo as $key => $value) {
-      if (!isset($oldRevisionData[$key])) {
-        // previous revision not included and needs to be pulled.
-        if ($revisionId === $newRevisionId && !in_array($key, $brandNewColumns)) {
-          // previous revisions that aren't brand new exist, so we might need to update one
-          $oldRevisionData = array_merge($oldRevisionData, $this->getRevisionData(null, $key, true, 1));
+      if (!isset($revisionId)) {
+        $revisionId = $newRevisionId;
+      }
+
+      foreach ($revisionInfo as $key => $value) {
+        if (!isset($oldRevisionData[$key])) {
+          // previous revision not included and needs to be pulled.
+          if ($revisionId === $newRevisionId && !in_array($key, $brandNewColumns)) {
+            // previous revisions that aren't brand new exist, so we might need to update one
+            $oldRevisionData = array_merge($oldRevisionData, $this->getRevisionData(null, $key, true, 1));
+          }
+        }
+        if (isset($oldRevisionData[$key])) {
+          $latestRevisionData = array_shift($oldRevisionData[$key]);
+          // update existing revisionData
+          $affectedRows += $this->saveRevisionData($value, $latestRevisionData['revisionId'], $key, $oldContent[$key], $latestRevisionData['id']);
+        }
+        if ($newContent[$key] !== $oldContent[$key]) {
+          // insert new content to db if it isn't the same as it used to be.
+          // It will be the same in the case of a blank first addition
+          $affectedRows += $this->saveRevisionData(json_encode($newContent[$key]), $newRevisionId, $key, $newContent[$key]);
         }
       }
-      if (isset($oldRevisionData[$key])) {
-        $latestRevisionData = array_shift($oldRevisionData[$key]);
-        // update existing revisionData
-        $affectedRows += $this->saveRevisionData($value, $latestRevisionData['revisionId'], $key, $oldContent[$key], $latestRevisionData['id']);
-      } else if (!in_array($key, $brandNewColumns) || empty($oldContentFiltered)) {
-        // no existing revision exists so insert a new one
-        $affectedRows += $this->saveRevisionData($value, $revisionId, $key, $oldContent[$key]);
-      }
-      // insert new content to db
-      $affectedRows += $this->saveRevisionData(json_encode($newContent[$key]), $newRevisionId, $key, $newContent[$key]);
     }
     return ($affectedRows !== 0);
   }
