@@ -150,7 +150,7 @@ class RevisionsManager extends RevisionsBase
     $qb->select('dataDB.`id`, dataDB.`contentHash`, dataDB.`revisionId`, dataDB.`revisionNumber`, dataDB.`key`, dataDB.`value`, rDB.`revisionNumber` as `revisionRevisionNumber`')
       ->from("`{$this->revisionDataTable}`", 'dataDB');
 
-    $qb = $qb->leftJoin('dataDB', "`{$this->revisionsTable}`", 'rDB', 'rDB.`id` = dataDB.`revisionId` AND rDB.`table` = :table AND rDB.`rowId` = :rowId');
+    $qb = $qb->innerJoin('dataDB', "`{$this->revisionsTable}`", 'rDB', 'rDB.`id` = dataDB.`revisionId` AND rDB.`table` = :table AND rDB.`rowId` = :rowId');
     $args = array(
       ':table' => $this->table,
       ':rowId' => $this->rowId,
@@ -195,7 +195,7 @@ class RevisionsManager extends RevisionsBase
     $qb = $db->createQueryBuilder();
     $qb->select('dataDB.`key`')
       ->from("`{$this->revisionDataTable}`", 'dataDB')
-      ->leftJoin('dataDB', "`{$this->revisionsTable}`", 'rDB', 'rDB.`id` = dataDB.`revisionId` AND rDB.`table` = :table AND rDB.`rowId` = :rowId')
+      ->innerJoin('dataDB', "`{$this->revisionsTable}`", 'rDB', 'rDB.`id` = dataDB.`revisionId` AND rDB.`table` = :table AND rDB.`rowId` = :rowId')
       ->groupBy('dataDB.`key`');
     return $db->fetchAll($qb->getSQL(), $args);
   }
@@ -257,12 +257,14 @@ class RevisionsManager extends RevisionsBase
         ':revisionId'     => $revisionId,
         ':key'            => $column,
         ':hash'           => md5($revisionContent),
+        ':table'          => $this->table,
+        ':rowId'          => $this->rowId,
       ));
 
       $qb = $db->createQueryBuilder();
       $qb->select(':hash, :revisionId, COUNT(dataDB.`revisionNumber`), :key, :value')
         ->from("`{$this->revisionDataTable}`", 'dataDB');
-      $qb = $qb->leftJoin('dataDB', "`{$this->revisionsTable}`", 'rDB', 'rDB.`id` = dataDB.`revisionId` AND rDB.`table` = :table AND rDB.`rowId` = :rowId')
+      $qb = $qb->innerJoin('dataDB', "`{$this->revisionsTable}`", 'rDB', 'rDB.`id` = dataDB.`revisionId` AND rDB.`table` = :table AND rDB.`rowId` = :rowId')
         ->where('`key` = :key');
       $select = $qb->getSQL();
 
@@ -389,7 +391,7 @@ class RevisionsManager extends RevisionsBase
         $latestRevisionData = array_shift($oldRevisionData[$key]);
         // update existing revisionData
         $affectedRows += $this->saveRevisionData($value, $latestRevisionData['revisionId'], $key, $oldContent[$key], $latestRevisionData['id']);
-      } else {
+      } else if (!in_array($key, $brandNewColumns) || empty($oldContentFiltered)) {
         // no existing revision exists so insert a new one
         $affectedRows += $this->saveRevisionData($value, $revisionId, $key, $oldContent[$key]);
       }

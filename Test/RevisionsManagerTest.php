@@ -302,6 +302,7 @@ class RevisionsManagerTest extends RevisionsTestsHelper
     $this->dbalConnection->query($this->getCreateDataQuery());
     $this->dbalConnection->query($this->getCreateQuery());
 
+    $this->call($this->revisionsManagerMock, 'saveRevisionContent', array(array('name' => $newContent), "", 'name'));
     $this->call($this->revisionsManagerMock, 'saveRevisionData', array(json_encode($newContent), 1, 'name', $currContent));
     $actual = $this->call($this->revisionsManagerMock, 'getRevisionData', array(1));
     $expected = array('name' => array(
@@ -310,7 +311,7 @@ class RevisionsManagerTest extends RevisionsTestsHelper
         'revisionId' => '1',
         'revisionNumber' => '0',
         'value' => 'Billy Joel Visto',
-        'revisionRevisionNumber' => null,
+        'revisionRevisionNumber' => '0',
       ),
     );
     $this->assertSame($expected, $actual);
@@ -330,6 +331,7 @@ class RevisionsManagerTest extends RevisionsTestsHelper
     $this->dbalConnection->query($this->getCreateDataQuery());
     $this->dbalConnection->query($this->getCreateQuery());
 
+    $this->call($this->revisionsManagerMock, 'saveRevisionContent', array(array('name' => $newContent), "", 'name'));
     $this->call($this->revisionsManagerMock, 'saveRevisionData', array(json_encode($newContent), 1, 'name', $currContent));
     $actual = $this->call($this->revisionsManagerMock, 'getRevisionData', array(null, 'name'));
     $expected = array('name' => array(
@@ -338,7 +340,7 @@ class RevisionsManagerTest extends RevisionsTestsHelper
         'contentHash' => md5($currContent),
         'revisionId' => '1',
         'value' => 'Billy Joel Visto',
-        'revisionRevisionNumber' => null,
+        'revisionRevisionNumber' => '0',
       ),
     ));
     $this->assertSame($expected, $actual);
@@ -440,6 +442,7 @@ class RevisionsManagerTest extends RevisionsTestsHelper
     $this->dbalConnection->query($this->getCreateDataQuery());
     $this->dbalConnection->query($this->getCreateQuery());
 
+    $this->call($this->revisionsManagerMock, 'saveRevisionContent', array(array('name' => $newContent), "", 'name'));
     $this->call($this->revisionsManagerMock, 'saveRevisionData', array(json_encode($newContent), 1, 'name', $newContent));
     $actual = $this->call($this->revisionsManagerMock, 'getRevisionData', array(null, 'name', true));
     $expected = array('name' => array(
@@ -448,7 +451,7 @@ class RevisionsManagerTest extends RevisionsTestsHelper
         'contentHash' => md5('Billy Joel Visto'),
         'revisionId' => '1',
         'value' => 'Billy Joel Visto',
-        'revisionRevisionNumber' => null,
+        'revisionRevisionNumber' => '0',
       ),
     ));
     $this->assertSame($expected, $actual);
@@ -541,7 +544,7 @@ class RevisionsManagerTest extends RevisionsTestsHelper
     $this->dbalConnection->query($this->getCreateDataQuery());
     $this->dbalConnection->query($this->getCreateQuery());
 
-    //$this->saveRevisionToDB($currContent, $newContent, $this->revisionsManagerMock);
+    $this->call($this->revisionsManagerMock, 'saveRevisionContent', array(array('name' => "Billy Visto"), "", 'name'));
     $this->call($this->revisionsManagerMock, 'saveRevisionData', array('[[1,null," Visto"]]', 1, 'name', "Billy Visto"));
 
     $actualDataSet = $conn->createDataSet(array('revisionData'));
@@ -570,6 +573,8 @@ class RevisionsManagerTest extends RevisionsTestsHelper
 
     //$this->saveRevisionToDB($currContent, $newContent, $this->revisionsManagerMock);
     //
+    $this->call($this->revisionsManagerMock, 'saveRevisionContent', array(array('name' => ''), "", 'name'));
+    $this->call($this->revisionsManagerMock, 'saveRevisionContent', array(array('name' => 'Billy'), "", 'name'));
     $this->call($this->revisionsManagerMock, 'saveRevisionData', array('[[0,0,""]]', 1, 'name', ''));
     // add the new row to mimick a soon to be tested function
     $this->call($this->revisionsManagerMock, 'saveRevisionData', array(json_encode('Billy'), 2, 'name', 'Billy'));
