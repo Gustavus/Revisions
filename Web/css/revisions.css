@@ -269,13 +269,15 @@ tr.compare td {
   box-sizing: border-box;
   padding: 10px;
   margin: 0;
+  font-family: Consolas, monospace;
 }
 .revisionData ins {
-  display: none;
+  color: green;
+  background-color: #dfd;
 }
 .revisionData del {
-  color: inherit;
-  text-decoration: none;
+  color: red;
+  background-color: #fee;
 }
 
 /* Comparing */
@@ -348,17 +350,8 @@ tr.compare td {
 .revisionData.comparison dt + dd ins {
   display: none;
 }
-.revisionData.comparison dt + dd del {
-  display: inline;
-  color: red;
-  text-decoration: line-through;
-}
 
 /* Revision B */
 .revisionData.comparison dd + dd del {
   display: none;
-}
-.revisionData.comparison dd + dd ins {
-  display: inline;
-  color: green;
 }
