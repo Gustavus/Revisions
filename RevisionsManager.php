@@ -342,12 +342,13 @@ class RevisionsManager extends RevisionsBase
 
   /**
    * Function to filter an array while keeping empty values if it is a brand new column
+   * Also json_encodes the new empty value
    *
    * @param  array  $revisionInfo
    * @param  array  $brandNewColumns
    * @return array
    */
-  private function myArrayFilter(array $revisionInfo, array $brandNewColumns)
+  private function filterOldColumns(array $revisionInfo, array $brandNewColumns)
   {
     array_walk($revisionInfo,
         function($value, $key, $array)
@@ -378,7 +379,7 @@ class RevisionsManager extends RevisionsBase
   protected function saveRevision(array $revisionInfo, array $newContent, array $oldContent, array $oldRevisionData = array(), $message = null, $createdBy = null, array $brandNewColumns = array())
   {
     $affectedRows = 0;
-    $revisionInfo = $this->myArrayFilter($revisionInfo, $brandNewColumns);
+    $revisionInfo = $this->filterOldColumns($revisionInfo, $brandNewColumns);
     if (empty($revisionInfo)) {
       // revisions are the same as they used to be
       // don't do anything

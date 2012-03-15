@@ -808,4 +808,15 @@ class RevisionsManagerTest extends RevisionsTestsHelper
     $this->assertSame($expected, $result);
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }
+
+  /**
+   * @test
+   */
+  public function filterOldColumns()
+  {
+    $expected = array('name' => 'Billy', 'city' => '""');
+    $revisionInfo = array('name' => 'Billy', 'city' => '', 'aboutYou' => '');
+    $result = $this->call($this->revisionsManager, 'filterOldColumns', array($revisionInfo, array('city')));
+    $this->assertSame($expected, $result);
+  }
 }
