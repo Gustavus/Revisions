@@ -77,26 +77,18 @@
 
 {% macro renderCell(revisionNumber, currentContentSize, revisionContentSize, maxColumnSize, removedContentSize, addedContentSize) %}
 
-  {% if revisionContentSize == 0 %}
+  {% if revisionContentSize == 0 or maxColumnSize == 0 %}
     {% set addedPercentage = 0 %}
+    {% set removedPercentage = 0 %}
   {% else %}
     {% set addedPercentage = addedContentSize / maxColumnSize * 100 %}
-  {% endif %}
-
-  {% if revisionContentSize == 0 %}
-    {% if currentContentSize == 0 %}
-      {% set removedPercentage = 0 %}
-    {% else %}
-      {% set removedPercentage = removedContentSize/currentContentSize*100 %}
-    {% endif %}
-  {% else %}
-    {% set removedPercentage = removedContentSize/revisionContentSize*100 %}
+    {% set removedPercentage = removedContentSize / maxColumnSize * 100 %}
   {% endif %}
 
   {% if maxColumnSize == 0 %}
     {% set unchangedPercentage = 0 %}
   {% else %}
-    {% set unchangedPercentage = revisionContentSize/maxColumnSize*100 %}
+    {% set unchangedPercentage = revisionContentSize / maxColumnSize * 100 %}
   {% endif %}
   <span class="bytes container">
     <span class="bytes positive">
