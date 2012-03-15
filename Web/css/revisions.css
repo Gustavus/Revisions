@@ -272,12 +272,13 @@ tr.compare td {
   font-family: Consolas, monospace;
 }
 .revisionData ins {
-  color: green;
   background-color: #dfd;
+  box-shadow: 0 0 0 1px #aea;
 }
 .revisionData del {
-  color: red;
-  background-color: #fee;
+  text-decoration: none;
+  background-color: #fdd;
+  box-shadow: 0 0 0 1px #fbb;
 }
 
 /* Comparing */
