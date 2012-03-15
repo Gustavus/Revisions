@@ -22,6 +22,11 @@ class RevisionsRenderer
   private $revisionsUrlParams;
 
   /**
+   * @var array
+   */
+  private $applicationUrlParams;
+
+  /**
    * @var boolean
    */
   private $shouldRenderTimeline = true;
@@ -35,11 +40,13 @@ class RevisionsRenderer
    * Class constructor
    * @param Revisions $revisions
    * @param array revisionsUrlParams
+   * @param array applicationUrlParams
    */
-  public function __construct(Revisions $revisions, array $revisionsUrlParams = array())
+  public function __construct(Revisions $revisions, array $revisionsUrlParams = array(), array $applicationUrlParams = array())
   {
-    $this->revisions = $revisions;
-    $this->revisionsUrlParams = $revisionsUrlParams;
+    $this->revisions            = $revisions;
+    $this->revisionsUrlParams   = $revisionsUrlParams;
+    $this->applicationUrlParams = $applicationUrlParams;
   }
 
   /**
@@ -185,7 +192,7 @@ class RevisionsRenderer
           'oldestRevisionNumber'  => $oldestRevisionNumber,
           'limit'                 => $this->revisions->getLimit(),
           'maxColumnSizes'        => $this->revisions->getMaxColumnSizes(),
-          'hiddenFields'          => $this->removeParams(array_merge(array('oldestRevisionNumber' => $oldestRevisionNumber + 1), $this->revisionsUrlParams), array('barebones', 'oldestRevisionInTimeline', 'visibleRevisions', 'revisionNumbers')),
+          'hiddenFields'          => $this->removeParams(array_merge($this->applicationUrlParams, array('oldestRevisionNumber' => $oldestRevisionNumber + 1), $this->revisionsUrlParams), array('barebones', 'oldestRevisionInTimeline', 'visibleRevisions', 'revisionNumbers')),
           'shouldRenderTimeline'      => $this->shouldRenderTimeline,
           'shouldRenderRevisionData'  => $this->shouldRenderRevisionData,
         )
