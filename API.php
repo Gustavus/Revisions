@@ -12,6 +12,8 @@ namespace Gustavus\Revisions;
 class API
 {
   const RESTORE_HOOK          = '\Gustavus\Revisions\API\Restore';
+  const RESTORE_ACTION        = 'restore';
+  const UNDO_ACTION           = 'undo';
   const REVISIONS_JS_VERSION  = 1;
   const REVISIONS_CSS_VERSION = 1;
 
@@ -100,7 +102,6 @@ class API
    */
   private function handlePostAction(array $post)
   {
-    unset($_POST);
     if ($this->isRestore($post)) {
       $this->handleRestoreAction($post);
     } else if ($this->isUndo($post)) {
@@ -118,7 +119,7 @@ class API
   {
     $revisionContent = $this->revisions->getRevisionContentArray((int) $urlParams['restore']);
     $oldMessage = $this->revisions->getRevisionByNumber((int) $urlParams['restore'])->getRevisionMessage();
-    \Gustavus\Extensibility\Actions::apply(self::RESTORE_HOOK, $revisionContent, $oldMessage);
+    \Gustavus\Extensibility\Actions::apply(self::RESTORE_HOOK, $revisionContent, $oldMessage, self::RESTORE_ACTION);
   }
 
   /**
@@ -134,7 +135,7 @@ class API
     $secondToLatestRevNum = $this->revisions->findOldestRevisionNumberPulled();
     $revisionContent = $this->revisions->getRevisionContentArray($secondToLatestRevNum);
     $oldMessage = $this->revisions->getRevisionByNumber($secondToLatestRevNum)->getRevisionMessage();
-    \Gustavus\Extensibility\Actions::apply(self::RESTORE_HOOK, $revisionContent, $oldMessage);
+    \Gustavus\Extensibility\Actions::apply(self::RESTORE_HOOK, $revisionContent, $oldMessage, self::UNDO_ACTION);
     // reset limit to what it was originally at
     $this->revisions->setLimit($limit);
   }
@@ -148,7 +149,6 @@ class API
    */
   private function doWorkRequstedInUrl(array $urlParams)
   {
-    unset($_GET);
     if (!isset($urlParams['barebones'])) {
       // don't bother to set up the template if barebones is set
       $this->setUpTemplate();
@@ -276,7 +276,20 @@ class API
    */
   private function shouldRenderTimeline(array $urlParams = array())
   {
-    if (isset($urlParams['barebones'], $urlParams['oldestRevisionInTimeline']) && ((isset($urlParams['revisionNumber']) && (int) $urlParams['revisionNumber'] > (int) $urlParams['oldestRevisionInTimeline']) || (isset($urlParams['revisionNumbers']) && $this->arrayMin($urlParams['revisionNumbers']) > (int) $urlParams['oldestRevisionInTimeline'])) && (isset($urlParams['oldestRevisionNumber']) && (int) $urlParams['oldestRevisionInTimeline'] <= (int) $urlParams['oldestRevisionNumber']) && !$this->isRestore($urlParams)) {
+    if (isset($urlParams['barebones'], $urlParams['oldestRevisionInTimeline']) &&
+      (
+        (isset($urlParams['revisionNumber']) && $urlParams['revisionNumber'] === false ||
+          (
+            (int) $urlParams['revisionNumber'] >= (int) $urlParams['oldestRevisionInTimeline']) ||
+            (isset($urlParams['revisionNumbers']) && $this->arrayMin($urlParams['revisionNumbers']) >= (int) $urlParams['oldestRevisionInTimeline']
+          )
+        )
+      ) &&
+      (isset($urlParams['oldestRevisionNumber']) &&
+        (
+          (int) $urlParams['oldestRevisionInTimeline'] <= (int) $urlParams['oldestRevisionNumber']
+        ) || (int) $urlParams['oldestRevisionNumber'] <= 1 && (int) $urlParams['oldestRevisionInTimeline'] <= 1
+      ) && !$this->isRestore($urlParams)) {
       return false;
     } else {
       return true;
@@ -320,7 +333,11 @@ class API
    */
   private function shouldRenderRevisionData(array $urlParams = array())
   {
-    if (isset($urlParams['barebones'], $urlParams['visibleRevisions']) && ((isset($urlParams['revisionNumber']) && $this->revisionIsOnlyVisible($urlParams['revisionNumber'], $urlParams['visibleRevisions'])) || (isset($urlParams['revisionNumbers']) && $this->revisionsAreVisible($urlParams['revisionNumbers'], $urlParams['visibleRevisions']))) && !$this->isRestore($urlParams)) {
+    if (isset($urlParams['barebones'], $urlParams['visibleRevisions']) &&
+      (
+        (isset($urlParams['revisionNumber']) && $this->revisionIsOnlyVisible($urlParams['revisionNumber'], $urlParams['visibleRevisions'])
+        ) || (isset($urlParams['revisionNumbers']) && $this->revisionsAreVisible($urlParams['revisionNumbers'], $urlParams['visibleRevisions']))
+      ) && !$this->isRestore($urlParams)) {
       return false;
     } else {
       return true;
@@ -453,8 +470,25 @@ class API
    */
   private function constructRevisionsRenderer(array $urlParams)
   {
-    $this->revisionsRenderer = new RevisionsRenderer($this->revisions, $this->getRevisionsUrlParams($urlParams));
+    $this->revisionsRenderer = new RevisionsRenderer($this->revisions, $this->getRevisionsUrlParams($urlParams), $this->getApplicationUrlParams($urlParams));
     $this->setUpItemsToRender($urlParams);
+  }
+
+  /**
+   * make application url params
+   *
+   * @param  array $urlParams
+   * @return array
+   */
+  private function getApplicationUrlParams(array $urlParams)
+  {
+    $applicationUrlParams = array();
+    foreach ($urlParams as $key => $value) {
+      if (!in_array($key, $this->possibleRevisionsQueryParams)) {
+        $applicationUrlParams[$key] = $value;
+      }
+    }
+    return $applicationUrlParams;
   }
 
   /**

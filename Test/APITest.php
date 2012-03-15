@@ -2101,6 +2101,24 @@ class APITest extends RevisionsTestsHelper
   /**
    * @test
    */
+  public function shouldRenderTimelineFalse()
+  {
+    $urlParams = array('oldestRevisionNumber' => '4', 'revisionNumber' => '4', 'barebones' => 'true', 'oldestRevisionInTimeline' => '4', 'visibleRevisions' => array(9));
+    $this->assertFalse($this->call($this->revisionsAPI, 'shouldRenderTimeline', array($urlParams)));
+  }
+
+  /**
+   * @test
+   */
+  public function shouldRenderTimelineFalseComparison()
+  {
+    $urlParams = array('pr' => 'manage', 'user' => 'patrick', 'oldestRevisionNumber' => '0', 'revisionNumber' => 'false', 'revisionNumbers' => array('4', '6'), 'barebones' => 'true', 'oldestRevisionInTimeline' => '1', 'visibleRevisions' => array('4', '7'));
+    $this->assertFalse($this->call($this->revisionsAPI, 'shouldRenderTimeline', array($urlParams)));
+  }
+
+  /**
+   * @test
+   */
   public function shouldRenderTimeline()
   {
     $urlParams = array('oldestRevisionNumber' => '2', 'revisionNumber' => '10', 'barebones' => 'true', 'oldestRevisionInTimeline' => '2');
