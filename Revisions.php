@@ -182,7 +182,7 @@ class Revisions extends RevisionsManager
     $oldText              = array();
     $brandNewColumns      = array();
     foreach ($newText as $key => $value) {
-      if (substr($key, 0, 1) === ':') {
+      if ($key[0] === ':') {
         // if passing in the same array as you would to a pdo or doctrine query
         $key = substr($key, 1);
       }
