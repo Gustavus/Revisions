@@ -40,6 +40,13 @@ abstract class RevisionData extends RevisionsBase
   protected $revisionContent;
 
   /**
+   * Diff content of this revision before it was changed. Result of following the revision info from the currentContent back
+   *
+   * @var string revision cell content
+   */
+  protected $revisionContentDiff;
+
+  /**
    * @var integer of revision's revisionId
    */
   protected $revisionId;
@@ -97,14 +104,29 @@ abstract class RevisionData extends RevisionsBase
   }
 
   /**
+   * @param boolean $showChanges
    * @return string
    */
-  public function getRevisionContent()
+  public function getRevisionContent($showChanges = false)
   {
+    if ($showChanges) {
+      return $this->getRevisionContentDiff();
+    }
     if (!isset($this->revisionContent)) {
       $this->revisionContent = $this->renderRevision();
     }
     return $this->revisionContent;
+  }
+
+  /**
+   * @return string
+   */
+  public function getRevisionContentDiff()
+  {
+    if (!isset($this->revisionContentDiff)) {
+      $this->revisionContentDiff = $this->renderRevision(true);
+    }
+    return $this->revisionContentDiff;
   }
 
   /**
