@@ -68,6 +68,8 @@ class RevisionDataDiff extends RevisionData
 
   /**
    * Helper for render revision that puts the revision together
+   * The addedContentSize and removedContentSize are working backwards. So the added content from the currentContent to this revision.
+   *
    * @param  array $revisionInfo   instructions on how to built the revision
    * @param  boolean $showChanges    whether to render a diff or not
    * @return string
@@ -88,12 +90,10 @@ class RevisionDataDiff extends RevisionData
           $ins .= $currContentArr[$i];
           $currContentArr[$i] = '';
         }
-        if (strlen($ins) < strlen($revisionContent)) {
-          // content was added
-          $this->addedContentSize += (strlen($revisionContent) - strlen($ins));
-        } else if (strlen($revisionContent) < strlen($ins)) {
-          // content was removed
-          $this->removedContentSize += (strlen($ins) - strlen($revisionContent));
+        if (!$showChanges) {
+          // we don't want to add this twice
+          $this->addedContentSize   += strlen($revisionContent);
+          $this->removedContentSize += strlen($ins);
         }
         $currContentArr[$startIndex] = ($showChanges) ? $revisionContent.$this->renderContentChange($ins, true) : $revisionContent;
       } else if (!isset($startIndex) && count($revisionInfo) === 1) {
@@ -103,7 +103,10 @@ class RevisionDataDiff extends RevisionData
         //content was added
         $currText = (!empty($currContentArr[$startIndex])) ? $currContentArr[$startIndex] : '';
         // add added content size to added content size
-        $this->addedContentSize += strlen($revisionContent);
+        if (!$showChanges) {
+          // we don't want to add this twice
+          $this->addedContentSize += strlen($revisionContent);
+        }
         $currContentArr[$startIndex] = $revisionContent.$currText;
       }
     }
@@ -134,8 +137,11 @@ class RevisionDataDiff extends RevisionData
       $newText = ($revisionContent !== null) ? $this->renderContentChange((string) $revisionContent, false) : '';
       $currText = $newText.$oldText;
     } else {
-      $this->removedContentSize = strlen($revisionContent);
-      $this->addedContentSize = strlen($currentContent);
+      if (!$showChanges) {
+        // we don't want to add this twice
+        $this->addedContentSize   += strlen($revisionContent);
+        $this->removedContentSize += strlen($currentContent);
+      }
       $currText = $revisionContent;
     }
     return $currText;
@@ -156,7 +162,7 @@ class RevisionDataDiff extends RevisionData
     }
     $this->setCurrentContent($newContent);
 
-    return $this->renderRevision($showChanges);
+    return $this->getRevisionContent($showChanges);
   }
 
   /**
@@ -167,7 +173,7 @@ class RevisionDataDiff extends RevisionData
    */
   public function makeRevisionContent($showChanges = false)
   {
-    return $this->renderRevision($showChanges);
+    return $this->getRevisionContent($showChanges);
   }
 
   /**

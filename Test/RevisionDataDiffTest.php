@@ -1428,4 +1428,32 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
     $expected = json_encode(array(array(8, 13, ""), array(15, 20, "")));
     $this->assertSame($expected, $actual);
   }
+
+  /**
+   * @test
+   */
+  public function getAddedAndRemovedContentSizeFullChange()
+  {
+    $revisionContent = 'Brooklyn Park';
+    $currentContent = 'Saint Peter';
+    $this->revisionDataDiff->setRevisionInfo(array());
+    $this->revisionDataDiff->setCurrentContent($revisionContent);
+    $this->assertSame($revisionContent, $this->revisionDataDiff->makeDiff($currentContent));
+    $this->assertSame(13, $this->revisionDataDiff->getAddedContentSize());
+    $this->assertSame(11, $this->revisionDataDiff->getRemovedContentSize());
+  }
+
+  /**
+   * @test
+   */
+  public function getAddedAndRemovedContentSizeNumber()
+  {
+    $revisionContent = 1234;
+    $currentContent = 25;
+    $this->revisionDataDiff->setRevisionInfo(array());
+    $this->revisionDataDiff->setCurrentContent($revisionContent);
+    $this->assertSame($revisionContent, $this->revisionDataDiff->makeDiff($currentContent));
+    $this->assertSame(4, $this->revisionDataDiff->getAddedContentSize());
+    $this->assertSame(2, $this->revisionDataDiff->getRemovedContentSize());
+  }
 }
