@@ -14,49 +14,42 @@ abstract class RevisionData extends RevisionsBase
   /**
    * revisionData's revision number of how many times this specific value has changed
    *
-   * @var int revisionNumber
+   * @var int number
    */
-  protected $revisionNumber;
+  protected $number;
 
   /**
    * revisionData's revision's revision number
    *
-   * @var int revisionRevisionNumber
+   * @var int revisionNumber
    */
-  protected $revisionRevisionNumber;
+  protected $revisionNumber;
 
   /**
    * Current content if this is the latest revision, or the revision content of the previous revision
    *
    * @var string current cell content
    */
-  protected $currentContent;
+  protected $nextContent;
 
   /**
-   * Content of this revision before it was changed. Result of following the revision info from the currentContent back
+   * Content of this revision before it was changed. Result of following the revision info from the nextContent back
    *
    * @var string revision cell content
    */
-  protected $revisionContent;
+  protected $content;
 
   /**
-   * Diff content of this revision before it was changed. Result of following the revision info from the currentContent back
-   *
-   * @var string revision cell content
+   * @var integer of revision's id
    */
-  protected $revisionContentDiff;
-
-  /**
-   * @var integer of revision's revisionId
-   */
-  protected $revisionId;
+  protected $id;
 
   /**
    * array of DiffInfo objects
    *
    * @var array
    */
-  protected $revisionInfo = array();
+  protected $diffInfo = array();
 
   /**
    * flag set to true if the hash doesn't compute correctly
@@ -84,7 +77,7 @@ abstract class RevisionData extends RevisionsBase
    */
   public function getRevisionNumber()
   {
-    return (int) $this->revisionNumber;
+    return (int) $this->number;
   }
 
   /**
@@ -92,49 +85,46 @@ abstract class RevisionData extends RevisionsBase
    */
   public function getRevisionRevisionNumber()
   {
-    return (int) $this->revisionRevisionNumber;
+    return (int) $this->revisionNumber;
   }
 
   /**
    * @return string
    */
-  public function getCurrentContent()
+  public function getNextContent()
   {
-    return $this->currentContent;
+    return $this->nextContent;
   }
 
   /**
    * @param boolean $showChanges
    * @return string
    */
-  public function getRevisionContent($showChanges = false)
+  public function getContent($showChanges = false)
   {
     if ($showChanges) {
-      return $this->getRevisionContentDiff();
+      return $this->getContentDiff();
     }
-    if (!isset($this->revisionContent)) {
-      $this->revisionContent = $this->renderRevision();
+    if (!isset($this->content)) {
+      $this->content = $this->renderRevision();
     }
-    return $this->revisionContent;
+    return $this->content;
   }
 
   /**
    * @return string
    */
-  public function getRevisionContentDiff()
+  public function getContentDiff()
   {
-    if (!isset($this->revisionContentDiff)) {
-      $this->revisionContentDiff = $this->renderRevision(true);
-    }
-    return $this->revisionContentDiff;
+    return $this->renderRevision(true);
   }
 
   /**
    * @return string
    */
-  public function getRevisionInfo()
+  public function getDiffInfo()
   {
-    return $this->revisionInfo;
+    return $this->diffInfo;
   }
 
   /**
@@ -142,7 +132,7 @@ abstract class RevisionData extends RevisionsBase
    */
   public function getRevisionId()
   {
-    return (int) $this->revisionId;
+    return (int) $this->id;
   }
 
   /**
@@ -157,9 +147,9 @@ abstract class RevisionData extends RevisionsBase
    * @param string $content
    * @return void
    */
-  public function setRevisionContent($content)
+  public function setContent($content)
   {
-    $this->revisionContent = $content;
+    $this->content = $content;
   }
 
   /**
@@ -172,21 +162,21 @@ abstract class RevisionData extends RevisionsBase
   }
 
   /**
-   * @param array $revisionInfo
+   * @param array $diffInfo
    * @return void
    */
-  public function setRevisionInfo($revisionInfo)
+  public function setDiffInfo($diffInfo)
   {
-    $this->revisionInfo = $revisionInfo;
+    $this->diffInfo = $diffInfo;
   }
 
   /**
-   * @param array $currentContent
+   * @param array $nextContent
    * @return void
    */
-  public function setCurrentContent($currentContent)
+  public function setNextContent($nextContent)
   {
-    $this->currentContent = $currentContent;
+    $this->nextContent = $nextContent;
   }
 
   /**
@@ -194,9 +184,9 @@ abstract class RevisionData extends RevisionsBase
    *
    * @return integer
    */
-  public function getRevisionContentSize()
+  public function getContentSize()
   {
-    return strlen($this->getRevisionContent());
+    return strlen($this->getContent());
   }
 
   /**
@@ -204,9 +194,9 @@ abstract class RevisionData extends RevisionsBase
    *
    * @return integer
    */
-  public function getCurrentContentSize()
+  public function getNextContentSize()
   {
-    return strlen($this->getCurrentContent());
+    return strlen($this->getNextContent());
   }
 
   /**
