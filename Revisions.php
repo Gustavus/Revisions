@@ -68,7 +68,7 @@ class Revisions extends RevisionsManager
    */
   public function makeRevisionData($oldText, $newText)
   {
-    $revisionData = new RevisionDataDiff(array('currentContent' => $oldText));
+    $revisionData = new RevisionDataDiff(array('nextContent' => $oldText));
     $revisionData->makeRevisionDataInfo($newText);
     return $revisionData;
   }
@@ -191,11 +191,11 @@ class Revisions extends RevisionsManager
       if (isset($oldRevisionData[$key])) {
         // revision exists in DB, so the first item will be the full current content
         $oldContentArray         = array_shift($oldRevisionData[$key]);
-        $revisionData            = new RevisionDataDiff(array('currentContent' => $oldContentArray['value']));
+        $revisionData            = new RevisionDataDiff(array('nextContent' => $oldContentArray['value']));
         $oldText[$key]           = $oldContentArray['value'];
       } else {
         // revision doesn't exist yet
-        $revisionData            = new RevisionDataDiff(array('currentContent' => ''));
+        $revisionData            = new RevisionDataDiff(array('nextContent' => ''));
         $oldText[$key]           = '';
         $brandNewColumns[]       = $key;
       }
@@ -218,7 +218,7 @@ class Revisions extends RevisionsManager
    */
   private function populateObjectWithRevisions()
   {
-    $currentContent = null;
+    $nextContent = null;
     $revisions = $this->getRevisions($this->findOldestRevisionNumberPulled(), null, null);
 
     foreach ($revisions as $revisionInfo) {
@@ -234,10 +234,10 @@ class Revisions extends RevisionsManager
       }
       if (!$previousError) {
         $params = array(
-          'revisionId'      => $revisionInfo['id'],
-          'revisionNumber'  => $revisionInfo['revisionNumber'],
-          'revisionDate'    => $revisionInfo['createdOn'],
-          'revisionMessage' => $revisionInfo['message'],
+          'id'      => $revisionInfo['id'],
+          'number'  => $revisionInfo['revisionNumber'],
+          'date'    => $revisionInfo['createdOn'],
+          'message' => $revisionInfo['message'],
           'createdBy'       => $revisionInfo['createdBy'],
           'revisionData'    => $revisionData['revisionData'],
           'modifiedColumns' => $revisionData['modifiedColumns'],
@@ -280,7 +280,7 @@ class Revisions extends RevisionsManager
         $previousRevisionData = null;
       } else {
         $previousRevisionData = $this->getOldestRevisionDataPulled($key, $revisionId);
-        $previousContent = $previousRevisionData->getRevisionContent();
+        $previousContent = $previousRevisionData->getContent();
         $previousError = $previousRevisionData->getError();
       }
       if (!$previousError) {
@@ -288,21 +288,21 @@ class Revisions extends RevisionsManager
           $revisionData = $previousRevisionData;
         } else {
           $params = array(
-            'revisionId'             => $value['revisionId'],
-            'revisionNumber'         => $value['revisionNumber'],
-            'revisionRevisionNumber' => $value['revisionRevisionNumber'],
-            'revisionInfo'           => $this->makeDiffInfoObjects($value['value']),
-            'currentContent'         => $previousContent,
+            'id'              => $value['revisionId'],
+            'number'          => $value['revisionNumber'],
+            'revisionNumber'  => $value['revisionRevisionNumber'],
+            'diffInfo'        => $this->makeDiffInfoObjects($value['value']),
+            'nextContent'     => $previousContent,
           );
           $revisionData = new RevisionDataDiff($params);
 
-          if (md5($revisionData->getRevisionContent()) !== $value['contentHash']) {
+          if (md5($revisionData->getContent()) !== $value['contentHash']) {
             $revisionData->setError(true);
           }
         }
         // set max column sizes
-        if (!isset($this->maxColumnSizes[$key]) || $this->maxColumnSizes[$key] < $revisionData->getRevisionContentSize()) {
-          $this->maxColumnSizes[$key] = $revisionData->getRevisionContentSize();
+        if (!isset($this->maxColumnSizes[$key]) || $this->maxColumnSizes[$key] < $revisionData->getContentSize()) {
+          $this->maxColumnSizes[$key] = $revisionData->getContentSize();
         }
         $revisionDataArray[$key] = $revisionData;
       }
@@ -317,7 +317,7 @@ class Revisions extends RevisionsManager
   }
 
   /**
-   * Makes DiffInfo Objects with the revisionInfo
+   * Makes DiffInfo Objects with the diffInfo
    *
    * @param  mixed $revisionInfo revisionInfo pulled from getRevisionData
    * @return mixed
@@ -329,7 +329,7 @@ class Revisions extends RevisionsManager
     }
     $return = array();
     foreach ($revisionInfo as $revInfo) {
-      $return[] = new DiffInfo(array('startIndex' => $revInfo[0], 'endIndex' => $revInfo[1], 'revisionInfo' => $revInfo[2]));
+      $return[] = new DiffInfo(array('startIndex' => $revInfo[0], 'endIndex' => $revInfo[1], 'info' => $revInfo[2]));
     }
     return $return;
   }
@@ -568,7 +568,7 @@ class Revisions extends RevisionsManager
   {
     $return = array();
     foreach ($this->getRevisionByNumber($revisionNumber)->getRevisionData() as $column => $revisionData) {
-      $return[$column] = $revisionData->getRevisionContent();
+      $return[$column] = $revisionData->getContent();
     }
     return $return;
   }

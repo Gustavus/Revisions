@@ -81,7 +81,7 @@ class RevisionsTest extends RevisionsTestsHelper
   public function makeRevision()
   {
     $rData = $this->revisions->makeRevisionData('some test content', 'new test content');
-    $result = $this->revisions->makeRevision(array('info' => $rData));
+    $result = $this->revisions->makeRevision(array('diffInfo' => $rData));
     $this->assertInstanceOf('\Gustavus\Revisions\Revision', $result);
   }
 
@@ -490,12 +490,12 @@ class RevisionsTest extends RevisionsTestsHelper
    */
   public function makeDiffInfoObjects()
   {
-    $diff = new Revisions\DiffInfo(array('startIndex' => 1, 'endIndex' => 2, 'revisionInfo' => ''));
+    $diff = new Revisions\DiffInfo(array('startIndex' => 1, 'endIndex' => 2, 'info' => ''));
     $expected = array($diff);
     $actual = $this->call($this->revisions, 'makeDiffInfoObjects', array(array(array(1,2,""))));
     $this->assertSame($expected[0]->getStartIndex(), $actual[0]->getStartIndex());
     $this->assertSame($expected[0]->getEndIndex(), $actual[0]->getEndIndex());
-    $this->assertSame($expected[0]->getRevisionInfo(), $actual[0]->getRevisionInfo());
+    $this->assertSame($expected[0]->getInfo(), $actual[0]->getInfo());
   }
 
   /**
@@ -550,6 +550,7 @@ class RevisionsTest extends RevisionsTestsHelper
     $this->saveRevisionToDB('', 'Billy Visto', 'name', $this->revisions, array(), null, 'name', array('name'));
     $this->saveRevisionToDB('Billy Visto', 'Billy', 'name', $this->revisions);
     $this->saveRevisionToDB('Billy', 'Billy Visto', 'name', $this->revisions);
+    $this->revisions->getRevisionByNumber(1);
 
     $this->assertInstanceOf('\Gustavus\Revisions\Revision', $this->revisions->getRevisionByNumber(1));
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
