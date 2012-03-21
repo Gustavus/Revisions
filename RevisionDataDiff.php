@@ -28,7 +28,7 @@ class RevisionDataDiff extends RevisionData
    */
   public function __destruct()
   {
-    unset($this->revisionNumber, $this->currentContent, $this->revisionContent, $this->revisionId, $this->revisionInfo, $this->error);
+    unset($this->number, $this->nextContent, $this->content, $this->id, $this->diffInfo, $this->error);
   }
 
   /**
@@ -40,30 +40,30 @@ class RevisionDataDiff extends RevisionData
    */
   protected function renderRevision($showChanges = false)
   {
-    $revisionInfo = $this->getRevisionInfo();
-    if ($revisionInfo === null) {
+    $diffInfo = $this->getDiffInfo();
+    if ($diffInfo === null) {
       // revisionInfo will be null if the current content is the same as the new content
-      return $this->getCurrentContent();
+      return $this->getNextContent();
     }
-    if (!is_array($revisionInfo)) {
+    if (!is_array($diffInfo)) {
       // revision info is the latest content of a revision
-      return $revisionInfo;
+      return $diffInfo;
     }
-    $currentContent = $this->getCurrentContent();
-    if (empty($revisionInfo) && isset($currentContent)) {
+    $nextContent = $this->getNextContent();
+    if (empty($diffInfo) && isset($nextContent)) {
       // brand new content was added
       if ($showChanges) {
-        if (is_string($currentContent)) {
-          return $this->renderContentChange($currentContent, true);
+        if (is_string($nextContent)) {
+          return $this->renderContentChange($nextContent, true);
         } else {
           return $this->renderNonStringRevision(null, true);
         }
       } else {
-        $this->removedContentSize = strlen($currentContent);
+        $this->removedContentSize = strlen($nextContent);
         return '';
       }
     }
-    return $this->putRevisionContentTogether($revisionInfo, $showChanges);
+    return $this->putRevisionContentTogether($diffInfo, $showChanges);
   }
 
   /**
@@ -76,42 +76,40 @@ class RevisionDataDiff extends RevisionData
    */
   private function putRevisionContentTogether($revisionInfo, $showChanges)
   {
-    $currContentArr = $this->splitWords($this->getCurrentContent(), false);
-    // currContentArr has empty index at the beginning from splitWords, so get rid of it
-    array_shift($currContentArr);
+    $nextContentArr = $this->splitWords($this->getNextContent(), false);
     foreach ($revisionInfo as $diffInfo) {
-      $revisionContent = ($showChanges) ? $this->renderContentChange($diffInfo->getRevisionInfo(), false) : $diffInfo->getRevisionInfo();
+      $revisionContent = ($showChanges) ? $this->renderContentChange($diffInfo->getInfo(), false) : $diffInfo->getInfo();
       $endIndex   = $diffInfo->getEndIndex();
       $startIndex = $diffInfo->getStartIndex();
       if (isset($endIndex)) {
         // content was deleted/replaced
         $ins = '';
         for ($i = $startIndex; $i <= $endIndex; ++$i) {
-          $ins .= $currContentArr[$i];
-          $currContentArr[$i] = '';
+          $ins .= $nextContentArr[$i];
+          $nextContentArr[$i] = '';
         }
         if (!$showChanges) {
           // we don't want to add this twice
           $this->addedContentSize   += strlen($revisionContent);
           $this->removedContentSize += strlen($ins);
         }
-        $currContentArr[$startIndex] = ($showChanges) ? $revisionContent.$this->renderContentChange($ins, true) : $revisionContent;
+        $nextContentArr[$startIndex] = ($showChanges) ? $revisionContent.$this->renderContentChange($ins, true) : $revisionContent;
       } else if (!isset($startIndex) && count($revisionInfo) === 1) {
         // full content change. As of now, this signifies a non string revision
-        return $this->renderNonStringRevision($diffInfo->getRevisionInfo(), $showChanges);
+        return $this->renderNonStringRevision($diffInfo->getInfo(), $showChanges);
       } else {
         //content was added
-        $currText = (!empty($currContentArr[$startIndex])) ? $currContentArr[$startIndex] : '';
+        $currText = (!empty($nextContentArr[$startIndex])) ? $nextContentArr[$startIndex] : '';
         // add added content size to added content size
         if (!$showChanges) {
           // we don't want to add this twice
           $this->addedContentSize += strlen($revisionContent);
         }
-        $currContentArr[$startIndex] = $revisionContent.$currText;
+        $nextContentArr[$startIndex] = $revisionContent.$currText;
       }
     }
-    $revisionContent = implode('', $currContentArr);
-    $this->setRevisionContent($revisionContent);
+    $revisionContent = implode('', $nextContentArr);
+    $this->setContent($revisionContent);
     return $revisionContent;
   }
 
@@ -124,23 +122,23 @@ class RevisionDataDiff extends RevisionData
    */
   private function renderNonStringRevision($revisionContent, $showChanges = false)
   {
-    $currentContent = $this->getCurrentContent();
+    $nextContent = $this->getNextContent();
     if ($showChanges) {
-      $currentContent = $this->getCurrentContent();
+      $nextContent = $this->getNextContent();
       if (is_bool($revisionContent)) {
         $revisionContent = ($revisionContent) ? 'true' : 'false';
       }
-      if (is_bool($currentContent)) {
-        $currentContent = ($currentContent) ? 'true' : 'false';
+      if (is_bool($nextContent)) {
+        $nextContent = ($nextContent) ? 'true' : 'false';
       }
-      $oldText = $this->renderContentChange((string) $currentContent, true);
+      $oldText = $this->renderContentChange((string) $nextContent, true);
       $newText = ($revisionContent !== null) ? $this->renderContentChange((string) $revisionContent, false) : '';
       $currText = $newText.$oldText;
     } else {
       if (!$showChanges) {
         // we don't want to add this twice
         $this->addedContentSize   += strlen($revisionContent);
-        $this->removedContentSize += strlen($currentContent);
+        $this->removedContentSize += strlen($nextContent);
       }
       $currText = $revisionContent;
     }
@@ -148,21 +146,21 @@ class RevisionDataDiff extends RevisionData
   }
 
   /**
-   * Renders changes to get from $currentContent to $newContent
+   * Renders changes to get from $nextContent to $newContent
    *
    * @param string $newContent
    * @return string
    */
   public function makeDiff($newContent, $showChanges = false)
   {
-    $revisionInfo = $this->getRevisionInfo();
-    if (empty($revisionInfo)) {
-      $revisionInfo = $this->makeRevisionInfo($newContent);
-      $this->setRevisionInfo($revisionInfo);
+    $diffInfo = $this->getDiffInfo();
+    if (empty($diffInfo)) {
+      $diffInfo = $this->makeDiffInfo($newContent);
+      $this->setDiffInfo($diffInfo);
     }
-    $this->setCurrentContent($newContent);
+    $this->setNextContent($newContent);
 
-    return $this->getRevisionContent($showChanges);
+    return $this->getContent($showChanges);
   }
 
   /**
@@ -173,7 +171,7 @@ class RevisionDataDiff extends RevisionData
    */
   public function makeRevisionContent($showChanges = false)
   {
-    return $this->getRevisionContent($showChanges);
+    return $this->getContent($showChanges);
   }
 
   /**
@@ -184,14 +182,14 @@ class RevisionDataDiff extends RevisionData
    */
   public function makeRevisionDataInfo($newContent)
   {
-    if (empty($this->revisionInfo) && isset($this->currentContent)) {
-      if ($newContent === $this->currentContent) {
-        $this->setRevisionInfo(null);
+    if (empty($this->diffInfo) && isset($this->nextContent)) {
+      if ($newContent === $this->nextContent) {
+        $this->setDiffInfo(null);
       } else {
-        $this->makeRevisionInfo($newContent);
+        $this->makeDiffInfo($newContent);
       }
-      $this->setRevisionContent($this->getCurrentContent());
-      $this->setCurrentContent($newContent);
+      $this->setContent($this->getNextContent());
+      $this->setNextContent($newContent);
     }
   }
 
@@ -222,13 +220,13 @@ class RevisionDataDiff extends RevisionData
    */
   public function renderRevisionForDB($newContent)
   {
-    if ($newContent === $this->getCurrentContent()) {
+    if ($newContent === $this->getNextContent()) {
       return null;
     } else {
       $return = array();
-      foreach ($this->makeRevisionInfo($newContent) as $diffInfo) {
+      foreach ($this->makeDiffInfo($newContent) as $diffInfo) {
         if (is_object($diffInfo)) {
-          $return[] = array($diffInfo->getStartIndex(), $diffInfo->getEndIndex(), $diffInfo->getRevisionInfo());
+          $return[] = array($diffInfo->getStartIndex(), $diffInfo->getEndIndex(), $diffInfo->getInfo());
         }
       }
       return json_encode($return);
@@ -286,7 +284,7 @@ class RevisionDataDiff extends RevisionData
   private function myArrayDiff(array $old, array $new)
   {
     $diff = $this->diff($old, $new);
-    //remove possible empty garbage from beginning and end
+    //remove possible empty garbage from beginning and end from diff()
     if (empty($diff[0]['d']) && empty($diff[0]['i'])) {
       // if the text starts with punctuation the first item will not be empty
       // the diff returns a difference from the start of the content so we want to get rid of the empty diff
@@ -322,16 +320,16 @@ class RevisionDataDiff extends RevisionData
    * @param  mixed $newContent
    * @return array
    */
-  private function makeNonStringRevisionInfo($newContent)
+  private function makeNonStringDiffInfo($newContent)
   {
-    if ($this->getCurrentContent() === $newContent) {
+    if ($this->getNextContent() === $newContent) {
       $diffInfo = array();
     } else {
-      $diffInfo = new DiffInfo(array('startIndex' => null, 'endIndex' => null, 'revisionInfo' => $this->getCurrentContent()));
+      $diffInfo = new DiffInfo(array('startIndex' => null, 'endIndex' => null, 'info' => $this->getNextContent()));
       $diffInfo = array($diffInfo);
     }
-    $this->setRevisionInfo($diffInfo);
-    return $this->getRevisionInfo();
+    $this->setDiffInfo($diffInfo);
+    return $this->getDiffInfo();
   }
 
   /**
@@ -343,15 +341,7 @@ class RevisionDataDiff extends RevisionData
    */
   private function splitWords($content, $shouldFilter = true)
   {
-    $split = preg_split('`\b`', $content);
-    if ($shouldFilter) {
-      if (empty($split[0])) {
-        array_shift($split);
-      }
-      if (!empty($split) && $split[count($split) - 1] === '') {
-        array_pop($split);
-      }
-    }
+    $split = preg_split('`(\b|\s+)`', $content, null, PREG_SPLIT_NO_EMPTY|PREG_SPLIT_DELIM_CAPTURE);
     return $split;
   }
 
@@ -362,14 +352,14 @@ class RevisionDataDiff extends RevisionData
    * @param string $newContent
    * @return array
    */
-  protected function makeRevisionInfo($newContent)
+  protected function makeDiffInfo($newContent)
   {
     if (!is_string($newContent)) {
-      return $this->makeNonStringRevisionInfo($newContent);
+      return $this->makeNonStringDiffInfo($newContent);
     }
-    $currContentArr = $this->splitWords($this->getCurrentContent());
+    $nextContentArr = $this->splitWords($this->getNextContent());
     $newContentArr  = $this->splitWords($newContent);
-    $diffArr        = $this->myArrayDiff($currContentArr, $newContentArr);
+    $diffArr        = $this->myArrayDiff($nextContentArr, $newContentArr);
     $diffInfo       = array();
     foreach ($diffArr as $key => $value) {
       $startInd        = $key;
@@ -387,10 +377,10 @@ class RevisionDataDiff extends RevisionData
         $revisionContent = implode('', $value['d']);
       }
 
-      $currDiff   = new DiffInfo(array('startIndex' => $startInd, 'endIndex' => $endInd, 'revisionInfo' => $revisionContent));
+      $currDiff   = new DiffInfo(array('startIndex' => $startInd, 'endIndex' => $endInd, 'info' => $revisionContent));
       $diffInfo[] = $currDiff;
     }
-    $this->setRevisionInfo($diffInfo);
+    $this->setDiffInfo($diffInfo);
     return $diffInfo;
   }
 }
