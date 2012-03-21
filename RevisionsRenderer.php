@@ -130,7 +130,11 @@ class RevisionsRenderer
   {
     // - 1 so we pull in one more revision for rendering content changes
     $this->revisions->populateEmptyRevisions($revNum - 1);
-    return $this->renderTwig('revisionData.twig', $this->revisions->getRevisionByNumber($revNum), array('visibleRevisions' => array($revNum), 'columns' => $columns), $oldestRevNum);
+    if ($oldestRevNum > $revNum) {
+      $oldestRevNum = $revNum;
+    }
+    // $revNum - 1 so we are looking at how it changed from the previous revision since the current revision is the current text in the previous revision
+    return $this->renderTwig('revisionData.twig', $this->revisions->getRevisionByNumber($revNum - 1), array('visibleRevisions' => array($revNum), 'columns' => $columns), $oldestRevNum);
   }
 
   /**
@@ -188,6 +192,7 @@ class RevisionsRenderer
     $params = array_merge(
         $params,
         array(
+          'revisions'             => $this->revisions->getRevisionObjects($oldestRevisionNumber),
           'revision'              => $revision,
           'oldestRevisionNumber'  => $oldestRevisionNumber,
           'limit'                 => $this->revisions->getLimit(),
