@@ -24,7 +24,7 @@ class DiffInfoTest extends \Gustavus\Test\Test
   private $diffInfoProperties = array(
     'startIndex' => 1,
     'endIndex'  => null,
-    'revisionInfo' =>' testing',
+    'info' =>' testing',
   );
 
   /**
@@ -66,6 +66,6 @@ class DiffInfoTest extends \Gustavus\Test\Test
    */
   public function getRevisionInfo()
   {
-    $this->assertSame($this->diffInfoProperties['revisionInfo'], $this->diffInfo->getRevisionInfo());
+    $this->assertSame($this->diffInfoProperties['info'], $this->diffInfo->getInfo());
   }
 }

@@ -24,7 +24,7 @@ class DiffInfo extends RevisionsBase
   /**
    * @var mixed content revision contained
    */
-  protected $revisionInfo;
+  protected $info;
 
   /**
    * Class constructor
@@ -43,7 +43,7 @@ class DiffInfo extends RevisionsBase
    */
   public function __destruct()
   {
-    unset($this->startInder, $this->endIndex, $this->revisionInfo);
+    unset($this->startIndex, $this->endIndex, $this->info);
   }
 
   /**
@@ -73,8 +73,8 @@ class DiffInfo extends RevisionsBase
   /**
    * @return mixed
    */
-  public function getRevisionInfo()
+  public function getInfo()
   {
-    return $this->revisionInfo;
+    return $this->info;
   }
 }
