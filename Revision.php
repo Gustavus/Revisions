@@ -12,26 +12,26 @@ namespace Gustavus\Revisions;
 class Revision extends RevisionsBase
 {
   /**
-   * @var int revisionId
+   * @var int id
    */
-  protected $revisionId;
+  protected $id;
 
   /**
-   * data's revision number of how many times it has changed to get to this point
+   * revisionData's revision number of how many times it has changed to get to this point
    *
-   * @var int revisionNumber
+   * @var int number
    */
-  protected $revisionNumber;
+  protected $number;
 
   /**
    * @var DateTime when revision was made
    */
-  protected $revisionDate;
+  protected $date;
 
   /**
-   * @var string revisionMessage
+   * @var string message
    */
-  protected $revisionMessage;
+  protected $message;
 
   /**
    * @var string createdBy
@@ -39,7 +39,7 @@ class Revision extends RevisionsBase
   protected $createdBy;
 
   /**
-   * @var array of RevisionData objects keyed by column
+   * @var array of revisionData objects keyed by column
    */
   protected $revisionData;
 
@@ -72,7 +72,7 @@ class Revision extends RevisionsBase
    */
   public function __destruct()
   {
-    unset($this->revisionId, $this->revisionNumber, $this->revisionDate, $this->revisonMessage, $this->createdBy, $this->revisionData, $this->modifiedColumns, $this->error);
+    unset($this->id, $this->number, $this->date, $this->message, $this->createdBy, $this->revisionData, $this->modifiedColumns, $this->error);
   }
 
   /**
@@ -80,7 +80,7 @@ class Revision extends RevisionsBase
    */
   public function getRevisionId()
   {
-    return (int) $this->revisionId;
+    return (int) $this->id;
   }
 
   /**
@@ -88,7 +88,7 @@ class Revision extends RevisionsBase
    */
   public function getRevisionNumber()
   {
-    return (int) $this->revisionNumber;
+    return (int) $this->number;
   }
 
   /**
@@ -96,7 +96,54 @@ class Revision extends RevisionsBase
    */
   public function getRevisionDate()
   {
-    return $this->revisionDate;
+    return $this->date;
+  }
+
+  /**
+   * Outputs a sentence of how long ago this revision was made.
+   * ie. 2 years, 3 months, and 5 days. 1 day, 3 hours, and 4 minutes. 23 seconds.
+   *
+   * @return string
+   */
+  public function getRevisionRelativeDate()
+  {
+    require_once('format/format.class.php');
+    $now       = new \DateTime('now');
+    $date      = new \DateTime($this->date);
+    $interval  = $date->diff($now);
+    $relative  = array();
+    $days      = (int) $interval->format('%d');
+    if ((int) $interval->format('%a') > 1) {
+      $years    = (int) $interval->format('%y');
+      $months   = (int) $interval->format('%m');
+      if ($years !== 0) {
+        $relative[] = \Format::quantity($years, 'year ', 'years ');
+      } else if ($months !== 0) {
+        $relative[] = \Format::quantity($months, 'month ', 'months ');
+      } else if ($days !== 0) {
+        $weeks = (int) floor($days / 7);
+        $days  = $days % 7;
+        if ($weeks !== 0) {
+          $relative[] = \Format::quantity($weeks, 'week ', 'weeks ');
+        } else if ($days !== 0) {
+          $relative[] = \Format::quantity($days, 'day ','days ');
+        }
+      }
+    } else {
+      $hours    = (int) $interval->format('%h');
+      $minutes  = (int) $interval->format('%i');
+      if ($days !== 0) {
+        $relative[] = \Format::quantity($days, 'day ','days ');
+      } else if ($hours !== 0) {
+        $relative[] = \Format::quantity($hours, 'hour ', 'hours ');
+      } else if ($minutes !== 0) {
+        $relative[] = \Format::quantity($minutes, 'minute ', 'minutes ');
+      } else if (empty($relative)) {
+        $seconds = (int) $interval->format('%s');
+        $relative[] = \Format::quantity($seconds, 'second ', 'seconds ');
+      }
+    }
+    return \Format::arrayToSentence($relative) . ' ago';
   }
 
   /**
@@ -112,7 +159,7 @@ class Revision extends RevisionsBase
    */
   public function getRevisionMessage()
   {
-    return $this->revisionMessage;
+    return $this->message;
   }
 
   /**
@@ -195,7 +242,7 @@ class Revision extends RevisionsBase
   {
     $return = array();
     foreach ($this->revisionData as $column => $revisionData) {
-      $return[$column] = $revisionData->getRevisionContent();
+      $return[$column] = $revisionData->getContent();
     }
     return $return;
   }

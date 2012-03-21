@@ -27,12 +27,11 @@ class RevisionTest extends \Gustavus\Test\Test
    * @var array to fill object with
    */
   private $revisionProperties = array(
-    'revisionId' => 1,
-    'currentContent' => 'some test content',
-    'revisionNumber' => 1,
-    'revisionDate' => '2012-01-05 23:34:15',
+    'id' => 1,
+    'number' => 1,
+    'date' => '2012-01-05 23:34:15',
     'createdBy' => 'Billy',
-    'revisionMessage' => 'Message',
+    'message' => 'Message',
     'modifiedColumns' => array('name'),
   );
 
@@ -40,8 +39,8 @@ class RevisionTest extends \Gustavus\Test\Test
    * @var array to fill object with
    */
   private $revisionDataProperties = array(
-    'currentContent' => 'billy',
-    'revisionNumber' => 1,
+    'nextContent' => 'billy',
+    'number' => 1,
   );
 
   /**
@@ -50,7 +49,7 @@ class RevisionTest extends \Gustavus\Test\Test
   private $diffInfoProperties = array(
     'startIndex' => 1,
     'endIndex' => null,
-    'revisionInfo' => ' visto',
+    'info' => ' visto',
   );
 
   /**
@@ -60,7 +59,7 @@ class RevisionTest extends \Gustavus\Test\Test
   public function setUp()
   {
     $diffInfo = new Revisions\DiffInfo($this->diffInfoProperties);
-    $this->revisionDataProperties['revisionInfo'] = array($diffInfo);
+    $this->revisionDataProperties['diffInfo'] = array($diffInfo);
     $this->revisionData = new Revisions\RevisionDataDiff($this->revisionDataProperties);
     $this->revisionProperties['revisionData'] = array('name' => $this->revisionData);
     $this->revision = new Revisions\Revision($this->revisionProperties);
@@ -80,7 +79,7 @@ class RevisionTest extends \Gustavus\Test\Test
    */
   public function getRevisionNumber()
   {
-    $this->assertSame($this->revisionProperties['revisionNumber'], $this->revision->getRevisionNumber());
+    $this->assertSame($this->revisionProperties['number'], $this->revision->getRevisionNumber());
   }
 
   /**
@@ -88,7 +87,95 @@ class RevisionTest extends \Gustavus\Test\Test
    */
   public function getRevisionDate()
   {
-    $this->assertSame($this->revisionProperties['revisionDate'], $this->revision->getRevisionDate());
+    $this->assertSame($this->revisionProperties['date'], $this->revision->getRevisionDate());
+  }
+
+  /**
+   * @test
+   */
+  public function getRevisionRelativeDate()
+  {
+    $date = new \DateTime('-1 months -3 weeks');
+    $this->revisionProperties['date'] = $date->format('c');
+    $this->setUp();
+    $this->assertSame('1 month ago', $this->revision->getRevisionRelativeDate());
+  }
+
+  /**
+   * @test
+   */
+  public function getRevisionRelativeDateAFewSecondsAgo()
+  {
+    $date = new \DateTime('-5 hours -3 minutes');
+    $this->revisionProperties['date'] = $date->format('c');
+    $this->setUp();
+    $this->assertSame('5 hours ago', $this->revision->getRevisionRelativeDate());
+  }
+
+  /**
+   * @test
+   */
+  public function getRevisionRelativeDateLessThanADay()
+  {
+    $date = new \DateTime('-5 seconds');
+    $this->revisionProperties['date'] = $date->format('c');
+    $this->setUp();
+    $this->assertSame('5 seconds ago', $this->revision->getRevisionRelativeDate());
+  }
+
+  /**
+   * @test
+   */
+  public function getRevisionRelativeDateYears()
+  {
+    $date = new \DateTime('-2 years');
+    $this->revisionProperties['date'] = $date->format('c');
+    $this->setUp();
+    $this->assertSame('2 years ago', $this->revision->getRevisionRelativeDate());
+  }
+
+  /**
+   * @test
+   */
+  public function getRevisionRelativeDateDays()
+  {
+    $date = new \DateTime('-2 days');
+    $this->revisionProperties['date'] = $date->format('c');
+    $this->setUp();
+    $this->assertSame('2 days ago', $this->revision->getRevisionRelativeDate());
+  }
+
+  /**
+   * @test
+   */
+  public function getRevisionRelativeDateDay()
+  {
+    $date = new \DateTime('-1 days');
+    $this->revisionProperties['date'] = $date->format('c');
+    $this->setUp();
+    $this->assertSame('1 day ago', $this->revision->getRevisionRelativeDate());
+  }
+
+  /**
+   * @test
+   */
+  public function getRevisionRelativeDateMinutes()
+  {
+    $date = new \DateTime('-20 minutes');
+    $this->revisionProperties['date'] = $date->format('c');
+    $this->setUp();
+    $this->assertSame('20 minutes ago', $this->revision->getRevisionRelativeDate());
+  }
+
+  /**
+   * @test
+   */
+  public function getRevisionRelativeDateWeeks()
+  {
+    $date = new \DateTime('-20 days');
+    $this->revisionProperties['date'] = $date->format('c');
+    $this->setUp();
+    $this->assertSame('2 weeks ago', $this->revision->getRevisionRelativeDate());
   }
 
   /**
@@ -104,7 +191,7 @@ class RevisionTest extends \Gustavus\Test\Test
    */
   public function getRevisionId()
   {
-    $this->assertSame($this->revisionProperties['revisionId'], $this->revision->getRevisionId());
+    $this->assertSame($this->revisionProperties['id'], $this->revision->getRevisionId());
   }
 
   /**
@@ -120,7 +207,7 @@ class RevisionTest extends \Gustavus\Test\Test
    */
   public function getRevisionMessage()
   {
-    $this->assertSame($this->revisionProperties['revisionMessage'], $this->revision->getRevisionMessage());
+    $this->assertSame($this->revisionProperties['message'], $this->revision->getRevisionMessage());
   }
 
   /**
