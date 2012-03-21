@@ -356,7 +356,7 @@ class RevisionsManager extends RevisionsBase
           if (!in_array($key, $array[0]) && empty($value)) {
             unset($array[1][$key]);
           } else if (empty($value)) {
-            $array[1][$key] = json_encode('');
+            $array[1][$key] = '""'; // same as json_encode('')
           }
         },
         array($brandNewColumns, &$revisionInfo)
