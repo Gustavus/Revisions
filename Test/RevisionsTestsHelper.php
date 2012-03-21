@@ -82,7 +82,7 @@ class RevisionsTestsHelper extends \Gustavus\Test\TestDBPDO
   protected function saveRevisionToDB($currContent, $newContent, $column, $object, $revisionDataArray = array(), $message = null, $createdBy = 'name', array $newColumns = array())
   {
     $revisionData = new \Gustavus\Revisions\RevisionDataDiff(array(
-      'currentContent' => $currContent,
+      'nextContent' => $currContent,
     ));
 
     $revisionInfo = $revisionData->renderRevisionForDB($newContent);
