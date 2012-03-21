@@ -101,7 +101,7 @@ class Revision extends RevisionsBase
 
   /**
    * Outputs a sentence of how long ago this revision was made.
-   * ie. 2 years, 3 months, and 5 days. 1 day, 3 hours, and 4 minutes. 23 seconds.
+   * ie. 2 years ago, 3 months ago, 5 days ago, 1 day ago, 3 hours ago, 4 minutes ago, and 23 seconds ago.
    *
    * @return string
    */
@@ -126,14 +126,14 @@ class Revision extends RevisionsBase
         if ($weeks !== 0) {
           $relative[] = \Format::quantity($weeks, 'week ', 'weeks ');
         } else if ($days !== 0) {
-          $relative[] = \Format::quantity($days, 'day ','days ');
+          $relative[] = \Format::quantity($days, 'day ', 'days ');
         }
       }
     } else {
       $hours    = (int) $interval->format('%h');
       $minutes  = (int) $interval->format('%i');
       if ($days !== 0) {
-        $relative[] = \Format::quantity($days, 'day ','days ');
+        $relative[] = \Format::quantity($days, 'day ', 'days ');
       } else if ($hours !== 0) {
         $relative[] = \Format::quantity($hours, 'hour ', 'hours ');
       } else if ($minutes !== 0) {

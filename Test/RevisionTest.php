@@ -170,6 +170,17 @@ class RevisionTest extends \Gustavus\Test\Test
   /**
    * @test
    */
+  public function getRevisionRelativeDateMinutesSeconds()
+  {
+    $date = new \DateTime('-20 minutes -30 seconds');
+    $this->revisionProperties['date'] = $date->format('c');
+    $this->setUp();
+    $this->assertSame('20 minutes ago', $this->revision->getRevisionRelativeDate());
+  }
+
+  /**
+   * @test
+   */
   public function getRevisionRelativeDateWeeks()
   {
     $date = new \DateTime('-20 days');
