@@ -1378,4 +1378,62 @@ class RevisionsTest extends RevisionsTestsHelper
 
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }
+
+  /**
+   * @test
+   */
+  public function getRevisionContentUpdatedInFutureRevision()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $this->revisions->makeAndSaveRevision(array('age' => 23, 'name' => 'Billy Visto'));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy'));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
+    $this->revisions->makeAndSaveRevision(array('age' => 123));
+
+    $revisionData = $this->revisions->getRevisionByNumber(2)->getRevisionData();
+
+    $expectedAge = 23;
+    $actualAge = $revisionData['age']->getContent(true, 3);
+    $expectedName = 'Billy<ins> Visto</ins>';
+    $actualName = $revisionData['name']->getContent(true, 3);
+
+    $this->assertSame($expectedAge, $actualAge);
+    $this->assertSame($expectedName, $actualName);
+
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
+  public function getSecondRevisionContentUpdatedInFutureRevision()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $this->revisions->makeAndSaveRevision(array('age' => 23, 'name' => 'Billy Visto'));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy'));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
+    $this->revisions->makeAndSaveRevision(array('age' => 123));
+
+    $revisionData = $this->revisions->getRevisionByNumber(1)->getRevisionData();
+
+    $expectedAge = 23;
+    $actualAge = $revisionData['age']->getContent(true, 2);
+    $expectedName = 'Billy<del> Visto</del>';
+    $actualName = $revisionData['name']->getContent(true, 2);
+
+    $this->assertSame(4, $revisionData['age']->getNextContentRevisionNumber());
+
+    $this->assertSame($expectedAge, $actualAge);
+    $this->assertSame($expectedName, $actualName);
+
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
 }

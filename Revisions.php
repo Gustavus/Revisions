@@ -132,8 +132,8 @@ class Revisions extends RevisionsManager
         $revisionDataArray[$key] = $this->makeRevisionData('', '');
         $revisionDataArray[$key]->setError(true);
       } else {
-        $revADataContent = ($revisionDataA === null) ? '' : $revisionDataA->makeRevisionContent();
-        $revBDataContent = $revisionDataB->makeRevisionContent();
+        $revADataContent = ($revisionDataA === null) ? '' : $revisionDataA->getContent();
+        $revBDataContent = $revisionDataB->getContent();
         $revisionDataArray[$key] = $this->makeRevisionData($revADataContent, $revBDataContent);
       }
     }
@@ -276,23 +276,26 @@ class Revisions extends RevisionsManager
           // we dont want to say that revision has been pulled if we are just populating the latest revision with the missing fields
           $this->revisionDataHasBeenPulled[$key] = true;
         }
-        $previousContent = $value['value'];
-        $previousRevisionData = null;
+        $previousContent               = $value['value'];
+        $previousContentRevisionNumber = $value['revisionNumber'];
+        $previousRevisionData          = null;
       } else {
-        $previousRevisionData = $this->getOldestRevisionDataPulled($key, $revisionId);
-        $previousContent = $previousRevisionData->getContent();
-        $previousError = $previousRevisionData->getError();
+        $previousRevisionData          = $this->getOldestRevisionDataPulled($key, $revisionId);
+        $previousContent               = $previousRevisionData->getContent();
+        $previousContentRevisionNumber = $previousRevisionData->getRevisionRevisionNumber();
+        $previousError                 = $previousRevisionData->getError();
       }
       if (!$previousError) {
         if (isset($previousRevisionData) && $previousRevisionData->getRevisionId() === $revisionId) {
           $revisionData = $previousRevisionData;
         } else {
           $params = array(
-            'id'              => $value['revisionId'],
-            'number'          => $value['revisionNumber'],
-            'revisionNumber'  => $value['revisionRevisionNumber'],
-            'diffInfo'        => $this->makeDiffInfoObjects($value['value']),
-            'nextContent'     => $previousContent,
+            'id'                        => $value['revisionId'],
+            'number'                    => $value['revisionNumber'],
+            'revisionNumber'            => $value['revisionRevisionNumber'],
+            'nextContentRevisionNumber' => $previousContentRevisionNumber,
+            'diffInfo'                  => $this->makeDiffInfoObjects($value['value']),
+            'nextContent'               => $previousContent,
           );
           $revisionData = new RevisionDataDiff($params);
 
