@@ -33,6 +33,13 @@ abstract class RevisionData extends RevisionsBase
   protected $nextContent;
 
   /**
+   * Revision number that the current content belongs to
+   *
+   * @var integer
+   */
+  protected $nextContentRevisionNumber;
+
+  /**
    * Content of this revision before it was changed. Result of following the revision info from the nextContent back
    *
    * @var string revision cell content
@@ -100,9 +107,10 @@ abstract class RevisionData extends RevisionsBase
    * @param boolean $showChanges
    * @return string
    */
-  public function getContent($showChanges = false)
+  public function getContent($showChanges = false, $currentRevisionNumber = null)
   {
-    if ($showChanges) {
+    if ($showChanges && ($currentRevisionNumber === null || $currentRevisionNumber >= $this->getNextContentRevisionNumber())) {
+      // revisionData doesn't belong to a future revision, so we can render the diff
       return $this->getContentDiff();
     }
     if (!isset($this->content)) {
@@ -217,5 +225,15 @@ abstract class RevisionData extends RevisionsBase
   public function getAddedContentSize()
   {
     return $this->addedContentSize;
+  }
+
+  /**
+   * get revision number of next content
+   *
+   * @return integer
+   */
+  public function getNextContentRevisionNumber()
+  {
+    return (int) $this->nextContentRevisionNumber;
   }
 }

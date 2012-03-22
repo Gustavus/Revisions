@@ -23,6 +23,7 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
    */
   private $revisionDataDiffProperties = array(
     'nextContent' => 'some test content',
+    'nextContentRevisionNumber' => null,
     'number' => 1,
     'revisionNumber' => 1,
     'id'  => 1,
