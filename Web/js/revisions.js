@@ -211,25 +211,13 @@ $('#revisionsForm').on('click', 'button', function() {
       revisions.unselectBox($(this));
     }
   }
-}).on('mouseenter', '#revisionTimeline table',
-  function() {
-    $('#revisionTimeline table').on('mouseenter', 'th, td',
-      function() {
-        if ($(this).attr('class')) {
-          var revNum = $(this).attr('class').match(/[\d]+/);
-          $('th.hover:not(' + revNum + '), td.hover:not(' + revNum + ')').removeClass('hover');
-          $('.' + revNum).addClass('hover');
-        } else {
-          $('th.hover, td.hover').removeClass('hover');
-        }
-      }
-    );
-  }
-).on('mouseleave', '#revisionTimeline table',
-  function() {
-    $('th.hover, td.hover').removeClass('hover');
-  }
-);
+}).on('mouseenter', '#revisionTimeline th, #revisionTimeline td', function() {
+  // Highlight the hovered column
+  $('#revisionTimeline .hover').removeClass('hover');
+  $('#revisionTimeline tr :nth-child(' + ($(this).prevAll().length + 1) + ')').addClass('hover');
+}).on('mouseleave', '#revisionTimeline table', function() {
+  $('th.hover, td.hover').removeClass('hover');
+});
 
 $(document).ready(function() {
   $('#compareButton').attr('disabled', 'disabled');
