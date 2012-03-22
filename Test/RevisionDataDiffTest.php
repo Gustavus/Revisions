@@ -594,21 +594,21 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
   /**
    * @test
    */
-  public function makeRevisionContent()
+  public function getContent()
   {
     $expected = 'some testing test content';
-    $result = $this->call($this->revisionDataDiff, 'makeRevisionContent');
+    $result = $this->call($this->revisionDataDiff, 'getContent');
     $this->assertSame($expected, $result);
   }
 
   /**
    * @test
    */
-  public function makeRevisionContentWithDiff()
+  public function getContentWithDiff()
   {
     $expected = 'some<del> testing</del> test content';
 
-    $result = $this->call($this->revisionDataDiff, 'makeRevisionContent', array(true));
+    $result = $this->call($this->revisionDataDiff, 'getContent', array(true));
     $this->assertSame($expected, $result);
   }
 

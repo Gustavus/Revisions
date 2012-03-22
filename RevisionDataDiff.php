@@ -164,17 +164,6 @@ class RevisionDataDiff extends RevisionData
   }
 
   /**
-   * Renders revision content
-   *
-   * @param boolean $showChanges
-   * @return string of revision
-   */
-  public function makeRevisionContent($showChanges = false)
-  {
-    return $this->getContent($showChanges);
-  }
-
-  /**
    * Makes RevisionInfo and sets the revisionData properties to be their respectful values
    *
    * @param  mixed $newContent
