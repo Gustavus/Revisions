@@ -14,6 +14,7 @@ td.bytes {
   margin: 0;
   padding: 0;
   min-width: 15px;
+  vertical-align: middle;
 }
 #revisionsForm th {
   vertical-align: middle;
@@ -27,6 +28,12 @@ td.bytes {
   background: none;
   -webkit-box-shadow: none;
   box-shadow: none;
+  display: block;
+}
+/* Firefox needs special styles for button elements */
+#revisionTimeline button.revision::-moz-focus-inner {
+  padding: 0;
+  border: 0;
 }
 #revisionTimeline button.missingRevisions {
   height: .3em;
@@ -123,7 +130,8 @@ td.bytes {
 }
 .bytes.container {
   position: relative;
-  height: 100%;
+  /* Firefox doesn't like elements with a height of 100%, so we need to use px */
+  height: 28px;
   width: 100%;
   padding: 2px 0;
 }
