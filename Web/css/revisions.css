@@ -109,7 +109,7 @@ td.bytes {
   border-left: 1px solid rgba(255, 255, 255, .4);
   width: 100%;
   z-index: 1;
-  border-radius: 1px 1px 0 0;
+  border-radius: 0 1px 0 0;
   box-shadow: inset 0 1px 5px rgba(0, 0, 0, .08);
 }
 .added.bytes {
@@ -118,14 +118,14 @@ td.bytes {
   background-color: #0b0;
   width: 100%;
   z-index: 2;
-  border-radius: 1px 1px 0 0;
+  border-radius: 0 1px 0 0;
   box-shadow: inset 0 1px 5px rgba(0, 0, 0, .1);
 }
 .removed.bytes {
   top: 0;
   background-color: #b00;
   width: 100%;
-  border-radius: 0 0 1px 1px;
+  border-radius: 0 0 1px 0;
   box-shadow: inset 0 2px 4px -2px rgba(0, 0, 0, .5);
 }
 .bytes.container {
