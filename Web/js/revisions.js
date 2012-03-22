@@ -1,5 +1,7 @@
 var revisions = {
+
   applicationQueryString: '',
+
   revisionsArgs: Array(
     'revisionsAction',
     'revisionNumber',
@@ -11,15 +13,18 @@ var revisions = {
     'visibleRevisions',
     'oldestRevisionInTimeline'
   ),
+
   unselectBox: function($item)
   {
     $item.removeAttr('checked');
     $('.' + $item.val()).removeClass('selected');
   },
+
   selectBox: function($item)
   {
     $item.attr('checked', 'checked');
   },
+
   unselectBoxes: function($item)
   {
     var $checkedBoxes = $('input.compare:checked:not(#' + $item.attr('id') + ')');
@@ -45,6 +50,7 @@ var revisions = {
       }
     }
   },
+
   enableCompareButton: function()
   {
     if ($('td.old input.compare:checked, td.young input.compare:checked').length !== 2) {
@@ -53,6 +59,7 @@ var revisions = {
       $('#compareButton').attr('disabled', 'disabled');
     }
   },
+
   makeVisibleRevisionsArray: function()
   {
     var visibleLength = $('tfoot td.old label input, tfoot td.young label input').length;
@@ -65,6 +72,7 @@ var revisions = {
     }
     return visibleRevisions;
   },
+
   replaceSectionsWithData: function($data)
   {
     $('#revisionsForm').attr('method', $data.attr('method'));
@@ -97,6 +105,7 @@ var revisions = {
       }
     });
   },
+
   makeDataObject: function($element)
   {
     var data = {};
@@ -124,6 +133,7 @@ var revisions = {
     }
     return data;
   },
+
   makeAjaxRequest: function(url, data)
   {
     var data = {};
