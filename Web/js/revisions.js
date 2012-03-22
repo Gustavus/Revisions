@@ -194,9 +194,7 @@ $('#revisionsForm').on('click', 'button', function() {
     revisions.handleClickAction($(this));
     return false;
   }
-});
-
-$('#revisionsForm').on('click', 'input.compare', function() {
+}).on('click', 'input.compare', function() {
   // disable compare button if 2 checkboxes aren't checked
   if ($('input.compare:checked').length === 2) {
     revisions.enableCompareButton();
@@ -213,9 +211,7 @@ $('#revisionsForm').on('click', 'input.compare', function() {
       revisions.unselectBox($(this));
     }
   }
-});
-
-$('#revisionsForm').on('mouseenter', '#revisionTimeline table',
+}).on('mouseenter', '#revisionTimeline table',
   function() {
     $('#revisionTimeline table').on('mouseenter', 'th, td',
       function() {
