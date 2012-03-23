@@ -1407,6 +1407,24 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
   /**
    * @test
    */
+  public function myArrayDiffRemovedPeriod()
+  {
+    $revisionContent = 'I like to eat a lot of food.';
+    $nextContent = 'I like to eat a lot of food';
+    $diff = $this->call($this->revisionDataDiff, 'myArrayDiff', array($this->call($this->revisionDataDiff, 'splitWords', array($revisionContent)), $this->call($this->revisionDataDiff, 'splitWords', array($nextContent))));
+
+    $expected = array(
+      "15" => array(
+        "d" => array('.'),
+        "i" => array(),
+      )
+    );
+    $this->assertSame($expected, $diff);
+  }
+
+  /**
+   * @test
+   */
   public function makeRevisionDataLargeChangeEndingWithPeriod()
   {
     $revisionData = new Revisions\RevisionDataDiff(array('nextContent' => 'I like to eat food'));
@@ -1490,6 +1508,94 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
     $this->setUp();
     $result = $this->call($this->revisionDataDiff, 'makeDiffInfo', array('Hi.'));
     $diff = new Revisions\DiffInfo(array('startIndex' => 2, 'endIndex' => null, 'info' => ' Hello'));
+    $expected = array($diff);
+    $this->compareRevisionInfo($expected, $result);
+  }
+
+  /**
+   * @test
+   */
+  public function myArrayDiffTwoSentencesToOne()
+  {
+    $oldContent = 'I like to eat. Food is good!';
+    $this->revisionDataDiffProperties['nextContent'] = $oldContent;
+    $this->setUp();
+    $nextContent = 'I like to eat a lot of food';
+    $oldSplit = $this->call($this->revisionDataDiff, 'splitWords', array($oldContent));
+    $nextSplit = $this->call($this->revisionDataDiff, 'splitWords', array($nextContent));
+    $myArrDiff = $this->call($this->revisionDataDiff, 'myArrayDiff', array($oldSplit, $nextSplit));
+    //var_dump($oldSplit, $nextSplit, $myArrDiff);.
+    $expected = array(
+      '7' => array(
+        'd' => array(
+          ".",
+          " ",
+          "Food",
+          " ",
+          "is",
+          " ",
+          "good",
+          "!",
+        ),
+        'i' => array(
+          " ",
+          "a",
+          " ",
+          "lot",
+          " ",
+          "of",
+          " ",
+          "food",
+        ),
+      ),
+    );
+    $this->assertSame($expected, $myArrDiff);
+  }
+
+  /**
+   * @test
+   */
+  public function myArrayDiffCity()
+  {
+    $oldContent = 'Brooklyn Park';
+    $nextContent = 'Saint Peter';
+    $this->revisionDataDiffProperties['nextContent'] = $oldContent;
+    $this->setUp();
+    $oldSplit = $this->call($this->revisionDataDiff, 'splitWords', array($oldContent));
+    $nextSplit = $this->call($this->revisionDataDiff, 'splitWords', array($nextContent));
+    $myArrDiff = $this->call($this->revisionDataDiff, 'myArrayDiff', array($oldSplit, $nextSplit));
+    //var_dump($oldSplit, $nextSplit, $myArrDiff);.
+    $expected = array(
+      '0' => array(
+        'd' => array(
+          "Brooklyn",
+          " ",
+          "Park",
+        ),
+        'i' => array(
+          "Saint",
+          " ",
+          "Peter",
+        ),
+      ),
+    );
+    $this->assertSame($expected, $myArrDiff);
+  }
+
+  /**
+   * @test
+   */
+  public function makeDiffInfoRemovedPeriod()
+  {
+    $oldContent = 'I like to eat a lot of food.';
+    $this->revisionDataDiffProperties['nextContent'] = $oldContent;
+    $this->setUp();
+    $nextContent = 'I like to eat a lot of food';
+    $result = $this->call($this->revisionDataDiff, 'makeDiffInfo', array($nextContent));
+    $oldSplit = $this->call($this->revisionDataDiff, 'splitWords', array($oldContent));
+    $nextSplit = $this->call($this->revisionDataDiff, 'splitWords', array($nextContent));
+    $myArrDiff = $this->call($this->revisionDataDiff, 'myArrayDiff', array($oldSplit, $nextSplit));
+    $diff = new Revisions\DiffInfo(array('startIndex' => 15, 'endIndex' => null, 'info' => '.'));
     $expected = array($diff);
     $this->compareRevisionInfo($expected, $result);
   }

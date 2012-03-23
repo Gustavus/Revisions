@@ -263,6 +263,11 @@ class RevisionDataDiff extends RevisionData
     );
   }
 
+  private function skippedValuesExist($prevKey, $key, $diff)
+  {
+    return (is_array($diff[$prevKey[0]]) && $key > 1 && ($key - 1 === end($prevKey) || ($key - 2 === end($prevKey) && $diff[$key - 1] === ' ')));
+  }
+
   /**
    * Strips irrelevent information while maintaining keys for making the revision information
    *
@@ -273,7 +278,6 @@ class RevisionDataDiff extends RevisionData
   private function myArrayDiff(array $old, array $new)
   {
     $diff = $this->diff($old, $new);
-    //remove possible empty garbage from beginning and end from diff()
     if (empty($diff[0]['d']) && empty($diff[0]['i'])) {
       // if the text starts with punctuation the first item will not be empty
       // the diff returns a difference from the start of the content so we want to get rid of the empty diff
@@ -284,19 +288,25 @@ class RevisionDataDiff extends RevisionData
       array_pop($diff);
     }
     $return  = array();
-    $prevKey = null;
+    $prevKey = array(0);
     $offset  = 0;
     foreach ($diff as $key => $value) {
       if (is_array($value)) {
-        if ($key - 1 === $prevKey || ($key - 2 === $prevKey && $diff[$key - 1] === ' ')) {
-          $skipped = ($key - 2 === $prevKey && $diff[$key - 1] === ' ') ? array(' ') : array();
-          $return[$prevKey]['d'] = array_merge($return[$prevKey]['d'], $skipped, $value['d']);
-          $return[$prevKey]['i'] = array_merge($return[$prevKey]['i'], $skipped, $value['i']);
+        if ($this->skippedValuesExist($prevKey, $key, $diff)) {
+          $skipped = ($key - 2 === end($prevKey) && $diff[$key - 1] === ' ') ? array(' ') : array();
+          $prevD = (isset($return[$prevKey[0]]['d'])) ? $return[$prevKey[0]]['d'] : array();
+          $return[$prevKey[0]]['d'] = array_merge($prevD, $skipped, $value['d']);
+
+          $prevI = (isset($return[$prevKey[0]]['i'])) ? $return[$prevKey[0]]['i'] : array();
+          $return[$prevKey[0]]['i'] = array_merge($prevI, $skipped, $value['i']);
+          if ($key > 0) {
+            $prevKey[] = $key;
+          }
         } else {
           $key += $offset;
           $return[$key] = $value;
+          $prevKey = array($key);
         }
-        $prevKey = $key;
         $offset += count($value['i']) - 1;
       }
     }
