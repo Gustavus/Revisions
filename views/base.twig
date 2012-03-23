@@ -37,3 +37,11 @@
 {% endmacro %}
 
 {% macro renderError() %}An unexpected error occured.{% endmacro %}
+
+{% macro renderTitle(revision, revisionNumber, oldestRevisionNumber) %}{% spaceless %}
+  {% if revision != null and revisionNumber > oldestRevisionNumber and revisionNumber != 0 %}
+    Modified {{ revision.getRevisionRelativeDate() }} by {{ revision.getcreatedBy() }}
+  {% else %}
+    Look at revision {{ revisionNumber }}
+  {% endif %}
+{% endspaceless %}{% endmacro %}
