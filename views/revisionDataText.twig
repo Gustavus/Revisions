@@ -12,14 +12,14 @@
           {%- if revisionData.error -%}
             {{- base.renderError() -}}
           {%- else -%}
-            {{- revisionData.makeRevisionContent(true)|raw -}}
+            {{- revisionData.getContent(true)|raw -}}
           {%- endif -%}
         </dd>
         <dd>
           {%- if revisionData.error -%}
             {{- base.renderError() -}}
           {%- else -%}
-            {{- revisionData.makeRevisionContent(true)|raw -}}
+            {{- revisionData.getContent(true)|raw -}}
           {%- endif -%}
         </dd>
       {% endif %}
