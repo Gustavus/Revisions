@@ -269,6 +269,48 @@ class API
   }
 
   /**
+   * Checks if params exist where the timeline might not need to be rendered out.
+   *
+   * @param  array $urlParams
+   * @return boolean
+   */
+  private function timelineParamsExistAndNotRestore(array $urlParams = array())
+  {
+    return (isset($urlParams['barebones'], $urlParams['oldestRevisionInTimeline']) && !$this->isRestore($urlParams));
+  }
+
+  /**
+   * Checks to see if the RevisionNumber of a visible revision is in the timeline.
+   *
+   * @param  array  $urlParams
+   * @return boolean
+   */
+  private function revisionNumberIsInTimeline(array $urlParams = array())
+  {
+    return (isset($urlParams['revisionNumber']) && $urlParams['revisionNumber'] === false ||
+      (
+        (int) $urlParams['revisionNumber'] >= (int) $urlParams['oldestRevisionInTimeline']) ||
+        (isset($urlParams['revisionNumbers']) && $this->arrayMin($urlParams['revisionNumbers']) >= (int) $urlParams['oldestRevisionInTimeline']
+      )
+    );
+  }
+
+  /**
+   * Checks if the oldestRevisionNumber is in the timeline or if we are supposed to pull more revisions in.
+   *
+   * @param  array  $urlParams
+   * @return boolean
+   */
+  private function oldestRevisionNumberIsInTimeline(array $urlParams = array())
+  {
+    return (isset($urlParams['oldestRevisionNumber']) &&
+      (
+        (int) $urlParams['oldestRevisionInTimeline'] <= (int) $urlParams['oldestRevisionNumber']
+      ) || (int) $urlParams['oldestRevisionNumber'] <= 1 && (int) $urlParams['oldestRevisionInTimeline'] <= 1
+    );
+  }
+
+  /**
    * Checks the urlParams on whether to render out the timeline or not.
    *
    * @param  array  $urlParams
@@ -276,20 +318,10 @@ class API
    */
   private function shouldRenderTimeline(array $urlParams = array())
   {
-    if (isset($urlParams['barebones'], $urlParams['oldestRevisionInTimeline']) &&
-      (
-        (isset($urlParams['revisionNumber']) && $urlParams['revisionNumber'] === false ||
-          (
-            (int) $urlParams['revisionNumber'] >= (int) $urlParams['oldestRevisionInTimeline']) ||
-            (isset($urlParams['revisionNumbers']) && $this->arrayMin($urlParams['revisionNumbers']) >= (int) $urlParams['oldestRevisionInTimeline']
-          )
-        )
-      ) &&
-      (isset($urlParams['oldestRevisionNumber']) &&
-        (
-          (int) $urlParams['oldestRevisionInTimeline'] <= (int) $urlParams['oldestRevisionNumber']
-        ) || (int) $urlParams['oldestRevisionNumber'] <= 1 && (int) $urlParams['oldestRevisionInTimeline'] <= 1
-      ) && !$this->isRestore($urlParams)) {
+    if ($this->timelineParamsExistAndNotRestore($urlParams) &&
+      $this->revisionNumberIsInTimeline($urlParams) &&
+      $this->oldestRevisionNumberIsInTimeline($urlParams)
+      ) {
       return false;
     } else {
       return true;
@@ -482,13 +514,7 @@ class API
    */
   private function getApplicationUrlParams(array $urlParams)
   {
-    $applicationUrlParams = array();
-    foreach ($urlParams as $key => $value) {
-      if (!in_array($key, $this->possibleRevisionsQueryParams)) {
-        $applicationUrlParams[$key] = $value;
-      }
-    }
-    return $applicationUrlParams;
+    return array_diff_key($urlParams, array_flip($this->possibleRevisionsQueryParams));
   }
 
   /**

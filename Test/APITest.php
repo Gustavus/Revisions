@@ -1936,6 +1936,16 @@ class APITest extends RevisionsTestsHelper
   /**
    * @test
    */
+  public function getApplicationUrlParams()
+  {
+    $actual = $this->call($this->revisionsAPI, 'getApplicationUrlParams', array(array('revisionsAction' => 'revision', 'limit' => 10, 'pr' => 'manage')));
+    $expected = array('pr' => 'manage');
+    $this->assertSame($expected, $actual);
+  }
+
+  /**
+   * @test
+   */
   public function isRestore()
   {
     $this->assertTrue($this->call($this->revisionsAPI, 'isRestore', array(array('restore' => '1'))));
@@ -2123,6 +2133,22 @@ class APITest extends RevisionsTestsHelper
   {
     $urlParams = array('oldestRevisionNumber' => '2', 'revisionNumber' => '10', 'barebones' => 'true', 'oldestRevisionInTimeline' => '2');
     $this->assertFalse($this->call($this->revisionsAPI, 'shouldRenderTimeline', array($urlParams)));
+  }
+
+  /**
+   * @test
+   */
+  public function shouldRenderTimelineNoOldestRevisionNumberModified()
+  {
+    $urlParams = array('pr' => 'manage',
+      'user' => 'bvisto',
+      'oldestRevisionNumber' => '6',
+      'revisionNumber' => '4',
+      'barebones' => 'true',
+      'oldestRevisionInTimeline' => '6',
+      'visibleRevisions' => array('7'),
+    );
+    $this->assertTrue($this->call($this->revisionsAPI, 'shouldRenderTimeline', array($urlParams)));
   }
 
   /**
