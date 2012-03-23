@@ -263,6 +263,14 @@ class RevisionDataDiff extends RevisionData
     );
   }
 
+  /**
+   * Checks to see if any important skipped values exist so we can thrown consecutive changes together
+   *
+   * @param  integer $prevKey
+   * @param  integer $key
+   * @param  array $diff
+   * @return boolean
+   */
   private function skippedValuesExist($prevKey, $key, $diff)
   {
     return (is_array($diff[$prevKey[0]]) && $key > 1 && ($key - 1 === end($prevKey) || ($key - 2 === end($prevKey) && $diff[$key - 1] === ' ')));
