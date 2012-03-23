@@ -1564,7 +1564,6 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
     $oldSplit = $this->call($this->revisionDataDiff, 'splitWords', array($oldContent));
     $nextSplit = $this->call($this->revisionDataDiff, 'splitWords', array($nextContent));
     $myArrDiff = $this->call($this->revisionDataDiff, 'myArrayDiff', array($oldSplit, $nextSplit));
-    //var_dump($oldSplit, $nextSplit, $myArrDiff);.
     $expected = array(
       '0' => array(
         'd' => array(
@@ -1580,6 +1579,114 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
       ),
     );
     $this->assertSame($expected, $myArrDiff);
+  }
+
+  /**
+   * @test
+   */
+  public function myArrayDiffRestored()
+  {
+    $oldContent = 'I like to eat a lot of junk food';
+    $nextContent = 'I like to jump. I also like to eat. Food is good!';
+    $this->revisionDataDiffProperties['nextContent'] = $oldContent;
+    $this->setUp();
+    $oldSplit = $this->call($this->revisionDataDiff, 'splitWords', array($oldContent));
+    $nextSplit = $this->call($this->revisionDataDiff, 'splitWords', array($nextContent));
+    $myArrDiff = $this->call($this->revisionDataDiff, 'myArrayDiff', array($oldSplit, $nextSplit));
+    $expected = array(
+      '6' => array(
+        'd' => array(
+        ),
+        'i' => array(
+          "jump",
+          ".",
+          " ",
+          "I",
+          " ",
+          "also",
+          " ",
+          "like",
+          " ",
+          "to",
+          " "
+        ),
+      ),
+      '18' => array(
+        'd' => array(
+          " ",
+          "a",
+          " ",
+          "lot",
+          " ",
+          "of",
+          " ",
+          "junk",
+          " ",
+          "food"
+        ),
+        'i' => array(
+          ".",
+          " ",
+          "Food",
+          " ",
+          "is",
+          " ",
+          "good",
+          "!"
+        ),
+      ),
+    );
+    $this->assertSame($expected, $myArrDiff);
+  }
+
+  /**
+   * @test
+   */
+  public function renderRevisionForDBRestored()
+  {
+    $oldContent = 'I like to eat a lot of junk food';
+    $nextContent = 'I like to jump. I also like to eat. Food is good!';
+    $this->revisionDataDiffProperties['nextContent'] = $oldContent;
+    $this->setUp();
+    $result = $this->revisionDataDiff->renderRevisionForDB($nextContent);
+    $expected = '[[6,16,""],[18,25," a lot of junk food"]]';
+    $this->assertSame($expected, $result);
+  }
+
+  /**
+   * @test
+   */
+  public function makeDiffAndContentRestored()
+  {
+    $oldContent = 'I like to eat a lot of junk food';
+    $nextContent = 'I like to jump. I also like to eat. Food is good!';
+    $this->revisionDataDiffProperties['nextContent'] = $oldContent;
+    $this->setUp();
+    $this->set($this->revisionDataDiff, 'diffInfo', array());
+    $result = $this->revisionDataDiff->makeDiff($nextContent);
+    $expected = 'I like to eat a lot of junk food';
+    $this->assertSame($expected, $result);
+    $resultDiff = $this->revisionDataDiff->makeDiff($nextContent, true);
+    $expectedDiff = 'I like to <ins>jump. I also like to </ins>eat<del> a lot of junk food</del><ins>. Food is good!</ins>';
+    $this->assertSame($expectedDiff, $resultDiff);
+  }
+
+  /**
+   * @test
+   */
+  public function skippedValuesExist()
+  {
+    $oldContent = 'I like to eat a lot of junk food';
+    $nextContent = 'I like to jump. I also like to eat. Food is good!';
+    $this->revisionDataDiffProperties['nextContent'] = $oldContent;
+    $this->setUp();
+    $oldSplit = $this->call($this->revisionDataDiff, 'splitWords', array($oldContent));
+    $nextSplit = $this->call($this->revisionDataDiff, 'splitWords', array($nextContent));
+    $diff = $this->call($this->revisionDataDiff, 'diff', array($oldSplit, $nextSplit));
+    $prevKey = array(9, 11);
+    $key = 13;
+    $result = $this->call($this->revisionDataDiff, 'skippedValuesExist', array($prevKey, $key, $diff));
+    $this->assertTrue($result);
   }
 
   /**

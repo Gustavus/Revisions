@@ -273,7 +273,7 @@ class RevisionDataDiff extends RevisionData
    */
   private function skippedValuesExist($prevKey, $key, $diff)
   {
-    return (is_array($diff[$prevKey[0]]) && $key > 1 && ($key - 1 === end($prevKey) || ($key - 2 === end($prevKey) && $diff[$key - 1] === ' ')));
+    return (count($prevKey) > 0 && is_array($diff[$prevKey[0]]) && $key > 1 && ($key - 1 === end($prevKey) || ($key - 2 === end($prevKey) && $diff[$key - 1] === ' ')));
   }
 
   /**
@@ -295,27 +295,31 @@ class RevisionDataDiff extends RevisionData
       // if the text ends with punctuation the last item will not be empty
       array_pop($diff);
     }
-    $return  = array();
-    $prevKey = array(0);
-    $offset  = 0;
+    $return    = array();
+    $prevKey   = array();
+    $oldOffset = 0;
+    $offset    = 0;
     foreach ($diff as $key => $value) {
       if (is_array($value)) {
         if ($this->skippedValuesExist($prevKey, $key, $diff)) {
           $skipped = ($key - 2 === end($prevKey) && $diff[$key - 1] === ' ') ? array(' ') : array();
-          $prevD = (isset($return[$prevKey[0]]['d'])) ? $return[$prevKey[0]]['d'] : array();
-          $return[$prevKey[0]]['d'] = array_merge($prevD, $skipped, $value['d']);
+          $prevD = (isset($return[$prevKey[0] + $oldOffset]['d'])) ? $return[$prevKey[0] + $oldOffset]['d'] : array();
+          $return[$prevKey[0] + $oldOffset]['d'] = array_merge($prevD, $skipped, $value['d']);
 
-          $prevI = (isset($return[$prevKey[0]]['i'])) ? $return[$prevKey[0]]['i'] : array();
-          $return[$prevKey[0]]['i'] = array_merge($prevI, $skipped, $value['i']);
+          $prevI = (isset($return[$prevKey[0] + $oldOffset]['i'])) ? $return[$prevKey[0] + $oldOffset]['i'] : array();
+          $return[$prevKey[0] + $oldOffset]['i'] = array_merge($prevI, $skipped, $value['i']);
           if ($key > 0) {
             $prevKey[] = $key;
           }
         } else {
-          $key += $offset;
-          $return[$key] = $value;
+          // we need the old offset so we know where the items live in the return array since offset gets set with the new offset
+          $oldOffset = $offset;
+          $return[$key + $oldOffset] = $value;
           $prevKey = array($key);
         }
         $offset += count($value['i']) - 1;
+      } else if ($value !== ' ') {
+        $prevKey = array();
       }
     }
     return $return;
