@@ -184,6 +184,26 @@ class RevisionsTest extends RevisionsTestsHelper
   /**
    * @test
    */
+  public function compareTwoRevisionsLongerData()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $this->revisions->makeAndSaveRevision(array('aboutYou' => 'I like to eat. Food is good!', 'name' => 'Billy Visto'));
+    $this->revisions->makeAndSaveRevision(array('aboutYou' => 'I like to eat a lot of food.'));
+    $this->revisions->makeAndSaveRevision(array('aboutYou' => 'I like to eat a lot of food'));
+    $this->revisions->makeAndSaveRevision(array('aboutYou' => 'I like to eat a lot of junk food'));
+
+    $comparison = $this->revisions->compareTwoRevisions(1, 3);
+    $this->assertSame('I like to eat<del>. Food is good!</del><ins> a lot of food</ins>', $comparison->getRevisionData('aboutYou')->getContent(true));
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
   public function makeAndSaveRevision1()
   {
     $conn = $this->getConnection();
