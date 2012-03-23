@@ -81,16 +81,19 @@ var revisions = {
       $('#' + $(element).attr('id')).html($(element).html());
 
       if ($(element).attr('id') === 'formExtras') {
+        console.log($(element).find('header hgroup'))
         restoreButtons = $(element).find('footer button')
         if (restoreButtons.length === 1) {
+          // revisionData
           $('.young').removeClass('young');
           $('.old').removeClass('old');
           $('input.compare:checked').each(function(i, element) {
             revisions.unselectBox($(element));
           })
           $('.' + restoreButtons.first().val()).addClass('young');
-          //selectBox($('#revisionNum-' + restoreButtons.first().val()));
+          revisions.selectBox($('#revisionNum-' + restoreButtons.first().val()));
         } else if (restoreButtons.length === 2) {
+          // revisionData comparison
           $('.old').removeClass('old');
           $('.' + restoreButtons.first().val()).addClass('old').removeClass('selected');
           revisions.selectBox($('#revisionNum-' + restoreButtons.first().val()));
@@ -99,10 +102,10 @@ var revisions = {
           revisions.selectBox($('#revisionNum-' + restoreButtons.last().val()));
         }
       }
-      if ($(element).find('#revisionTimeline')) {
+      if ($(element).attr('id') == 'revisionTimeline') {
         Extend.apply('page', $('#revisionTimeline'));
-        $('#compareButton').attr('disabled', 'disabled');
       }
+      $('#compareButton').attr('disabled', 'disabled');
     });
   },
 
@@ -136,6 +139,8 @@ var revisions = {
 
   makeAjaxRequest: function(url, data)
   {
+    // This is triggered when the history state changes
+    console.log('ajax');
     var data = {};
     data['barebones'] = true;
     data['oldestRevisionInTimeline'] = $('tfoot td label input').first().val();
@@ -147,49 +152,61 @@ var revisions = {
         type: 'GET',
         data: data,
         success: function(ajaxData) {
+          console.log('ajaxSuccess');
           revisions.replaceSectionsWithData($(ajaxData));
         }
-      })
+      });
     }
   },
+
   makeHistory: function($element)
   {
+    console.log('makeHistory');
     var data = revisions.makeDataObject($element);
-    var url = (revisions.applicationQueryString === '') ? '?' : revisions.applicationQueryString + '&';
-    url += $.param(data);
+    var url = '?' + $.param(data);
     if (window.History.enabled) {
+      console.log('History enabled');
       window.History.pushState(data, null, url);
+
     } else {
+      console.log('History Disabled');
       // history isn't enabled, so the statechange event wont get called
       revisions.makeAjaxRequest(url, data);
     }
   },
+
   handleClickAction: function($element)
   {
+    console.log('handleClickAction');
     // call make history to throw the new url to the stack and trigger the statechange event that calls revisions.makeAjaxRequest
     revisions.makeHistory($element);
-  },
-  makeApplicationQueryString: function()
-  {
-    var queryStringArray = window.location.search.slice(1).split('&');
-    for (var i = 0; i < queryStringArray.length; ++i) {
-      if (revisions.revisionsArgs.indexOf(queryStringArray[i].slice(0, queryStringArray[i].indexOf('='))) === -1) {
-        if (revisions.applicationQueryString === '') {
-          revisions.applicationQueryString = '?' + queryStringArray[i];
-        } else {
-          revisions.applicationQueryString += '&' + queryStringArray[i];
-        }
-      }
-    }
   }
 }
 
 window.History.Adapter.bind(window, 'statechange', function() {
+  console.log('statechange');
   var State = window.History.getState();
+
+  // Track this event in Google Analytics
+  //window._gaq = window._gaq || [];
+  //_gaq.push(['_trackPageview', '/homepage/news.php?type=' + type]);
+
   revisions.makeAjaxRequest(State.url, State.data);
 });
 
+// window.onstatechange(function() {
+//   console.log('statechange');
+//   var State = window.History.getState();
+
+//   // Track this event in Google Analytics
+//   //window._gaq = window._gaq || [];
+//   //_gaq.push(['_trackPageview', '/homepage/news.php?type=' + type]);
+
+//   revisions.makeAjaxRequest(State.url, State.data);
+// });
+
 $('#revisionsForm').on('click', 'button', function() {
+  console.log('click');
   if ($('#revisionsForm').attr('method') === 'GET') {
     revisions.handleClickAction($(this));
     return false;
@@ -204,6 +221,7 @@ $('#revisionsForm').on('click', 'button', function() {
   } else {
     $('#compareButton').attr('disabled', 'disabled');
   }
+
   if (!$(this).parents('td').hasClass('old') && !$(this).parents('td').hasClass('young')) {
     if ($(this).is(':checked')) {
       $('.' + $(this).val()).addClass('selected');
@@ -221,5 +239,4 @@ $('#revisionsForm').on('click', 'button', function() {
 
 $(document).ready(function() {
   $('#compareButton').attr('disabled', 'disabled');
-  revisions.makeApplicationQueryString();
 });
