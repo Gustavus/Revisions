@@ -273,7 +273,7 @@ class RevisionDataDiff extends RevisionData
    */
   private function skippedValuesExist($prevKey, $key, $diff)
   {
-    return (count($prevKey) > 0 && is_array($diff[$prevKey[0]]) && $key > 1 && ($key - 1 === end($prevKey) || ($key - 2 === end($prevKey) && $diff[$key - 1] === ' ')));
+    return (count($prevKey) > 0 && is_array($diff[$prevKey[0]]) && $key > 1 && ($key - 1 === end($prevKey) || ($key - 2 === end($prevKey) && preg_match('`[\s]+`', $diff[$key - 1]) !== 0)));
   }
 
   /**
@@ -286,6 +286,7 @@ class RevisionDataDiff extends RevisionData
   private function myArrayDiff(array $old, array $new)
   {
     $diff = $this->diff($old, $new);
+    // remove empty data from diff()
     if (empty($diff[0]['d']) && empty($diff[0]['i'])) {
       // if the text starts with punctuation the first item will not be empty
       // the diff returns a difference from the start of the content so we want to get rid of the empty diff
@@ -302,7 +303,7 @@ class RevisionDataDiff extends RevisionData
     foreach ($diff as $key => $value) {
       if (is_array($value)) {
         if ($this->skippedValuesExist($prevKey, $key, $diff)) {
-          $skipped = ($key - 2 === end($prevKey) && $diff[$key - 1] === ' ') ? array(' ') : array();
+          $skipped = ($key - 2 === end($prevKey) && preg_match('`([\s]+)`', $diff[$key - 1], $spaces) !== 0)  ? array($spaces[0]) : array();
           $prevD = (isset($return[$prevKey[0] + $oldOffset]['d'])) ? $return[$prevKey[0] + $oldOffset]['d'] : array();
           $return[$prevKey[0] + $oldOffset]['d'] = array_merge($prevD, $skipped, $value['d']);
 
@@ -318,7 +319,7 @@ class RevisionDataDiff extends RevisionData
           $prevKey = array($key);
         }
         $offset += count($value['i']) - 1;
-      } else if ($value !== ' ') {
+      } else if (preg_match('`[\s]+`', $value) === 0) {
         $prevKey = array();
       }
     }

@@ -1642,6 +1642,142 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
   /**
    * @test
    */
+  public function myArrayDiffWeirdSpaces()
+  {
+    $oldContent = 'I like to eat a  lot of junk food';
+    $nextContent = 'I like  to jump. I also like  to eat. Food is good!';
+    $this->revisionDataDiffProperties['nextContent'] = $oldContent;
+    $this->setUp();
+    $oldSplit = $this->call($this->revisionDataDiff, 'splitWords', array($oldContent));
+    $nextSplit = $this->call($this->revisionDataDiff, 'splitWords', array($nextContent));
+    $myArrDiff = $this->call($this->revisionDataDiff, 'myArrayDiff', array($oldSplit, $nextSplit));
+    $expected = array(
+      '3' => array(
+        'd' => array(
+          " "
+        ),
+        'i' => array(
+          "  ",
+          "to",
+          " ",
+          "jump",
+          ".",
+          " ",
+          "I",
+          " ",
+          "also",
+          " ",
+          "like",
+          "  ",
+        ),
+      ),
+      '18' => array(
+        'd' => array(
+          " ",
+          "a",
+          "  ",
+          "lot",
+          " ",
+          "of",
+          " ",
+          "junk",
+          " ",
+          "food"
+        ),
+        'i' => array(
+          ".",
+          " ",
+          "Food",
+          " ",
+          "is",
+          " ",
+          "good",
+          "!"
+        ),
+      ),
+    );
+    $this->assertSame($expected, $myArrDiff);
+  }
+
+  /**
+   * @test
+   */
+  public function myArrayDiffReallyWeirdSpaces()
+  {
+    $oldContent = 'I  like  to  eat  a  lot  of  junk  food';
+    $nextContent = 'I  like  to  jump.  I  also  like   to  eat.  Food  is  good!';
+    $this->revisionDataDiffProperties['nextContent'] = $oldContent;
+    $this->setUp();
+    $oldSplit = $this->call($this->revisionDataDiff, 'splitWords', array($oldContent));
+    $nextSplit = $this->call($this->revisionDataDiff, 'splitWords', array($nextContent));
+    $myArrDiff = $this->call($this->revisionDataDiff, 'myArrayDiff', array($oldSplit, $nextSplit));
+    $expected = array(
+      '6' => array(
+        'd' => array(
+        ),
+        'i' => array(
+          "jump",
+          ".",
+          "  ",
+          "I",
+          "  ",
+          "also",
+          "  ",
+          "like",
+          "   ",
+          "to",
+          "  "
+        ),
+      ),
+      '18' => array(
+        'd' => array(
+          "  ",
+          "a",
+          "  ",
+          "lot",
+          "  ",
+          "of",
+          "  ",
+          "junk",
+          "  ",
+          "food"
+        ),
+        'i' => array(
+          ".",
+          "  ",
+          "Food",
+          "  ",
+          "is",
+          "  ",
+          "good",
+          "!"
+        ),
+      ),
+    );
+    $this->assertSame($expected, $myArrDiff);
+  }
+
+  /**
+   * @test
+   */
+  public function renderRevisionWeirdSpaces()
+  {
+    $oldContent = 'I like to eat a  lot of junk food';
+    $nextContent = 'I like  to jump. I also like  to eat. Food is good!';
+    $this->revisionDataDiffProperties['nextContent'] = $oldContent;
+    $this->setUp();
+    $resultDB = $this->revisionDataDiff->renderRevisionForDB($nextContent);
+    $expectedDB = '[[3,14," "],[18,25," a  lot of junk food"]]';
+    $this->assertSame($expectedDB, $resultDB);
+
+    $result = $this->revisionDataDiff->makeDiff($nextContent);
+    $expected = $oldContent;
+    $this->assertSame($expected, $result);
+  }
+
+  /**
+   * @test
+   */
   public function renderRevisionForDBRestored()
   {
     $oldContent = 'I like to eat a lot of junk food';
@@ -1678,6 +1814,24 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
   {
     $oldContent = 'I like to eat a lot of junk food';
     $nextContent = 'I like to jump. I also like to eat. Food is good!';
+    $this->revisionDataDiffProperties['nextContent'] = $oldContent;
+    $this->setUp();
+    $oldSplit = $this->call($this->revisionDataDiff, 'splitWords', array($oldContent));
+    $nextSplit = $this->call($this->revisionDataDiff, 'splitWords', array($nextContent));
+    $diff = $this->call($this->revisionDataDiff, 'diff', array($oldSplit, $nextSplit));
+    $prevKey = array(9, 11);
+    $key = 13;
+    $result = $this->call($this->revisionDataDiff, 'skippedValuesExist', array($prevKey, $key, $diff));
+    $this->assertTrue($result);
+  }
+
+  /**
+   * @test
+   */
+  public function skippedValuesExistMultipleSpaces()
+  {
+    $oldContent = 'I  like  to  eat  a  lot  of  junk  food';
+    $nextContent = 'I  like  to  jump.  I  also  like  to  eat.  Food  is  good!';
     $this->revisionDataDiffProperties['nextContent'] = $oldContent;
     $this->setUp();
     $oldSplit = $this->call($this->revisionDataDiff, 'splitWords', array($oldContent));
