@@ -164,7 +164,7 @@ class RevisionDataDiff extends RevisionData
   }
 
   /**
-   * Makes RevisionInfo and sets the revisionData properties to be their respectful values
+   * Makes RevisionInfo and sets the revisionData properties to be their respective values
    *
    * @param  mixed $newContent
    * @return void
