@@ -3,6 +3,7 @@
  * @package Revisions
  */
 namespace Gustavus\Revisions;
+use \Format;
 
 /**
  * A single Revision object that contains many RevisionData objects
@@ -117,33 +118,33 @@ class Revision extends RevisionsBase
       $years    = (int) $interval->format('%y');
       $months   = (int) $interval->format('%m');
       if ($years !== 0) {
-        $relative[] = \Format::quantity($years, 'year ', 'years ');
+        $relative[] = Format::quantity($years, 'year ', 'years ');
       } else if ($months !== 0) {
-        $relative[] = \Format::quantity($months, 'month ', 'months ');
+        $relative[] = Format::quantity($months, 'month ', 'months ');
       } else if ($days !== 0) {
         $weeks = (int) floor($days / 7);
         $days  = $days % 7;
         if ($weeks !== 0) {
-          $relative[] = \Format::quantity($weeks, 'week ', 'weeks ');
+          $relative[] = Format::quantity($weeks, 'week ', 'weeks ');
         } else if ($days !== 0) {
-          $relative[] = \Format::quantity($days, 'day ', 'days ');
+          $relative[] = Format::quantity($days, 'day ', 'days ');
         }
       }
     } else {
       $hours    = (int) $interval->format('%h');
       $minutes  = (int) $interval->format('%i');
       if ($days !== 0) {
-        $relative[] = \Format::quantity($days, 'day ', 'days ');
+        $relative[] = Format::quantity($days, 'day ', 'days ');
       } else if ($hours !== 0) {
-        $relative[] = \Format::quantity($hours, 'hour ', 'hours ');
+        $relative[] = Format::quantity($hours, 'hour ', 'hours ');
       } else if ($minutes !== 0) {
-        $relative[] = \Format::quantity($minutes, 'minute ', 'minutes ');
+        $relative[] = Format::quantity($minutes, 'minute ', 'minutes ');
       } else if (empty($relative)) {
         $seconds = (int) $interval->format('%s');
-        $relative[] = \Format::quantity($seconds, 'second ', 'seconds ');
+        $relative[] = Format::quantity($seconds, 'second ', 'seconds ');
       }
     }
-    return \Format::arrayToSentence($relative) . ' ago';
+    return Format::arrayToSentence($relative) . ' ago';
   }
 
   /**
