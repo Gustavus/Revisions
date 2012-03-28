@@ -194,7 +194,11 @@ abstract class RevisionData extends RevisionsBase
    */
   public function getContentSize()
   {
-    return strlen($this->getContent());
+    if ($this->contentIsNumeric()) {
+      return $this->toNumber($this->getContent());
+    } else {
+      return strlen($this->getContent());
+    }
   }
 
   /**
@@ -204,7 +208,11 @@ abstract class RevisionData extends RevisionsBase
    */
   public function getNextContentSize()
   {
-    return strlen($this->getNextContent());
+    if ($this->contentIsNumeric()) {
+      return $this->toNumber($this->getNextContent());
+    } else {
+      return strlen($this->getNextContent());
+    }
   }
 
   /**
@@ -235,5 +243,15 @@ abstract class RevisionData extends RevisionsBase
   public function getNextContentRevisionNumber()
   {
     return (int) $this->nextContentRevisionNumber;
+  }
+
+  /**
+   * Checks to see if the content is numeric or not for rendering out changes
+   *
+   * @return boolean
+   */
+  public function contentIsNumeric()
+  {
+    return (is_numeric($this->getContent()) && is_numeric($this->getNextContent()));
   }
 }
