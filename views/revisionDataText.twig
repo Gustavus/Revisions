@@ -4,10 +4,13 @@
 
 {% block revisionData %}
   {% set column %}
-    {% for key in revision.revisionData|keys %}
-      {% if revision.revisionData[key] != null %}
+    {% if columns|length == 0 %}
+      {% set columns = revision.revisionData|keys %}
+    {% endif %}
+    {% for key, label in labels %}
+      {% if revision.revisionData[key] != null and key in columns %}
         {% set revisionData = revision.revisionData[key] %}
-        <dt{% if revisionData.error %} class="error"{% endif %}>{{ key }}</dt>
+        <dt{% if revisionData.error %} class="error"{% endif %}>{{ label }}</dt>
         <dd>
           {%- if revisionData.error -%}
             {{- base.renderError() -}}
