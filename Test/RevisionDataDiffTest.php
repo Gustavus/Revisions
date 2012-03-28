@@ -174,6 +174,16 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
   /**
    * @test
    */
+  public function getContentSize()
+  {
+    $expected = strlen($this->revisionDataDiff->getContent());
+    $this->call($this->revisionDataDiff, 'renderRevision');
+    $this->assertSame($expected, $this->revisionDataDiff->getContentSize());
+  }
+
+  /**
+   * @test
+   */
   public function getNextContentSize()
   {
     $expected = strlen($this->revisionDataDiffProperties['nextContent']);
@@ -1859,5 +1869,69 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
     $diff = new Revisions\DiffInfo(array('startIndex' => 15, 'endIndex' => null, 'info' => '.'));
     $expected = array($diff);
     $this->compareRevisionInfo($expected, $result);
+  }
+
+  /**
+   * @test
+   */
+  public function contentIsNumericFalse()
+  {
+    $this->assertFalse($this->revisionDataDiff->contentIsNumeric());
+  }
+
+  /**
+   * @test
+   */
+  public function contentIsNumeric()
+  {
+    $oldContent = 22;
+    $nextContent = 23;
+    $this->revisionDataDiffProperties['nextContent'] = $oldContent;
+    $this->setUp();
+    $this->set($this->revisionDataDiff, 'diffInfo', array());
+    $result = $this->revisionDataDiff->makeDiff($nextContent);
+    $this->assertTrue($this->revisionDataDiff->contentIsNumeric());
+  }
+
+  /**
+   * @test
+   */
+  public function contentIsNumericFloat()
+  {
+    $oldContent = 22.2;
+    $nextContent = 23.9;
+    $this->revisionDataDiffProperties['nextContent'] = $oldContent;
+    $this->setUp();
+    $this->set($this->revisionDataDiff, 'diffInfo', array());
+    $result = $this->revisionDataDiff->makeDiff($nextContent);
+    $this->assertTrue($this->revisionDataDiff->contentIsNumeric());
+  }
+
+  /**
+   * @test
+   */
+  public function contentIsNumericBoolean()
+  {
+    $oldContent = false;
+    $nextContent = true;
+    $this->revisionDataDiffProperties['nextContent'] = $oldContent;
+    $this->setUp();
+    $this->set($this->revisionDataDiff, 'diffInfo', array());
+    $result = $this->revisionDataDiff->makeDiff($nextContent);
+    $this->assertFalse($this->revisionDataDiff->contentIsNumeric());
+  }
+
+  /**
+   * @test
+   */
+  public function contentIsNumericBooleanString()
+  {
+    $oldContent = 'false';
+    $nextContent = 'true';
+    $this->revisionDataDiffProperties['nextContent'] = $oldContent;
+    $this->setUp();
+    $this->set($this->revisionDataDiff, 'diffInfo', array());
+    $result = $this->revisionDataDiff->makeDiff($nextContent);
+    $this->assertFalse($this->revisionDataDiff->contentIsNumeric());
   }
 }
