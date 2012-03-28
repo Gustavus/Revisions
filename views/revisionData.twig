@@ -22,7 +22,7 @@
         {% for key, label in labels %}
           {% if key in columns and revision.revisionData[key] != null %}
             {% set revisionData = revision.revisionData[key] %}
-            <dt{% if revisionData.error %} class="error"{% endif %}>{{ label }}</dt>
+            <dt{% if revisionData.error %} class="error"{% endif %} title="{{ key }}">{{ label }}</dt>
             <dd>
               {%- if revisionData.error -%}
                 {{- base.renderError() -}}
