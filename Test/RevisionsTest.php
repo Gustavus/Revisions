@@ -1402,26 +1402,6 @@ class RevisionsTest extends RevisionsTestsHelper
   /**
    * @test
    */
-  public function stringToNumber()
-  {
-    $this->assertSame(23.2, $this->call($this->revisions, 'stringToNumber', array('23.2')));
-    $this->assertSame(23, $this->call($this->revisions, 'stringToNumber', array('23')));
-  }
-
-  /**
-   * @test
-   */
-  public function toNumber()
-  {
-    $this->assertSame(23.2, $this->call($this->revisions, 'toNumber', array('23.2')));
-    $this->assertSame(23, $this->call($this->revisions, 'toNumber', array('23')));
-    $this->assertSame(23.2, $this->call($this->revisions, 'toNumber', array(23.2)));
-    $this->assertSame(23, $this->call($this->revisions, 'toNumber', array(23)));
-  }
-
-  /**
-   * @test
-   */
   public function getRevisionContentUpdatedInFutureRevision()
   {
     $conn = $this->getConnection();
