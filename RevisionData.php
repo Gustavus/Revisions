@@ -195,7 +195,7 @@ abstract class RevisionData extends RevisionsBase
   public function getContentSize()
   {
     if ($this->contentIsNumeric()) {
-      return $this->toNumber($this->getContent());
+      return $this->getContent();
     } else {
       return strlen($this->getContent());
     }
@@ -209,7 +209,7 @@ abstract class RevisionData extends RevisionsBase
   public function getNextContentSize()
   {
     if ($this->contentIsNumeric()) {
-      return $this->toNumber($this->getNextContent());
+      return $this->getNextContent();
     } else {
       return strlen($this->getNextContent());
     }
