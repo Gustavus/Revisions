@@ -216,6 +216,10 @@ class API
   final public function renderRevisionsJS($content = null)
   {
     $revisionsScripts = array(
+      '/js/jquery/ui/current/minified/jquery.ui.mouse.min.js',
+      '/js/jquery/ui/current/minified/jquery.ui.draggable.min.js',
+      '/min/f=/js/jquery/jquery.scraggable.js',
+      '/min/f=/js/jquery/jquery.viewport.js',
       '/js/history/scripts/bundled/html4+html5/jquery.history.js',
       sprintf('/min/f=/revisions/js/revisions.js&%1$s',
           self::REVISIONS_JS_VERSION
@@ -329,28 +333,46 @@ class API
   }
 
   /**
-   * Checks to see if both revision numbers in arrayA are visible or not
+   * Checks to see if both revision numbers in the revisionsNumbers index are visible or not
    *
-   * @param  array  $arrayA
-   * @param  array  $arrayB
+   * @param  array  $urlParams
    * @return boolean
    */
-  private function revisionsAreVisible(array $arrayA = array(), array $arrayB = array())
+  private function revisionsAreVisible(array $urlParams = array())
   {
-    $diff = array_diff($arrayA, $arrayB);
-    return empty($diff);
+    if (isset($urlParams['revisionNumbers'])) {
+      $diff = array_diff($urlParams['revisionNumbers'], $urlParams['visibleRevisions']);
+      return empty($diff);
+    } else {
+      return false;
+    }
   }
 
   /**
    * Checks to see if the revision number is the only one in the visibleRevisions array
    *
-   * @param  integer $revisionNumber
-   * @param  array  $visibleRevisions
+   * @param  array  $urlParams
    * @return boolean
    */
-  private function revisionIsOnlyVisible($revisionNumber, array $visibleRevisions = array())
+  private function revisionIsOnlyVisible(array $urlParams = array())
   {
-    if (in_array($revisionNumber, $visibleRevisions) && count($visibleRevisions) === 1) {
+    if (isset($urlParams['revisionNumber']) && $this->elementIsOnlyOneInArray($urlParams['revisionNumber'], $urlParams['visibleRevisions'])) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  /**
+   * Checks to see if an element is the only one in an array
+   *
+   * @param  mixed $element
+   * @param  array  $array
+   * @return boolean
+   */
+  private function elementIsOnlyOneInArray($element, array $array = array())
+  {
+    if (in_array($element, $array) && count($array) === 1) {
       return true;
     } else {
       return false;
@@ -367,8 +389,8 @@ class API
   {
     if (isset($urlParams['barebones'], $urlParams['visibleRevisions']) &&
       (
-        (isset($urlParams['revisionNumber']) && $this->revisionIsOnlyVisible($urlParams['revisionNumber'], $urlParams['visibleRevisions'])
-        ) || (isset($urlParams['revisionNumbers']) && $this->revisionsAreVisible($urlParams['revisionNumbers'], $urlParams['visibleRevisions']))
+        $this->revisionIsOnlyVisible($urlParams) ||
+        $this->revisionsAreVisible($urlParams)
       ) && !$this->isRestore($urlParams)) {
       return false;
     } else {

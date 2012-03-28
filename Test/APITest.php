@@ -2201,7 +2201,11 @@ class APITest extends RevisionsTestsHelper
    */
   public function revisionIsOnlyVisible()
   {
-    $this->assertTrue($this->call($this->revisionsAPI, 'revisionIsOnlyVisible', array('2', array('2'))));
+    $urlParams = array(
+      'revisionNumber'    => '2',
+      'visibleRevisions'  => array('2'),
+    );
+    $this->assertTrue($this->call($this->revisionsAPI, 'revisionIsOnlyVisible', array($urlParams)));
   }
 
   /**
@@ -2209,7 +2213,11 @@ class APITest extends RevisionsTestsHelper
    */
   public function revisionIsOnlyVisibleFalse()
   {
-    $this->assertFalse($this->call($this->revisionsAPI, 'revisionIsOnlyVisible', array('2', array('3'))));
+    $urlParams = array(
+      'revisionNumber'    => '2',
+      'visibleRevisions'  => array('3'),
+    );
+    $this->assertFalse($this->call($this->revisionsAPI, 'revisionIsOnlyVisible', array($urlParams)));
   }
 
   /**
@@ -2217,7 +2225,35 @@ class APITest extends RevisionsTestsHelper
    */
   public function revisionIsOnlyVisibleFalseMultipleVisible()
   {
-    $this->assertFalse($this->call($this->revisionsAPI, 'revisionIsOnlyVisible', array('2', array('2', '3'))));
+    $urlParams = array(
+      'revisionNumber'    => '2',
+      'visibleRevisions'  => array('2', '3'),
+    );
+    $this->assertFalse($this->call($this->revisionsAPI, 'revisionIsOnlyVisible', array($urlParams)));
+  }
+
+  /**
+   * @test
+   */
+  public function elementIsOnlyOneInArray()
+  {
+    $this->assertTrue($this->call($this->revisionsAPI, 'elementIsOnlyOneInArray', array('2', array('2'))));
+  }
+
+  /**
+   * @test
+   */
+  public function elementIsOnlyOneInArrayFalse()
+  {
+    $this->assertFalse($this->call($this->revisionsAPI, 'elementIsOnlyOneInArray', array('2', array('3'))));
+  }
+
+  /**
+   * @test
+   */
+  public function elementIsOnlyOneInArrayFalseMultipleVisible()
+  {
+    $this->assertFalse($this->call($this->revisionsAPI, 'elementIsOnlyOneInArray', array('2', array('2', '3'))));
   }
 
   /**
@@ -2225,7 +2261,11 @@ class APITest extends RevisionsTestsHelper
    */
   public function revisionsAreVisible()
   {
-    $this->assertTrue($this->call($this->revisionsAPI, 'revisionsAreVisible', array(array('2'), array('2'))));
+    $urlParams = array(
+      'revisionNumbers' => array('2'),
+      'visibleRevisions' => array('2'),
+    );
+    $this->assertTrue($this->call($this->revisionsAPI, 'revisionsAreVisible', array($urlParams)));
   }
 
   /**
@@ -2233,7 +2273,11 @@ class APITest extends RevisionsTestsHelper
    */
   public function revisionsAreVisibleComplex()
   {
-    $this->assertTrue($this->call($this->revisionsAPI, 'revisionsAreVisible', array(array('3', '2'), array('2', '3'))));
+    $urlParams = array(
+      'revisionNumbers' => array('3', '2'),
+      'visibleRevisions' => array('2', '3'),
+    );
+    $this->assertTrue($this->call($this->revisionsAPI, 'revisionsAreVisible', array($urlParams)));
   }
 
   /**
@@ -2241,6 +2285,10 @@ class APITest extends RevisionsTestsHelper
    */
   public function revisionsAreNotVisible()
   {
-    $this->assertFalse($this->call($this->revisionsAPI, 'revisionsAreVisible', array(array('2'), array('3'))));
+    $urlParams = array(
+      'revisionNumbers' => array('2'),
+      'visibleRevisions' => array('3'),
+    );
+    $this->assertFalse($this->call($this->revisionsAPI, 'revisionsAreVisible', array($urlParams)));
   }
 }
