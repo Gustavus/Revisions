@@ -28,6 +28,13 @@ class API
   private $revisionsRenderer;
 
   /**
+   * array of column labels used for mapping column names to formatted labels
+   *
+   * @var array
+   */
+  private $labels = array();
+
+  /**
    * array of possible query string parameters for revisions
    *
    * @var array
@@ -57,6 +64,9 @@ class API
       $params['table'],
       $params['rowId'])) {
         $this->revisions = new Revisions($params);
+        if (isset($params['labels'])) {
+          $this->labels = $params['labels'];
+        }
     } else {
       throw new \RuntimeException('Insufficient application information');
     }
@@ -69,7 +79,7 @@ class API
    */
   public function __destruct()
   {
-    unset($this->revisions, $this->revisionsRenderer, $this->possibleRevisionsQueryParams);
+    unset($this->revisions, $this->revisionsRenderer, $this->possibleRevisionsQueryParams, $this->labels);
   }
 
   /**
@@ -531,7 +541,7 @@ class API
    */
   private function constructRevisionsRenderer(array $urlParams)
   {
-    $this->revisionsRenderer = new RevisionsRenderer($this->revisions, $this->getRevisionsUrlParams($urlParams), $this->getApplicationUrlParams($urlParams));
+    $this->revisionsRenderer = new RevisionsRenderer($this->revisions, $this->getRevisionsUrlParams($urlParams), $this->getApplicationUrlParams($urlParams), $this->labels);
     $this->setUpItemsToRender($urlParams);
   }
 
