@@ -273,7 +273,7 @@ class RevisionDataDiff extends RevisionData
    */
   private function skippedValuesExist($prevKey, $key, $diff)
   {
-    return (count($prevKey) > 0 && is_array($diff[$prevKey[0]]) && $key > 1 && ($key - 1 === end($prevKey) || ($key - 2 === end($prevKey) && preg_match('`[\s]+`', $diff[$key - 1]) !== 0)));
+    return (count($prevKey) > 0 && is_array($diff[$prevKey[0]]) && $key > 1 && ($key - 1 === end($prevKey) || ($key - 2 === end($prevKey) && preg_match('`\s+`', $diff[$key - 1]) !== 0)));
   }
 
   /**
@@ -303,23 +303,33 @@ class RevisionDataDiff extends RevisionData
     foreach ($diff as $key => $value) {
       if (is_array($value)) {
         if ($this->skippedValuesExist($prevKey, $key, $diff)) {
-          $skipped = ($key - 2 === end($prevKey) && preg_match('`([\s]+)`', $diff[$key - 1], $spaces) !== 0)  ? array($spaces[0]) : array();
+          // $value is a continuation of a previous diff's deletion and can be thrown on top of it.
+          // find skipped spaces between the last index and this one.
+          $skipped = ($key - 2 === end($prevKey) && preg_match('`(\s+)`', $diff[$key - 1], $spaces) !== 0)  ? array($spaces[0]) : array();
+          // figure out what the deletion we are adding on to is
           $prevD = (isset($return[$prevKey[0] + $oldOffset]['d'])) ? $return[$prevKey[0] + $oldOffset]['d'] : array();
+          // add the deletions together to make a chained deletion.
           $return[$prevKey[0] + $oldOffset]['d'] = array_merge($prevD, $skipped, $value['d']);
 
+          // figure out what the insertion we are adding onto is
           $prevI = (isset($return[$prevKey[0] + $oldOffset]['i'])) ? $return[$prevKey[0] + $oldOffset]['i'] : array();
+          // add the insertions together to make a chained insertion
           $return[$prevKey[0] + $oldOffset]['i'] = array_merge($prevI, $skipped, $value['i']);
           if ($key > 0) {
+            // add the current key to the array of keys so we can continue chaining things together if needed
             $prevKey[] = $key;
           }
         } else {
           // we need the old offset so we know where the items live in the return array since offset gets set with the new offset
           $oldOffset = $offset;
           $return[$key + $oldOffset] = $value;
+          // new potential chain, reset the array with only the current key so we can see if anything can be chained on top of it
           $prevKey = array($key);
         }
+        // offset of the total number of items we have chained together so we maintain proper keys
         $offset += count($value['i']) - 1;
-      } else if (preg_match('`[\s]+`', $value) === 0) {
+      } else if (preg_match('`\s+`', $value) === 0) {
+        // reset $prevKey
         $prevKey = array();
       }
     }
