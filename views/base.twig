@@ -4,6 +4,7 @@
       {% block hiddenFields %}
         <div id="hiddenFields">
           {% for key, value in hiddenFields %}
+            {# value|keys|length because we want to see if value is an array, and if it is a string, it will not have keys, but will have a length #}
             {% if value|keys|length > 0 %}
               {% for arrKey, arrValue in value %}
                 <input type="hidden" name="{{ key }}[{{ arrKey }}]" value="{{ arrValue }}" />
