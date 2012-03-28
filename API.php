@@ -80,16 +80,23 @@ class API
   public function render()
   {
     if (isset($_GET['barebones'])) {
+      // making an ajax request, so we don't want any extra information returned
       ob_end_clean();
     }
     if (!empty($_POST)) {
+      // submitted the form with Post method.
       return $this->handlePostAction($_POST);
     }
+    // form was either submitted, or it is just a regular page load.
+    // get revisionsRenderer ready to go
     $this->constructRevisionsRenderer($_GET);
     if (isset($_GET['barebones'])) {
+      // an ajax call was made for new information
+      // we want the new information echoed to the ajax call and then we want to exit so nothing else gets thrown in.
       echo $this->doWorkRequstedInUrl($_GET);
       exit();
     } else {
+      // regular page load
       return $this->doWorkRequstedInUrl($_GET);
     }
   }
@@ -238,7 +245,7 @@ class API
   private function modernizeJS(Array $scripts)
   {
     return sprintf('
-      <script type="text/javascript">
+      <script>
         Modernizr.load([
           "%1$s"
         ]);
