@@ -3,20 +3,19 @@
 
 {% block revisionTimeline %}
   {% if shouldRenderTimeline %}
-    {{ _self.renderTimeline(revisions, maxColumnSizes, [], oldestRevisionNumber, limit) }}
+    {{ _self.renderTimeline(revisions, maxColumnSizes, [], oldestRevisionNumber, limit, labels) }}
   {% endif %}
 {% endblock %}
 
 {% block formExtras %}
 {% endblock %}
 
-{% macro renderTimeline(revisions, maxColumnSizes, visibleRevisions, oldestRevisionNumber, limit) %}
+{% macro renderTimeline(revisions, maxColumnSizes, visibleRevisions, oldestRevisionNumber, limit, labels) %}
   {% import 'base.twig' as base %}
-  {% set columns = revisions[revisions|length - 1].getRevisionData()|keys %}
   <div id="revisionTimeline">
     <div class="labels">
-      {% for column in columns %}
-        <div>{{ column }}</div>
+      {% for column, label in labels %}
+        <div>{{ label }}</div>
       {% endfor %}
       <div><button id="compareButton" class="positive" name="revisionNumber" value="false">Compare</button></div>
     </div>
@@ -25,39 +24,34 @@
         <thead>
           <tr>
             <th>
-              {#{% if oldestRevisionNumber > 0 %}
-                {% if oldestRevisionNumber - limit + 1 < 0 %}{% set oldestRevNum = 1 %}{% else %}{% set oldestRevNum = oldestRevisionNumber - limit + 1 %}{% endif %}
-                <button id="showMoreRevisions" name="oldestRevisionNumber" value="{{ oldestRevNum }}" class="small" title="Show Revision {{ oldestRevNum }} in table">Show More Revisions</button>
-              {% else %}#}
               &nbsp;
-              {#{% endif %}#}
             </th>
             {% for revisionNumber, revision in revisions %}
               {% if revisionNumber != 0 %}
-                <th class="{{ revisionNumber }}{% if revisionNumber in visibleRevisions %} {% if visibleRevisions|length > 1 and revisionNumber == visibleRevisions[1] or visibleRevisions|length == 1 and revisionNumber == visibleRevisions[0] %}young{% else %}old{% endif %}{% endif %}" title="{{ base.renderTitle(revision, revisionNumber, oldestRevisionNumber) }}" data-revision-number="{{ revisionNumber }}">{#<button class="revision" name="revisionNumber" value="{{ revisionNumber }}" title="{{ base.renderTitle(revision, revisionNumber, oldestRevisionNumber) }}">#}{{ revisionNumber }}{#</button>#}</th>
+                <th class="{{ revisionNumber }}{% if revisionNumber in visibleRevisions %} {% if visibleRevisions|length > 1 and revisionNumber == visibleRevisions[1] or visibleRevisions|length == 1 and revisionNumber == visibleRevisions[0] %}young{% else %}old{% endif %}{% endif %}" title="{{ base.renderTitle(revision, revisionNumber, oldestRevisionNumber) }}" data-revision-number="{{ revisionNumber }}">{{ revisionNumber }}</th>
               {% endif %}
             {% endfor %}
           </tr>
         </thead>
         <tbody>
-          {% for column in columns %}
+          {% for column, label in labels %}
             <tr>
-              <th>{{ column }}</th>
+              <th>{{ label }}</th>
               {% for revisionNumber, revision in revisions %}
                 {% if revision.error %}
                   {{ base.renderErrorColumns(1) }}
                 {% elseif revision != null and revisionNumber > oldestRevisionNumber and revisionNumber != 0 %}
-                  <td class="bytes {{ revisionNumber }}{% if revisionNumber in visibleRevisions and visibleRevisions|length > 1 and revisionNumber == visibleRevisions[1] or visibleRevisions|length == 1 and revisionNumber == visibleRevisions[0] %} young{% elseif revisionNumber in visibleRevisions %} old{% endif %}" data-revision-number="{{ revisionNumber }}">{#<button name="revisionNumber" value="{{ revisionNumber }}" class="revision">#}
+                  <td class="bytes {{ revisionNumber }}{% if revisionNumber in visibleRevisions and visibleRevisions|length > 1 and revisionNumber == visibleRevisions[1] or visibleRevisions|length == 1 and revisionNumber == visibleRevisions[0] %} young{% elseif revisionNumber in visibleRevisions %} old{% endif %}" data-revision-number="{{ revisionNumber }}">
                   {% if revision.getRevisionData(column).getRevisionRevisionNumber() == revision.getRevisionNumber() %}
                     {{ _self.renderCell(revision, revisions[revisionNumber - 1], maxColumnSizes[column], column) }}
                   {% else %}
                     {{ _self.renderCell(revision, revision, maxColumnSizes[column], column) }}
                   {% endif %}
-                  {#</button>#}</td>
+                  </td>
                 {% else %}
                   {% if revisionNumber != 0 %}
                     <td class="bytes {{ revisionNumber }}{% if revisionNumber in visibleRevisions %} visibleRevision{% endif %}" data-oldest-revision-number="{{ revisionNumber }}" class="missingRevisions" title="Show More Revisions">
-                      {#<button name="oldestRevisionNumber" value="{{ revisionNumber }}" class="missingRevisions" title="Show More Revisions"></button>#}</td>
+                    </td>
                   {% endif %}
                 {% endif %}
               {% endfor %}
