@@ -357,7 +357,7 @@ class API
    */
   private function revisionsAreVisible(array $urlParams = array())
   {
-    if (isset($urlParams['revisionNumbers'])) {
+    if (isset($urlParams['revisionNumbers'], $urlParams['visibleRevisions'])) {
       $diff = array_diff($urlParams['revisionNumbers'], $urlParams['visibleRevisions']);
       return empty($diff);
     } else {
@@ -373,7 +373,7 @@ class API
    */
   private function revisionIsOnlyVisible(array $urlParams = array())
   {
-    if (isset($urlParams['revisionNumber']) && $this->elementIsOnlyOneInArray($urlParams['revisionNumber'], $urlParams['visibleRevisions'])) {
+    if (isset($urlParams['revisionNumber'], $urlParams['visibleRevisions']) && $this->elementIsOnlyOneInArray($urlParams['revisionNumber'], $urlParams['visibleRevisions'])) {
       return true;
     } else {
       return false;
@@ -404,7 +404,7 @@ class API
    */
   private function shouldRenderRevisionData(array $urlParams = array())
   {
-    if (isset($urlParams['barebones'], $urlParams['visibleRevisions']) &&
+    if (isset($urlParams['barebones']) &&
       (
         $this->revisionIsOnlyVisible($urlParams) ||
         $this->revisionsAreVisible($urlParams)
