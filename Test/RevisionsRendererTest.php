@@ -89,4 +89,101 @@ class RevisionsRendererTest extends RevisionsTestsHelper
     $this->revisionsRenderer->setShouldRenderRevisionData(false);
     $this->assertFalse($this->get($this->revisionsRenderer, 'shouldRenderRevisionData'));
   }
+
+  /**
+   * @test
+   */
+  public function makeLabels()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $this->revisions->makeAndSaveRevision(array('age' => 23, 'name' => 'Billy Visto', 'aboutYou' => ""));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy'));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
+    $this->revisions->makeAndSaveRevision(array('age' => 123));
+
+    $this->revisions->populateEmptyRevisions(1);
+
+    $labels = array(
+      'aboutYou' => 'About You',
+      'age'     => 'Age',
+    );
+    $this->revisionsRenderer = new Revisions\RevisionsRenderer($this->revisions, array(), array(), $labels);
+
+    $expected = array(
+      'aboutYou' => 'About You',
+      'age'     => 'Age',
+      'name'    => 'name',
+    );
+    $result = $this->call($this->revisionsRenderer, 'makeLabels');
+    $this->assertSame($expected, $result);
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
+  public function makeLabelsDifferentOrder()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $this->revisions->makeAndSaveRevision(array('age' => 23, 'name' => 'Billy Visto', 'aboutYou' => ""));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy'));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
+    $this->revisions->makeAndSaveRevision(array('age' => 123));
+
+    $this->revisions->populateEmptyRevisions(1);
+
+    $labels = array(
+      'name'    => 'Name',
+      'aboutYou' => 'About You',
+      'age'     => 'Age',
+    );
+    $this->revisionsRenderer = new Revisions\RevisionsRenderer($this->revisions, array(), array(), $labels);
+
+    $expected = array(
+      'name'    => 'Name',
+      'aboutYou' => 'About You',
+      'age'     => 'Age',
+    );
+    $result = $this->call($this->revisionsRenderer, 'makeLabels');
+    $this->assertSame($expected, $result);
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+
+  /**
+   * @test
+   */
+  public function makeLabelsEmpty()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $this->revisions->makeAndSaveRevision(array('age' => 23, 'name' => 'Billy Visto', 'aboutYou' => ""));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy'));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
+    $this->revisions->makeAndSaveRevision(array('age' => 123));
+
+    $this->revisions->populateEmptyRevisions(1);
+
+    $this->revisionsRenderer = new Revisions\RevisionsRenderer($this->revisions);
+
+    $expected = array(
+      'aboutYou' => 'aboutYou',
+      'age' => 'age',
+      'name' => 'name',
+    );
+    $result = $this->call($this->revisionsRenderer, 'makeLabels');
+    $this->assertSame($expected, $result);
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
 }

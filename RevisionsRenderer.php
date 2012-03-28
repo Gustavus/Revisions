@@ -37,16 +37,24 @@ class RevisionsRenderer
   private $shouldRenderRevisionData = true;
 
   /**
+   * array of column labels used for mapping column names to formatted labels
+   *
+   * @var array
+   */
+  private $labels = array();
+
+  /**
    * Class constructor
    * @param Revisions $revisions
    * @param array revisionsUrlParams
    * @param array applicationUrlParams
    */
-  public function __construct(Revisions $revisions, array $revisionsUrlParams = array(), array $applicationUrlParams = array())
+  public function __construct(Revisions $revisions, array $revisionsUrlParams = array(), array $applicationUrlParams = array(), array $labels = array())
   {
     $this->revisions            = $revisions;
     $this->revisionsUrlParams   = $revisionsUrlParams;
     $this->applicationUrlParams = $applicationUrlParams;
+    $this->labels               = $labels;
   }
 
   /**
@@ -56,7 +64,7 @@ class RevisionsRenderer
    */
   public function __destruct()
   {
-    unset($this->revisions, $this->revisionsUrlParams, $this->shouldRenderTimeline, $this->shouldRenderRevisionData);
+    unset($this->revisions, $this->revisionsUrlParams, $this->shouldRenderTimeline, $this->shouldRenderRevisionData, $this->labels);
   }
 
   /**
@@ -159,6 +167,24 @@ class RevisionsRenderer
   }
 
   /**
+   * Make labels based off of the applications labels that it prefers and falls back to using the column name if none specified.
+   * This will also let the application change the order of columns.
+   *
+   * @return array
+   */
+  private function makeLabels()
+  {
+    $columnNames = array_keys($this->revisions->getRevisionByNumber($this->revisions->findLatestRevisionNumberPulled())->getRevisionData());
+    // set labels to be the labels specified by the application
+    $labels = array_intersect_key($this->labels, array_flip($columnNames));
+    // default labels to be the column name if not specified
+    foreach (array_diff_key(array_flip($columnNames), $this->labels) as $key => $value) {
+      $labels[$key] = $key;
+    }
+    return $labels;
+  }
+
+  /**
    * Remove params that are in paramsToFilter
    *
    * @param  array  $params
@@ -193,6 +219,7 @@ class RevisionsRenderer
         $params,
         array(
           'revisions'             => $this->revisions->getRevisionObjects($oldestRevisionNumber),
+          'labels'                => $this->makeLabels(),
           'revision'              => $revision,
           'oldestRevisionNumber'  => $oldestRevisionNumber,
           'limit'                 => $this->revisions->getLimit(),
