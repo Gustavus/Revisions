@@ -174,12 +174,16 @@ class RevisionsRenderer
    */
   private function makeLabels()
   {
-    $columnNames = array_keys($this->revisions->getRevisionByNumber($this->revisions->findLatestRevisionNumberPulled())->getRevisionData());
-    // set labels to be the labels specified by the application
-    $labels = array_intersect_key($this->labels, array_flip($columnNames));
-    // default labels to be the column name if not specified
-    foreach (array_diff_key(array_flip($columnNames), $this->labels) as $key => $value) {
-      $labels[$key] = $key;
+    if ($this->revisions->findLatestRevisionNumberPulled() !== null) {
+      $columnNames = array_keys($this->revisions->getRevisionByNumber($this->revisions->findLatestRevisionNumberPulled())->getRevisionData());
+      // set labels to be the labels specified by the application
+      $labels = array_intersect_key($this->labels, array_flip($columnNames));
+      // default labels to be the column name if not specified
+      foreach (array_diff_key(array_flip($columnNames), $this->labels) as $key => $value) {
+        $labels[$key] = $key;
+      }
+    } else {
+      $labels = array();
     }
     return $labels;
   }
