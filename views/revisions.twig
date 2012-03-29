@@ -146,12 +146,6 @@
       added {{ _self.workWithNumber(number) }}
     {% elseif label == 'removed' %}
       subtracted {{ _self.workWithNumber(number) }}
-    {% elseif label == 'unchanged' %}
-      {% if removedContentSize <= 0 %}
-        {# avoids subtracting a negative number #}
-        {% set removedContentSize = 0 %}
-      {% endif %}
-      {{ _self.workWithNumber(number - removedContentSize) }} unchanged
     {% endif %}
   {% endspaceless %}
 {% endmacro %}
@@ -160,7 +154,13 @@
     {% if number < 0 %}
       0
     {% else %}
-      {{ number }}
+      {% set whole = number // 1 %}
+      {% if number|length - whole|length > 6 %}
+        {% set length = 6 %}
+      {% else %}
+        {% set length = number|length - whole|length %}
+      {% endif %}
+      {{ whole|number_format }}{{ number[whole|length:length] }}
     {% endif %}
   {% endspaceless %}
 {% endmacro %}
