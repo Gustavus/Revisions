@@ -252,6 +252,6 @@ abstract class RevisionData extends RevisionsBase
    */
   public function contentIsNumeric()
   {
-    return (is_numeric($this->getContent()) && is_numeric($this->getNextContent()));
+    return ((is_int($this->getContent()) || is_float($this->getContent())) && (is_int($this->getNextContent()) || is_float($this->getNextContent())));
   }
 }
