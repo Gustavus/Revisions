@@ -2138,6 +2138,15 @@ class APITest extends RevisionsTestsHelper
   /**
    * @test
    */
+  public function revisionNumberIsInTimelineNoRevisionNumber()
+  {
+    $urlParams = array('oldestRevisionNumber' => '2', 'revisionNumbers' => array('3', '4'), 'barebones' => 'true', 'oldestRevisionInTimeline' => '2');
+    $this->assertFalse($this->call($this->revisionsAPI, 'revisionNumberIsInTimeline', array($urlParams)));
+  }
+
+  /**
+   * @test
+   */
   public function shouldRenderTimelineNoOldestRevisionNumberModified()
   {
     $urlParams = array('pr' => 'manage',

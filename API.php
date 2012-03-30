@@ -309,10 +309,12 @@ class API
    */
   private function revisionNumberIsInTimeline(array $urlParams = array())
   {
-    return (isset($urlParams['revisionNumber']) && $urlParams['revisionNumber'] === false ||
-      (
-        (int) $urlParams['revisionNumber'] >= (int) $urlParams['oldestRevisionInTimeline']) ||
-        (isset($urlParams['revisionNumbers']) && $this->arrayMin($urlParams['revisionNumbers']) >= (int) $urlParams['oldestRevisionInTimeline']
+    return (isset($urlParams['revisionNumber']) &&
+      ($urlParams['revisionNumber'] === false ||
+        (
+          (int) $urlParams['revisionNumber'] >= (int) $urlParams['oldestRevisionInTimeline']) ||
+          (isset($urlParams['revisionNumbers']) && $this->arrayMin($urlParams['revisionNumbers']) >= (int) $urlParams['oldestRevisionInTimeline']
+        )
       )
     );
   }
