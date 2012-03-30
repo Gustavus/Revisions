@@ -235,6 +235,7 @@ class API
     $revisionsScripts = array(
       '/js/jquery/ui/current/minified/jquery.ui.mouse.min.js',
       '/js/jquery/ui/current/minified/jquery.ui.draggable.min.js',
+      '/js/jquery/ui/current/minified/jquery.effects.slide.min.js',
       '/min/f=/js/jquery/jquery.scraggable.js',
       '/min/f=/js/jquery/jquery.viewport.js',
       '/js/history/scripts/bundled/html4+html5/jquery.history.js',
