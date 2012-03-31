@@ -14,6 +14,10 @@ var revisions = {
     'oldestRevisionInTimeline'
   ),
 
+  oldData: {},
+
+  oldestRevisionNumber: null,
+
   unselectBox: function($item)
   {
     $item.removeAttr('checked');
@@ -73,38 +77,71 @@ var revisions = {
     return visibleRevisions;
   },
 
-  replaceSectionsWithData: function($data)
+  animateAndReplaceData: function($selector, html, direction)
+  {
+    $selector
+      .wrap('<div class="slideViewport" />')
+      .append(html);
+
+    var $sections = $('.slideViewport section');
+    $sections.last().addClass('slide-' + direction);
+
+    $selector.parent()
+      .height(Math.max($sections.first().outerHeight(), $sections.last().outerHeight()))
+      .hide('slide', {
+          direction: direction,
+          distance: $sections.last().outerWidth(true)
+        }, 200, function() {
+          $sections.removeClass('slide-' + direction);
+          if ($sections.length > 1) {
+            $sections.first().remove();
+          }
+          $selector.unwrap();
+        }
+      );
+  },
+
+  replaceSectionsWithData: function($data, direction)
   {
     $('#revisionsForm').attr('method', $data.attr('method'));
 
     $data.children().each(function(i, element) {
-      $('#' + $(element).attr('id')).html($(element).html());
+      switch ($(element).attr('id')) {
+        case 'revisionTimeline':
+          // make sure the oldest revisionNumber pulled in is less than the oldestRevisionNumber we have asked for incase the ajax call takes time.
+          if ($data.find('#hiddenFields #oldestRevisionNumber').val() <= revisions.oldestRevisionNumber) {
+            $('#revisionTimeline table').html($(element).find('table').html(), direction);
+            Extend.apply('page', $('#revisionTimeline'));
+          }
+            break;
 
-      if ($(element).attr('id') === 'formExtras') {
-        console.log($(element).find('header hgroup'))
-        restoreButtons = $(element).find('footer button')
-        if (restoreButtons.length === 1) {
-          // revisionData
-          $('.young').removeClass('young');
-          $('.old').removeClass('old');
-          $('input.compare:checked').each(function(i, element) {
-            revisions.unselectBox($(element));
-          })
-          $('.' + restoreButtons.first().val()).addClass('young');
-          revisions.selectBox($('#revisionNum-' + restoreButtons.first().val()));
-        } else if (restoreButtons.length === 2) {
-          // revisionData comparison
-          $('.old').removeClass('old');
-          $('.' + restoreButtons.first().val()).addClass('old').removeClass('selected');
-          revisions.selectBox($('#revisionNum-' + restoreButtons.first().val()));
-          $('.young').removeClass('young');
-          $('.' + restoreButtons.last().val()).addClass('young').removeClass('selected');
-          revisions.selectBox($('#revisionNum-' + restoreButtons.last().val()));
-        }
+        case 'formExtras':
+          revisions.animateAndReplaceData($('#formExtras'), $(element).html(), direction);
+          restoreButtons = $(element).find('footer button');
+          if (restoreButtons.length === 1) {
+            // revisionData
+            $('.young').removeClass('young');
+            $('.old').removeClass('old');
+            $('input.compare:checked').each(function(i, element) {
+              revisions.unselectBox($(element));
+            })
+            $('.' + restoreButtons.first().val()).addClass('young');
+            revisions.selectBox($('#revisionNum-' + restoreButtons.first().val()));
+          } else if (restoreButtons.length === 2) {
+            // revisionData comparison
+            $('.old').removeClass('old');
+            $('.' + restoreButtons.first().val()).addClass('old').removeClass('selected');
+            revisions.selectBox($('#revisionNum-' + restoreButtons.first().val()));
+            $('.young').removeClass('young');
+            $('.' + restoreButtons.last().val()).addClass('young').removeClass('selected');
+            revisions.selectBox($('#revisionNum-' + restoreButtons.last().val()));
+          }
+            break;
+
+          default:
+            $('#' + $(element).attr('id')).html($(element).html(), direction);
       }
-      if ($(element).attr('id') == 'revisionTimeline') {
-        Extend.apply('page', $('#revisionTimeline'));
-      }
+
       $('#compareButton').attr('disabled', 'disabled');
     });
   },
@@ -112,35 +149,78 @@ var revisions = {
   makeDataObject: function($element)
   {
     var data = {};
+
     // get hidden fields
     $('#hiddenFields input').each(function(i, element) {
       data[$(element).attr('name')] = $(element).val();
     });
-    // get button's info
-    data[$element.attr('name')] = $element.val();
-    if ($element.attr('id') === 'compareButton') {
-      //get checkbox data
-      if ($('input.compare:checked').length > 1) {
-        data['revisionNumbers'] = Array();
-        $('input.compare:checked').each(function(i, element) {
-          data['revisionNumbers'][i] = $(element).val();
-        })
+
+    if ($element.is('button')) {
+      // A button was clicked, so we need to get that button's data
+      data[$element.attr('name')] = $element.val();
+
+      if ($element.attr('id') === 'compareButton') {
+        // User wants to compare two revisions, so get checkbox data
+        if ($('input.compare:checked').length > 1) {
+          data['revisionNumbers'] = Array();
+          $('input.compare:checked').each(function(i, element) {
+            data['revisionNumbers'][i] = $(element).val();
+          })
+        }
       }
-    } else if (!$element.hasClass('revision')) {
-      if ($('input.compare:checked').length > 1) {
-        data['revisionNumbers'] = Array();
-        $('#formExtras footer button').each(function(i, element) {
-          data['revisionNumbers'][i] = $(element).val();
-        })
+    } else {
+      // A non-button element was clicked, (table cell) so we need to get
+      // that table cell's data
+      if ($element.data('revision-number') !== undefined) {
+        // User clicked on a single revision to view it
+        data['revisionNumber'] = $element.data('revision-number');
+      } else if ($element.data('oldest-revision-number') !== undefined) {
+        // User clicked on a non-visible revision to load the timeline further back
+        data['oldestRevisionNumber'] = $element.data('oldest-revision-number');
+        if ($('input.compare:checked').length > 1) {
+          // User was already comparing two revisions, so we want to keep that
+          // comparison going
+          data['revisionNumbers'] = Array();
+          $('#formExtras footer button').each(function(i, element) {
+            data['revisionNumbers'][i] = $(element).val();
+          })
+        }
       }
     }
     return data;
   },
 
-  makeAjaxRequest: function(url, data)
+  getSlideDirection: function(revData)
+  {
+    if (revisions.oldData.revisionNumber !== undefined && revData.revisionNumber !== undefined) {
+      // figure out old revisionNumber
+      if (revisions.oldData.revisionNumber === "false") {
+        // set oldRevNum to be the average of the revisionNumbers you are comparing
+        var oldRevNum = (parseInt(revisions.oldData.revisionNumbers[0]) + parseInt(revisions.oldData.revisionNumbers[1])) / 2;
+      } else {
+        var oldRevNum = revisions.oldData.revisionNumber;
+      }
+      // figure out new revisionNumber
+      if (revData.revisionNumber === "false") {
+        var newRevNum = (parseInt(revData.revisionNumbers[0]) + parseInt(revData.revisionNumbers[1])) / 2;
+      } else {
+        var newRevNum = revData.revisionNumber;
+      }
+      if (newRevNum >= oldRevNum) {
+        var direction = 'left';
+      } else {
+        var direction = 'right';
+      }
+    } else {
+      var direction = 'left';
+    }
+    revisions.oldData = revData;
+    return direction
+  },
+
+  makeAjaxRequest: function(revData, url)
   {
     // This is triggered when the history state changes
-    console.log('ajax');
     var data = {};
     data['barebones'] = true;
     data['oldestRevisionInTimeline'] = $('tfoot td label input').first().val();
@@ -152,8 +232,10 @@ var revisions = {
         type: 'GET',
         data: data,
         success: function(ajaxData) {
-          console.log('ajaxSuccess');
-          revisions.replaceSectionsWithData($(ajaxData));
+          revisions.replaceSectionsWithData($(ajaxData), revisions.getSlideDirection(revData));
+          // Track this event in Google Analytics
+          window._gaq = window._gaq || [];
+          _gaq.push(['_trackPageview', url.replace(/^https?:\/\/[^\/]+/, '') + '&joe=true&url=replace']);
         }
       });
     }
@@ -161,52 +243,73 @@ var revisions = {
 
   makeHistory: function($element)
   {
-    console.log('makeHistory');
-    var data = revisions.makeDataObject($element);
-    var url = '?' + $.param(data);
+    var revData = revisions.makeDataObject($element);
+    var url = '?' + $.param(revData);
     if (window.History.enabled) {
-      console.log('History enabled');
-      window.History.pushState(data, null, url);
-
+      window.History.pushState(revData, null, url);
     } else {
-      console.log('History Disabled');
       // history isn't enabled, so the statechange event wont get called
-      revisions.makeAjaxRequest(url, data);
+      revisions.makeAjaxRequest(revData, url);
     }
   },
 
   handleClickAction: function($element)
   {
-    console.log('handleClickAction');
     // call make history to throw the new url to the stack and trigger the statechange event that calls revisions.makeAjaxRequest
     revisions.makeHistory($element);
+  },
+
+  triggerShowMoreClick: function(oldestRevNumToPull)
+  {
+    if ($('.compare input:first-child').val() > oldestRevNumToPull) {
+      revisions.oldestRevisionNumber = oldestRevNumToPull;
+      // trigger click on button to pull more revisions
+      $('td.bytes.' + oldestRevNumToPull).first().click();
+    }
+  },
+
+  convertNegativeAndZero: function(number)
+  {
+    if (number <= 0) {
+      return 1;
+    } else {
+      return number;
+    }
+  },
+
+  loadVisibleRevisionsIntoTimeline: function()
+  {
+    if ($('.compare input:first-child').val() > 1) {
+      var $lastRevisionTh   = $('.viewport table thead tr th:last-child');
+      var revisionWidth     = $lastRevisionTh.outerWidth();
+      var latestRevisionNum = $lastRevisionTh.data('revision-number');
+      var $viewport         = $('#revisionTimeline .viewport');
+      var visibleTableWidth = $viewport.outerWidth();
+      var offset            = $viewport.viewport('content').position().left;
+
+      var numberOfRevisionsVisible  = Math.floor((visibleTableWidth + offset) / revisionWidth);
+      // +6 to pull in an extra 6 so we cache the scrolling a little
+      var oldestRevNumToPull        = revisions.convertNegativeAndZero(latestRevisionNum - (numberOfRevisionsVisible + 6));
+      if (revisions.oldestRevisionNumber === null) {
+        revisions.triggerShowMoreClick(oldestRevNumToPull);
+      } else {
+        // -3 so we only pull in groups of three or more to avoid a lot of requests
+        var oldestRevNumAllowedToPull = revisions.convertNegativeAndZero(revisions.oldestRevisionNumber - 3);
+        if (revisions.oldestRevisionNumber > 1 && oldestRevNumAllowedToPull >= oldestRevNumToPull) {
+          revisions.triggerShowMoreClick(oldestRevNumToPull);
+        }
+      }
+    }
   }
 }
 
-window.History.Adapter.bind(window, 'statechange', function() {
-  console.log('statechange');
+window.History.Adapter.bind(window, 'statechange', function(e, i) {
   var State = window.History.getState();
 
-  // Track this event in Google Analytics
-  //window._gaq = window._gaq || [];
-  //_gaq.push(['_trackPageview', '/homepage/news.php?type=' + type]);
-
-  revisions.makeAjaxRequest(State.url, State.data);
+  revisions.makeAjaxRequest(State.data, State.url);
 });
 
-// window.onstatechange(function() {
-//   console.log('statechange');
-//   var State = window.History.getState();
-
-//   // Track this event in Google Analytics
-//   //window._gaq = window._gaq || [];
-//   //_gaq.push(['_trackPageview', '/homepage/news.php?type=' + type]);
-
-//   revisions.makeAjaxRequest(State.url, State.data);
-// });
-
-$('#revisionsForm').on('click', 'button', function() {
-  console.log('click');
+$('#revisionsForm').on('click', 'thead th, tbody td, button', function() {
   if ($('#revisionsForm').attr('method') === 'GET') {
     revisions.handleClickAction($(this));
     return false;
@@ -237,6 +340,33 @@ $('#revisionsForm').on('click', 'button', function() {
   $('th.hover, td.hover').removeClass('hover');
 });
 
+/* Set up viewport */
+var $table = $('#revisionTimeline table');
+
+var dimensions = {
+  height: ($table.height() + 1) + 'px',
+  width: $('#revisionTimeline').width() - parseInt($('#revisionTimeline .viewport').css('marginLeft')) + 'px'
+}
+
+$('#revisionTimeline .viewport')
+  .css(dimensions)
+  .viewport({
+    content: $table,
+    position: 'right'
+  })
+  .viewport('content')
+    .draggable({
+      containment: 'parent',
+      axis: 'x'
+    })
+    .scraggable({
+      containment: 'parent'
+    })
+    .on('drag', function() {
+      revisions.loadVisibleRevisionsIntoTimeline();
+    });
+
 $(document).ready(function() {
   $('#compareButton').attr('disabled', 'disabled');
+  revisions.loadVisibleRevisionsIntoTimeline();
 });
