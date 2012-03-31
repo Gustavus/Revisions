@@ -383,6 +383,11 @@ class API
     }
   }
 
+  private function noRevisionsSpecified(array $urlParams = array())
+  {
+    return (!isset($urlParams['revisionNumber']) && !isset($urlParams['revisionNumbers']));
+  }
+
   /**
    * Checks to see if an element is the only one in an array
    *
@@ -410,7 +415,8 @@ class API
     if (isset($urlParams['barebones']) &&
       (
         $this->revisionIsOnlyVisible($urlParams) ||
-        $this->revisionsAreVisible($urlParams)
+        $this->revisionsAreVisible($urlParams) ||
+        $this->noRevisionsSpecified($urlParams)
       ) && !$this->isRestore($urlParams)) {
       return false;
     } else {
