@@ -10,7 +10,7 @@
                 <input type="hidden" name="{{ key }}[{{ arrKey }}]" value="{{ arrValue }}" />
               {% endfor %}
             {% else %}
-              <input type="hidden" name="{{ key }}" value="{{ value }}" />
+              <input{% if key == 'oldestRevisionNumber' %} id="oldestRevisionNumber"{% endif %} type="hidden" name="{{ key }}" value="{{ value }}" />
             {% endif %}
           {% endfor %}
         </div>
