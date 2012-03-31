@@ -196,13 +196,22 @@ var revisions = {
       // figure out old revisionNumber
       if (revisions.oldData.revisionNumber === "false") {
         // set oldRevNum to be the average of the revisionNumbers you are comparing
-        var oldRevNum = (parseInt(revisions.oldData.revisionNumbers[0]) + parseInt(revisions.oldData.revisionNumbers[1])) / 2;
+        if (revisions.oldData.revisionNumbers !== undefined && revisions.oldData.revisionNumbers.length > 1) {
+          var oldRevNum = (parseInt(revisions.oldData.revisionNumbers[0]) + parseInt(revisions.oldData.revisionNumbers[1])) / 2;
+        } else {
+          var oldRevNum = 0;
+        }
       } else {
         var oldRevNum = revisions.oldData.revisionNumber;
       }
       // figure out new revisionNumber
       if (revData.revisionNumber === "false") {
-        var newRevNum = (parseInt(revData.revisionNumbers[0]) + parseInt(revData.revisionNumbers[1])) / 2;
+        if (revData.revisionNumbers !== undefined && revData.revisionNumbers.length > 1) {
+          var newRevNum = (parseInt(revData.revisionNumbers[0]) + parseInt(revData.revisionNumbers[1])) / 2;
+        } else {
+          // we want this to default to left, so add one to the oldRevNum
+          var newRevNum = oldRevNum + 1;
+        }
       } else {
         var newRevNum = revData.revisionNumber;
       }
