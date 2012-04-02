@@ -13,6 +13,7 @@
 {% macro renderTimeline(revisions, maxColumnSizes, visibleRevisions, oldestRevisionNumber, limit, labels) %}
   {% import 'base.twig' as base %}
   <div id="revisionTimeline">
+    <h4>Revision History</h4>
     <div class="labels">
       {% for column, label in labels %}
         <div>{{ label }}</div>

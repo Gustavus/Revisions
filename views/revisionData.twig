@@ -4,7 +4,6 @@
 
 {% block revisionTimeline %}
   {% if shouldRenderTimeline %}
-    <h4>Revision History</h4>
     {{ revisionsTwig.renderTimeline(revisions, maxColumnSizes, visibleRevisions, oldestRevisionNumber, limit, labels) }}
   {% endif %}
 {% endblock %}
