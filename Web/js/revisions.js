@@ -21,7 +21,7 @@ var revisions = {
   unselectBox: function($item)
   {
     $item.removeAttr('checked');
-    $('.' + $item.val()).removeClass('selected');
+    $('#revisionTimeline .' + $item.val()).removeClass('selected');
   },
 
   selectBox: function($item)
@@ -29,7 +29,7 @@ var revisions = {
     $item.attr('checked', 'checked');
   },
 
-  unselectBoxes: function($item)
+  unselectClosestBox: function($item)
   {
     var $checkedBoxes = $('input.compare:checked:not(#' + $item.attr('id') + ')');
     var firstVal      = parseInt($checkedBoxes.first().val());
@@ -79,23 +79,31 @@ var revisions = {
 
   animateAndReplaceData: function($selector, html, direction)
   {
-    $selector
-      .wrap('<div class="slideViewport" />')
-      .append(html);
+    // Prevents animations (and their callbacks) from overlapping
+    $selector.parent('.slideViewport').stop(true, true);
 
-    var $sections = $('.slideViewport section');
+    if (!$selector.parent().hasClass('slideViewport')) {
+      $selector
+        .wrap('<div class="slideViewport" />')
+        .children(':not(.slideSection)').wrapAll('<div class="slideSection" />');
+    }
+
+    // Append the new content to the element
+    $selector.append('<div class="slideSection">'+html+'</div>');
+
+    var $sections = $selector.children('.slideSection');
     $sections.last().addClass('slide-' + direction);
 
-    $selector.parent()
-      .height(Math.max($sections.first().outerHeight(), $sections.last().outerHeight()))
+    $selector.parent() // .slideViewport
+      .height(Math.max($selector.outerHeight(true), $sections.last().outerHeight(true)))
       .hide('slide', {
           direction: direction,
           distance: $sections.last().outerWidth(true)
-        }, 200, function() {
-          $sections.removeClass('slide-' + direction);
-          if ($sections.length > 1) {
-            $sections.first().remove();
-          }
+        }, 250, function() {
+          $sections
+            .removeClass('slide-' + direction)
+            .not(':last-child').remove().end() // Remove all but the last section
+            .children().unwrap();
           $selector.unwrap();
         }
       );
@@ -109,22 +117,32 @@ var revisions = {
       switch ($(element).attr('id')) {
         case 'revisionTimeline':
           // make sure the oldest revisionNumber pulled in is less than the oldestRevisionNumber we have asked for incase the ajax call takes time.
-          if ($data.find('#hiddenFields #oldestRevisionNumber').val() <= revisions.oldestRevisionNumber) {
-            $('#revisionTimeline table').html($(element).find('table').html(), direction);
-            Extend.apply('page', $('#revisionTimeline'));
+          if (revisions.oldestRevisionNumber === null || $data.find('#hiddenFields #oldestRevisionNumber').val() <= revisions.oldestRevisionNumber) {
+            if ($(element).html() !== '' && $('#revisionTimeline').html() !== '') {
+              $('#revisionTimeline table').html($(element).find('table').html(), direction);
+              Extend.apply('page', $('#revisionTimeline'));
+            } else {
+              // completely replace timeline
+              $('#revisionTimeline').html($(element).html());
+              if ($(element).html() !== '') {
+                // timeline is being replaced. Set up viewport to drag and scroll
+                Extend.add('page', revisions.setUpViewport());
+              }
+            }
           }
             break;
 
         case 'formExtras':
           revisions.animateAndReplaceData($('#formExtras'), $(element).html(), direction);
           restoreButtons = $(element).find('footer button');
+          // unselect all boxes
+          $('input.compare:checked').each(function(i, element) {
+            revisions.unselectBox($(element));
+          })
           if (restoreButtons.length === 1) {
             // revisionData
             $('.young').removeClass('young');
             $('.old').removeClass('old');
-            $('input.compare:checked').each(function(i, element) {
-              revisions.unselectBox($(element));
-            })
             $('.' + restoreButtons.first().val()).addClass('young');
             revisions.selectBox($('#revisionNum-' + restoreButtons.first().val()));
           } else if (restoreButtons.length === 2) {
@@ -135,6 +153,10 @@ var revisions = {
             $('.young').removeClass('young');
             $('.' + restoreButtons.last().val()).addClass('young').removeClass('selected');
             revisions.selectBox($('#revisionNum-' + restoreButtons.last().val()));
+          } else {
+            // revisionData was removed from the page
+            $('.young').removeClass('young');
+            $('.old').removeClass('old');
           }
             break;
 
@@ -232,7 +254,11 @@ var revisions = {
     // This is triggered when the history state changes
     var data = {};
     data['barebones'] = true;
-    data['oldestRevisionInTimeline'] = $('tfoot td label input').first().val();
+    var oldestRevisionInTimeline = $('tfoot td label input').first().val();
+    if (oldestRevisionInTimeline) {
+      // only set this if the timeline exists
+      data['oldestRevisionInTimeline'] = oldestRevisionInTimeline;
+    }
     data['visibleRevisions'] = revisions.makeVisibleRevisionsArray();
 
     if (url !== '') {
@@ -244,17 +270,17 @@ var revisions = {
           revisions.replaceSectionsWithData($(ajaxData), revisions.getSlideDirection(revData));
           // Track this event in Google Analytics
           window._gaq = window._gaq || [];
-          _gaq.push(['_trackPageview', url.replace(/^https?:\/\/[^\/]+/, '') + '&joe=true&url=replace']);
+          _gaq.push(['_trackPageview', url.replace(/^https?:\/\/[^\/]+/, '')]);
         }
       });
     }
   },
 
-  makeHistory: function($element)
+  makeHistory: function($element, shouldMakeHistory)
   {
     var revData = revisions.makeDataObject($element);
     var url = '?' + $.param(revData);
-    if (window.History.enabled) {
+    if (window.History.enabled && shouldMakeHistory) {
       window.History.pushState(revData, null, url);
     } else {
       // history isn't enabled, so the statechange event wont get called
@@ -262,10 +288,10 @@ var revisions = {
     }
   },
 
-  handleClickAction: function($element)
+  handleClickAction: function($element, shouldMakeHistory)
   {
     // call make history to throw the new url to the stack and trigger the statechange event that calls revisions.makeAjaxRequest
-    revisions.makeHistory($element);
+    revisions.makeHistory($element, shouldMakeHistory);
   },
 
   triggerShowMoreClick: function(oldestRevNumToPull)
@@ -273,7 +299,8 @@ var revisions = {
     if ($('.compare input:first-child').val() > oldestRevNumToPull) {
       revisions.oldestRevisionNumber = oldestRevNumToPull;
       // trigger click on button to pull more revisions
-      $('td.bytes.' + oldestRevNumToPull).first().click();
+      // don't push to history stack
+      revisions.handleClickAction($('td.bytes.' + oldestRevNumToPull).first(), false);
     }
   },
 
@@ -309,6 +336,36 @@ var revisions = {
         }
       }
     }
+  },
+
+  setUpViewport: function()
+  {
+    var $table = $('#revisionTimeline table');
+
+    var dimensions = {
+      height: $table.height() + 'px',
+      width: $('#revisionTimeline').width() - parseInt($('#revisionTimeline .viewport').css('marginLeft')) + 'px'
+    }
+
+    if ($('#revisionTimeline .viewport table').outerWidth() > $('#revisionTimeline').width()) {
+      $('#revisionTimeline .viewport')
+        .css(dimensions)
+        .viewport({
+          content: $table,
+          position: 'right'
+        })
+        .viewport('content')
+          .draggable({
+            containment: 'parent',
+            axis: 'x'
+          })
+          .scraggable({
+            containment: 'parent'
+          })
+          .on('drag', function() {
+            revisions.loadVisibleRevisionsIntoTimeline();
+          });
+    }
   }
 }
 
@@ -318,9 +375,12 @@ window.History.Adapter.bind(window, 'statechange', function(e, i) {
   revisions.makeAjaxRequest(State.data, State.url);
 });
 
-$('#revisionsForm').on('click', 'thead th, tbody td, button', function() {
+$('#revisionsForm').on('click', 'thead th, tbody td', function() {
+  revisions.handleClickAction($(this), true);
+  return false;
+}).on('click', 'button', function() {
   if ($('#revisionsForm').attr('method') === 'GET') {
-    revisions.handleClickAction($(this));
+    revisions.handleClickAction($(this), true);
     return false;
   }
 }).on('click', 'input.compare', function() {
@@ -328,7 +388,7 @@ $('#revisionsForm').on('click', 'thead th, tbody td, button', function() {
   if ($('input.compare:checked').length === 2) {
     revisions.enableCompareButton();
   } else if ($('input.compare:checked').length > 2) {
-    revisions.unselectBoxes($(this));
+    revisions.unselectClosestBox($(this));
     revisions.enableCompareButton();
   } else {
     $('#compareButton').attr('disabled', 'disabled');
@@ -350,30 +410,7 @@ $('#revisionsForm').on('click', 'thead th, tbody td, button', function() {
 });
 
 /* Set up viewport */
-var $table = $('#revisionTimeline table');
-
-var dimensions = {
-  height: ($table.height() + 1) + 'px',
-  width: $('#revisionTimeline').width() - parseInt($('#revisionTimeline .viewport').css('marginLeft')) + 'px'
-}
-
-$('#revisionTimeline .viewport')
-  .css(dimensions)
-  .viewport({
-    content: $table,
-    position: 'right'
-  })
-  .viewport('content')
-    .draggable({
-      containment: 'parent',
-      axis: 'x'
-    })
-    .scraggable({
-      containment: 'parent'
-    })
-    .on('drag', function() {
-      revisions.loadVisibleRevisionsIntoTimeline();
-    });
+revisions.setUpViewport()
 
 $(document).ready(function() {
   $('#compareButton').attr('disabled', 'disabled');
