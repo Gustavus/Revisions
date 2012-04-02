@@ -2120,6 +2120,15 @@ class APITest extends RevisionsTestsHelper
   /**
    * @test
    */
+  public function timelineParamsExistAndNotRestore()
+  {
+    $urlParams = array('oldestRevisionNumber' => '4', 'revisionNumber' => '4', 'barebones' => 'true', 'visibleRevisions' => array(9));
+    $this->assertFalse($this->call($this->revisionsAPI, 'timelineParamsExistAndNotRestore', array($urlParams)));
+  }
+
+  /**
+   * @test
+   */
   public function shouldRenderTimelineFalseComparison()
   {
     $urlParams = array('pr' => 'manage', 'user' => 'patrick', 'oldestRevisionNumber' => '0', 'revisionNumber' => 'false', 'revisionNumbers' => array('4', '6'), 'barebones' => 'true', 'oldestRevisionInTimeline' => '1', 'visibleRevisions' => array('4', '7'));
@@ -2132,6 +2141,24 @@ class APITest extends RevisionsTestsHelper
   public function shouldRenderTimeline()
   {
     $urlParams = array('oldestRevisionNumber' => '2', 'revisionNumber' => '10', 'barebones' => 'true', 'oldestRevisionInTimeline' => '2');
+    $this->assertFalse($this->call($this->revisionsAPI, 'shouldRenderTimeline', array($urlParams)));
+  }
+
+  /**
+   * @test
+   */
+  public function shouldRenderTimelineBackToEmptyData()
+  {
+    $urlParams = array('pr' => 'manage', 'user' => 'bvisto', 'barebones' => 'true', 'oldestRevisionInTimeline' => '1', 'visibleRevisions' => array('39'));
+    $this->assertFalse($this->call($this->revisionsAPI, 'shouldRenderTimeline', array($urlParams)));
+  }
+
+  /**
+   * @test
+   */
+  public function shouldRenderTimelineBackToEmptyDataNotFullTimeline()
+  {
+    $urlParams = array('pr' => 'manage', 'user' => 'bvisto', 'barebones' => 'true', 'oldestRevisionInTimeline' => '11', 'visibleRevisions' => array('39'));
     $this->assertFalse($this->call($this->revisionsAPI, 'shouldRenderTimeline', array($urlParams)));
   }
 
@@ -2181,6 +2208,52 @@ class APITest extends RevisionsTestsHelper
   /**
    * @test
    */
+  public function shouldRenderRevisionDataBackToEmptyData()
+  {
+    $urlParams = array('pr' => 'manage', 'user' => 'bvisto', 'barebones' => 'true', 'oldestRevisionInTimeline' => '1', 'visibleRevisions' => array('39'));
+    $this->assertTrue($this->call($this->revisionsAPI, 'shouldRenderRevisionData', array($urlParams)));
+  }
+
+  /**
+   * @test
+   */
+  public function noRevisionSpecified()
+  {
+    $urlParams = array('pr' => 'manage', 'user' => 'bvisto', 'barebones' => 'true', 'oldestRevisionInTimeline' => '1', 'visibleRevisions' => array('39'));
+    $this->assertFalse($this->call($this->revisionsAPI, 'noRevisionSpecified', array($urlParams)));
+  }
+
+  /**
+   * @test
+   */
+  public function noRevisionSpecifiedNoVisibleRevisions()
+  {
+    $urlParams = array('pr' => 'manage', 'user' => 'bvisto', 'barebones' => 'true', 'oldestRevisionInTimeline' => '1');
+    $this->assertTrue($this->call($this->revisionsAPI, 'noRevisionSpecified', array($urlParams)));
+  }
+
+  /**
+   * @test
+   */
+  public function revisionIsOnlyVisibleBackToEmptyData()
+  {
+    $urlParams = array('pr' => 'manage', 'user' => 'bvisto', 'barebones' => 'true', 'oldestRevisionInTimeline' => '1', 'visibleRevisions' => array('39'));
+    $this->assertFalse($this->call($this->revisionsAPI, 'revisionIsOnlyVisible', array($urlParams)));
+  }
+
+  /**
+   * @test
+   */
+  public function revisionsAreVisibleBackToEmptyData()
+  {
+    $urlParams = array('pr' => 'manage', 'user' => 'bvisto', 'barebones' => 'true', 'oldestRevisionInTimeline' => '1', 'visibleRevisions' => array('39'));
+    $this->assertFalse($this->call($this->revisionsAPI, 'revisionsAreVisible', array($urlParams)));
+  }
+
+
+  /**
+   * @test
+   */
   public function shouldRenderRevisionData()
   {
     $urlParams = array('oldestRevisionNumber' => '2', 'revisionNumber' => '10', 'visibleRevisions' => array('10'), 'barebones' => 'true');
@@ -2217,7 +2290,7 @@ class APITest extends RevisionsTestsHelper
   /**
    * @test
    */
-  public function noRevisionSpecified()
+  public function noRevisionsSpecified()
   {
     $urlParams = array('oldestRevisionNumber' => '4', 'pr' => 'manage', 'user' => 'bvisto', 'barebones' => 'true', 'oldestRevisionInTimeline' => '7');
     $this->assertTrue($this->call($this->revisionsAPI, 'noRevisionsSpecified', array($urlParams)));

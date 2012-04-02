@@ -49,6 +49,7 @@ class API
     'barebones',
     'visibleRevisions',
     'oldestRevisionInTimeline',
+    'restore',
   );
 
   /**
@@ -236,7 +237,8 @@ class API
       '/js/jquery/ui/current/minified/jquery.ui.mouse.min.js',
       '/js/jquery/ui/current/minified/jquery.ui.draggable.min.js',
       '/js/jquery/ui/current/minified/jquery.effects.slide.min.js',
-      '/min/f=/js/jquery/jquery.scraggable.js',
+      '/min/f=/joe/jquery.scraggable/jquery.scraggable.js',
+      //'/min/f=/js/jquery/jquery.scraggable.js',
       '/min/f=/js/jquery/jquery.viewport.js',
       '/js/history/scripts/bundled/html4+html5/jquery.history.js',
       sprintf('/min/f=/revisions/js/revisions.js&%1$s',
@@ -309,7 +311,7 @@ class API
    */
   private function revisionNumberIsInTimeline(array $urlParams = array())
   {
-    return (isset($urlParams['revisionNumber']) &&
+    return (isset($urlParams['revisionNumber'], $urlParams['oldestRevisionInTimeline']) &&
       ($urlParams['revisionNumber'] === false ||
         (
           (int) $urlParams['revisionNumber'] >= (int) $urlParams['oldestRevisionInTimeline']) ||
@@ -327,11 +329,24 @@ class API
    */
   private function oldestRevisionNumberIsInTimeline(array $urlParams = array())
   {
-    return (isset($urlParams['oldestRevisionNumber']) &&
+    return (isset($urlParams['oldestRevisionNumber'], $urlParams['oldestRevisionInTimeline']) &&
       (
         (int) $urlParams['oldestRevisionInTimeline'] <= (int) $urlParams['oldestRevisionNumber']
       ) || (int) $urlParams['oldestRevisionNumber'] <= 1 && (int) $urlParams['oldestRevisionInTimeline'] <= 1
     );
+  }
+
+  /**
+   * Checks if timeline contains the revisionNumbers, or if there are no revisionNumbers passed. This happens if we are going through the history stack and get back to the initial state.
+   *
+   * @param  array  $urlParams
+   * @return boolean
+   */
+  private function timelineContainsRevisions(array $urlParams = array())
+  {
+    return (($this->revisionNumberIsInTimeline($urlParams) &&
+      $this->oldestRevisionNumberIsInTimeline($urlParams)) ||
+      (!isset($urlParams['oldestRevisionNumber']) && !isset($urlParams['revisionNumber'])));
   }
 
   /**
@@ -343,8 +358,7 @@ class API
   private function shouldRenderTimeline(array $urlParams = array())
   {
     if ($this->timelineParamsExistAndNotRestore($urlParams) &&
-      $this->revisionNumberIsInTimeline($urlParams) &&
-      $this->oldestRevisionNumberIsInTimeline($urlParams)
+      $this->timelineContainsRevisions($urlParams)
       ) {
       return false;
     } else {
@@ -383,9 +397,32 @@ class API
     }
   }
 
+  /**
+   * Checks if a revision has been specified or not. This will not be the case if we are pulling in the timeline.
+   *
+   * @param  array  $urlParams
+   * @return boolean
+   */
   private function noRevisionsSpecified(array $urlParams = array())
   {
     return (!isset($urlParams['revisionNumber']) && !isset($urlParams['revisionNumbers']));
+  }
+
+  /**
+   * Checks if a revision has been specified or not. If a revision was visible, but no longer has a revision number, we want to redraw the revisionData
+   *
+   * @param  array  $urlParams
+   * @return boolean
+   */
+  private function noRevisionSpecified(array $urlParams = array())
+  {
+    if (isset($urlParams['visibleRevisions'])) {
+      // revision was visible
+      // if it is empty, we don't want the revisionData rendered out
+      return (empty($urlParams['visibleRevisions']) && $this->noRevisionsSpecified($urlParams));
+    } else {
+      return $this->noRevisionsSpecified($urlParams);
+    }
   }
 
   /**
@@ -416,7 +453,7 @@ class API
       (
         $this->revisionIsOnlyVisible($urlParams) ||
         $this->revisionsAreVisible($urlParams) ||
-        $this->noRevisionsSpecified($urlParams)
+        $this->noRevisionSpecified($urlParams)
       ) && !$this->isRestore($urlParams)) {
       return false;
     } else {
