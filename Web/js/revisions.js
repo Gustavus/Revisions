@@ -14,6 +14,12 @@ var revisions = {
     'oldestRevisionInTimeline'
   ),
 
+  // load extra revisions to the timeline to cache scrolling a little
+  timelineScrollingCache: 6,
+
+  // minimum number of revisions scrolled until we pull in more revisions to the timeline
+  timelineAutoLoadGroupSize: 3,
+
   oldData: {},
 
   oldestRevisionNumber: null,
@@ -119,7 +125,7 @@ var revisions = {
           // make sure the oldest revisionNumber pulled in is less than the oldestRevisionNumber we have asked for incase the ajax call takes time.
           if (revisions.oldestRevisionNumber === null || $data.find('#hiddenFields #oldestRevisionNumber').val() <= revisions.oldestRevisionNumber) {
             if ($(element).html() !== '' && $('#revisionTimeline').html() !== '') {
-              $('#revisionTimeline table').html($(element).find('table').html(), direction);
+              $('#revisionTimeline table').html($(element).find('table').html());
               Extend.apply('page', $('#revisionTimeline'));
             } else {
               // completely replace timeline
@@ -324,13 +330,13 @@ var revisions = {
       var offset            = $viewport.viewport('content').position().left;
 
       var numberOfRevisionsVisible  = Math.floor((visibleTableWidth + offset) / revisionWidth);
-      // +6 to pull in an extra 6 so we cache the scrolling a little
-      var oldestRevNumToPull        = revisions.convertNegativeAndZero(latestRevisionNum - (numberOfRevisionsVisible + 6));
+      // pull in extra revisions specified in timelineScrollingCache
+      var oldestRevNumToPull        = revisions.convertNegativeAndZero(latestRevisionNum - (numberOfRevisionsVisible + revisions.timelineScrollingCache));
       if (revisions.oldestRevisionNumber === null) {
         revisions.triggerShowMoreClick(oldestRevNumToPull);
       } else {
-        // -3 so we only pull in groups of three or more to avoid a lot of requests
-        var oldestRevNumAllowedToPull = revisions.convertNegativeAndZero(revisions.oldestRevisionNumber - 3);
+        // pull in by group size set in timelineAutoLoadGroupSize
+        var oldestRevNumAllowedToPull = revisions.convertNegativeAndZero(revisions.oldestRevisionNumber - timelineAutoLoadGroupSize);
         if (revisions.oldestRevisionNumber > 1 && oldestRevNumAllowedToPull >= oldestRevNumToPull) {
           revisions.triggerShowMoreClick(oldestRevNumToPull);
         }
