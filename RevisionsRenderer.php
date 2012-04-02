@@ -215,10 +215,6 @@ class RevisionsRenderer
   private function renderTwig($filename, $revision, array $params = array(), $oldestRevNum = null)
   {
     $oldestRevisionNumber = ($oldestRevNum === null) ? $this->revisions->findOldestRevisionNumberPulled() : $oldestRevNum - 1;
-    if ($this->shouldRenderTimeline) {
-      // don't bother pulling all the revisions for the timeline
-      $params['revisions'] = $this->revisions->getRevisionObjects($oldestRevisionNumber);
-    }
     $params = array_merge(
         $params,
         array(
