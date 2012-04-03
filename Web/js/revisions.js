@@ -118,12 +118,12 @@ var revisions = {
       );
   },
 
-  animateTimeline: function($formExtras, $element)
+  animateTimeline: function($formExtras, shouldAnimate)
   {
     if ($('#revisionTimeline').html() !== '' && $formExtras.find('footer button:first-child').html() !== '') {
       // revision timeline and revisionData exist
-      var oldestRevDataShown = $element.find('footer button:first-child').val();
-      var latestRevDataShown = $element.find('footer button:last-child').val();
+      var oldestRevDataShown = $formExtras.find('footer button:first-child').val();
+      var latestRevDataShown = $formExtras.find('footer button:last-child').val();
       var $lastRevisionTh    = $('.viewport table thead tr th:last-child');
       var revisionWidth      = $lastRevisionTh.outerWidth();
       var latestRevisionNum  = $lastRevisionTh.data('revision-number');
@@ -144,7 +144,11 @@ var revisions = {
           // check for unsupported values if there isn't room for the padding
           newLeftPos = maxAmountHidden;
         }
-        $viewport.viewport('content').animate({'left': newLeftPos + 'px'}, 250);
+        if (shouldAnimate) {
+          $viewport.viewport('content').animate({'left': newLeftPos + 'px'}, 250);
+        } else {
+          $viewport.viewport('content').css('left', newLeftPos + 'px');
+        }
       } else if (latestRevDataShown >= visibleRevisionsRange[1]) {
         // timeline needs to scroll right;
         var newLeftPos = ((latestRevisionNum - latestRevDataShown - revisions.revisionTimelinePadding) * revisionWidth);
@@ -153,7 +157,11 @@ var revisions = {
           newLeftPos = 0;
         }
         // set viewport position to be the new position with the revision visible in the timeline
-        $viewport.viewport('content').animate({'left': newLeftPos + 'px'}, 250);
+        if (shouldAnimate) {
+          $viewport.viewport('content').animate({'left': newLeftPos + 'px'}, 250);
+        } else {
+          $viewport.viewport('content').css('left', newLeftPos + 'px');
+        }
       }
     }
   },
@@ -183,7 +191,7 @@ var revisions = {
 
         case 'formExtras':
           revisions.animateAndReplaceData($('#formExtras'), $(element).html(), direction);
-          revisions.animateTimeline($('#formExtras'), $(element));
+          revisions.animateTimeline($(element), true);
           restoreButtons = $(element).find('footer button');
           // unselect all boxes
           $('input.compare:checked').each(function(i, element) {
@@ -414,6 +422,10 @@ var revisions = {
           })
           .on('drag', function() {
             revisions.loadVisibleRevisionsIntoTimeline();
+          })
+          .ready(function() {
+            // make sure the visible revision is also visible in the timeline
+            revisions.animateTimeline($('#formExtras'), false);
           });
     }
   }
