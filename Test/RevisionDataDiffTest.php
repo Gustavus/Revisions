@@ -1578,7 +1578,6 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
     $oldSplit = $this->call($this->revisionDataDiff, 'splitWords', array($oldContent));
     $nextSplit = $this->call($this->revisionDataDiff, 'splitWords', array($nextContent));
     $myArrDiff = $this->call($this->revisionDataDiff, 'myArrayDiff', array($oldSplit, $nextSplit));
-    //var_dump($oldSplit, $nextSplit, $myArrDiff);.
     $expected = array(
       '7' => array(
         'd' => array(
