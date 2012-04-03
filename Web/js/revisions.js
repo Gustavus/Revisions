@@ -20,6 +20,9 @@ var revisions = {
   // minimum number of revisions scrolled until we pull in more revisions to the timeline
   timelineAutoLoadGroupSize: 3,
 
+  // how many revisions to pad with when scrolling the timeline
+  revisionTimelinePadding: 3,
+
   oldData: {},
 
   oldestRevisionNumber: null,
@@ -115,6 +118,46 @@ var revisions = {
       );
   },
 
+  animateTimeline: function($formExtras, $element)
+  {
+    if ($('#revisionTimeline').html() !== '' && $formExtras.find('footer button:first-child').html() !== '') {
+      // revision timeline and revisionData exist
+      var oldestRevDataShown = $element.find('footer button:first-child').val();
+      var latestRevDataShown = $element.find('footer button:last-child').val();
+      var $lastRevisionTh    = $('.viewport table thead tr th:last-child');
+      var revisionWidth      = $lastRevisionTh.outerWidth();
+      var latestRevisionNum  = $lastRevisionTh.data('revision-number');
+      var $viewport          = $('#revisionTimeline .viewport');
+      var visibleTableWidth  = $viewport.outerWidth();
+      var offset             = $viewport.viewport('content').position().left;
+      // number of revisions visible as well as hidden to the right.
+      var numberOfRevisionsVisible  = Math.floor((visibleTableWidth + offset) / revisionWidth);
+      // range of revisions in the visible viewport
+      var visibleRevisionsRange = Array(latestRevisionNum - numberOfRevisionsVisible, latestRevisionNum - Math.floor(offset / revisionWidth));
+
+      if (visibleRevisionsRange[0] >= oldestRevDataShown) {
+        // timeline needs to scroll left;
+        var newLeftPos = ((visibleRevisionsRange[0] - oldestRevDataShown) + revisions.revisionTimelinePadding) * revisionWidth;
+        // max left offset
+        var maxAmountHidden    = latestRevisionNum * revisionWidth - visibleTableWidth;
+        if (newLeftPos > maxAmountHidden) {
+          // check for unsupported values if there isn't room for the padding
+          newLeftPos = maxAmountHidden;
+        }
+        $viewport.viewport('content').animate({'left': newLeftPos + 'px'}, 250);
+      } else if (latestRevDataShown >= visibleRevisionsRange[1]) {
+        // timeline needs to scroll right;
+        var newLeftPos = ((latestRevisionNum - latestRevDataShown - revisions.revisionTimelinePadding) * revisionWidth);
+        if (newLeftPos < 0) {
+          // check for unsupported values if there isn't room for the padding
+          newLeftPos = 0;
+        }
+        // set viewport position to be the new position with the revision visible in the timeline
+        $viewport.viewport('content').animate({'left': newLeftPos + 'px'}, 250);
+      }
+    }
+  },
+
   replaceSectionsWithData: function($data, direction)
   {
     $('#revisionsForm').attr('method', $data.attr('method'));
@@ -140,6 +183,7 @@ var revisions = {
 
         case 'formExtras':
           revisions.animateAndReplaceData($('#formExtras'), $(element).html(), direction);
+          revisions.animateTimeline($('#formExtras'), $(element));
           restoreButtons = $(element).find('footer button');
           // unselect all boxes
           $('input.compare:checked').each(function(i, element) {
@@ -167,7 +211,7 @@ var revisions = {
             break;
 
           default:
-            $('#' + $(element).attr('id')).html($(element).html(), direction);
+            $('#' + $(element).attr('id')).html($(element).html());
       }
 
       $('#compareButton').attr('disabled', 'disabled');
@@ -336,7 +380,7 @@ var revisions = {
         revisions.triggerShowMoreClick(oldestRevNumToPull);
       } else {
         // pull in by group size set in timelineAutoLoadGroupSize
-        var oldestRevNumAllowedToPull = revisions.convertNegativeAndZero(revisions.oldestRevisionNumber - timelineAutoLoadGroupSize);
+        var oldestRevNumAllowedToPull = revisions.convertNegativeAndZero(revisions.oldestRevisionNumber - revisions.timelineAutoLoadGroupSize);
         if (revisions.oldestRevisionNumber > 1 && oldestRevNumAllowedToPull >= oldestRevNumToPull) {
           revisions.triggerShowMoreClick(oldestRevNumToPull);
         }
