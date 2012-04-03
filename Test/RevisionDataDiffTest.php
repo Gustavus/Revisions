@@ -184,9 +184,53 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
   /**
    * @test
    */
+  public function getContentNumericSize()
+  {
+    $currContent = 23;
+    $content = 22;
+    $this->revisionDataDiffProperties = array(
+      'nextContent' => $currContent,
+      'content'     => $content,
+    );
+    $this->diffInfoProperties = array(
+      'startIndex' => null,
+      'endIndex' => null,
+      'info' => 22,
+    );
+    $this->setUp();
+    $expected = $content;
+    $this->call($this->revisionDataDiff, 'renderRevision');
+    $this->assertSame($expected, $this->revisionDataDiff->getContentSize());
+  }
+
+  /**
+   * @test
+   */
   public function getNextContentSize()
   {
     $expected = strlen($this->revisionDataDiffProperties['nextContent']);
+    $this->call($this->revisionDataDiff, 'renderRevision');
+    $this->assertSame($expected, $this->revisionDataDiff->getNextContentSize());
+  }
+
+  /**
+   * @test
+   */
+  public function getNextContentNumericSize()
+  {
+    $currContent = 23;
+    $content = 22;
+    $this->revisionDataDiffProperties = array(
+      'nextContent' => $currContent,
+      'content'     => $content,
+    );
+    $this->diffInfoProperties = array(
+      'startIndex' => null,
+      'endIndex' => null,
+      'info' => 23,
+    );
+    $this->setUp();
+    $expected = $currContent;
     $this->call($this->revisionDataDiff, 'renderRevision');
     $this->assertSame($expected, $this->revisionDataDiff->getNextContentSize());
   }
