@@ -1,5 +1,92 @@
 var revisions = {
 
+  timeline: {
+
+    $viewport: null,
+
+    getViewport: function() {
+      if (revisions.timeline.$viewport === null) {
+        revisions.timeline.$viewport = $('#revisionTimeline .viewport');
+      }
+      return revisions.timeline.$viewport;
+    },
+
+    $lastRevisionTh: null,
+
+    getLastRevisionTh: function() {
+      if (revisions.timeline.$lastRevisionTh === null) {
+        revisions.timeline.$lastRevisionTh = $('#revisionTimeline table thead tr th:last-child');
+      }
+      return revisions.timeline.$lastRevisionTh;
+    },
+
+    // each individual revision width
+    revisionWidth: null,
+
+    getRevisionWidth: function() {
+      if (revisions.timeline.revisionWidth === null) {
+        // .prev() because the last item has a border right that gets included in outerWidth in firefox but not in chrome, so we will resort to the second to last item
+        revisions.timeline.revisionWidth = revisions.timeline.getLastRevisionTh().prev().outerWidth();
+      }
+      return revisions.timeline.revisionWidth;
+    },
+
+    latestRevisionNumber: null,
+
+    getLatestRevisionNumber: function() {
+      if (revisions.timeline.latestRevisionNumber === null) {
+        revisions.timeline.latestRevisionNumber = revisions.timeline.getLastRevisionTh().data('revision-number');
+      }
+      return revisions.timeline.latestRevisionNumber;
+    },
+
+    visibleTableWidth: null,
+
+    getVisibleTableWidth: function() {
+      if (revisions.timeline.visibleTableWidth === null) {
+        revisions.timeline.visibleTableWidth = revisions.timeline.getViewport().width();
+      }
+      return revisions.timeline.visibleTableWidth;
+    },
+
+    // number of pixels in the table that are not visible
+    pixelsHidden: null,
+
+    getPixelsHidden: function() {
+      if (revisions.timeline.pixelsHidden === null) {
+        revisions.timeline.pixelsHidden = revisions.timeline.getLatestRevisionNumber() * revisions.timeline.getRevisionWidth() - revisions.timeline.getVisibleTableWidth();
+      }
+      return revisions.timeline.pixelsHidden;
+    },
+
+    getLeftOffset: function() {
+      return revisions.timeline.getViewport().viewport('content').position().left;
+    },
+
+    // number of revisions visible as well as hidden to the right.
+    getNumberOfRevisionsVisible: function() {
+      return Math.floor((revisions.timeline.getVisibleTableWidth() + revisions.timeline.getLeftOffset()) / revisions.timeline.getRevisionWidth());
+    },
+
+    // load extra revisions to the timeline to cache scrolling a little
+    // revisions.timelineScrollingCache
+    scrollingCache: 6,
+
+    // minimum number of revisions scrolled until we pull in more revisions to the timeline
+    // revisions.timelineAutoLoadGroupSize
+    autoLoadGroupSize: 3,
+
+    // how many revisions to pad with when scrolling the timeline
+    // revisions.revisionTimelinePadding
+    padding: 3,
+
+    // how many revisions to scroll each time the timeline is scrolled
+    revisionsToScrollThrough: 3
+
+  },
+
+  contentSlideSpeed: 250,
+
   applicationQueryString: '',
 
   revisionsArgs: Array(
@@ -13,15 +100,6 @@ var revisions = {
     'visibleRevisions',
     'oldestRevisionInTimeline'
   ),
-
-  // load extra revisions to the timeline to cache scrolling a little
-  timelineScrollingCache: 6,
-
-  // minimum number of revisions scrolled until we pull in more revisions to the timeline
-  timelineAutoLoadGroupSize: 3,
-
-  // how many revisions to pad with when scrolling the timeline
-  revisionTimelinePadding: 3,
 
   oldData: {},
 
@@ -108,7 +186,7 @@ var revisions = {
       .hide('slide', {
           direction: direction,
           distance: $sections.last().outerWidth(true)
-        }, 250, function() {
+        }, revisions.contentSlideSpeed, function() {
           $sections
             .removeClass('slide-' + direction)
             .not(':last-child').remove().end() // Remove all but the last section
@@ -118,50 +196,48 @@ var revisions = {
       );
   },
 
-  animateTimeline: function($formExtras, shouldAnimate)
+  slideTimeline: function(pos, maxPos, shouldAnimate, speed)
+  {
+    if (pos > maxPos) {
+      // check for unsupported values if there isn't room for the padding
+      pos = maxPos;
+    }
+    if (pos < 0) {
+      pos = 0;
+    }
+    if (shouldAnimate) {
+      revisions.timeline.getViewport().viewport('content').stop(true, true).animate({'left': pos + 'px'}, speed, 'linear', function() {
+        // make sure revisions are visible in timeline
+        revisions.loadVisibleRevisionsIntoTimeline();
+      });
+    } else {
+      revisions.timeline.getViewport().viewport('content').css('left', pos + 'px');
+      // make sure revisions are visible in timeline
+      revisions.loadVisibleRevisionsIntoTimeline();
+    }
+  },
+
+  // slide timeline to make sure visible revisions are in view
+  showVisibleRevisionInTimeline: function($formExtras, shouldAnimate)
   {
     if ($('#revisionTimeline').html() !== '' && $formExtras.find('footer button:first-child').html() !== '') {
       // revision timeline and revisionData exist
       var oldestRevDataShown = $formExtras.find('footer button:first-child').val();
       var latestRevDataShown = $formExtras.find('footer button:last-child').val();
-      var $lastRevisionTh    = $('.viewport table thead tr th:last-child');
-      var revisionWidth      = $lastRevisionTh.outerWidth();
-      var latestRevisionNum  = $lastRevisionTh.data('revision-number');
-      var $viewport          = $('#revisionTimeline .viewport');
-      var visibleTableWidth  = $viewport.outerWidth();
-      var offset             = $viewport.viewport('content').position().left;
-      // number of revisions visible as well as hidden to the right.
-      var numberOfRevisionsVisible  = Math.floor((visibleTableWidth + offset) / revisionWidth);
+
       // range of revisions in the visible viewport
-      var visibleRevisionsRange = Array(latestRevisionNum - numberOfRevisionsVisible, latestRevisionNum - Math.floor(offset / revisionWidth));
+      var visibleRevisionsRange = Array(revisions.timeline.getLatestRevisionNumber() - revisions.timeline.getNumberOfRevisionsVisible(), revisions.timeline.getLatestRevisionNumber() - Math.floor(revisions.timeline.getLeftOffset() / revisions.timeline.getRevisionWidth()));
 
       if (visibleRevisionsRange[0] >= oldestRevDataShown) {
         // timeline needs to scroll left;
-        var newLeftPos = ((visibleRevisionsRange[0] - oldestRevDataShown) + revisions.revisionTimelinePadding) * revisionWidth;
-        // max left offset
-        var maxAmountHidden    = latestRevisionNum * revisionWidth - visibleTableWidth;
-        if (newLeftPos > maxAmountHidden) {
-          // check for unsupported values if there isn't room for the padding
-          newLeftPos = maxAmountHidden;
-        }
-        if (shouldAnimate) {
-          $viewport.viewport('content').animate({'left': newLeftPos + 'px'}, 250);
-        } else {
-          $viewport.viewport('content').css('left', newLeftPos + 'px');
-        }
+        var newLeftPos = ((visibleRevisionsRange[0] - oldestRevDataShown) + revisions.timeline.padding) * revisions.timeline.getRevisionWidth();
+
+        revisions.slideTimeline(newLeftPos, revisions.timeline.getPixelsHidden(), shouldAnimate, revisions.contentSlideSpeed);
       } else if (latestRevDataShown >= visibleRevisionsRange[1]) {
         // timeline needs to scroll right;
-        var newLeftPos = ((latestRevisionNum - latestRevDataShown - revisions.revisionTimelinePadding) * revisionWidth);
-        if (newLeftPos < 0) {
-          // check for unsupported values if there isn't room for the padding
-          newLeftPos = 0;
-        }
-        // set viewport position to be the new position with the revision visible in the timeline
-        if (shouldAnimate) {
-          $viewport.viewport('content').animate({'left': newLeftPos + 'px'}, 250);
-        } else {
-          $viewport.viewport('content').css('left', newLeftPos + 'px');
-        }
+        var newLeftPos = ((revisions.timeline.getLatestRevisionNumber() - latestRevDataShown - revisions.timeline.padding) * revisions.timeline.getRevisionWidth());
+
+        revisions.slideTimeline(newLeftPos, revisions.timeline.getPixelsHidden(), shouldAnimate, revisions.contentSlideSpeed);
       }
     }
   },
@@ -191,7 +267,7 @@ var revisions = {
 
         case 'formExtras':
           revisions.animateAndReplaceData($('#formExtras'), $(element).html(), direction);
-          revisions.animateTimeline($(element), true);
+          revisions.showVisibleRevisionInTimeline($(element), true);
           restoreButtons = $(element).find('footer button');
           // unselect all boxes
           $('input.compare:checked').each(function(i, element) {
@@ -374,25 +450,73 @@ var revisions = {
   loadVisibleRevisionsIntoTimeline: function()
   {
     if ($('.compare input:first-child').val() > 1) {
-      var $lastRevisionTh   = $('.viewport table thead tr th:last-child');
-      var revisionWidth     = $lastRevisionTh.outerWidth();
-      var latestRevisionNum = $lastRevisionTh.data('revision-number');
-      var $viewport         = $('#revisionTimeline .viewport');
-      var visibleTableWidth = $viewport.outerWidth();
-      var offset            = $viewport.viewport('content').position().left;
-
-      var numberOfRevisionsVisible  = Math.floor((visibleTableWidth + offset) / revisionWidth);
       // pull in extra revisions specified in timelineScrollingCache
-      var oldestRevNumToPull        = revisions.convertNegativeAndZero(latestRevisionNum - (numberOfRevisionsVisible + revisions.timelineScrollingCache));
+      var oldestRevNumToPull        = revisions.convertNegativeAndZero(revisions.timeline.getLatestRevisionNumber() - (revisions.timeline.getNumberOfRevisionsVisible() + revisions.timeline.scrollingCache));
+
       if (revisions.oldestRevisionNumber === null) {
         revisions.triggerShowMoreClick(oldestRevNumToPull);
       } else {
         // pull in by group size set in timelineAutoLoadGroupSize
-        var oldestRevNumAllowedToPull = revisions.convertNegativeAndZero(revisions.oldestRevisionNumber - revisions.timelineAutoLoadGroupSize);
+        var oldestRevNumAllowedToPull = revisions.convertNegativeAndZero(revisions.oldestRevisionNumber - revisions.timeline.autoLoadGroupSize);
         if (revisions.oldestRevisionNumber > 1 && oldestRevNumAllowedToPull >= oldestRevNumToPull) {
           revisions.triggerShowMoreClick(oldestRevNumToPull);
         }
       }
+    }
+  },
+
+  scrollOnMouseWheel: function(mouseEvent)
+  {
+    var isMousewheel = (/Firefox/i.test(navigator.userAgent)) ? false : true;
+    if (isMousewheel) {
+      var deltaX = mouseEvent.originalEvent.wheelDeltaX;
+      var deltaY = mouseEvent.originalEvent.wheelDeltaY;
+    } else {
+      if (Math.abs(mouseEvent.originalEvent.detail) === 3) {
+        // vertical scrolling is either 3 or -3
+        var deltaX = 0;
+        var deltaY = mouseEvent.originalEvent.detail / 3;
+      } else {
+        var deltaY = 0;
+        // for some reason, this is backwards from on mousewheel
+        var deltaX = 0 - mouseEvent.originalEvent.detail;
+      }
+    }
+    if (mouseEvent.originalEvent && (deltaY !== 0 || deltaX !== 0)) {
+      var wheelScrollAmount = (deltaX !== 0) ? deltaX : deltaY;
+
+      if (isMousewheel) {
+        // if it is on mousewheel it will have a large number divisible by 120
+        wheelScrollAmount = wheelScrollAmount / 120;
+      }
+      if (wheelScrollAmount < 0) {
+        var newPos = revisions.timeline.getLeftOffset() + (revisions.timeline.getRevisionWidth() * revisions.timeline.revisionsToScrollThrough) * wheelScrollAmount;
+      } else {
+        var newPos = revisions.timeline.getLeftOffset() + (revisions.timeline.getRevisionWidth() * revisions.timeline.revisionsToScrollThrough) * wheelScrollAmount;
+      }
+
+      var hoverRevisionNumber = $('#revisionTimeline th.hover, #revisionTimeline td.hover').data('revision-number');
+
+      if (newPos > revisions.timeline.getPixelsHidden()) {
+        var revisionsToScroll = (newPos - revisions.timeline.getPixelsHidden()) / (revisions.timeline.revisionsToScrollThrough * revisions.timeline.getRevisionWidth());
+      } else if (newPos < 0) {
+        var revisionsToScroll = (0 - newPos) / (revisions.timeline.revisionsToScrollThrough * revisions.timeline.getRevisionWidth());
+      } else {
+        var revisionsToScroll = revisions.timeline.revisionsToScrollThrough;
+      }
+      if (revisionsToScroll === 1) {
+        // this means that it wants to scroll over by the width of the revision * the number of revisions to scroll through
+        revisionsToScroll = 0;
+      }
+
+      if (wheelScrollAmount < 0) {
+        var newHoverRevisionNumber = hoverRevisionNumber + (revisionsToScroll);
+      } else {
+        var newHoverRevisionNumber = hoverRevisionNumber - (revisionsToScroll);
+      }
+
+      $('#revisionTimeline tr .' + newHoverRevisionNumber).mouseenter();
+      revisions.slideTimeline(newPos, revisions.timeline.getPixelsHidden(), false, 1);
     }
   },
 
@@ -402,11 +526,11 @@ var revisions = {
 
     var dimensions = {
       height: $table.height() + 'px',
-      width: $('#revisionTimeline').width() - parseInt($('#revisionTimeline .viewport').css('marginLeft')) + 'px'
+      width: $('#revisionTimeline').width() - parseInt(revisions.timeline.getViewport().css('marginLeft')) + 'px'
     }
-
+    var mousewheelEvt = (/Firefox/i.test(navigator.userAgent)) ? 'DOMMouseScroll' : 'mousewheel';
     if ($('#revisionTimeline .viewport table').outerWidth() > $('#revisionTimeline').width()) {
-      $('#revisionTimeline .viewport')
+      revisions.timeline.getViewport()
         .css(dimensions)
         .viewport({
           content: $table,
@@ -417,15 +541,16 @@ var revisions = {
             containment: 'parent',
             axis: 'x'
           })
-          .scraggable({
-            containment: 'parent'
-          })
-          .on('drag', function() {
+          .on('drag', function(e) {
             revisions.loadVisibleRevisionsIntoTimeline();
+          })
+          .on(mousewheelEvt, function(e) {
+            revisions.scrollOnMouseWheel(e);
+            return false;
           })
           .ready(function() {
             // make sure the visible revision is also visible in the timeline
-            revisions.animateTimeline($('#formExtras'), false);
+            revisions.showVisibleRevisionInTimeline($('#formExtras'), false);
           });
     }
   }
@@ -442,6 +567,7 @@ $('#revisionsForm').on('click', 'thead th, tbody td', function() {
   return false;
 }).on('click', 'button', function() {
   if ($('#revisionsForm').attr('method') === 'GET') {
+    // we only want to do an ajax request if the form method is get.
     revisions.handleClickAction($(this), true);
     return false;
   }
@@ -468,7 +594,20 @@ $('#revisionsForm').on('click', 'thead th, tbody td', function() {
   $('#revisionTimeline .hover').removeClass('hover');
   $('#revisionTimeline tr :nth-child(' + ($(this).prevAll().length + 1) + ')').addClass('hover');
 }).on('mouseleave', '#revisionTimeline table', function() {
+  // remove hovered column class
   $('th.hover, td.hover').removeClass('hover');
+}).on('mouseenter', '.scrollHotspot.scrollRight', function() {
+  // slide timeline right
+  revisions.slideTimeline(0, 1, true, 2500);
+}).on('mouseleave', '.scrollHotspot.scrollRight', function() {
+  // stop animation
+  revisions.timeline.getViewport().viewport('content').stop();
+}).on('mouseenter', '.scrollHotspot.scrollLeft', function() {
+  // slide timeline left
+  revisions.slideTimeline(revisions.timeline.getPixelsHidden(), revisions.timeline.getPixelsHidden(), true, 2500);
+}).on('mouseleave', '.scrollHotspot.scrollLeft', function() {
+  // stop animation
+  revisions.timeline.getViewport().viewport('content').stop();
 });
 
 /* Set up viewport */
