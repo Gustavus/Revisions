@@ -171,7 +171,7 @@ class API
       // don't bother to set up the template if barebones is set
       $this->setUpTemplate();
     }
-    if ($this->isRevisionData($urlParams)) {
+    if ($this->isRevisionData($urlParams) || $this->isSingleComparison($urlParams)) {
       return $this->renderRevisionFromUrlParams($urlParams);
     } else if ($this->isComparison($urlParams)) {
       return $this->renderRevisionComparisonFromUrlParams($urlParams);
@@ -237,8 +237,6 @@ class API
       '/js/jquery/ui/current/minified/jquery.ui.mouse.min.js',
       '/js/jquery/ui/current/minified/jquery.ui.draggable.min.js',
       '/js/jquery/ui/current/minified/jquery.effects.slide.min.js',
-      '/min/f=/joe/jquery.scraggable/jquery.scraggable.js',
-      //'/min/f=/js/jquery/jquery.scraggable.js',
       '/min/f=/js/jquery/jquery.viewport.js',
       '/js/history/scripts/bundled/html4+html5/jquery.history.js',
       sprintf('/min/f=/revisions/js/revisions.js&%1$s',
@@ -498,6 +496,11 @@ class API
     return (isset($urlParams['revisionNumber']) && is_numeric($urlParams['revisionNumber']) || $this->isRestore($urlParams));
   }
 
+  private function isSingleComparison(array $urlParams)
+  {
+    return (isset($urlParams['revisionNumber']) && isset($urlParams['revisionNumbers']) && $urlParams['revisionNumber'] === 'false' && count($urlParams['revisionNumbers']) === 1);
+  }
+
   /**
    * Checks the urlParams to see if it is a thank you action
    *
@@ -554,8 +557,13 @@ class API
     if ($this->isRestore($urlParams)) {
       return $this->renderRevisionRestore((int) $urlParams['restore']);
     } else {
+      if ($this->isSingleComparison($urlParams)) {
+        $revisionNumber = (int) $urlParams['revisionNumbers'][0];
+      } else {
+        $revisionNumber = (int) $urlParams['revisionNumber'];
+      }
       return $this->renderRevisionData(
-          (int) $urlParams['revisionNumber'],
+          $revisionNumber,
           (isset($urlParams['columns'])) ? $urlParams['columns'] : array(),
           $oldestRevNumToPull
       );

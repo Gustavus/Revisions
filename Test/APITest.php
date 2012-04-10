@@ -2026,6 +2026,22 @@ class APITest extends RevisionsTestsHelper
   /**
    * @test
    */
+  public function isSingleComparison()
+  {
+    $this->assertTrue($this->call($this->revisionsAPI, 'isSingleComparison', array(array('revisionNumbers' => array(1), 'revisionNumber' => 'false'))));
+  }
+
+  /**
+   * @test
+   */
+  public function isSingleComparisonFalse()
+  {
+    $this->assertFalse($this->call($this->revisionsAPI, 'isSingleComparison', array(array('revisionNumbers' => array('1', '2'), 'limit' => 10))));
+  }
+
+  /**
+   * @test
+   */
   public function handleRestoreAction()
   {
     $conn = $this->getConnection();
