@@ -31,16 +31,7 @@
             </th>
             {% for revisionNumber, revision in revisions %}
               {% if revisionNumber != 0 %}
-                {% if revisionNumber in visibleRevisions %}
-                  {% if visibleRevisions|length > 1 and revisionNumber == visibleRevisions[1] or visibleRevisions|length == 1 and revisionNumber == visibleRevisions[0] %}
-                    {% set class = ' young' %}
-                  {% else %}
-                    {% set class = ' old' %}
-                  {% endif %}
-                {% else %}
-                  {% set class = '' %}
-                {% endif %}
-                <th class="{{ revisionNumber }}{{ class }}" title="{{ base.renderTitle(revision, revisionNumber, oldestRevisionNumber) }}" data-revision-number="{{ revisionNumber }}">{{ revisionNumber }}</th>
+                <th class="{{ revisionNumber }}{{- _self.generateRevisionClass(revisionNumber, visibleRevisions) -}}" title="{{ base.renderTitle(revision, revisionNumber, oldestRevisionNumber) }}" data-revision-number="{{ revisionNumber }}">{{ revisionNumber }}</th>
               {% endif %}
             {% endfor %}
           </tr>
@@ -53,16 +44,7 @@
                 {% if revision.error %}
                   {{ base.renderErrorColumns(1) }}
                 {% elseif revision != null and revisionNumber > oldestRevisionNumber and revisionNumber != 0 %}
-                  {% if revisionNumber in visibleRevisions %}
-                    {% if visibleRevisions|length > 1 and revisionNumber == visibleRevisions[1] or visibleRevisions|length == 1 and revisionNumber == visibleRevisions[0] %}
-                      {% set class = ' young' %}
-                    {% else %}
-                      {% set class = ' old' %}
-                    {% endif %}
-                  {% else %}
-                    {% set class = '' %}
-                  {% endif %}
-                  <td class="bytes {{ revisionNumber }}{{ class }}" data-revision-number="{{ revisionNumber }}">
+                  <td class="bytes {{ revisionNumber }}{{- _self.generateRevisionClass(revisionNumber, visibleRevisions) -}}" data-revision-number="{{ revisionNumber }}">
                   {% if revision.getRevisionData(column).getRevisionRevisionNumber() == revision.getRevisionNumber() %}
                     {{ _self.renderCell(revision, revisions[revisionNumber - 1], maxColumnSizes[column], column) }}
                   {% else %}
@@ -84,16 +66,7 @@
             <th>&nbsp;</th>
             {% for revisionNumber, revision in revisions %}
               {% if revision != null and revisionNumber > oldestRevisionNumber and not revision.error and revisionNumber != 0 %}
-                {% if revisionNumber in visibleRevisions %}
-                  {% if visibleRevisions|length > 1 and revisionNumber == visibleRevisions[1] or visibleRevisions|length == 1 and revisionNumber == visibleRevisions[0] %}
-                    {% set class = ' young' %}
-                  {% else %}
-                    {% set class = ' old' %}
-                  {% endif %}
-                {% else %}
-                  {% set class = '' %}
-                {% endif %}
-                <td class="{{ revisionNumber }}{{ class }}">
+                <td class="{{ revisionNumber }}{{- _self.generateRevisionClass(revisionNumber, visibleRevisions) -}}">
                   <label for="revisionNum-{{ revisionNumber }}">
                     <input id="revisionNum-{{ revisionNumber }}" type="checkbox" name="revisionNumbers[]" title="Revision {{ revisionNumber }}" class="compare" value="{{ revisionNumber }}"{% if revisionNumber in visibleRevisions and visibleRevisions|length >= 1 %} checked="checked"{% endif %}/>
                   </label>
@@ -108,6 +81,18 @@
     </div>
   </div>
 {% endmacro %}
+
+{% macro generateRevisionClass(revisionNumber, visibleRevisions) %}{% spaceless %}
+  {% if revisionNumber in visibleRevisions %}
+    {% if visibleRevisions|length > 1 and revisionNumber == visibleRevisions[1] or visibleRevisions|length == 1 and revisionNumber == visibleRevisions[0] %}
+      {% set class = ' young' %}
+    {% else %}
+      {% set class = ' old' %}
+    {% endif %}
+  {% else %}
+    {% set class = '' %}
+  {% endif %}
+{% endspaceless %}{{ class }}{% endmacro %}
 
 {% macro renderCell(revision, previousRevision, maxColumnSize, column) %}
   {% if revision.getRevisionData(column).contentIsNumeric() %}
