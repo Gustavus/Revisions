@@ -25,6 +25,56 @@ span.bytes {
 #revisionTimeline .viewport {
   margin-left: 102px;
 }
+
+/* Revision Timeline scrolling hotspots */
+#revisionTimeline .viewport .scrollHotspot {
+  background: rgba(0, 0, 0, .65);
+  color: #fff;
+
+  display: block;
+  text-align: center;
+
+  font-size: 1.2em;
+
+  width: 11px;
+  height: 25px;
+  line-height: 25px;
+
+  overflow: visible;
+  z-index: 10;
+
+  position: absolute;
+  bottom: 40%;
+
+  -webkit-transition: all .05s ease-in-out;
+  -moz-transition: all .05s ease-in-out;
+  -ms-transition: all .05s ease-in-out;
+  -o-transition: all .05s ease-in-out;
+  transition: all .05s ease-in-out;
+}
+#revisionTimeline .viewport:hover .scrollHotspot {
+  cursor: pointer;
+}
+
+#revisionTimeline .scrollHotspot.scrollLeft {
+  left: -12px;
+  border-radius: 0 2px 2px 0;
+  padding-right: 1px;
+}
+#revisionTimeline .viewport:hover .scrollHotspot.scrollLeft {
+  left: 0;
+  opacity: 1;
+}
+
+#revisionTimeline .scrollHotspot.scrollRight {
+  right: -12px;
+  border-radius: 2px 0 0 2px;
+  padding-left: 1px;
+}
+#revisionTimeline .viewport:hover .scrollHotspot.scrollRight {
+  right: 0;
+}
+
 #revisionTimeline th:first-child {
   display: none;
 }
@@ -159,7 +209,7 @@ td.bytes {
   display: block;
   height: 2.5em;
   line-height: 2.5em;
-  padding: 0 1px;
+  padding: 0;
 }
 #revisionTimeline thead th, #revisionTimeline tbody td {
   cursor: pointer;
