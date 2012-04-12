@@ -270,9 +270,6 @@ var revisions = {
                 $revisionTimeline.html($(element).html());
                 // make sure revisionTimeline is visible
                 $revisionTimeline.show();
-              } else {
-                // timeline wasn't empty, so just hide the timeline
-                $revisionTimeline.hide();
               }
               if ($(element).html() !== '') {
                 // timeline is being replaced. Set up viewport to drag and scroll
@@ -286,6 +283,8 @@ var revisions = {
           if ($('#revisionTimeline').html() !== '' && $(element).find('#restoreButton').html() === null) {
             // if coming from restore page, we want to show the timeline
             $('#revisionTimeline').show();
+          } else if ($(element).find('#restoreButton').html() !== null) {
+            $('#revisionTimeline').hide();
           }
           revisions.animateAndReplaceData($('#formExtras'), $(element).html(), direction);
           revisions.showVisibleRevisionInTimeline($(element), true);
@@ -560,20 +559,21 @@ var revisions = {
             // make sure the visible revision is also visible in the timeline
             revisions.showVisibleRevisionInTimeline($('#formExtras'), false);
           });
-      $('#revisionTimeline .scrollHotspot').removeClass('disabled');
-      $('#revisionTimeline').on('mouseenter', '.scrollHotspot.scrollRight', function() {
-        // slide timeline right
-        revisions.slideTimeline(0, 1, true, revisions.findSlideDuration(0));
-      }).on('mouseleave', '.scrollHotspot.scrollRight', function() {
-        // stop animation
-        revisions.timeline.getViewport().viewport('content').stop();
-      }).on('mouseenter', '.scrollHotspot.scrollLeft', function() {
-        // slide timeline left
-        revisions.slideTimeline(revisions.timeline.getPixelsHidden(), revisions.timeline.getPixelsHidden(), true, revisions.findSlideDuration(revisions.timeline.getPixelsHidden()));
-      }).on('mouseleave', '.scrollHotspot.scrollLeft', function() {
-        // stop animation
-        revisions.timeline.getViewport().viewport('content').stop();
-      });
+      $('#revisionTimeline')
+        .find('.scrollHotspot').removeClass('disabled').end()
+        .on('mouseenter', '.scrollHotspot.scrollRight', function() {
+          // slide timeline right
+          revisions.slideTimeline(0, 1, true, revisions.findSlideDuration(0));
+        }).on('mouseleave', '.scrollHotspot.scrollRight', function() {
+          // stop animation
+          revisions.timeline.getViewport().viewport('content').stop();
+        }).on('mouseenter', '.scrollHotspot.scrollLeft', function() {
+          // slide timeline left
+          revisions.slideTimeline(revisions.timeline.getPixelsHidden(), revisions.timeline.getPixelsHidden(), true, revisions.findSlideDuration(revisions.timeline.getPixelsHidden()));
+        }).on('mouseleave', '.scrollHotspot.scrollLeft', function() {
+          // stop animation
+          revisions.timeline.getViewport().viewport('content').stop();
+        });
     }
   }
 }
