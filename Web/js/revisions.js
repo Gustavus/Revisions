@@ -83,11 +83,12 @@ var revisions = {
     // how many revisions to scroll each time the timeline is scrolled
     revisionsToScrollThrough: 3,
 
-    // how many pixels per millisecond to slide when hovering over a scrolling hotspot
-    hotspotPixelsPerMS: 10
+    // how many milliseconds per pixel to slide when hovering over a scrolling hotspot
+    hotspotMSPerPixel: 10
 
   },
 
+  // duration of the sliding animation when sliding in revisionData
   contentSlideSpeed: 250,
 
   applicationQueryString: '',
@@ -508,7 +509,7 @@ var revisions = {
   {
     // pixels needed to slide until we hit our target
     var pixelsUntilEnd = Math.abs(revisions.timeline.getViewport().viewport('content').position().left - newPos);
-    return pixelsUntilEnd * revisions.timeline.hotspotPixelsPerMS;
+    return pixelsUntilEnd * revisions.timeline.hotspotMSPerPixel;
   },
 
   setUpViewport: function()
