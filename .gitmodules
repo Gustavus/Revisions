@@ -1,0 +1,3 @@
+[submodule "Web/js/jquery-mousewheel"]
+	path = Web/js/jquery-mousewheel
+	url = git://github.com/brandonaaron/jquery-mousewheel.git
