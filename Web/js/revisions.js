@@ -5,7 +5,7 @@ var revisions = {
     $viewport: null,
 
     getViewport: function() {
-      if (revisions.timeline.$viewport === null) {
+      if (revisions.timeline.$viewport === null || revisions.timeline.$viewport.html() === null) {
         revisions.timeline.$viewport = $('#revisionTimeline .viewport');
       }
       return revisions.timeline.$viewport;
@@ -60,6 +60,10 @@ var revisions = {
     },
 
     getLeftOffset: function() {
+      if (revisions.timeline.getViewport().html() !== null && revisions.timeline.getViewport().viewport('content').html() === null) {
+        // set up viewport if timeline exists but not yet a viewport
+        revisions.setUpViewport();
+      }
       return revisions.timeline.getViewport().viewport('content').position().left;
     },
 
@@ -210,7 +214,7 @@ var revisions = {
       pos = 0;
     }
     if (shouldAnimate) {
-      revisions.timeline.getViewport().viewport('content').stop(true, true).animate({'left': pos + 'px'}, speed, 'linear', function() {
+      revisions.timeline.getViewport().viewport('content').stop(true, true).animate({'left': pos + 'px'}, speed, 'easeInOutSine', function() {
         // make sure revisions are visible in timeline
         revisions.loadVisibleRevisionsIntoTimeline();
       });
@@ -228,7 +232,6 @@ var revisions = {
       // revision timeline and revisionData exist
       var oldestRevDataShown = $formExtras.find('footer button:first-child').val();
       var latestRevDataShown = $formExtras.find('footer button:last-child').val();
-
       // range of revisions in the visible viewport
       var visibleRevisionsRange = Array(revisions.timeline.getLatestRevisionNumber() - revisions.timeline.getNumberOfRevisionsVisible(), revisions.timeline.getLatestRevisionNumber() - Math.floor(revisions.timeline.getLeftOffset() / revisions.timeline.getRevisionWidth()));
 
@@ -254,13 +257,23 @@ var revisions = {
       switch ($(element).attr('id')) {
         case 'revisionTimeline':
           // make sure the oldest revisionNumber pulled in is less than the oldestRevisionNumber we have asked for incase the ajax call takes time.
+          var $revisionTimeline = $('#revisionTimeline');
           if (revisions.oldestRevisionNumber === null || $data.find('#hiddenFields #oldestRevisionNumber').val() <= revisions.oldestRevisionNumber) {
-            if ($(element).html() !== '' && $('#revisionTimeline').html() !== '') {
+            if ($(element).html() !== '' && $revisionTimeline.html() !== '') {
               $('#revisionTimeline table').html($(element).find('table').html());
-              Extend.apply('page', $('#revisionTimeline'));
+              // make sure revisionTimeline is visible
+              $revisionTimeline.show();
+              Extend.apply('page', $revisionTimeline);
             } else {
-              // completely replace timeline
-              $('#revisionTimeline').html($(element).html());
+              if ($revisionTimeline.html() === '') {
+                // timeline was empty, so completely replace it
+                $revisionTimeline.html($(element).html());
+                // make sure revisionTimeline is visible
+                $revisionTimeline.show();
+              } else {
+                // timeline wasn't empty, so just hide the timeline
+                $revisionTimeline.hide();
+              }
               if ($(element).html() !== '') {
                 // timeline is being replaced. Set up viewport to drag and scroll
                 Extend.add('page', revisions.setUpViewport());
@@ -270,6 +283,10 @@ var revisions = {
             break;
 
         case 'formExtras':
+          if ($('#revisionTimeline').html() !== '' && $(element).find('#restoreButton').html() === null) {
+            // if coming from restore page, we want to show the timeline
+            $('#revisionTimeline').show();
+          }
           revisions.animateAndReplaceData($('#formExtras'), $(element).html(), direction);
           revisions.showVisibleRevisionInTimeline($(element), true);
           restoreButtons = $(element).find('footer button');
@@ -321,9 +338,9 @@ var revisions = {
 
       if ($element.attr('id') === 'compareButton') {
         // User wants to compare two revisions, so get checkbox data
-        if ($('input.compare:checked').length > 1) {
+        if ($('#revisionTimeline input.compare:checked').length > 1) {
           data['revisionNumbers'] = Array();
-          $('input.compare:checked').each(function(i, element) {
+          $('#revisionTimeline input.compare:checked').each(function(i, element) {
             data['revisionNumbers'][i] = $(element).val();
           })
         }
@@ -508,7 +525,7 @@ var revisions = {
   findSlideDuration: function(newPos)
   {
     // pixels needed to slide until we hit our target
-    var pixelsUntilEnd = Math.abs(revisions.timeline.getViewport().viewport('content').position().left - newPos);
+    var pixelsUntilEnd = Math.abs(revisions.timeline.getLeftOffset() - newPos);
     return pixelsUntilEnd * revisions.timeline.hotspotMSPerPixel;
   },
 
