@@ -238,6 +238,7 @@ class API
       '/js/jquery/ui/current/minified/jquery.ui.draggable.min.js',
       '/js/jquery/ui/current/minified/jquery.effects.slide.min.js',
       '/min/f=/js/jquery/jquery.viewport.js',
+      '/min/f=/revisions/js/jquery-mousewheel/jquery.mousewheel.js&amp;1',
       '/js/history/scripts/bundled/html4+html5/jquery.history.js',
       sprintf('/min/f=/revisions/js/revisions.js&%1$s',
           self::REVISIONS_JS_VERSION
@@ -496,9 +497,15 @@ class API
     return (isset($urlParams['revisionNumber']) && is_numeric($urlParams['revisionNumber']) || $this->isRestore($urlParams));
   }
 
+  /**
+   * Checks the urlParams to see if it only one checkbox was checked when comparing.
+   *
+   * @param  array   $urlParams
+   * @return boolean
+   */
   private function isSingleComparison(array $urlParams)
   {
-    return (isset($urlParams['revisionNumber']) && isset($urlParams['revisionNumbers']) && $urlParams['revisionNumber'] === 'false' && count($urlParams['revisionNumbers']) === 1);
+    return (isset($urlParams['revisionNumber'], $urlParams['revisionNumbers']) && $urlParams['revisionNumber'] === 'false' && count($urlParams['revisionNumbers']) === 1);
   }
 
   /**
