@@ -501,6 +501,14 @@ var revisions = {
     }
   },
 
+  findSlideDuration: function(newPos)
+  {
+    // pixels needed to slide until we hit our target
+    var pixelsUntilEnd = Math.abs(revisions.timeline.getViewport().viewport('content').position().left - newPos);
+    // we want to move 10 pixels per millisecond
+    return pixelsUntilEnd * 10;
+  },
+
   setUpViewport: function()
   {
     var $table = $('#revisionTimeline table');
@@ -509,7 +517,6 @@ var revisions = {
       height: $table.height() + 'px',
       width: $('#revisionTimeline').width() - parseInt(revisions.timeline.getViewport().css('marginLeft')) + 'px'
     }
-    //var mousewheelEvt = (/Firefox/i.test(navigator.userAgent)) ? 'DOMMouseScroll' : 'mousewheel';
     if ($('#revisionTimeline .viewport table').outerWidth() > $('#revisionTimeline').width()) {
       revisions.timeline.getViewport()
         .css(dimensions)
@@ -533,6 +540,20 @@ var revisions = {
             // make sure the visible revision is also visible in the timeline
             revisions.showVisibleRevisionInTimeline($('#formExtras'), false);
           });
+      $('#revisionTimeline .scrollHotspot').removeClass('disabled');
+      $('#revisionTimeline').on('mouseenter', '.scrollHotspot.scrollRight', function() {
+        // slide timeline right
+        revisions.slideTimeline(0, 1, true, revisions.findSlideDuration(0));
+      }).on('mouseleave', '.scrollHotspot.scrollRight', function() {
+        // stop animation
+        revisions.timeline.getViewport().viewport('content').stop();
+      }).on('mouseenter', '.scrollHotspot.scrollLeft', function() {
+        // slide timeline left
+        revisions.slideTimeline(revisions.timeline.getPixelsHidden(), revisions.timeline.getPixelsHidden(), true, revisions.findSlideDuration(revisions.timeline.getPixelsHidden()));
+      }).on('mouseleave', '.scrollHotspot.scrollLeft', function() {
+        // stop animation
+        revisions.timeline.getViewport().viewport('content').stop();
+      });
     }
   }
 }
@@ -577,18 +598,6 @@ $('#revisionsForm').on('click', 'thead th, tbody td', function() {
 }).on('mouseleave', '#revisionTimeline table', function() {
   // remove hovered column class
   $('th.hover, td.hover').removeClass('hover');
-}).on('mouseenter', '.scrollHotspot.scrollRight', function() {
-  // slide timeline right
-  revisions.slideTimeline(0, 1, true, 2500);
-}).on('mouseleave', '.scrollHotspot.scrollRight', function() {
-  // stop animation
-  revisions.timeline.getViewport().viewport('content').stop();
-}).on('mouseenter', '.scrollHotspot.scrollLeft', function() {
-  // slide timeline left
-  revisions.slideTimeline(revisions.timeline.getPixelsHidden(), revisions.timeline.getPixelsHidden(), true, 2500);
-}).on('mouseleave', '.scrollHotspot.scrollLeft', function() {
-  // stop animation
-  revisions.timeline.getViewport().viewport('content').stop();
 });
 
 /* Set up viewport */
