@@ -15,7 +15,7 @@ var revisions = {
 
     getLastRevisionTh: function() {
       if (revisions.timeline.$lastRevisionTh === null) {
-        revisions.timeline.$lastRevisionTh = $('#revisionTimeline table thead tr th:last-child');
+        revisions.timeline.$lastRevisionTh = $('#revisionTimeline thead th:last-child');
       }
       return revisions.timeline.$lastRevisionTh;
     },
@@ -26,7 +26,7 @@ var revisions = {
     getRevisionWidth: function() {
       if (revisions.timeline.revisionWidth === null) {
         // .prev() because the last item has a border right that gets included in outerWidth in firefox but not in chrome, so we will resort to the second to last item
-        revisions.timeline.revisionWidth = revisions.timeline.getLastRevisionTh().prev().outerWidth();
+        revisions.timeline.revisionWidth = (revisions.timeline.getLastRevisionTh().prev()) ? revisions.timeline.getLastRevisionTh().prev().outerWidth() : revisions.timeline.getLastRevisionTh().outerWidth();
       }
       return revisions.timeline.revisionWidth;
     },
@@ -465,37 +465,18 @@ var revisions = {
     }
   },
 
-  scrollOnMouseWheel: function(mouseEvent)
+  scrollOnMouseWheel: function(delta, deltaX, deltaY)
   {
-    var isMousewheel = (/Firefox/i.test(navigator.userAgent)) ? false : true;
-    if (isMousewheel) {
-      var deltaX = mouseEvent.originalEvent.wheelDeltaX;
-      var deltaY = mouseEvent.originalEvent.wheelDeltaY;
-    } else {
-      if (Math.abs(mouseEvent.originalEvent.detail) === 3) {
-        // vertical scrolling is either 3 or -3
-        var deltaX = 0;
-        var deltaY = mouseEvent.originalEvent.detail / 3;
-      } else {
-        var deltaY = 0;
-        // for some reason, this is backwards from on mousewheel
-        var deltaX = 0 - mouseEvent.originalEvent.detail;
-      }
-    }
-    if (mouseEvent.originalEvent && (deltaY !== 0 || deltaX !== 0)) {
-      var wheelScrollAmount = (deltaX !== 0) ? deltaX : deltaY;
+    if (delta) {
+      var wheelScrollAmount = (deltaX !== 0) ? 0 - deltaX : delta;
 
-      if (isMousewheel) {
-        // if it is on mousewheel it will have a large number divisible by 120
-        wheelScrollAmount = wheelScrollAmount / 120;
-      }
       if (wheelScrollAmount < 0) {
         var newPos = revisions.timeline.getLeftOffset() + (revisions.timeline.getRevisionWidth() * revisions.timeline.revisionsToScrollThrough) * wheelScrollAmount;
       } else {
         var newPos = revisions.timeline.getLeftOffset() + (revisions.timeline.getRevisionWidth() * revisions.timeline.revisionsToScrollThrough) * wheelScrollAmount;
       }
 
-      var hoverRevisionNumber = $('#revisionTimeline th.hover, #revisionTimeline td.hover').data('revision-number');
+      var hoverRevisionNumber = $('#revisionTimeline th.hover').data('revision-number');
 
       if (newPos > revisions.timeline.getPixelsHidden()) {
         var revisionsToScroll = (newPos - revisions.timeline.getPixelsHidden()) / (revisions.timeline.revisionsToScrollThrough * revisions.timeline.getRevisionWidth());
@@ -515,7 +496,7 @@ var revisions = {
         var newHoverRevisionNumber = hoverRevisionNumber - (revisionsToScroll);
       }
 
-      $('#revisionTimeline tr .' + newHoverRevisionNumber).mouseenter();
+      $('#revisionTimeline tr th.' + newHoverRevisionNumber).mouseenter();
       revisions.slideTimeline(newPos, revisions.timeline.getPixelsHidden(), false, 1);
     }
   },
@@ -528,7 +509,7 @@ var revisions = {
       height: $table.height() + 'px',
       width: $('#revisionTimeline').width() - parseInt(revisions.timeline.getViewport().css('marginLeft')) + 'px'
     }
-    var mousewheelEvt = (/Firefox/i.test(navigator.userAgent)) ? 'DOMMouseScroll' : 'mousewheel';
+    //var mousewheelEvt = (/Firefox/i.test(navigator.userAgent)) ? 'DOMMouseScroll' : 'mousewheel';
     if ($('#revisionTimeline .viewport table').outerWidth() > $('#revisionTimeline').width()) {
       revisions.timeline.getViewport()
         .css(dimensions)
@@ -544,8 +525,8 @@ var revisions = {
           .on('drag', function(e) {
             revisions.loadVisibleRevisionsIntoTimeline();
           })
-          .on(mousewheelEvt, function(e) {
-            revisions.scrollOnMouseWheel(e);
+          .on('mousewheel', function(e, delta, deltaX, deltaY) {
+            revisions.scrollOnMouseWheel(delta, deltaX, deltaY);
             return false;
           })
           .ready(function() {
