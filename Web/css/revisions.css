@@ -61,9 +61,8 @@ span.bytes {
   border-radius: 0 2px 2px 0;
   padding-right: 1px;
 }
-#revisionTimeline .viewport:hover .scrollHotspot.scrollLeft {
+#revisionTimeline .viewport:hover .scrollHotspot.scrollLeft:not(.disabled) {
   left: 0;
-  opacity: 1;
 }
 
 #revisionTimeline .scrollHotspot.scrollRight {
@@ -71,7 +70,7 @@ span.bytes {
   border-radius: 2px 0 0 2px;
   padding-left: 1px;
 }
-#revisionTimeline .viewport:hover .scrollHotspot.scrollRight {
+#revisionTimeline .viewport:hover .scrollHotspot.scrollRight:not(.disabled) {
   right: 0;
 }
 
