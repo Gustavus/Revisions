@@ -26,9 +26,7 @@
       <table class="fancy">
         <thead>
           <tr>
-            <th>
-              &nbsp;
-            </th>
+            <th>&nbsp;</th>
             {% for revisionNumber, revision in revisions %}
               {% if revisionNumber != 0 %}
                 <th class="{{ revisionNumber }}{{- _self.generateRevisionClass(revisionNumber, visibleRevisions) -}}" title="{{ base.renderTitle(revision, revisionNumber, oldestRevisionNumber) }}" data-revision-number="{{ revisionNumber }}">{{ revisionNumber }}</th>
@@ -53,7 +51,7 @@
                   </td>
                 {% else %}
                   {% if revisionNumber != 0 %}
-                    <td class="bytes {{ revisionNumber }}{% if revisionNumber in visibleRevisions %} visibleRevision{% endif %}" data-oldest-revision-number="{{ revisionNumber }}" class="missingRevisions" title="Show More Revisions">
+                    <td class="missingRevisions bytes {{ revisionNumber }}{% if revisionNumber in visibleRevisions %} visibleRevision{% endif %}" data-oldest-revision-number="{{ revisionNumber }}" title="Show More Revisions">
                     </td>
                   {% endif %}
                 {% endif %}
