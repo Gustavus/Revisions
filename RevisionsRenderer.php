@@ -64,7 +64,7 @@ class RevisionsRenderer
    */
   public function __destruct()
   {
-    unset($this->revisions, $this->revisionsUrlParams, $this->shouldRenderTimeline, $this->shouldRenderRevisionData, $this->labels);
+    unset($this->revisions, $this->revisionsUrlParams, $this->applicationUrlParams, $this->shouldRenderTimeline, $this->shouldRenderRevisionData, $this->labels);
   }
 
   /**
