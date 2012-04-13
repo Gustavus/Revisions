@@ -1,3 +1,6 @@
 [submodule "Web/js/jquery-mousewheel"]
 	path = Web/js/jquery-mousewheel
 	url = git://github.com/brandonaaron/jquery-mousewheel.git
+[submodule "Web/js/jquery-viewport"]
+	path = Web/js/jquery-viewport
+	url = git://github.com/borbit/jquery.viewport.git
