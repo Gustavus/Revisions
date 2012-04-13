@@ -350,18 +350,19 @@ class RevisionsManager extends RevisionsBase
    */
   private function filterOldColumns(array $revisionInfo, array $brandNewColumns)
   {
+    $return = array();
     array_walk($revisionInfo,
         function($value, $key, $array)
         {
-          if (!in_array($key, $array[0]) && empty($value)) {
-            unset($array[1][$key]);
-          } else if (empty($value)) {
+          if (in_array($key, $array[0]) && empty($value)) {
             $array[1][$key] = '""'; // same as json_encode('')
+          } else if (!empty($value)) {
+            $array[1][$key] = $value;
           }
         },
-        array($brandNewColumns, &$revisionInfo)
+        array($brandNewColumns, &$return)
     );
-    return $revisionInfo;
+    return $return;
   }
 
   /**
