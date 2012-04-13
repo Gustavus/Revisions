@@ -5,7 +5,7 @@ var revisions = {
     $viewport: null,
 
     getViewport: function() {
-      if (revisions.timeline.$viewport === null || revisions.timeline.$viewport.html() === null) {
+      if (revisions.timeline.$viewport === null || revisions.timeline.$viewport.length === 0) {
         revisions.timeline.$viewport = $('#revisionTimeline .viewport');
       }
       return revisions.timeline.$viewport;
@@ -60,11 +60,17 @@ var revisions = {
     },
 
     getLeftOffset: function() {
-      if (revisions.timeline.getViewport().html() !== null && revisions.timeline.getViewport().viewport('content').html() === null) {
+      if (revisions.timeline.getViewport().length !== 0 && revisions.timeline.getViewport().viewport('content').length === 0) {
         // set up viewport if timeline exists but not yet a viewport
         revisions.setUpViewport();
       }
-      return revisions.timeline.getViewport().viewport('content').position().left;
+      if (revisions.timeline.getViewport().viewport('content').length !== 0) {
+        // the viewport exists, so we can get the position of it
+        return revisions.timeline.getViewport().viewport('content').position().left;
+      } else {
+        // if the viewport doesn't exist, there will be no position
+        return 0;
+      }
     },
 
     // number of revisions visible as well as hidden to the right.
@@ -131,20 +137,27 @@ var revisions = {
     var lastVal       = parseInt($checkedBoxes.last().val());
     var itemVal       = parseInt($item.val());
     if (firstVal > itemVal) {
+      // newly checked box should replace the first checked box
       revisions.unselectBox($checkedBoxes.first());
     } else if (lastVal < itemVal) {
+      // newly checked box should replace the last checked box
       revisions.unselectBox($checkedBoxes.last());
-      } else {
+    } else {
+      // it is somewhere in the middle, so we need to figure out which one the new box is closer to.
       var firstDistance = itemVal - firstVal;
       var lastDistance  = lastVal - itemVal;
       var middle        = $('input.compare').length / 2;
       if (firstDistance < lastDistance) {
+        // new box is closer to the first box
         revisions.unselectBox($checkedBoxes.first());
       } else if (lastDistance < firstDistance) {
+        // new box is closer to the last box
         revisions.unselectBox($checkedBoxes.last());
       } else if (itemVal < middle) {
+        // item is in the middle, so if it is in the first half of the timeline, unselect the first box
         revisions.unselectBox($checkedBoxes.first());
       } else {
+        // item is in the middle, so if it is in the last half of the timeline, unselect the last box
         revisions.unselectBox($checkedBoxes.last());
       }
     }
@@ -207,10 +220,11 @@ var revisions = {
   slideTimeline: function(pos, maxPos, shouldAnimate, speed)
   {
     if (pos > maxPos) {
-      // check for unsupported values if there isn't room for the padding
+      // we don't want it to overscroll
       pos = maxPos;
     }
     if (pos < 0) {
+      // we don't want negatives
       pos = 0;
     }
     if (shouldAnimate) {
@@ -232,6 +246,7 @@ var revisions = {
       // revision timeline and revisionData exist
       var oldestRevDataShown = $formExtras.find('footer button:first-child').val();
       var latestRevDataShown = $formExtras.find('footer button:last-child').val();
+
       // range of revisions in the visible viewport
       var visibleRevisionsRange = Array(revisions.timeline.getLatestRevisionNumber() - revisions.timeline.getNumberOfRevisionsVisible(), revisions.timeline.getLatestRevisionNumber() - Math.floor(revisions.timeline.getLeftOffset() / revisions.timeline.getRevisionWidth()));
 
@@ -280,10 +295,10 @@ var revisions = {
             break;
 
         case 'formExtras':
-          if ($('#revisionTimeline').html() !== '' && $(element).find('#restoreButton').html() === null) {
+          if ($('#revisionTimeline').html() !== '' && $(element).find('#restoreButton').length === 0) {
             // if coming from restore page, we want to show the timeline
             $('#revisionTimeline').show();
-          } else if ($(element).find('#restoreButton').html() !== null) {
+          } else if ($(element).find('#restoreButton').length !== 0) {
             $('#revisionTimeline').hide();
           }
           revisions.animateAndReplaceData($('#formExtras'), $(element).html(), direction);
