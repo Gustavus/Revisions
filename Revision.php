@@ -140,8 +140,7 @@ class Revision extends RevisionsBase
       } else if ($minutes !== 0) {
         $relative[] = Format::quantity($minutes, 'minute ', 'minutes ');
       } else if (empty($relative)) {
-        $seconds = (int) $interval->format('%s');
-        $relative[] = Format::quantity($seconds, 'second ', 'seconds ');
+        return 'just now';
       }
     }
     return Format::arrayToSentence($relative) . ' ago';

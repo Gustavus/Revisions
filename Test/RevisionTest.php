@@ -120,7 +120,7 @@ class RevisionTest extends \Gustavus\Test\Test
     $date = new \DateTime('-5 seconds');
     $this->revisionProperties['date'] = $date->format('c');
     $this->setUp();
-    $this->assertSame('5 seconds ago', $this->revision->getRevisionRelativeDate());
+    $this->assertSame('just now', $this->revision->getRevisionRelativeDate());
   }
 
   /**
