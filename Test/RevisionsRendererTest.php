@@ -157,7 +157,6 @@ class RevisionsRendererTest extends RevisionsTestsHelper
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }
 
-
   /**
    * @test
    */
@@ -182,6 +181,31 @@ class RevisionsRendererTest extends RevisionsTestsHelper
       'age' => 'age',
       'name' => 'name',
     );
+    $result = $this->call($this->revisionsRenderer, 'makeLabels');
+    $this->assertSame($expected, $result);
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
+  public function makeLabelsEmptyObject()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $this->revisions->makeAndSaveRevision(array('age' => 23, 'name' => 'Billy Visto', 'aboutYou' => ""));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy'));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
+    $this->revisions->makeAndSaveRevision(array('age' => 123));
+
+    //$this->revisions->populateEmptyRevisions(1);
+
+    $this->revisionsRenderer = new Revisions\RevisionsRenderer($this->revisions);
+
+    $expected = array();
     $result = $this->call($this->revisionsRenderer, 'makeLabels');
     $this->assertSame($expected, $result);
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
