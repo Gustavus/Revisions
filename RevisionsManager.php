@@ -95,6 +95,22 @@ class RevisionsManager extends RevisionsBase
   }
 
   /**
+   * Gets the database function for the current time
+   *
+   * @return string
+   */
+  protected function getNowExpression()
+  {
+    $db = $this->getDB();
+    if ($db->getDatabasePlatform()->getName() === 'sqlite') {
+      // can't use getNowExpression because it doesn't support the timezone parameter
+      return 'datetime("now", "localtime")';
+    } else {
+      $db->getDatabasePlatform()->getNowExpression();
+    }
+  }
+
+  /**
    * Looks in the database for revisions
    *
    * @param integer $prevRevisionNum
@@ -311,7 +327,6 @@ class RevisionsManager extends RevisionsBase
       ':createdBy'      => $createdBy,
       ':contentHash'    => $this->generateHashFromArray($revisionContent),
     );
-    $nowExpression = ($db->getDatabasePlatform()->getName() === 'sqlite') ? 'datetime("now", "localtime")' : 'NOW()';
     $sql = sprintf('
       INSERT INTO `%1$s` (
         `contentHash`,
@@ -334,7 +349,7 @@ class RevisionsManager extends RevisionsBase
           AND `rowId` = :rowId;
         ',
         $this->revisionsTable,
-        $nowExpression
+        $this->getNowExpression()
     );
     $db->executeUpdate($sql, $args);
     return (int) $db->lastInsertId();
