@@ -532,6 +532,19 @@ class RevisionsManagerTest extends RevisionsTestsHelper
   /**
    * @test
    */
+  public function getNowExpression()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+
+    $result = $this->call($this->revisionsManagerMock, 'getNowExpression');
+
+    $this->assertSame('datetime("now", "localtime")', $result);
+  }
+
+  /**
+   * @test
+   */
   public function saveRevisionData3()
   {
     $conn = $this->getConnection();
