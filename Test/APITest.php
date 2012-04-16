@@ -29,9 +29,9 @@ class APITest extends RevisionsTestsHelper
   private $dbalConnection;
 
   /**
-   * @var string
+   * @var string DateTime string
    */
-  private $appUrl = 'https://gustavus.edu/billy';
+  private $date;
 
   /**
    * sets up the object for each test
@@ -39,6 +39,7 @@ class APITest extends RevisionsTestsHelper
    */
   public function setUp()
   {
+    $this->date = new \DateTime('-3 weeks');
     $this->revisionsAPI = new Revisions\API($this->revisionsManagerInfo);
   }
 
@@ -60,7 +61,23 @@ class APITest extends RevisionsTestsHelper
       $this->dbalConnection = \Gustavus\Doctrine\DBAL::getDBAL($tableName, self::$dbh);
     }
 
-    $this->set($this->revisionsAPI, 'revisions', $this->getMockWithDB('\Gustavus\Revisions\Revisions', 'getDB', array($this->revisionsManagerInfo), $this->dbalConnection));
+    $dbMock = $this->getMock('\Gustavus\Revisions\Revisions', array('getDB', 'getNowExpression'), array($this->revisionsManagerInfo));
+    $dbMock->expects($this->any())
+      ->method('getDB')
+      ->will($this->returnValue($this->dbalConnection));
+    $date = $this->date->format('Y-m-d H:i:s');
+    $dbMock->expects($this->any())
+      ->method('getNowExpression')
+      ->will($this->returnValue("'{$date}'"));
+
+    $this->set($this->revisionsAPI, 'revisions', $dbMock);
+
+    // $this->set($this->revisionsAPI, 'revisions', $this->getMockWithDB('\Gustavus\Revisions\Revisions', 'getDB', array($this->revisionsManagerInfo), $this->dbalConnection));
+  }
+
+  private function getDateTitle()
+  {
+    return $this->date->format('c');
   }
 
   /**
@@ -112,1816 +129,1331 @@ class APITest extends RevisionsTestsHelper
     $this->assertNull($this->call($this->revisionsAPI, 'getOldestRevisionNumberToPullFromURL', array(array())));
   }
 
-//   /**
-//    * @test
-//    */
-//   public function renderRevisions()
-//   {
-//     $conn = $this->getConnection();
-//     $this->setUpMock('person-revision');
-//     $this->dbalConnection->query($this->getCreateQuery());
-//     $this->dbalConnection->query($this->getCreateDataQuery());
+  /**
+   * @test
+   */
+  public function renderRevisions()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
 
-//     $this->revisionsAPI->saveRevision(array('name' => 'Billy Visto'));
-//     $this->revisionsAPI->saveRevision(array('name' => 'Visto', 'age' => 23));
-//     $expected = "<form id=\"revisionsForm\" method=\"GET\">
-//   <div id=\"revisionTimeline\">
-//   <table class=\"fancy\">
-//     <thead>
-//       <tr>
-//         <th/>
-//         <th class=\"1\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=1\" data-revisionNumber=\"1\" title=\"Look at Revision 1\">1</a>
-//         </th>
-//         <th class=\"2\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=2\" data-revisionNumber=\"2\" title=\"Look at Revision 2\">2</a>
-//         </th>
-//         <th class=\"3\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=3\" data-revisionNumber=\"3\" title=\"Look at Revision 3\">3</a>
-//         </th>
-//       </tr>
-//     </thead>
-//     <tbody>
-//       <tr>
-//         <th>age</th>
-//         <td class=\"bytes 1\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=1\" class=\"revision\" data-revisionNumber=\"1\" title=\"Look at Revision 1\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"0 Bytes unchanged\" style=\"height:0%;\"/>
-//                 <span class=\"bytes added\" title=\"0 Bytes added\" style=\"height:0%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\"0 Bytes removed\" style=\"height:0%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//         <td class=\"bytes 2\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=2\" class=\"revision\" data-revisionNumber=\"2\" title=\"Look at Revision 2\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"0 Bytes unchanged\" style=\"height:0%;\"/>
-//                 <span class=\"bytes added\" title=\" Bytes added\" style=\"height:0%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\" Bytes removed\" style=\"height:0%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//         <td class=\"bytes 3\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=3\" class=\"revision\" data-revisionNumber=\"3\" title=\"Look at Revision 3\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"0 Bytes unchanged\" style=\"height:100%;\"/>
-//                 <span class=\"bytes added\" title=\"2 Bytes added\" style=\"height:100%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\"0 Bytes removed\" style=\"height:0%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//       </tr>
-//       <tr>
-//         <th>name</th>
-//         <td class=\"bytes 1\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=1\" class=\"revision\" data-revisionNumber=\"1\" title=\"Look at Revision 1\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"0 Bytes unchanged\" style=\"height:100%;\"/>
-//                 <span class=\"bytes added\" title=\"11 Bytes added\" style=\"height:100%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\"0 Bytes removed\" style=\"height:0%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//         <td class=\"bytes 2\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=2\" class=\"revision\" data-revisionNumber=\"2\" title=\"Look at Revision 2\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"11 Bytes unchanged\" style=\"height:100%;\"/>
-//                 <span class=\"bytes added\" title=\"0 Bytes added\" style=\"height:0%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\"0 Bytes removed\" style=\"height:0%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//         <td class=\"bytes 3\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=3\" class=\"revision\" data-revisionNumber=\"3\" title=\"Look at Revision 3\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"5 Bytes unchanged\" style=\"height:45.454545454545%;\"/>
-//                 <span class=\"bytes added\" title=\"0 Bytes added\" style=\"height:0%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\"6 Bytes removed\" style=\"height:120%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//       </tr>
-//     </tbody>
-//     <tfoot>
-//       <tr class=\"compare\">
-//         <th>
-//           <button id=\"compareButton\" class=\"positive\" name=\"revisionsAction\" value=\"text\">Compare</button>
-//         </th>
-//         <td class=\"1\">
-//           <label for=\"revisionNum-1\">
-//             <input id=\"revisionNum-1\" type=\"checkbox\" name=\"revisionNumbersToCompare[]\" title=\"Revision 1\" class=\"compare\" value=\"1\"/>
-//           </label>
-//         </td>
-//         <td class=\"2\">
-//           <label for=\"revisionNum-2\">
-//             <input id=\"revisionNum-2\" type=\"checkbox\" name=\"revisionNumbersToCompare[]\" title=\"Revision 2\" class=\"compare\" value=\"2\"/>
-//           </label>
-//         </td>
-//         <td class=\"3\">
-//           <label for=\"revisionNum-3\">
-//             <input id=\"revisionNum-3\" type=\"checkbox\" name=\"revisionNumbersToCompare[]\" title=\"Revision 3\" class=\"compare\" value=\"3\"/>
-//           </label>
-//         </td>
-//       </tr>
-//     </tfoot>
-//   </table>
-//   </div>
-//   <div id=\"formExtras\"/>
-// </form>";
+    $this->revisionsAPI->saveRevision(array('name' => 'Billy Visto'));
+    $this->revisionsAPI->saveRevision(array('name' => 'Visto', 'age' => 23));
+    $expected = "
+    <form id=\"revisionsForm\" method=\"GET\">
+      <div id=\"hiddenFields\">
+        <input id=\"oldestRevisionNumber\" type=\"hidden\" name=\"oldestRevisionNumber\" value=\"0\" />
+        <input type=\"hidden\" name=\"limit\" value=\"10\" />
+      </div>
+      <div id=\"revisionTimeline\">
+        <h4>Revision History</h4>
+        <div class=\"labels\">
+          <div>age</div>
+          <div>name</div>
+          <div>
+            <button id=\"compareButton\" class=\"positive\" name=\"revisionNumber\" value=\"false\">Compare</button>
+          </div>
+        </div>
+        <div class=\"viewport\">
+          <span class=\"scrollHotspot scrollLeft disabled\">◂</span>
+          <span class=\"scrollHotspot scrollRight disabled\">▸</span>
+          <table class=\"fancy\">
+            <thead>
+              <tr>
+                <th> </th>
+                <th class=\"1\" title=\"Modified 3 weeks ago by\" data-revision-number=\"1\">1</th>
+                <th class=\"2\" title=\"Modified 3 weeks ago by\" data-revision-number=\"2\">2</th>
+                <th class=\"3\" title=\"Modified 3 weeks ago by\" data-revision-number=\"3\">3</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th>age</th>
+                <td class=\"bytes 1\" data-revision-number=\"1\">
+                  <span class=\"bytes container\">
+                    <span class=\"bytes positive\"></span>
+                    <span class=\"bytes negative\"></span>
+                  </span>
+                </td>
+                <td class=\"bytes 2\" data-revision-number=\"2\">
+                  <span class=\"bytes container\">
+                    <span class=\"bytes positive\"></span>
+                    <span class=\"bytes negative\"></span>
+                  </span>
+                </td>
+                <td class=\"bytes 3\" data-revision-number=\"3\">
+                  <span class=\"bytes container\">
+                    <span class=\"bytes positive\">
+                      <span class=\"bytes unchanged\" title=\"\" style=\"height:100%;\"></span>
+                      <span class=\"bytes added\" title=\"added 23\" style=\"height:100%;\"></span>
+                    </span>
+                    <span class=\"bytes negative\"></span>
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <th>name</th>
+                <td class=\"bytes 1\" data-revision-number=\"1\">
+                  <span class=\"bytes container\">
+                    <span class=\"bytes positive\">
+                      <span class=\"bytes unchanged\" title=\"0 Bytes unchanged\" style=\"height:100%;\"></span>
+                      <span class=\"bytes added\" title=\"11 Bytes added\" style=\"height:100%;\"></span>
+                    </span>
+                    <span class=\"bytes negative\"></span>
+                  </span>
+                </td>
+                <td class=\"bytes 2\" data-revision-number=\"2\">
+                  <span class=\"bytes container\">
+                    <span class=\"bytes positive\">
+                      <span class=\"bytes unchanged\" title=\"11 Bytes unchanged\" style=\"height:100%;\"></span>
+                    </span>
+                    <span class=\"bytes negative\"></span>
+                  </span>
+                </td>
+                <td class=\"bytes 3\" data-revision-number=\"3\">
+                  <span class=\"bytes container\">
+                    <span class=\"bytes positive\">
+                      <span class=\"bytes unchanged\" title=\"5 Bytes unchanged\" style=\"height:45.454545454545%;\"></span>
+                    </span>
+                    <span class=\"bytes negative\">
+                      <span class=\"bytes removed\" title=\"6 Bytes removed\" style=\"height:54.545454545455%;\"></span>
+                    </span>
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr class=\"compare\">
+                <th> </th>
+                <td class=\"1\">
+                  <label for=\"revisionNum-1\">
+                    <input id=\"revisionNum-1\" type=\"checkbox\" name=\"revisionNumbers[]\" title=\"Revision 1\" class=\"compare\" value=\"1\"/>
+                  </label>
+                </td>
+                <td class=\"2\">
+                  <label for=\"revisionNum-2\">
+                    <input id=\"revisionNum-2\" type=\"checkbox\" name=\"revisionNumbers[]\" title=\"Revision 2\" class=\"compare\" value=\"2\"/>
+                  </label>
+                </td>
+                <td class=\"3\">
+                  <label for=\"revisionNum-3\">
+                    <input id=\"revisionNum-3\" type=\"checkbox\" name=\"revisionNumbers[]\" title=\"Revision 3\" class=\"compare\" value=\"3\"/>
+                  </label>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+      <div id=\"formExtras\"></div>
+    </form>";
 
-//     $urlParams = array('limit' => 10);
-//     $actual = $this->revisionsAPI->render($urlParams, $this->appUrl);
-//     $this->assertXmlStringEqualsXmlString($expected, $actual);
-//     $this->dropCreatedTables(array('person-revision', 'revisionData'));
-//   }
+    $_GET = array('limit' => 10);
+    $actual = $this->revisionsAPI->render();
 
-//   /**
-//    * @test
-//    */
-//   public function renderRevisionsTryingForRevisionAndComparison()
-//   {
-//     $conn = $this->getConnection();
-//     $this->setUpMock('person-revision');
-//     $this->dbalConnection->query($this->getCreateQuery());
-//     $this->dbalConnection->query($this->getCreateDataQuery());
+    // $echo = str_replace('"', '\"', str_replace('&nbsp;', ' ', $actual));
+    // echo "<pre>$echo</pre>";
+    // exit;
 
-//     $this->revisionsAPI->saveRevision(array('name' => 'Billy Visto'));
-//     $this->revisionsAPI->saveRevision(array('name' => 'Visto', 'age' => 23));
-//     $expected = "<form id=\"revisionsForm\" method=\"GET\">
-//   <div id=\"revisionTimeline\">
-//   <table class=\"fancy\">
-//     <thead>
-//       <tr>
-//         <th/>
-//         <th class=\"1\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=1\" data-revisionNumber=\"1\" title=\"Look at Revision 1\">1</a>
-//         </th>
-//         <th class=\"2\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=2\" data-revisionNumber=\"2\" title=\"Look at Revision 2\">2</a>
-//         </th>
-//         <th class=\"3\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=3\" data-revisionNumber=\"3\" title=\"Look at Revision 3\">3</a>
-//         </th>
-//       </tr>
-//     </thead>
-//     <tbody>
-//       <tr>
-//         <th>age</th>
-//         <td class=\"bytes 1\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=1\" class=\"revision\" data-revisionNumber=\"1\" title=\"Look at Revision 1\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"0 Bytes unchanged\" style=\"height:0%;\"/>
-//                 <span class=\"bytes added\" title=\"0 Bytes added\" style=\"height:0%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\"0 Bytes removed\" style=\"height:0%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//         <td class=\"bytes 2\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=2\" class=\"revision\" data-revisionNumber=\"2\" title=\"Look at Revision 2\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"0 Bytes unchanged\" style=\"height:0%;\"/>
-//                 <span class=\"bytes added\" title=\" Bytes added\" style=\"height:0%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\" Bytes removed\" style=\"height:0%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//         <td class=\"bytes 3\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=3\" class=\"revision\" data-revisionNumber=\"3\" title=\"Look at Revision 3\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"0 Bytes unchanged\" style=\"height:100%;\"/>
-//                 <span class=\"bytes added\" title=\"2 Bytes added\" style=\"height:100%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\"0 Bytes removed\" style=\"height:0%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//       </tr>
-//       <tr>
-//         <th>name</th>
-//         <td class=\"bytes 1\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=1\" class=\"revision\" data-revisionNumber=\"1\" title=\"Look at Revision 1\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"0 Bytes unchanged\" style=\"height:100%;\"/>
-//                 <span class=\"bytes added\" title=\"11 Bytes added\" style=\"height:100%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\"0 Bytes removed\" style=\"height:0%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//         <td class=\"bytes 2\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=2\" class=\"revision\" data-revisionNumber=\"2\" title=\"Look at Revision 2\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"11 Bytes unchanged\" style=\"height:100%;\"/>
-//                 <span class=\"bytes added\" title=\"0 Bytes added\" style=\"height:0%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\"0 Bytes removed\" style=\"height:0%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//         <td class=\"bytes 3\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=3\" class=\"revision\" data-revisionNumber=\"3\" title=\"Look at Revision 3\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"5 Bytes unchanged\" style=\"height:45.454545454545%;\"/>
-//                 <span class=\"bytes added\" title=\"0 Bytes added\" style=\"height:0%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\"6 Bytes removed\" style=\"height:120%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//       </tr>
-//     </tbody>
-//     <tfoot>
-//       <tr class=\"compare\">
-//         <th>
-//           <button id=\"compareButton\" class=\"positive\" name=\"revisionsAction\" value=\"text\">Compare</button>
-//         </th>
-//         <td class=\"1\">
-//           <label for=\"revisionNum-1\">
-//             <input id=\"revisionNum-1\" type=\"checkbox\" name=\"revisionNumbersToCompare[]\" title=\"Revision 1\" class=\"compare\" value=\"1\"/>
-//           </label>
-//         </td>
-//         <td class=\"2\">
-//           <label for=\"revisionNum-2\">
-//             <input id=\"revisionNum-2\" type=\"checkbox\" name=\"revisionNumbersToCompare[]\" title=\"Revision 2\" class=\"compare\" value=\"2\"/>
-//           </label>
-//         </td>
-//         <td class=\"3\">
-//           <label for=\"revisionNum-3\">
-//             <input id=\"revisionNum-3\" type=\"checkbox\" name=\"revisionNumbersToCompare[]\" title=\"Revision 3\" class=\"compare\" value=\"3\"/>
-//           </label>
-//         </td>
-//       </tr>
-//     </tfoot>
-//   </table>
-//   </div>
-//   <div id=\"formExtras\"/>
-// </form>";
+    $this->assertXmlStringEqualsXmlString($expected, str_replace('&nbsp;', ' ', $actual));
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
 
-//     $urlParams = array('limit' => 10, 'revisionsAction' => 'revision');
-//     $actual = $this->revisionsAPI->render($urlParams, $this->appUrl);
-//     $this->assertXmlStringEqualsXmlString($expected, $actual);
+  /**
+   * @test
+   */
+  public function renderRevisionsNoLimitUntilRevision3()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
 
-//     // try to do a comparison, but realize it doesnt have the info, falls back to revisions
-//     $urlParams = array('limit' => 10, 'revisionsAction' => 'text');
-//     $actual = $this->revisionsAPI->render($urlParams, $this->appUrl);
-//     $this->assertXmlStringEqualsXmlString($expected, $actual);
-//     $this->dropCreatedTables(array('person-revision', 'revisionData'));
-//   }
+    $this->revisionsAPI->saveRevision(array('name' => 'Billy Visto'));
+    $this->revisionsAPI->saveRevision(array('name' => 'Visto', 'age' => 23));
+    $expected = "
+    <form id=\"revisionsForm\" method=\"GET\">
+      <div id=\"hiddenFields\">
+        <input id=\"oldestRevisionNumber\" type=\"hidden\" name=\"oldestRevisionNumber\" value=\"3\" />
+      </div>
+      <div id=\"revisionTimeline\">
+        <h4>Revision History</h4>
+        <div class=\"labels\">
+          <div>age</div>
+          <div>name</div>
+          <div>
+            <button id=\"compareButton\" class=\"positive\" name=\"revisionNumber\" value=\"false\">Compare</button>
+          </div>
+        </div>
+        <div class=\"viewport\">
+          <span class=\"scrollHotspot scrollLeft disabled\">◂</span>
+          <span class=\"scrollHotspot scrollRight disabled\">▸</span>
+          <table class=\"fancy\">
+            <thead>
+              <tr>
+                <th> </th>
+                <th class=\"1\" title=\"Look at revision 1\" data-revision-number=\"1\">1</th>
+                <th class=\"2\" title=\"Look at revision 2\" data-revision-number=\"2\">2</th>
+                <th class=\"3\" title=\"Modified 3 weeks ago by\" data-revision-number=\"3\">3</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th>age</th>
+                <td class=\"missingRevisions bytes 1\" data-oldest-revision-number=\"1\" title=\"Show More Revisions\"></td>
+                <td class=\"missingRevisions bytes 2\" data-oldest-revision-number=\"2\" title=\"Show More Revisions\"></td>
+                <td class=\"bytes 3\" data-revision-number=\"3\">
+                  <span class=\"bytes container\">
+                    <span class=\"bytes positive\">
+                      <span class=\"bytes unchanged\" title=\"\" style=\"height:100%;\"></span>
+                      <span class=\"bytes added\" title=\"added 23\" style=\"height:100%;\"></span>
+                    </span>
+                    <span class=\"bytes negative\"></span>
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <th>name</th>
+                <td class=\"missingRevisions bytes 1\" data-oldest-revision-number=\"1\" title=\"Show More Revisions\"></td>
+                <td class=\"missingRevisions bytes 2\" data-oldest-revision-number=\"2\" title=\"Show More Revisions\"></td>
+                <td class=\"bytes 3\" data-revision-number=\"3\">
+                  <span class=\"bytes container\">
+                    <span class=\"bytes positive\">
+                      <span class=\"bytes unchanged\" title=\"5 Bytes unchanged\" style=\"height:45.454545454545%;\"></span>
+                    </span>
+                    <span class=\"bytes negative\">
+                      <span class=\"bytes removed\" title=\"6 Bytes removed\" style=\"height:54.545454545455%;\"></span>
+                    </span>
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr class=\"compare\">
+                <th> </th>
+                <td class=\"1\"></td>
+                <td class=\"2\"></td>
+                <td class=\"3\">
+                  <label for=\"revisionNum-3\">
+                    <input id=\"revisionNum-3\" type=\"checkbox\" name=\"revisionNumbers[]\" title=\"Revision 3\" class=\"compare\" value=\"3\"/>
+                  </label>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+      <div id=\"formExtras\"></div>
+    </form>";
 
+    $_GET = array('oldestRevisionNumber' => 3);
+    $actual = $this->revisionsAPI->render();
 
-//   /**
-//    * @test
-//    */
-//   public function renderRevisionsNoLimitUntilRevision3()
-//   {
-//     $conn = $this->getConnection();
-//     $this->setUpMock('person-revision');
-//     $this->dbalConnection->query($this->getCreateQuery());
-//     $this->dbalConnection->query($this->getCreateDataQuery());
+    $this->assertXmlStringEqualsXmlString($expected, str_replace('&nbsp;', ' ', $actual));
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
 
-//     $this->revisionsAPI->saveRevision(array('name' => 'Billy Visto'));
-//     $this->revisionsAPI->saveRevision(array('name' => 'Visto', 'age' => 23));
-//     $expected = "<form id=\"revisionsForm\" method=\"GET\">
-//   <div id=\"revisionTimeline\">
-//   <table class=\"fancy\">
-//     <thead>
-//       <tr>
-//         <th>
-//           <a id=\"showMoreRevisions\" href=\"$this->appUrl?oldestRevisionNumber=2\" class=\"button small\" title=\"Show Revision  in table\">Show More Revisions</a>
-//         </th>
-//         <th class=\"1\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=1\" data-revisionNumber=\"1\" title=\"Look at Revision 1\">1</a>
-//         </th>
-//         <th class=\"2\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=2\" data-revisionNumber=\"2\" title=\"Look at Revision 2\">2</a>
-//         </th>
-//         <th class=\"3\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=3\" data-revisionNumber=\"3\" title=\"Look at Revision 3\">3</a>
-//         </th>
-//       </tr>
-//     </thead>
-//     <tbody>
-//       <tr>
-//         <th>age</th>
-//         <td class=\"bytes 1\">
-//           <a href=\"$this->appUrl?oldestRevisionNumber=1\" class=\"missingRevisions button\" title=\"Show Revision 1 in table\"/>
-//         </td>
-//         <td class=\"bytes 2\">
-//           <a href=\"$this->appUrl?oldestRevisionNumber=2\" class=\"missingRevisions button\" title=\"Show Revision 2 in table\"/>
-//         </td>
-//         <td class=\"bytes 3\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=3\" class=\"revision\" data-revisionNumber=\"3\" title=\"Look at Revision 3\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"0 Bytes unchanged\" style=\"height:100%;\"/>
-//                 <span class=\"bytes added\" title=\"2 Bytes added\" style=\"height:100%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\"0 Bytes removed\" style=\"height:0%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//       </tr>
-//       <tr>
-//         <th>name</th>
-//         <td class=\"bytes 1\">
-//           <a href=\"$this->appUrl?oldestRevisionNumber=1\" class=\"missingRevisions button\" title=\"Show Revision 1 in table\"/>
-//         </td>
-//         <td class=\"bytes 2\">
-//           <a href=\"$this->appUrl?oldestRevisionNumber=2\" class=\"missingRevisions button\" title=\"Show Revision 2 in table\"/>
-//         </td>
-//         <td class=\"bytes 3\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=3\" class=\"revision\" data-revisionNumber=\"3\" title=\"Look at Revision 3\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"5 Bytes unchanged\" style=\"height:45.454545454545%;\"/>
-//                 <span class=\"bytes added\" title=\"0 Bytes added\" style=\"height:0%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\"6 Bytes removed\" style=\"height:120%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//       </tr>
-//     </tbody>
-//     <tfoot>
-//       <tr class=\"compare\">
-//         <th>
-//           <button id=\"compareButton\" class=\"positive\" name=\"revisionsAction\" value=\"text\">Compare</button>
-//         </th>
-//         <td class=\"1\"></td>
-//         <td class=\"2\"></td>
-//         <td class=\"3\">
-//           <label for=\"revisionNum-3\">
-//             <input id=\"revisionNum-3\" type=\"checkbox\" name=\"revisionNumbersToCompare[]\" title=\"Revision 3\" class=\"compare\" value=\"3\"/>
-//           </label>
-//         </td>
-//       </tr>
-//     </tfoot>
-//   </table>
-//   </div>
-//   <div id=\"formExtras\"/>
-// </form>";
+  /**
+   * @test
+   */
+  public function renderRevisionsError()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
 
-//     $urlParams = array('oldestRevisionNumber' => 3);
-//     $actual = $this->revisionsAPI->render($urlParams, $this->appUrl);
-//     $this->assertXmlStringEqualsXmlString($expected, $actual);
-//     $this->dropCreatedTables(array('person-revision', 'revisionData'));
-//   }
+    $this->revisionsAPI->saveRevision(array('name' => 'Billy Visto'));
+    $this->saveRevisionToDB('Billy', 'Billy Visto', 'name', $this->get($this->revisionsAPI, 'revisions'));
+    $this->revisionsAPI->saveRevision(array('name' => 'Visto', 'age' => 23));
+    $expected = "
+    <form id=\"revisionsForm\" method=\"GET\">
+      <div id=\"hiddenFields\">
+        <input id=\"oldestRevisionNumber\" type=\"hidden\" name=\"oldestRevisionNumber\" value=\"1\" />
+      </div>
+      <div id=\"revisionTimeline\">
+        <h4>Revision History</h4>
+        <div class=\"labels\">
+          <div>age</div>
+          <div>name</div>
+          <div>
+            <button id=\"compareButton\" class=\"positive\" name=\"revisionNumber\" value=\"false\">Compare</button>
+          </div>
+        </div>
+        <div class=\"viewport\">
+          <span class=\"scrollHotspot scrollLeft disabled\">◂</span>
+          <span class=\"scrollHotspot scrollRight disabled\">▸</span>
+          <table class=\"fancy\">
+            <thead>
+              <tr>
+                <th> </th>
+                <th class=\"1\" title=\"Modified 3 weeks ago by\" data-revision-number=\"1\">1</th>
+                <th class=\"2\" title=\"Modified 3 weeks ago by name\" data-revision-number=\"2\">2</th>
+                <th class=\"3\" title=\"Modified 3 weeks ago by\" data-revision-number=\"3\">3</th>
+                <th class=\"4\" title=\"Modified 3 weeks ago by\" data-revision-number=\"4\">4</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th>age</th>
+                <td class=\"error\">An unexpected error occured.</td>
+                <td class=\"bytes 2\" data-revision-number=\"2\">
+                  <span class=\"bytes container\">
+                    <span class=\"bytes positive\"></span>
+                    <span class=\"bytes negative\"></span>
+                  </span>
+                </td>
+                <td class=\"bytes 3\" data-revision-number=\"3\">
+                  <span class=\"bytes container\">
+                    <span class=\"bytes positive\"></span>
+                    <span class=\"bytes negative\"></span>
+                  </span>
+                </td>
+                <td class=\"bytes 4\" data-revision-number=\"4\">
+                  <span class=\"bytes container\">
+                    <span class=\"bytes positive\">
+                      <span class=\"bytes unchanged\" title=\"\" style=\"height:100%;\"></span>
+                      <span class=\"bytes added\" title=\"added 23\" style=\"height:100%;\"></span>
+                    </span>
+                    <span class=\"bytes negative\"></span>
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <th>name</th>
+                <td class=\"error\">An unexpected error occured.</td>
+                <td class=\"bytes 2\" data-revision-number=\"2\">
+                  <span class=\"bytes container\">
+                    <span class=\"bytes positive\">
+                    <span class=\"bytes unchanged\" title=\"5 Bytes unchanged\" style=\"height:100%;\"></span>
+                    <span class=\"bytes added\" title=\"6 Bytes added\" style=\"height:54.545454545455%;\"></span>
+                  </span>
+                    <span class=\"bytes negative\"></span>
+                  </span>
+                </td>
+                <td class=\"bytes 3\" data-revision-number=\"3\">
+                  <span class=\"bytes container\">
+                    <span class=\"bytes positive\">
+                      <span class=\"bytes unchanged\" title=\"11 Bytes unchanged\" style=\"height:100%;\"></span>
+                    </span>
+                    <span class=\"bytes negative\"></span>
+                  </span>
+                </td>
+                <td class=\"bytes 4\" data-revision-number=\"4\">
+                  <span class=\"bytes container\">
+                    <span class=\"bytes positive\">
+                      <span class=\"bytes unchanged\" title=\"5 Bytes unchanged\" style=\"height:45.454545454545%;\"></span>
+                    </span>
+                    <span class=\"bytes negative\">
+                      <span class=\"bytes removed\" title=\"6 Bytes removed\" style=\"height:54.545454545455%;\"></span>
+                    </span>
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr class=\"compare\"><th> </th>
+                <td class=\"1\"></td>
+                <td class=\"2\">
+                  <label for=\"revisionNum-2\">
+                    <input id=\"revisionNum-2\" type=\"checkbox\" name=\"revisionNumbers[]\" title=\"Revision 2\" class=\"compare\" value=\"2\"/>
+                  </label>
+                </td>
+                <td class=\"3\">
+                  <label for=\"revisionNum-3\">
+                    <input id=\"revisionNum-3\" type=\"checkbox\" name=\"revisionNumbers[]\" title=\"Revision 3\" class=\"compare\" value=\"3\"/>
+                  </label>
+                </td>
+                <td class=\"4\">
+                  <label for=\"revisionNum-4\">
+                    <input id=\"revisionNum-4\" type=\"checkbox\" name=\"revisionNumbers[]\" title=\"Revision 4\" class=\"compare\" value=\"4\"/>
+                  </label>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+      <div id=\"formExtras\"></div>
+    </form>";
 
-//   /**
-//    * @test
-//    */
-//   public function renderRevisionsError()
-//   {
-//     $conn = $this->getConnection();
-//     $this->setUpMock('person-revision');
-//     $this->dbalConnection->query($this->getCreateQuery());
-//     $this->dbalConnection->query($this->getCreateDataQuery());
+    $_GET = array('oldestRevisionNumber' => 1);
+    $actual = $this->revisionsAPI->render();
 
-//     $this->revisionsAPI->saveRevision(array('name' => 'Billy Visto'));
-//     $this->saveRevisionToDB('Billy', 'Billy Visto', 'name', $this->get($this->revisionsAPI, 'revisions'));
-//     $this->revisionsAPI->saveRevision(array('name' => 'Visto', 'age' => 23));
-//     $expected = "<form id=\"revisionsForm\" method=\"GET\">
-//   <div id=\"revisionTimeline\">
-//   <table class=\"fancy\">
-//     <thead>
-//       <tr>
-//         <th/>
-//         <th class=\"1\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=1\" data-revisionNumber=\"1\" title=\"Look at Revision 1\">1</a>
-//         </th>
-//         <th class=\"2\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=2\" data-revisionNumber=\"2\" title=\"Look at Revision 2\">2</a>
-//         </th>
-//         <th class=\"3\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=3\" data-revisionNumber=\"3\" title=\"Look at Revision 3\">3</a>
-//         </th>
-//         <th class=\"4\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=4\" data-revisionNumber=\"4\" title=\"Look at Revision 4\">4</a>
-//         </th>
-//       </tr>
-//     </thead>
-//     <tbody>
-//       <tr>
-//         <th>age</th>
-//         <td class=\"error\">$this->error</td>
-//         <td class=\"bytes 2\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=2\" class=\"revision\" data-revisionNumber=\"2\" title=\"Look at Revision 2\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"0 Bytes unchanged\" style=\"height:0%;\"/>
-//                 <span class=\"bytes added\" title=\"0 Bytes added\" style=\"height:0%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\"0 Bytes removed\" style=\"height:0%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//         <td class=\"bytes 3\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=3\" class=\"revision\" data-revisionNumber=\"3\" title=\"Look at Revision 3\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"0 Bytes unchanged\" style=\"height:0%;\"/>
-//                 <span class=\"bytes added\" title=\" Bytes added\" style=\"height:0%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\" Bytes removed\" style=\"height:0%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//         <td class=\"bytes 4\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=4\" class=\"revision\" data-revisionNumber=\"4\" title=\"Look at Revision 4\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"0 Bytes unchanged\" style=\"height:100%;\"/>
-//                 <span class=\"bytes added\" title=\"2 Bytes added\" style=\"height:100%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\"0 Bytes removed\" style=\"height:0%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//       </tr>
-//       <tr>
-//         <th>name</th>
-//         <td class=\"error\">$this->error</td>
-//         <td class=\"bytes 2\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=2\" class=\"revision\" data-revisionNumber=\"2\" title=\"Look at Revision 2\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"5 Bytes unchanged\" style=\"height:100%;\"/>
-//                 <span class=\"bytes added\" title=\"6 Bytes added\" style=\"height:54.545454545455%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\"0 Bytes removed\" style=\"height:0%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//         <td class=\"bytes 3\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=3\" class=\"revision\" data-revisionNumber=\"3\" title=\"Look at Revision 3\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"11 Bytes unchanged\" style=\"height:100%;\"/>
-//                 <span class=\"bytes added\" title=\"0 Bytes added\" style=\"height:0%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\"0 Bytes removed\" style=\"height:0%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//         <td class=\"bytes 4\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=4\" class=\"revision\" data-revisionNumber=\"4\" title=\"Look at Revision 4\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"5 Bytes unchanged\" style=\"height:45.454545454545%;\"/>
-//                 <span class=\"bytes added\" title=\"0 Bytes added\" style=\"height:0%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\"6 Bytes removed\" style=\"height:120%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//       </tr>
-//     </tbody>
-//     <tfoot>
-//       <tr class=\"compare\">
-//         <th>
-//           <button id=\"compareButton\" class=\"positive\" name=\"revisionsAction\" value=\"text\">Compare</button>
-//         </th>
-//         <td class=\"1\"></td>
-//         <td class=\"2\">
-//           <label for=\"revisionNum-2\">
-//             <input id=\"revisionNum-2\" type=\"checkbox\" name=\"revisionNumbersToCompare[]\" title=\"Revision 2\" class=\"compare\" value=\"2\"/>
-//           </label>
-//         </td>
-//         <td class=\"3\">
-//           <label for=\"revisionNum-3\">
-//             <input id=\"revisionNum-3\" type=\"checkbox\" name=\"revisionNumbersToCompare[]\" title=\"Revision 3\" class=\"compare\" value=\"3\"/>
-//           </label>
-//         </td>
-//         <td class=\"4\">
-//           <label for=\"revisionNum-4\">
-//             <input id=\"revisionNum-4\" type=\"checkbox\" name=\"revisionNumbersToCompare[]\" title=\"Revision 4\" class=\"compare\" value=\"4\"/>
-//           </label>
-//         </td>
-//       </tr>
-//     </tfoot>
-//   </table>
-//   </div>
-//   <div id=\"formExtras\"/>
-// </form>";
-//     $urlParams = array('oldestRevisionNumber' => 1);
-//     $actual = $this->revisionsAPI->render($urlParams, $this->appUrl);
-//     $this->assertXmlStringEqualsXmlString($expected, $actual);
-//     $this->dropCreatedTables(array('person-revision', 'revisionData'));
-//   }
-//   /**
-//    * @test
-//    */
-//   public function renderRevisionsRevisionsActionNotAccepted()
-//   {
-//     $conn = $this->getConnection();
-//     $this->setUpMock('person-revision');
-//     $this->dbalConnection->query($this->getCreateQuery());
-//     $this->dbalConnection->query($this->getCreateDataQuery());
+    $this->assertXmlStringEqualsXmlString($expected, str_replace('&nbsp;', ' ', $actual));
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
 
-//     $this->revisionsAPI->saveRevision(array('name' => 'Billy Visto'));
-//     $this->revisionsAPI->saveRevision(array('name' => 'Visto', 'age' => 23));
-//     $expected = "<form id=\"revisionsForm\" method=\"GET\">
-//   <div id=\"revisionTimeline\">
-//   <table class=\"fancy\">
-//     <thead>
-//       <tr>
-//         <th/>
-//         <th class=\"1\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=1\" data-revisionNumber=\"1\" title=\"Look at Revision 1\">1</a>
-//         </th>
-//         <th class=\"2\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=2\" data-revisionNumber=\"2\" title=\"Look at Revision 2\">2</a>
-//         </th>
-//         <th class=\"3\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=3\" data-revisionNumber=\"3\" title=\"Look at Revision 3\">3</a>
-//         </th>
-//       </tr>
-//     </thead>
-//     <tbody>
-//       <tr>
-//         <th>age</th>
-//         <td class=\"bytes 1\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=1\" class=\"revision\" data-revisionNumber=\"1\" title=\"Look at Revision 1\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"0 Bytes unchanged\" style=\"height:0%;\"/>
-//                 <span class=\"bytes added\" title=\"0 Bytes added\" style=\"height:0%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\"0 Bytes removed\" style=\"height:0%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//         <td class=\"bytes 2\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=2\" class=\"revision\" data-revisionNumber=\"2\" title=\"Look at Revision 2\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"0 Bytes unchanged\" style=\"height:0%;\"/>
-//                 <span class=\"bytes added\" title=\" Bytes added\" style=\"height:0%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\" Bytes removed\" style=\"height:0%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//         <td class=\"bytes 3\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=3\" class=\"revision\" data-revisionNumber=\"3\" title=\"Look at Revision 3\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"0 Bytes unchanged\" style=\"height:100%;\"/>
-//                 <span class=\"bytes added\" title=\"2 Bytes added\" style=\"height:100%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\"0 Bytes removed\" style=\"height:0%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//       </tr>
-//       <tr>
-//         <th>name</th>
-//         <td class=\"bytes 1\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=1\" class=\"revision\" data-revisionNumber=\"1\" title=\"Look at Revision 1\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"0 Bytes unchanged\" style=\"height:100%;\"/>
-//                 <span class=\"bytes added\" title=\"11 Bytes added\" style=\"height:100%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\"0 Bytes removed\" style=\"height:0%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//         <td class=\"bytes 2\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=2\" class=\"revision\" data-revisionNumber=\"2\" title=\"Look at Revision 2\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"11 Bytes unchanged\" style=\"height:100%;\"/>
-//                 <span class=\"bytes added\" title=\"0 Bytes added\" style=\"height:0%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\"0 Bytes removed\" style=\"height:0%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//         <td class=\"bytes 3\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=3\" class=\"revision\" data-revisionNumber=\"3\" title=\"Look at Revision 3\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"5 Bytes unchanged\" style=\"height:45.454545454545%;\"/>
-//                 <span class=\"bytes added\" title=\"0 Bytes added\" style=\"height:0%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\"6 Bytes removed\" style=\"height:120%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//       </tr>
-//     </tbody>
-//     <tfoot>
-//       <tr class=\"compare\">
-//         <th>
-//           <button id=\"compareButton\" class=\"positive\" name=\"revisionsAction\" value=\"text\">Compare</button>
-//         </th>
-//         <td class=\"1\">
-//           <label for=\"revisionNum-1\">
-//             <input id=\"revisionNum-1\" type=\"checkbox\" name=\"revisionNumbersToCompare[]\" title=\"Revision 1\" class=\"compare\" value=\"1\"/>
-//           </label>
-//         </td>
-//         <td class=\"2\">
-//           <label for=\"revisionNum-2\">
-//             <input id=\"revisionNum-2\" type=\"checkbox\" name=\"revisionNumbersToCompare[]\" title=\"Revision 2\" class=\"compare\" value=\"2\"/>
-//           </label>
-//         </td>
-//         <td class=\"3\">
-//           <label for=\"revisionNum-3\">
-//             <input id=\"revisionNum-3\" type=\"checkbox\" name=\"revisionNumbersToCompare[]\" title=\"Revision 3\" class=\"compare\" value=\"3\"/>
-//           </label>
-//         </td>
-//       </tr>
-//     </tfoot>
-//   </table>
-//   </div>
-//   <div id=\"formExtras\"/>
-// </form>";
+  /**
+   * @test
+   */
+  public function renderRevisionComparisonText()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
 
-//     $urlParams = array('limit' => 10, 'revisionsAction' => 'randomAction');
-//     $actual = $this->revisionsAPI->render($urlParams, $this->appUrl);
-//     $this->assertXmlStringEqualsXmlString($expected, $actual);
-//     $this->dropCreatedTables(array('person-revision', 'revisionData'));
-//   }
+    $this->revisionsAPI->saveRevision(array('name' => 'Billy Visto'));
+    $this->revisionsAPI->saveRevision(array('name' => 'Visto', 'age' => 23));
 
-//   /**
-//    * @test
-//    */
-//   public function renderRevisionComparisonText()
-//   {
-//     $conn = $this->getConnection();
-//     $this->setUpMock('person-revision');
-//     $this->dbalConnection->query($this->getCreateQuery());
-//     $this->dbalConnection->query($this->getCreateDataQuery());
+    $expected = "
+    <form id=\"revisionsForm\" method=\"GET\">
+      <div id=\"hiddenFields\">
+        <input id=\"oldestRevisionNumber\" type=\"hidden\" name=\"oldestRevisionNumber\" value=\"1\" />
+      </div>
+      <div id=\"revisionTimeline\">
+        <h4>Revision History</h4>
+        <div class=\"labels\">
+          <div>age</div>
+          <div>name</div>
+          <div>
+            <button id=\"compareButton\" class=\"positive\" name=\"revisionNumber\" value=\"false\">Compare</button>
+          </div>
+        </div>
+        <div class=\"viewport\">
+          <span class=\"scrollHotspot scrollLeft disabled\">◂</span>
+          <span class=\"scrollHotspot scrollRight disabled\">▸</span>
+          <table class=\"fancy\">
+            <thead>
+              <tr>
+                <th> </th>
+                <th class=\"1 old\" title=\"Modified 3 weeks ago by\" data-revision-number=\"1\">1</th>
+                <th class=\"2\" title=\"Modified 3 weeks ago by\" data-revision-number=\"2\">2</th>
+                <th class=\"3 young\" title=\"Modified 3 weeks ago by\" data-revision-number=\"3\">3</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th>age</th>
+                <td class=\"bytes 1 old\" data-revision-number=\"1\">
+                  <span class=\"bytes container\">
+                    <span class=\"bytes positive\"></span>
+                    <span class=\"bytes negative\"></span>
+                  </span>
+                </td>
+                <td class=\"bytes 2\" data-revision-number=\"2\">
+                  <span class=\"bytes container\">
+                    <span class=\"bytes positive\"></span>
+                    <span class=\"bytes negative\"></span>
+                  </span>
+                </td>
+                <td class=\"bytes 3 young\" data-revision-number=\"3\">
+                  <span class=\"bytes container\">
+                    <span class=\"bytes positive\">
+                      <span class=\"bytes unchanged\" title=\"\" style=\"height:100%;\"></span>
+                      <span class=\"bytes added\" title=\"added 23\" style=\"height:100%;\"></span>
+                    </span>
+                    <span class=\"bytes negative\"></span>
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <th>name</th>
+                <td class=\"bytes 1 old\" data-revision-number=\"1\">
+                  <span class=\"bytes container\">
+                    <span class=\"bytes positive\">
+                      <span class=\"bytes unchanged\" title=\"0 Bytes unchanged\" style=\"height:100%;\"></span>
+                      <span class=\"bytes added\" title=\"11 Bytes added\" style=\"height:100%;\"></span>
+                    </span>
+                    <span class=\"bytes negative\"></span>
+                  </span>
+                </td>
+                <td class=\"bytes 2\" data-revision-number=\"2\">
+                  <span class=\"bytes container\">
+                    <span class=\"bytes positive\">
+                      <span class=\"bytes unchanged\" title=\"11 Bytes unchanged\" style=\"height:100%;\"></span>
+                    </span>
+                    <span class=\"bytes negative\"></span>
+                  </span>
+                </td>
+                <td class=\"bytes 3 young\" data-revision-number=\"3\">
+                  <span class=\"bytes container\">
+                    <span class=\"bytes positive\">
+                      <span class=\"bytes unchanged\" title=\"5 Bytes unchanged\" style=\"height:45.454545454545%;\"></span>
+                    </span>
+                    <span class=\"bytes negative\">
+                      <span class=\"bytes removed\" title=\"6 Bytes removed\" style=\"height:54.545454545455%;\"></span>
+                    </span>
+                  </span>
+                </td>
+              </tr>
+              </tbody>
+              <tfoot>
+                <tr class=\"compare\">
+                  <th> </th>
+                  <td class=\"1 old\">
+                    <label for=\"revisionNum-1\">
+                      <input id=\"revisionNum-1\" type=\"checkbox\" name=\"revisionNumbers[]\" title=\"Revision 1\" class=\"compare\" value=\"1\" checked=\"checked\"/>
+                    </label>
+                  </td>
+                  <td class=\"2\">
+                    <label for=\"revisionNum-2\">
+                      <input id=\"revisionNum-2\" type=\"checkbox\" name=\"revisionNumbers[]\" title=\"Revision 2\" class=\"compare\" value=\"2\"/>
+                    </label>
+                  </td>
+                  <td class=\"3 young\">
+                    <label for=\"revisionNum-3\">
+                      <input id=\"revisionNum-3\" type=\"checkbox\" name=\"revisionNumbers[]\" title=\"Revision 3\" class=\"compare\" value=\"3\" checked=\"checked\" />
+                    </label>
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+        <div id=\"formExtras\"><section class=\"clearfix revisionData comparison\">
+          <div class=\"clearfix headers\">
+            <header>
+              <hgroup title=\"{$this->getDateTitle()}\">
+                <h1></h1>
+                <h2>3 weeks ago</h2>
+                <h2></h2>
+              </hgroup>
+            </header>
+            <header>
+              <hgroup title=\"{$this->getDateTitle()}\">
+                <h1></h1>
+                <h2>3 weeks ago</h2>
+                <h2></h2>
+              </hgroup>
+            </header>
+          </div>
+          <dl class=\"clearfix\">
+            <dt title=\"age\">age</dt>
+              <dd><ins>23</ins></dd>
+              <dd><ins>23</ins></dd>
+            <dt title=\"name\">name</dt>
+              <dd><del>Billy </del>Visto</dd>
+              <dd><del>Billy </del>Visto</dd>
+          </dl>
+          <footer>
+            <button name=\"restore\" value=\"1\" id=\"restore-1\" class=\"restore\" title=\"Restore Revision 1\">Restore #1</button>
+          </footer>
+          <footer>
+            <button name=\"restore\" value=\"3\" id=\"restore-3\" class=\"restore disabled\" title=\"Restore Revision 3\">Restore #3</button>
+          </footer>
+        </section>
+      </div>
+    </form>";
+    $_GET = array('revisionNumbers' => array(1,3));
+    $actual = $this->revisionsAPI->render();
 
-//     $this->revisionsAPI->saveRevision(array('name' => 'Billy Visto'));
-//     $this->revisionsAPI->saveRevision(array('name' => 'Visto', 'age' => 23));
+    //var_dump($this->get($this->revisionsAPI, 'revisions')->compareTwoRevisions(1, 4));
+    //var_dump($this->get($this->revisionsAPI, 'revisions')->getRevisionByNumber(3));
+    //exit;
 
-//     $now = date("F jS \\a\\t g:ia");
-//     $expected = "<form id=\"revisionsForm\" method=\"GET\">
-//   <h4>Revision History</h4>
-//   <div id=\"revisionTimeline\">
-//   <table class=\"fancy\">
-//     <thead>
-//       <tr>
-//         <th/>
-//         <th class=\"1 old\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=1\" data-revisionNumber=\"1\" title=\"Look at Revision 1\">1</a>
-//         </th>
-//         <th class=\"2\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=2\" data-revisionNumber=\"2\" title=\"Look at Revision 2\">2</a>
-//         </th>
-//         <th class=\"3\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=3\" data-revisionNumber=\"3\" title=\"Look at Revision 3\">3</a>
-//         </th>
-//       </tr>
-//     </thead>
-//     <tbody>
-//       <tr>
-//         <th>age</th>
-//         <td class=\"bytes 1 old\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=1\" class=\"revision\" data-revisionNumber=\"1\" title=\"Look at Revision 1\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"0 Bytes unchanged\" style=\"height:0%;\"/>
-//                 <span class=\"bytes added\" title=\"0 Bytes added\" style=\"height:0%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\"0 Bytes removed\" style=\"height:0%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//         <td class=\"bytes 2\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=2\" class=\"revision\" data-revisionNumber=\"2\" title=\"Look at Revision 2\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"0 Bytes unchanged\" style=\"height:0%;\"/>
-//                 <span class=\"bytes added\" title=\" Bytes added\" style=\"height:0%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\" Bytes removed\" style=\"height:0%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//         <td class=\"bytes 3\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=3\" class=\"revision\" data-revisionNumber=\"3\" title=\"Look at Revision 3\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"0 Bytes unchanged\" style=\"height:100%;\"/>
-//                 <span class=\"bytes added\" title=\"2 Bytes added\" style=\"height:100%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\"0 Bytes removed\" style=\"height:0%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//       </tr>
-//       <tr>
-//         <th>name</th>
-//         <td class=\"bytes 1 old\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=1\" class=\"revision\" data-revisionNumber=\"1\" title=\"Look at Revision 1\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"0 Bytes unchanged\" style=\"height:100%;\"/>
-//                 <span class=\"bytes added\" title=\"11 Bytes added\" style=\"height:100%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\"0 Bytes removed\" style=\"height:0%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//         <td class=\"bytes 2\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=2\" class=\"revision\" data-revisionNumber=\"2\" title=\"Look at Revision 2\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"11 Bytes unchanged\" style=\"height:100%;\"/>
-//                 <span class=\"bytes added\" title=\"0 Bytes added\" style=\"height:0%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\"0 Bytes removed\" style=\"height:0%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//         <td class=\"bytes 3\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=3\" class=\"revision\" data-revisionNumber=\"3\" title=\"Look at Revision 3\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"5 Bytes unchanged\" style=\"height:45.454545454545%;\"/>
-//                 <span class=\"bytes added\" title=\"0 Bytes added\" style=\"height:0%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\"12 Bytes removed\" style=\"height:240%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//       </tr>
-//     </tbody>
-//     <tfoot>
-//       <tr class=\"compare\">
-//         <th>
-//           <button id=\"compareButton\" class=\"positive\" name=\"revisionsAction\" value=\"text\">Compare</button>
-//         </th>
-//         <td class=\"1 old\">
-//           <label for=\"revisionNum-1\">
-//             <input id=\"revisionNum-1\" type=\"checkbox\" name=\"revisionNumbersToCompare[]\" title=\"Revision 1\" class=\"compare\" value=\"1\" checked=\"checked\"/>
-//           </label>
-//         </td>
-//         <td class=\"2\">
-//           <label for=\"revisionNum-2\">
-//             <input id=\"revisionNum-2\" type=\"checkbox\" name=\"revisionNumbersToCompare[]\" title=\"Revision 2\" class=\"compare\" value=\"2\"/>
-//           </label>
-//         </td>
-//         <td class=\"3\">
-//           <label for=\"revisionNum-3\">
-//             <input id=\"revisionNum-3\" type=\"checkbox\" name=\"revisionNumbersToCompare[]\" title=\"Revision 3\" class=\"compare\" value=\"3\"/>
-//           </label>
-//         </td>
-//       </tr>
-//     </tfoot>
-//   </table>
-//   </div>
-//   <div id=\"formExtras\">
-//   <section class=\"clearfix revisionData comparison\">
-//     <div class=\"clearfix headers\">
-//       <header>
-//         <hgroup>
-//           <h1/>
-//           <h2>$now</h2>
-//           <h2>by </h2>
-//         </hgroup>
-//       </header>
-//       <header>
-//         <hgroup>
-//           <h1/>
-//           <h2>$now</h2>
-//           <h2>by </h2>
-//         </hgroup>
-//       </header>
-//     </div>
-//     <dl class=\"clearfix\">
-//       <dt>age</dt>
-//       <dd>
-//         <ins>23</ins>
-//       </dd>
-//       <dd>
-//         <ins>23</ins>
-//       </dd>
-//       <dt>name</dt>
-//       <dd><del>Billy </del>Visto</dd>
-//       <dd><del>Billy </del>Visto</dd>
-//     </dl>
-//     <footer>
-//       <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=1&amp;restore=true\" id=\"restore-1\" class=\"restore button\" data-revisionNumber=\"1\" title=\"Restore Revision 1\">Restore #1</a>
-//     </footer>
-//     <footer>
-//       <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=4&amp;restore=true\" id=\"restore-4\" class=\"restore button\" data-revisionNumber=\"4\" title=\"Restore Revision 4\">Restore #4</a>
-//     </footer>
-//   </section>
-//   </div>
-// </form>";
-//     $urlParams = array('revisionNumbersToCompare' => array(1,4), 'revisionsAction' => 'text');
-//     $actual = $this->revisionsAPI->render($urlParams, $this->appUrl);
-//     $this->assertXmlStringEqualsXmlString($expected, $actual);
-//     $this->dropCreatedTables(array('person-revision', 'revisionData'));
-//   }
+    $this->assertXmlStringEqualsXmlString($expected, str_replace('&nbsp;', ' ', $actual));
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
 
-//   /**
-//    * @test
-//    */
-//   public function renderRevisionComparisonTextColumns()
-//   {
-//     $conn = $this->getConnection();
-//     $this->setUpMock('person-revision');
-//     $this->dbalConnection->query($this->getCreateQuery());
-//     $this->dbalConnection->query($this->getCreateDataQuery());
+  /**
+   * @test
+   */
+  public function renderRevisionComparisonTextColumns()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
 
-//     $this->revisionsAPI->saveRevision(array('name' => 'Billy Visto'));
-//     $this->revisionsAPI->saveRevision(array('name' => 'Visto', 'age' => 23));
+    $this->revisionsAPI->saveRevision(array('name' => 'Billy Visto'));
+    $this->revisionsAPI->saveRevision(array('name' => 'Visto', 'age' => 23));
 
-//     $now = date("F jS \\a\\t g:ia");
-//     $expected = "<form id=\"revisionsForm\" method=\"GET\">
-//   <h4>Revision History</h4>
-//   <div id=\"revisionTimeline\">
-//   <table class=\"fancy\">
-//     <thead>
-//       <tr>
-//         <th/>
-//         <th class=\"1 old\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=1\" data-revisionNumber=\"1\" title=\"Look at Revision 1\">1</a>
-//         </th>
-//         <th class=\"2\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=2\" data-revisionNumber=\"2\" title=\"Look at Revision 2\">2</a>
-//         </th>
-//         <th class=\"3\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=3\" data-revisionNumber=\"3\" title=\"Look at Revision 3\">3</a>
-//         </th>
-//       </tr>
-//     </thead>
-//     <tbody>
-//       <tr>
-//         <th>age</th>
-//         <td class=\"bytes 1 old\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=1\" class=\"revision\" data-revisionNumber=\"1\" title=\"Look at Revision 1\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"0 Bytes unchanged\" style=\"height:0%;\"/>
-//                 <span class=\"bytes added\" title=\"0 Bytes added\" style=\"height:0%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\"0 Bytes removed\" style=\"height:0%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//         <td class=\"bytes 2\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=2\" class=\"revision\" data-revisionNumber=\"2\" title=\"Look at Revision 2\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"0 Bytes unchanged\" style=\"height:0%;\"/>
-//                 <span class=\"bytes added\" title=\" Bytes added\" style=\"height:0%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\" Bytes removed\" style=\"height:0%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//         <td class=\"bytes 3\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=3\" class=\"revision\" data-revisionNumber=\"3\" title=\"Look at Revision 3\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"0 Bytes unchanged\" style=\"height:100%;\"/>
-//                 <span class=\"bytes added\" title=\"2 Bytes added\" style=\"height:100%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\"0 Bytes removed\" style=\"height:0%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//       </tr>
-//       <tr>
-//         <th>name</th>
-//         <td class=\"bytes 1 old\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=1\" class=\"revision\" data-revisionNumber=\"1\" title=\"Look at Revision 1\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"0 Bytes unchanged\" style=\"height:100%;\"/>
-//                 <span class=\"bytes added\" title=\"11 Bytes added\" style=\"height:100%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\"0 Bytes removed\" style=\"height:0%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//         <td class=\"bytes 2\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=2\" class=\"revision\" data-revisionNumber=\"2\" title=\"Look at Revision 2\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"11 Bytes unchanged\" style=\"height:100%;\"/>
-//                 <span class=\"bytes added\" title=\"0 Bytes added\" style=\"height:0%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\"0 Bytes removed\" style=\"height:0%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//         <td class=\"bytes 3\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=3\" class=\"revision\" data-revisionNumber=\"3\" title=\"Look at Revision 3\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"5 Bytes unchanged\" style=\"height:45.454545454545%;\"/>
-//                 <span class=\"bytes added\" title=\"0 Bytes added\" style=\"height:0%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\"12 Bytes removed\" style=\"height:240%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//       </tr>
-//     </tbody>
-//     <tfoot>
-//       <tr class=\"compare\">
-//         <th>
-//           <button id=\"compareButton\" class=\"positive\" name=\"revisionsAction\" value=\"text\">Compare</button>
-//         </th>
-//         <td class=\"1 old\">
-//           <label for=\"revisionNum-1\">
-//             <input id=\"revisionNum-1\" type=\"checkbox\" name=\"revisionNumbersToCompare[]\" title=\"Revision 1\" class=\"compare\" value=\"1\" checked=\"checked\"/>
-//           </label>
-//         </td>
-//         <td class=\"2\">
-//           <label for=\"revisionNum-2\">
-//             <input id=\"revisionNum-2\" type=\"checkbox\" name=\"revisionNumbersToCompare[]\" title=\"Revision 2\" class=\"compare\" value=\"2\"/>
-//           </label>
-//         </td>
-//         <td class=\"3\">
-//           <label for=\"revisionNum-3\">
-//             <input id=\"revisionNum-3\" type=\"checkbox\" name=\"revisionNumbersToCompare[]\" title=\"Revision 3\" class=\"compare\" value=\"3\"/>
-//           </label>
-//         </td>
-//       </tr>
-//     </tfoot>
-//   </table>
-//   </div>
-//   <div id=\"formExtras\">
-//   <section class=\"clearfix revisionData comparison\">
-//     <div class=\"clearfix headers\">
-//       <header>
-//         <hgroup>
-//           <h1/>
-//           <h2>$now</h2>
-//           <h2>by </h2>
-//         </hgroup>
-//       </header>
-//       <header>
-//         <hgroup>
-//           <h1/>
-//           <h2>$now</h2>
-//           <h2>by </h2>
-//         </hgroup>
-//       </header>
-//     </div>
-//     <dl class=\"clearfix\">
-//       <dt>name</dt>
-//       <dd><del>Billy </del>Visto</dd>
-//       <dd><del>Billy </del>Visto</dd>
-//     </dl>
-//     <footer>
-//       <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=1&amp;restore=true\" id=\"restore-1\" class=\"restore button\" data-revisionNumber=\"1\" title=\"Restore Revision 1\">Restore #1</a>
-//     </footer>
-//     <footer>
-//       <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=4&amp;restore=true\" id=\"restore-4\" class=\"restore button\" data-revisionNumber=\"4\" title=\"Restore Revision 4\">Restore #4</a>
-//     </footer>
-//   </section>
-//   </div>
-// </form>";
-//     $urlParams = array('revisionNumbersToCompare' => array(1,4), 'revisionsAction' => 'text', 'columns' => array('name'));
-//     $actual = $this->revisionsAPI->render($urlParams, $this->appUrl);
-//     $this->assertXmlStringEqualsXmlString($expected, $actual);
-//     $this->dropCreatedTables(array('person-revision', 'revisionData'));
-//   }
+    $expected = "
+    <form id=\"revisionsForm\" method=\"GET\">
+      <div id=\"hiddenFields\">
+        <input id=\"oldestRevisionNumber\" type=\"hidden\" name=\"oldestRevisionNumber\" value=\"1\" />
+        <input type=\"hidden\" name=\"columns[0]\" value=\"name\" />
+      </div>
+      <div id=\"revisionTimeline\">
+        <h4>Revision History</h4>
+        <div class=\"labels\">
+          <div>age</div>
+          <div>name</div>
+          <div>
+            <button id=\"compareButton\" class=\"positive\" name=\"revisionNumber\" value=\"false\">Compare</button>
+          </div>
+        </div>
+        <div class=\"viewport\">
+          <span class=\"scrollHotspot scrollLeft disabled\">◂</span>
+          <span class=\"scrollHotspot scrollRight disabled\">▸</span>
+          <table class=\"fancy\">
+            <thead>
+              <tr>
+                <th> </th>
+                <th class=\"1 old\" title=\"Modified 3 weeks ago by\" data-revision-number=\"1\">1</th>
+                <th class=\"2\" title=\"Modified 3 weeks ago by\" data-revision-number=\"2\">2</th>
+                <th class=\"3 young\" title=\"Modified 3 weeks ago by\" data-revision-number=\"3\">3</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th>age</th>
+                <td class=\"bytes 1 old\" data-revision-number=\"1\">
+                  <span class=\"bytes container\">
+                    <span class=\"bytes positive\"></span>
+                    <span class=\"bytes negative\"></span>
+                  </span>
+                </td>
+                <td class=\"bytes 2\" data-revision-number=\"2\">
+                  <span class=\"bytes container\">
+                    <span class=\"bytes positive\"></span>
+                    <span class=\"bytes negative\"></span>
+                  </span>
+                </td>
+                <td class=\"bytes 3 young\" data-revision-number=\"3\">
+                  <span class=\"bytes container\">
+                    <span class=\"bytes positive\">
+                      <span class=\"bytes unchanged\" title=\"\" style=\"height:100%;\"></span>
+                      <span class=\"bytes added\" title=\"added 23\" style=\"height:100%;\"></span>
+                    </span>
+                    <span class=\"bytes negative\"></span>
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <th>name</th>
+                <td class=\"bytes 1 old\" data-revision-number=\"1\">
+                  <span class=\"bytes container\">
+                    <span class=\"bytes positive\">
+                      <span class=\"bytes unchanged\" title=\"0 Bytes unchanged\" style=\"height:100%;\"></span>
+                      <span class=\"bytes added\" title=\"11 Bytes added\" style=\"height:100%;\"></span>
+                    </span>
+                    <span class=\"bytes negative\"></span>
+                  </span>
+                </td>
+                <td class=\"bytes 2\" data-revision-number=\"2\">
+                  <span class=\"bytes container\">
+                    <span class=\"bytes positive\">
+                      <span class=\"bytes unchanged\" title=\"11 Bytes unchanged\" style=\"height:100%;\"></span>
+                    </span>
+                    <span class=\"bytes negative\"></span>
+                  </span>
+                </td>
+                <td class=\"bytes 3 young\" data-revision-number=\"3\">
+                  <span class=\"bytes container\">
+                    <span class=\"bytes positive\">
+                      <span class=\"bytes unchanged\" title=\"5 Bytes unchanged\" style=\"height:45.454545454545%;\"></span>
+                    </span>
+                    <span class=\"bytes negative\">
+                      <span class=\"bytes removed\" title=\"6 Bytes removed\" style=\"height:54.545454545455%;\"></span>
+                    </span>
+                  </span>
+                </td>
+              </tr>
+              </tbody>
+              <tfoot>
+                <tr class=\"compare\">
+                  <th> </th>
+                  <td class=\"1 old\">
+                    <label for=\"revisionNum-1\">
+                      <input id=\"revisionNum-1\" type=\"checkbox\" name=\"revisionNumbers[]\" title=\"Revision 1\" class=\"compare\" value=\"1\" checked=\"checked\"/>
+                    </label>
+                  </td>
+                  <td class=\"2\">
+                    <label for=\"revisionNum-2\">
+                      <input id=\"revisionNum-2\" type=\"checkbox\" name=\"revisionNumbers[]\" title=\"Revision 2\" class=\"compare\" value=\"2\"/>
+                    </label>
+                  </td>
+                  <td class=\"3 young\">
+                    <label for=\"revisionNum-3\">
+                      <input id=\"revisionNum-3\" type=\"checkbox\" name=\"revisionNumbers[]\" title=\"Revision 3\" class=\"compare\" value=\"3\" checked=\"checked\"/>
+                    </label>
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+        <div id=\"formExtras\"><section class=\"clearfix revisionData comparison\">
+          <div class=\"clearfix headers\">
+            <header>
+              <hgroup title=\"{$this->getDateTitle()}\">
+                <h1></h1>
+                <h2>3 weeks ago</h2>
+                <h2></h2>
+              </hgroup>
+            </header>
+            <header>
+              <hgroup title=\"{$this->getDateTitle()}\">
+                <h1></h1>
+                <h2>3 weeks ago</h2>
+                <h2></h2>
+              </hgroup>
+            </header>
+          </div>
+          <dl class=\"clearfix\">
+            <dt title=\"name\">name</dt>
+              <dd><del>Billy </del>Visto</dd>
+              <dd><del>Billy </del>Visto</dd>
+          </dl>
+          <footer>
+            <button name=\"restore\" value=\"1\" id=\"restore-1\" class=\"restore\" title=\"Restore Revision 1\">Restore #1</button>
+          </footer>
+          <footer>
+            <button name=\"restore\" value=\"3\" id=\"restore-3\" class=\"restore disabled\" title=\"Restore Revision 3\">Restore #3</button>
+          </footer>
+        </section>
+      </div>
+    </form>";
 
-//   /**
-//    * @test
-//    */
-//   public function renderRevisionComparisonTextError()
-//   {
-//     $conn = $this->getConnection();
-//     $this->setUpMock('person-revision');
-//     $this->dbalConnection->query($this->getCreateQuery());
-//     $this->dbalConnection->query($this->getCreateDataQuery());
+    $_GET = array('revisionNumbers' => array(1,3), 'columns' => array('name'));
+    $actual = $this->revisionsAPI->render();
 
-//     $this->revisionsAPI->saveRevision(array('name' => 'Billy Visto'));
-//     $this->saveRevisionToDB('Billy', 'Billy Visto', 'name', $this->get($this->revisionsAPI, 'revisions'));
-//     $this->revisionsAPI->saveRevision(array('name' => 'Visto', 'age' => 23));
+    $this->assertXmlStringEqualsXmlString($expected, str_replace('&nbsp;', ' ', $actual));
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
 
-//     $now = date("F jS \\a\\t g:ia");
-//     $expected = "<form id=\"revisionsForm\" method=\"GET\">
-//   <h4>Revision History</h4>
-//   <div id=\"revisionTimeline\">
-//   <table class=\"fancy\">
-//     <thead>
-//       <tr>
-//         <th>
-//           <a id=\"showMoreRevisions\" href=\"$this->appUrl?revisionNumbersToCompare%5B0%5D=1&amp;revisionNumbersToCompare%5B1%5D=3&amp;revisionsAction=text&amp;oldestRevisionNumber=1\" class=\"button small\" title=\"Show Revision  in table\">Show More Revisions</a>
-//         </th>
-//         <th class=\"1 old\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=1\" data-revisionNumber=\"1\" title=\"Look at Revision 1\">1</a>
-//         </th>
-//         <th class=\"2\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=2\" data-revisionNumber=\"2\" title=\"Look at Revision 2\">2</a>
-//         </th>
-//         <th class=\"3 young\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=3\" data-revisionNumber=\"3\" title=\"Look at Revision 3\">3</a>
-//         </th>
-//         <th class=\"4\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=4\" data-revisionNumber=\"4\" title=\"Look at Revision 4\">4</a>
-//         </th>
-//       </tr>
-//     </thead>
-//     <tbody>
-//       <tr>
-//         <th>age</th>
-//         <td class=\"error\">$this->error</td>
-//         <td class=\"bytes 2\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=2\" class=\"revision\" data-revisionNumber=\"2\" title=\"Look at Revision 2\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"0 Bytes unchanged\" style=\"height:0%;\"/>
-//                 <span class=\"bytes added\" title=\"0 Bytes added\" style=\"height:0%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\"0 Bytes removed\" style=\"height:0%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//         <td class=\"bytes 3 young\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=3\" class=\"revision\" data-revisionNumber=\"3\" title=\"Look at Revision 3\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"0 Bytes unchanged\" style=\"height:0%;\"/>
-//                 <span class=\"bytes added\" title=\" Bytes added\" style=\"height:0%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\" Bytes removed\" style=\"height:0%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//         <td class=\"bytes 4\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=4\" class=\"revision\" data-revisionNumber=\"4\" title=\"Look at Revision 4\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"0 Bytes unchanged\" style=\"height:100%;\"/>
-//                 <span class=\"bytes added\" title=\"2 Bytes added\" style=\"height:100%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\"0 Bytes removed\" style=\"height:0%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//       </tr>
-//       <tr>
-//         <th>name</th>
-//         <td class=\"error\">$this->error</td>
-//         <td class=\"bytes 2\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=2\" class=\"revision\" data-revisionNumber=\"2\" title=\"Look at Revision 2\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"5 Bytes unchanged\" style=\"height:100%;\"/>
-//                 <span class=\"bytes added\" title=\"6 Bytes added\" style=\"height:54.545454545455%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\"0 Bytes removed\" style=\"height:0%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//         <td class=\"bytes 3 young\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=3\" class=\"revision\" data-revisionNumber=\"3\" title=\"Look at Revision 3\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"11 Bytes unchanged\" style=\"height:100%;\"/>
-//                 <span class=\"bytes added\" title=\"0 Bytes added\" style=\"height:0%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\"0 Bytes removed\" style=\"height:0%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//         <td class=\"bytes 4\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=4\" class=\"revision\" data-revisionNumber=\"4\" title=\"Look at Revision 4\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"5 Bytes unchanged\" style=\"height:45.454545454545%;\"/>
-//                 <span class=\"bytes added\" title=\"0 Bytes added\" style=\"height:0%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\"6 Bytes removed\" style=\"height:120%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//       </tr>
-//     </tbody>
-//     <tfoot>
-//       <tr class=\"compare\">
-//         <th>
-//           <button id=\"compareButton\" class=\"positive\" name=\"revisionsAction\" value=\"text\">Compare</button>
-//         </th>
-//         <td class=\"1\"></td>
-//         <td class=\"2\">
-//           <label for=\"revisionNum-2\">
-//             <input id=\"revisionNum-2\" type=\"checkbox\" name=\"revisionNumbersToCompare[]\" title=\"Revision 2\" class=\"compare\" value=\"2\"/>
-//           </label>
-//         </td>
-//         <td class=\"3 young\">
-//           <label for=\"revisionNum-3\">
-//             <input id=\"revisionNum-3\" type=\"checkbox\" name=\"revisionNumbersToCompare[]\" title=\"Revision 3\" class=\"compare\" value=\"3\" checked=\"checked\"/>
-//           </label>
-//         </td>
-//         <td class=\"4\">
-//           <label for=\"revisionNum-4\">
-//             <input id=\"revisionNum-4\" type=\"checkbox\" name=\"revisionNumbersToCompare[]\" title=\"Revision 4\" class=\"compare\" value=\"4\"/>
-//           </label>
-//         </td>
-//       </tr>
-//     </tfoot>
-//   </table>
-//   </div>
-//   <div id=\"formExtras\">
-//   <section class=\"clearfix revisionData comparison\">
-//     <div class=\"clearfix headers\">
-//       <header>
-//         <hgroup>
-//           <h1/>
-//           <h2>$now</h2>
-//           <h2>by </h2>
-//         </hgroup>
-//       </header>
-//       <header>
-//         <hgroup>
-//           <h1/>
-//           <h2>$now</h2>
-//           <h2>by </h2>
-//         </hgroup>
-//       </header>
-//     </div>
-//     <dl class=\"clearfix\">
-//       <dt>age</dt>
-//       <dd/>
-//       <dd/>
-//       <dt class=\"error\">name</dt>
-//       <dd>$this->error</dd>
-//       <dd>$this->error</dd>
-//     </dl>
-//     <footer>
-//       <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=1&amp;restore=true\" id=\"restore-1\" class=\"restore button\" data-revisionNumber=\"1\" title=\"Restore Revision 1\">Restore #1</a>
-//     </footer>
-//     <footer>
-//       <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=3&amp;restore=true\" id=\"restore-3\" class=\"restore button\" data-revisionNumber=\"3\" title=\"Restore Revision 3\">Restore #3</a>
-//     </footer>
-//   </section>
-//   </div>
-// </form>";
+  /**
+   * @test
+   */
+  public function renderRevisionComparisonTextError()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
 
-//     $urlParams = array('revisionNumbersToCompare' => array(1,3), 'revisionsAction' => 'text');
-//     $actual = $this->revisionsAPI->render($urlParams, $this->appUrl);
-//     $this->assertXmlStringEqualsXmlString($expected, $actual);
-//     $this->dropCreatedTables(array('person-revision', 'revisionData'));
-//   }
+    $this->revisionsAPI->saveRevision(array('name' => 'Billy Visto'));
+    $this->saveRevisionToDB('Billy', 'Billy Visto', 'name', $this->get($this->revisionsAPI, 'revisions'));
+    $this->revisionsAPI->saveRevision(array('name' => 'Visto', 'age' => 23));
 
-//   /**
-//    * @test
-//    */
-//   public function renderRevisionData()
-//   {
-//     $conn = $this->getConnection();
-//     $this->setUpMock('person-revision');
-//     $this->dbalConnection->query($this->getCreateQuery());
-//     $this->dbalConnection->query($this->getCreateDataQuery());
+    $expected = "
+    <form id=\"revisionsForm\" method=\"GET\">
+      <div id=\"hiddenFields\">
+        <input id=\"oldestRevisionNumber\" type=\"hidden\" name=\"oldestRevisionNumber\" value=\"2\" />
+      </div>
+      <div id=\"revisionTimeline\">
+        <h4>Revision History</h4>
+        <div class=\"labels\">
+          <div>age</div>
+          <div>name</div>
+          <div>
+            <button id=\"compareButton\" class=\"positive\" name=\"revisionNumber\" value=\"false\">Compare</button>
+          </div>
+        </div>
+        <div class=\"viewport\">
+          <span class=\"scrollHotspot scrollLeft disabled\">◂</span>
+          <span class=\"scrollHotspot scrollRight disabled\">▸</span>
+          <table class=\"fancy\">
+            <thead>
+              <tr>
+                <th> </th>
+                <th class=\"1 old\" title=\"Look at revision 1\" data-revision-number=\"1\">1</th>
+                <th class=\"2\" title=\"Modified 3 weeks ago by name\" data-revision-number=\"2\">2</th>
+                <th class=\"3 young\" title=\"Modified 3 weeks ago by\" data-revision-number=\"3\">3</th>
+                <th class=\"4\" title=\"Modified 3 weeks ago by\" data-revision-number=\"4\">4</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th>age</th>
+                <td class=\"error\">An unexpected error occured.</td>
+                <td class=\"bytes 2\" data-revision-number=\"2\">
+                  <span class=\"bytes container\">
+                    <span class=\"bytes positive\"></span>
+                    <span class=\"bytes negative\"></span>
+                  </span>
+                </td>
+                <td class=\"bytes 3 young\" data-revision-number=\"3\">
+                  <span class=\"bytes container\">
+                    <span class=\"bytes positive\"></span>
+                    <span class=\"bytes negative\"></span>
+                  </span>
+                </td>
+                <td class=\"bytes 4\" data-revision-number=\"4\">
+                  <span class=\"bytes container\">
+                      <span class=\"bytes positive\">
+                      <span class=\"bytes unchanged\" title=\"\" style=\"height:100%;\"></span>
+                      <span class=\"bytes added\" title=\"added 23\" style=\"height:100%;\"></span>
+                    </span>
+                    <span class=\"bytes negative\"></span>
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <th>name</th>
+                <td class=\"error\">An unexpected error occured.</td>
+                <td class=\"bytes 2\" data-revision-number=\"2\">
+                  <span class=\"bytes container\">
+                    <span class=\"bytes positive\">
+                      <span class=\"bytes unchanged\" title=\"5 Bytes unchanged\" style=\"height:100%;\"></span>
+                      <span class=\"bytes added\" title=\"6 Bytes added\" style=\"height:54.545454545455%;\"></span>
+                    </span>
+                    <span class=\"bytes negative\"></span>
+                  </span>
+                </td>
+                <td class=\"bytes 3 young\" data-revision-number=\"3\">
+                  <span class=\"bytes container\">
+                    <span class=\"bytes positive\">
+                      <span class=\"bytes unchanged\" title=\"11 Bytes unchanged\" style=\"height:100%;\"></span>
+                    </span>
+                    <span class=\"bytes negative\"></span>
+                  </span>
+                </td>
+                <td class=\"bytes 4\" data-revision-number=\"4\">
+                  <span class=\"bytes container\">
+                    <span class=\"bytes positive\">
+                      <span class=\"bytes unchanged\" title=\"5 Bytes unchanged\" style=\"height:45.454545454545%;\"></span>
+                    </span>
+                    <span class=\"bytes negative\">
+                      <span class=\"bytes removed\" title=\"6 Bytes removed\" style=\"height:54.545454545455%;\"></span>
+                    </span>
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr class=\"compare\">
+                <th> </th>
+                <td class=\"1\"></td>
+                <td class=\"2\">
+                  <label for=\"revisionNum-2\">
+                    <input id=\"revisionNum-2\" type=\"checkbox\" name=\"revisionNumbers[]\" title=\"Revision 2\" class=\"compare\" value=\"2\"/>
+                  </label>
+                </td>
+                <td class=\"3 young\">
+                  <label for=\"revisionNum-3\">
+                    <input id=\"revisionNum-3\" type=\"checkbox\" name=\"revisionNumbers[]\" title=\"Revision 3\" class=\"compare\" value=\"3\" checked=\"checked\"/>
+                  </label>
+                </td>
+                <td class=\"4\">
+                  <label for=\"revisionNum-4\">
+                    <input id=\"revisionNum-4\" type=\"checkbox\" name=\"revisionNumbers[]\" title=\"Revision 4\" class=\"compare\" value=\"4\"/>
+                  </label>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+      <div id=\"formExtras\">
+        <section class=\"clearfix revisionData comparison\">
+          <div class=\"clearfix headers\">
+            <header>
+              <hgroup title=\"{$this->getDateTitle()}\">
+                <h1></h1>
+                <h2>3 weeks ago</h2>
+                <h2></h2>
+              </hgroup>
+            </header>
+            <header>
+              <hgroup title=\"{$this->getDateTitle()}\">
+                <h1></h1>
+                <h2>3 weeks ago</h2>
+                <h2></h2>
+              </hgroup>
+            </header>
+          </div>
+          <dl class=\"clearfix\">
+            <dt title=\"age\">age</dt>
+              <dd></dd>
+              <dd></dd>
+            <dt class=\"error\" title=\"name\">name</dt>
+              <dd>An unexpected error occured.</dd>
+              <dd>An unexpected error occured.</dd>
+          </dl>
+          <footer>
+            <button name=\"restore\" value=\"1\" id=\"restore-1\" class=\"restore\" title=\"Restore Revision 1\">Restore #1</button></footer><footer><button name=\"restore\" value=\"3\" id=\"restore-3\" class=\"restore\" title=\"Restore Revision 3\">Restore #3</button>
+          </footer>
+        </section>
+      </div>
+    </form>";
 
-//     $this->revisionsAPI->saveRevision(array('name' => 'Billy Visto'));
-//     $this->revisionsAPI->saveRevision(array('name' => 'Visto', 'age' => 23));
+    $_GET = array('revisionNumbers' => array(1,3));
+    $actual = $this->revisionsAPI->render();
+    $this->assertXmlStringEqualsXmlString($expected, str_replace('&nbsp;', ' ', $actual));
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
 
-//     $now = date("F jS \\a\\t g:ia");
-//     $expected = "<form id=\"revisionsForm\" method=\"GET\">
-//   <h4>Revision History</h4>
-//   <div id=\"revisionTimeline\">
-//   <table class=\"fancy\">
-//     <thead>
-//       <tr>
-//         <th>
-//           <a id=\"showMoreRevisions\" href=\"$this->appUrl?revisionNumber=2&amp;revisionsAction=revision&amp;oldestRevisionNumber=1\" class=\"button small\" title=\"Show Revision  in table\">Show More Revisions</a>
-//         </th>
-//         <th class=\"1\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=1\" data-revisionNumber=\"1\" title=\"Look at Revision 1\">1</a>
-//         </th>
-//         <th class=\"2 young\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=2\" data-revisionNumber=\"2\" title=\"Look at Revision 2\">2</a>
-//         </th>
-//         <th class=\"3\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=3\" data-revisionNumber=\"3\" title=\"Look at Revision 3\">3</a>
-//         </th>
-//       </tr>
-//     </thead>
-//     <tbody>
-//       <tr>
-//         <th>age</th>
-//         <td class=\"bytes 1\">
-//           <a href=\"$this->appUrl?revisionNumber=2&amp;revisionsAction=revision&amp;oldestRevisionNumber=1\" class=\"missingRevisions button\" title=\"Show Revision 1 in table\"/>
-//         </td>
-//         <td class=\"bytes 2 young\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=2\" class=\"revision\" data-revisionNumber=\"2\" title=\"Look at Revision 2\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"0 Bytes unchanged\" style=\"height:0%;\"/>
-//                 <span class=\"bytes added\" title=\" Bytes added\" style=\"height:0%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\" Bytes removed\" style=\"height:0%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//         <td class=\"bytes 3\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=3\" class=\"revision\" data-revisionNumber=\"3\" title=\"Look at Revision 3\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"0 Bytes unchanged\" style=\"height:100%;\"/>
-//                 <span class=\"bytes added\" title=\"2 Bytes added\" style=\"height:100%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\"0 Bytes removed\" style=\"height:0%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//       </tr>
-//       <tr>
-//         <th>name</th>
-//         <td class=\"bytes 1\">
-//           <a href=\"$this->appUrl?revisionNumber=2&amp;revisionsAction=revision&amp;oldestRevisionNumber=1\" class=\"missingRevisions button\" title=\"Show Revision 1 in table\"/>
-//         </td>
-//         <td class=\"bytes 2 young\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=2\" class=\"revision\" data-revisionNumber=\"2\" title=\"Look at Revision 2\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"11 Bytes unchanged\" style=\"height:100%;\"/>
-//                 <span class=\"bytes added\" title=\"0 Bytes added\" style=\"height:0%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\"0 Bytes removed\" style=\"height:0%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//         <td class=\"bytes 3\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=3\" class=\"revision\" data-revisionNumber=\"3\" title=\"Look at Revision 3\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"5 Bytes unchanged\" style=\"height:45.454545454545%;\"/>
-//                 <span class=\"bytes added\" title=\"0 Bytes added\" style=\"height:0%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\"6 Bytes removed\" style=\"height:120%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//       </tr>
-//     </tbody>
-//     <tfoot>
-//       <tr class=\"compare\">
-//         <th>
-//           <button id=\"compareButton\" class=\"positive\" name=\"revisionsAction\" value=\"text\">Compare</button>
-//         </th>
-//         <td class=\"1\"></td>
-//         <td class=\"2 young\">
-//           <label for=\"revisionNum-2\">
-//             <input id=\"revisionNum-2\" type=\"checkbox\" name=\"revisionNumbersToCompare[]\" title=\"Revision 2\" class=\"compare\" value=\"2\" checked=\"checked\"/>
-//           </label>
-//         </td>
-//         <td class=\"3\">
-//           <label for=\"revisionNum-3\">
-//             <input id=\"revisionNum-3\" type=\"checkbox\" name=\"revisionNumbersToCompare[]\" title=\"Revision 3\" class=\"compare\" value=\"3\"/>
-//           </label>
-//         </td>
-//       </tr>
-//     </tfoot>
-//   </table>
-//   </div>
-//   <div id=\"formExtras\">
-//   <section class=\"clearfix revisionData\">
-//     <div class=\"clearfix headers\">
-//       <header>
-//         <hgroup>
-//           <h1/>
-//           <h2>$now</h2>
-//           <h2>by </h2>
-//         </hgroup>
-//       </header>
-//     </div>
-//     <dl class=\"clearfix\">
-//       <dt>age</dt>
-//       <dd>
-//         <ins>23</ins>
-//       </dd>
-//       <dt>name</dt>
-//       <dd><del>Billy </del>Visto</dd>
-//     </dl>
-//     <footer>
-//       <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=2&amp;restore=true\" id=\"restore-2\" class=\"restore button\" data-revisionNumber=\"2\" title=\"Restore Revision 2\">Restore #2</a>
-//     </footer>
-//   </section>
-//   </div>
-// </form>";
+  /**
+   * @test
+   */
+  public function renderRevisionData()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
 
-//     $urlParams = array('revisionNumber' => '2', 'revisionsAction' => 'revision');
-//     $actual = $this->revisionsAPI->render($urlParams, $this->appUrl);
-//     $this->assertXmlStringEqualsXmlString($expected, $actual);
-//     $this->dropCreatedTables(array('person-revision', 'revisionData'));
-//   }
+    $this->revisionsAPI->saveRevision(array('name' => 'Billy Visto'));
+    $this->revisionsAPI->saveRevision(array('name' => 'Visto', 'age' => 23));
 
-//   /**
-//    * @test
-//    */
-//   public function renderRevisionDataError()
-//   {
-//     $conn = $this->getConnection();
-//     $this->setUpMock('person-revision');
-//     $this->dbalConnection->query($this->getCreateQuery());
-//     $this->dbalConnection->query($this->getCreateDataQuery());
+    $expected = "
+    <form id=\"revisionsForm\" method=\"GET\">
+      <div id=\"hiddenFields\">
+        <input id=\"oldestRevisionNumber\" type=\"hidden\" name=\"oldestRevisionNumber\" value=\"3\" />
+        <input type=\"hidden\" name=\"revisionNumber\" value=\"2\" />
+      </div>
+      <div id=\"revisionTimeline\">
+        <h4>Revision History</h4>
+        <div class=\"labels\">
+          <div>age</div>
+          <div>name</div>
+          <div>
+            <button id=\"compareButton\" class=\"positive\" name=\"revisionNumber\" value=\"false\">Compare</button>
+          </div>
+        </div>
+        <div class=\"viewport\">
+          <span class=\"scrollHotspot scrollLeft disabled\">◂</span>
+          <span class=\"scrollHotspot scrollRight disabled\">▸</span>
+          <table class=\"fancy\">
+            <thead>
+              <tr>
+                <th> </th>
+                <th class=\"1\" title=\"Look at revision 1\" data-revision-number=\"1\">1</th>
+                <th class=\"2 young\" title=\"Modified 3 weeks ago by\" data-revision-number=\"2\">2</th>
+                <th class=\"3\" title=\"Modified 3 weeks ago by\" data-revision-number=\"3\">3</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th>age</th>
+                <td class=\"missingRevisions bytes 1\" data-oldest-revision-number=\"1\" title=\"Show More Revisions\"></td>
+                <td class=\"bytes 2 young\" data-revision-number=\"2\">
+                  <span class=\"bytes container\">
+                    <span class=\"bytes positive\"></span>
+                    <span class=\"bytes negative\"></span>
+                  </span>
+                </td>
+                <td class=\"bytes 3\" data-revision-number=\"3\">
+                  <span class=\"bytes container\">
+                    <span class=\"bytes positive\">
+                      <span class=\"bytes unchanged\" title=\"\" style=\"height:100%;\"></span>
+                      <span class=\"bytes added\" title=\"added 23\" style=\"height:100%;\"></span>
+                    </span>
+                    <span class=\"bytes negative\"></span>
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <th>name</th>
+                <td class=\"missingRevisions bytes 1\" data-oldest-revision-number=\"1\" title=\"Show More Revisions\"></td>
+                <td class=\"bytes 2 young\" data-revision-number=\"2\">
+                  <span class=\"bytes container\">
+                    <span class=\"bytes positive\">
+                      <span class=\"bytes unchanged\" title=\"11 Bytes unchanged\" style=\"height:100%;\"></span>
+                    </span>
+                    <span class=\"bytes negative\"></span>
+                  </span>
+                </td>
+                <td class=\"bytes 3\" data-revision-number=\"3\">
+                  <span class=\"bytes container\">
+                      <span class=\"bytes positive\">
+                      <span class=\"bytes unchanged\" title=\"5 Bytes unchanged\" style=\"height:45.454545454545%;\"></span>
+                    </span>
+                    <span class=\"bytes negative\">
+                      <span class=\"bytes removed\" title=\"6 Bytes removed\" style=\"height:54.545454545455%;\"></span>
+                    </span>
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr class=\"compare\">
+                <th> </th>
+                <td class=\"1\"></td>
+                <td class=\"2 young\">
+                  <label for=\"revisionNum-2\">
+                    <input id=\"revisionNum-2\" type=\"checkbox\" name=\"revisionNumbers[]\" title=\"Revision 2\" class=\"compare\" value=\"2\" checked=\"checked\"/>
+                  </label>
+                </td>
+                <td class=\"3\">
+                  <label for=\"revisionNum-3\">
+                    <input id=\"revisionNum-3\" type=\"checkbox\" name=\"revisionNumbers[]\" title=\"Revision 3\" class=\"compare\" value=\"3\"/>
+                  </label>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+      <div id=\"formExtras\">
+        <section class=\"clearfix revisionData\">
+          <div class=\"clearfix headers\">
+            <header>
+              <hgroup title=\"{$this->getDateTitle()}\">
+                <h1></h1>
+                <h2>3 weeks ago</h2>
+                <h2></h2>
+              </hgroup>
+            </header>
+          </div>
+          <dl class=\"clearfix\">
+            <dt title=\"name\">name</dt>
+              <dd>Billy Visto</dd>
+          </dl>
+          <footer>
+            <button name=\"restore\" value=\"2\" id=\"restore-2\" class=\"restore\" title=\"Restore Revision 2\">Restore #2</button>
+          </footer>
+        </section>
+      </div>
+    </form>";
 
-//     $this->revisionsAPI->saveRevision(array('name' => 'Billy Visto'));
-//     $this->saveRevisionToDB('Billy', 'Billy Visto', 'name', $this->get($this->revisionsAPI, 'revisions'));
-//     $this->revisionsAPI->saveRevision(array('name' => 'Visto', 'age' => 23));
+    $_GET = array('revisionNumber' => '2', 'oldestRevisionNumber' => '3');
+    $actual = $this->revisionsAPI->render();
+    $this->assertXmlStringEqualsXmlString($expected, str_replace('&nbsp;', ' ', $actual));
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
 
-//     $now = date("F jS \\a\\t g:ia");
-//     $expected = "<form id=\"revisionsForm\" method=\"GET\">
-//   <h4>Revision History</h4>
-//   <div id=\"revisionTimeline\">
-//   <table class=\"fancy\">
-//     <thead>
-//       <tr>
-//         <th>
-//           <a id=\"showMoreRevisions\" href=\"$this->appUrl?revisionNumber=1&amp;revisionsAction=revision&amp;oldestRevisionNumber=1\" class=\"button small\" title=\"Show Revision  in table\">Show More Revisions</a>
-//         </th>
-//         <th class=\"1 young\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=1\" data-revisionNumber=\"1\" title=\"Look at Revision 1\">1</a>
-//         </th>
-//         <th class=\"2\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=2\" data-revisionNumber=\"2\" title=\"Look at Revision 2\">2</a>
-//         </th>
-//         <th class=\"3\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=3\" data-revisionNumber=\"3\" title=\"Look at Revision 3\">3</a>
-//         </th>
-//         <th class=\"4\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=4\" data-revisionNumber=\"4\" title=\"Look at Revision 4\">4</a>
-//         </th>
-//       </tr>
-//     </thead>
-//     <tbody>
-//       <tr>
-//         <th>age</th>
-//         <td class=\"error\">$this->error</td>
-//         <td class=\"bytes 2\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=2\" class=\"revision\" data-revisionNumber=\"2\" title=\"Look at Revision 2\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"0 Bytes unchanged\" style=\"height:0%;\"/>
-//                 <span class=\"bytes added\" title=\"0 Bytes added\" style=\"height:0%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\"0 Bytes removed\" style=\"height:0%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//         <td class=\"bytes 3\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=3\" class=\"revision\" data-revisionNumber=\"3\" title=\"Look at Revision 3\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"0 Bytes unchanged\" style=\"height:0%;\"/>
-//                 <span class=\"bytes added\" title=\" Bytes added\" style=\"height:0%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\" Bytes removed\" style=\"height:0%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//         <td class=\"bytes 4\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=4\" class=\"revision\" data-revisionNumber=\"4\" title=\"Look at Revision 4\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"0 Bytes unchanged\" style=\"height:100%;\"/>
-//                 <span class=\"bytes added\" title=\"2 Bytes added\" style=\"height:100%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\"0 Bytes removed\" style=\"height:0%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//       </tr>
-//       <tr>
-//         <th>name</th>
-//         <td class=\"error\">$this->error</td>
-//         <td class=\"bytes 2\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=2\" class=\"revision\" data-revisionNumber=\"2\" title=\"Look at Revision 2\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"5 Bytes unchanged\" style=\"height:100%;\"/>
-//                 <span class=\"bytes added\" title=\"6 Bytes added\" style=\"height:54.545454545455%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\"0 Bytes removed\" style=\"height:0%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//         <td class=\"bytes 3\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=3\" class=\"revision\" data-revisionNumber=\"3\" title=\"Look at Revision 3\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"11 Bytes unchanged\" style=\"height:100%;\"/>
-//                 <span class=\"bytes added\" title=\"0 Bytes added\" style=\"height:0%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\"0 Bytes removed\" style=\"height:0%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//         <td class=\"bytes 4\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=4\" class=\"revision\" data-revisionNumber=\"4\" title=\"Look at Revision 4\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"5 Bytes unchanged\" style=\"height:45.454545454545%;\"/>
-//                 <span class=\"bytes added\" title=\"0 Bytes added\" style=\"height:0%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\"6 Bytes removed\" style=\"height:120%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//       </tr>
-//     </tbody>
-//     <tfoot>
-//       <tr class=\"compare\">
-//         <th>
-//           <button id=\"compareButton\" class=\"positive\" name=\"revisionsAction\" value=\"text\">Compare</button>
-//         </th>
-//         <td class=\"1\"></td>
-//         <td class=\"2\">
-//           <label for=\"revisionNum-2\">
-//             <input id=\"revisionNum-2\" type=\"checkbox\" name=\"revisionNumbersToCompare[]\" title=\"Revision 2\" class=\"compare\" value=\"2\"/>
-//           </label>
-//         </td>
-//         <td class=\"3\">
-//           <label for=\"revisionNum-3\">
-//             <input id=\"revisionNum-3\" type=\"checkbox\" name=\"revisionNumbersToCompare[]\" title=\"Revision 3\" class=\"compare\" value=\"3\"/>
-//           </label>
-//         </td>
-//         <td class=\"4\">
-//           <label for=\"revisionNum-4\">
-//             <input id=\"revisionNum-4\" type=\"checkbox\" name=\"revisionNumbersToCompare[]\" title=\"Revision 4\" class=\"compare\" value=\"4\"/>
-//           </label>
-//         </td>
-//       </tr>
-//     </tfoot>
-//   </table>
-//   </div>
-//   <div id=\"formExtras\">
-//   <section class=\"clearfix revisionData\">
-//     <div class=\"clearfix headers\">
-//       <header>
-//         <hgroup>
-//           <h1/>
-//           <h2>$now</h2>
-//           <h2>by </h2>
-//         </hgroup>
-//       </header>
-//     </div>
-//     <dl class=\"clearfix\">
-//       <dt class=\"error\">name</dt>
-//       <dd>$this->error</dd>
-//     </dl>
-//     <footer>
-//       <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=1&amp;restore=true\" id=\"restore-1\" class=\"restore button\" data-revisionNumber=\"1\" title=\"Restore Revision 1\">Restore #1</a>
-//     </footer>
-//   </section>
-//   </div>
-// </form>";
-//     $urlParams = array('revisionNumber' => '1', 'revisionsAction' => 'revision');
-//     $actual = $this->revisionsAPI->render($urlParams, $this->appUrl);
-//     $this->assertXmlStringEqualsXmlString($expected, $actual);
-//     $this->dropCreatedTables(array('person-revision', 'revisionData'));
-//   }
+  /**
+   * @test
+   */
+  public function renderRevisionDataError()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
 
-//   /**
-//    * @test
-//    */
-//   public function renderRevisionDataColumn()
-//   {
-//     $conn = $this->getConnection();
-//     $this->setUpMock('person-revision');
-//     $this->dbalConnection->query($this->getCreateQuery());
-//     $this->dbalConnection->query($this->getCreateDataQuery());
+    $this->revisionsAPI->saveRevision(array('name' => 'Billy Visto'));
+    $this->saveRevisionToDB('Billy', 'Billy Visto', 'name', $this->get($this->revisionsAPI, 'revisions'));
+    $this->revisionsAPI->saveRevision(array('name' => 'Visto', 'age' => 23));
 
-//     $this->revisionsAPI->saveRevision(array('name' => 'Billy Visto'));
-//     $this->revisionsAPI->saveRevision(array('name' => 'Visto', 'age' => 23));
+    $expected = "
+    <form id=\"revisionsForm\" method=\"GET\">
+      <div id=\"hiddenFields\">
+        <input id=\"oldestRevisionNumber\" type=\"hidden\" name=\"oldestRevisionNumber\" value=\"2\" />
+        <input type=\"hidden\" name=\"revisionNumber\" value=\"1\" />
+      </div>
+      <div id=\"revisionTimeline\">
+        <h4>Revision History</h4>
+        <div class=\"labels\">
+          <div>age</div>
+          <div>name</div>
+          <div>
+            <button id=\"compareButton\" class=\"positive\" name=\"revisionNumber\" value=\"false\">Compare</button>
+          </div>
+        </div>
+        <div class=\"viewport\">
+          <span class=\"scrollHotspot scrollLeft disabled\">◂</span>
+          <span class=\"scrollHotspot scrollRight disabled\">▸</span>
+          <table class=\"fancy\">
+            <thead>
+              <tr>
+                <th> </th>
+                <th class=\"1 young\" title=\"Look at revision 1\" data-revision-number=\"1\">1</th>
+                <th class=\"2\" title=\"Modified 3 weeks ago by name\" data-revision-number=\"2\">2</th>
+                <th class=\"3\" title=\"Modified 3 weeks ago by\" data-revision-number=\"3\">3</th>
+                <th class=\"4\" title=\"Modified 3 weeks ago by\" data-revision-number=\"4\">4</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th>age</th>
+                <td class=\"error\">An unexpected error occured.</td>
+                <td class=\"bytes 2\" data-revision-number=\"2\">
+                  <span class=\"bytes container\">
+                    <span class=\"bytes positive\"></span>
+                    <span class=\"bytes negative\"></span>
+                  </span>
+                </td>
+                <td class=\"bytes 3\" data-revision-number=\"3\">
+                  <span class=\"bytes container\">
+                    <span class=\"bytes positive\"></span>
+                    <span class=\"bytes negative\"></span>
+                  </span>
+                </td>
+                <td class=\"bytes 4\" data-revision-number=\"4\">
+                  <span class=\"bytes container\">
+                      <span class=\"bytes positive\">
+                      <span class=\"bytes unchanged\" title=\"\" style=\"height:100%;\"></span>
+                      <span class=\"bytes added\" title=\"added 23\" style=\"height:100%;\"></span>
+                    </span>
+                    <span class=\"bytes negative\"></span>
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <th>name</th>
+                  <td class=\"error\">An unexpected error occured.</td>
+                  <td class=\"bytes 2\" data-revision-number=\"2\">
+                  <span class=\"bytes container\">
+                    <span class=\"bytes positive\">
+                      <span class=\"bytes unchanged\" title=\"5 Bytes unchanged\" style=\"height:100%;\"></span>
+                      <span class=\"bytes added\" title=\"6 Bytes added\" style=\"height:54.545454545455%;\"></span>
+                    </span>
+                    <span class=\"bytes negative\"></span>
+                  </span>
+                </td>
+                <td class=\"bytes 3\" data-revision-number=\"3\">
+                  <span class=\"bytes container\">
+                      <span class=\"bytes positive\">
+                      <span class=\"bytes unchanged\" title=\"11 Bytes unchanged\" style=\"height:100%;\"></span>
+                    </span>
+                    <span class=\"bytes negative\"></span>
+                  </span>
+                </td>
+                <td class=\"bytes 4\" data-revision-number=\"4\">
+                  <span class=\"bytes container\">
+                    <span class=\"bytes positive\">
+                      <span class=\"bytes unchanged\" title=\"5 Bytes unchanged\" style=\"height:45.454545454545%;\"></span>
+                    </span>
+                    <span class=\"bytes negative\">
+                      <span class=\"bytes removed\" title=\"6 Bytes removed\" style=\"height:54.545454545455%;\"></span>
+                    </span>
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr class=\"compare\">
+                <th> </th>
+                <td class=\"1\"></td>
+                <td class=\"2\">
+                  <label for=\"revisionNum-2\">
+                    <input id=\"revisionNum-2\" type=\"checkbox\" name=\"revisionNumbers[]\" title=\"Revision 2\" class=\"compare\" value=\"2\"/>
+                  </label>
+                </td>
+                <td class=\"3\">
+                  <label for=\"revisionNum-3\">
+                    <input id=\"revisionNum-3\" type=\"checkbox\" name=\"revisionNumbers[]\" title=\"Revision 3\" class=\"compare\" value=\"3\"/>
+                  </label>
+                </td>
+                <td class=\"4\">
+                  <label for=\"revisionNum-4\">
+                    <input id=\"revisionNum-4\" type=\"checkbox\" name=\"revisionNumbers[]\" title=\"Revision 4\" class=\"compare\" value=\"4\"/>
+                  </label>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+      <div id=\"formExtras\">
+        <section class=\"clearfix revisionData\">
+          <div class=\"clearfix headers\">
+            <header>
+              <hgroup title=\"{$this->getDateTitle()}\">
+                <h1></h1>
+                <h2>3 weeks ago</h2>
+                <h2></h2>
+              </hgroup>
+            </header>
+          </div>
+          <dl class=\"clearfix\" />
+          <footer>
+            <button name=\"restore\" value=\"1\" id=\"restore-1\" class=\"restore\" title=\"Restore Revision 1\">Restore #1</button>
+          </footer>
+        </section>
+      </div>
+    </form>";
 
-//     $now = date("F jS \\a\\t g:ia");
-//     $expected = "<form id=\"revisionsForm\" method=\"GET\">
-//   <h4>Revision History</h4>
-//   <div id=\"revisionTimeline\">
-//   <table class=\"fancy\">
-//     <thead>
-//       <tr>
-//         <th>
-//           <a id=\"showMoreRevisions\" href=\"$this->appUrl?revisionNumber=2&amp;revisionsAction=revision&amp;columns%5B0%5D=name&amp;oldestRevisionNumber=1\" class=\"button small\" title=\"Show Revision  in table\">Show More Revisions</a>
-//         </th>
-//         <th class=\"1\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=1\" data-revisionNumber=\"1\" title=\"Look at Revision 1\">1</a>
-//         </th>
-//         <th class=\"2 young\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=2\" data-revisionNumber=\"2\" title=\"Look at Revision 2\">2</a>
-//         </th>
-//         <th class=\"3\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=3\" data-revisionNumber=\"3\" title=\"Look at Revision 3\">3</a>
-//         </th>
-//       </tr>
-//     </thead>
-//     <tbody>
-//       <tr>
-//         <th>age</th>
-//         <td class=\"bytes 1\">
-//           <a href=\"$this->appUrl?revisionNumber=2&amp;revisionsAction=revision&amp;columns%5B0%5D=name&amp;oldestRevisionNumber=1\" class=\"missingRevisions button\" title=\"Show Revision 1 in table\"/>
-//         </td>
-//         <td class=\"bytes 2 young\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=2\" class=\"revision\" data-revisionNumber=\"2\" title=\"Look at Revision 2\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"0 Bytes unchanged\" style=\"height:0%;\"/>
-//                 <span class=\"bytes added\" title=\" Bytes added\" style=\"height:0%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\" Bytes removed\" style=\"height:0%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//         <td class=\"bytes 3\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=3\" class=\"revision\" data-revisionNumber=\"3\" title=\"Look at Revision 3\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"0 Bytes unchanged\" style=\"height:100%;\"/>
-//                 <span class=\"bytes added\" title=\"2 Bytes added\" style=\"height:100%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\"0 Bytes removed\" style=\"height:0%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//       </tr>
-//       <tr>
-//         <th>name</th>
-//         <td class=\"bytes 1\">
-//           <a href=\"$this->appUrl?revisionNumber=2&amp;revisionsAction=revision&amp;columns%5B0%5D=name&amp;oldestRevisionNumber=1\" class=\"missingRevisions button\" title=\"Show Revision 1 in table\"/>
-//         </td>
-//         <td class=\"bytes 2 young\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=2\" class=\"revision\" data-revisionNumber=\"2\" title=\"Look at Revision 2\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"11 Bytes unchanged\" style=\"height:100%;\"/>
-//                 <span class=\"bytes added\" title=\"0 Bytes added\" style=\"height:0%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\"0 Bytes removed\" style=\"height:0%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//         <td class=\"bytes 3\">
-//           <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=3\" class=\"revision\" data-revisionNumber=\"3\" title=\"Look at Revision 3\">
-//             <span class=\"bytes container\">
-//               <span class=\"bytes positive\">
-//                 <span class=\"bytes unchanged\" title=\"5 Bytes unchanged\" style=\"height:45.454545454545%;\"/>
-//                 <span class=\"bytes added\" title=\"0 Bytes added\" style=\"height:0%;\"/>
-//               </span>
-//               <span class=\"bytes negative\">
-//                 <span class=\"bytes removed\" title=\"6 Bytes removed\" style=\"height:120%;\"/>
-//               </span>
-//             </span>
-//           </a>
-//         </td>
-//       </tr>
-//     </tbody>
-//     <tfoot>
-//       <tr class=\"compare\">
-//         <th>
-//           <button id=\"compareButton\" class=\"positive\" name=\"revisionsAction\" value=\"text\">Compare</button>
-//         </th>
-//         <td class=\"1\"></td>
-//         <td class=\"2 young\">
-//           <label for=\"revisionNum-2\">
-//             <input id=\"revisionNum-2\" type=\"checkbox\" name=\"revisionNumbersToCompare[]\" title=\"Revision 2\" class=\"compare\" value=\"2\" checked=\"checked\"/>
-//           </label>
-//         </td>
-//         <td class=\"3\">
-//           <label for=\"revisionNum-3\">
-//             <input id=\"revisionNum-3\" type=\"checkbox\" name=\"revisionNumbersToCompare[]\" title=\"Revision 3\" class=\"compare\" value=\"3\"/>
-//           </label>
-//         </td>
-//       </tr>
-//     </tfoot>
-//   </table>
-//   </div>
-//   <div id=\"formExtras\">
-//   <section class=\"clearfix revisionData\">
-//     <div class=\"clearfix headers\">
-//       <header>
-//         <hgroup>
-//           <h1/>
-//           <h2>$now</h2>
-//           <h2>by </h2>
-//         </hgroup>
-//       </header>
-//     </div>
-//     <dl class=\"clearfix\">
-//       <dt>name</dt>
-//       <dd><del>Billy </del>Visto</dd>
-//     </dl>
-//     <footer>
-//       <a href=\"$this->appUrl?revisionsAction=revision&amp;revisionNumber=2&amp;restore=true\" id=\"restore-2\" class=\"restore button\" data-revisionNumber=\"2\" title=\"Restore Revision 2\">Restore #2</a>
-//     </footer>
-//   </section>
-//   </div>
-// </form>";
+    $_GET = array('revisionNumber' => '1');
+    $actual = $this->revisionsAPI->render();
+    $this->assertXmlStringEqualsXmlString($expected, str_replace('&nbsp;', ' ', $actual));
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
 
-//     $urlParams = array('revisionNumber' => '2', 'revisionsAction' => 'revision', 'columns' => array('name'));
-//     $actual = $this->revisionsAPI->render($urlParams, $this->appUrl);
-//     $this->assertXmlStringEqualsXmlString($expected, $actual);
-//     $this->dropCreatedTables(array('person-revision', 'revisionData'));
-//   }
+  /**
+   * @test
+   */
+  public function renderRevisionDataColumn()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
 
-//   /**
-//    * @test
-//    */
-//   public function renderRevisionRestore()
-//   {
-//     $conn = $this->getConnection();
-//     $this->setUpMock('person-revision');
-//     $this->dbalConnection->query($this->getCreateQuery());
-//     $this->dbalConnection->query($this->getCreateDataQuery());
+    $this->revisionsAPI->saveRevision(array('name' => 'Billy Visto'));
+    $this->revisionsAPI->saveRevision(array('name' => 'Visto', 'age' => 23));
 
-//     $this->revisionsAPI->saveRevision(array('name' => 'Billy Visto'));
-//     $this->revisionsAPI->saveRevision(array('name' => 'Visto', 'age' => 23));
+    $expected = "
+    <form id=\"revisionsForm\" method=\"GET\">
+      <div id=\"hiddenFields\">
+        <input id=\"oldestRevisionNumber\" type=\"hidden\" name=\"oldestRevisionNumber\" value=\"2\" />
+        <input type=\"hidden\" name=\"revisionNumber\" value=\"false\" />
+        <input type=\"hidden\" name=\"columns[0]\" value=\"name\" />
+      </div>
+      <div id=\"revisionTimeline\">
+        <h4>Revision History</h4>
+        <div class=\"labels\">
+          <div>age</div>
+          <div>name</div>
+          <div>
+            <button id=\"compareButton\" class=\"positive\" name=\"revisionNumber\" value=\"false\">Compare</button>
+          </div>
+        </div>
+        <div class=\"viewport\">
+          <span class=\"scrollHotspot scrollLeft disabled\">◂</span>
+          <span class=\"scrollHotspot scrollRight disabled\">▸</span>
+          <table class=\"fancy\">
+            <thead>
+              <tr>
+                <th> </th>
+                <th class=\"1\" title=\"Look at revision 1\" data-revision-number=\"1\">1</th>
+                <th class=\"2 young\" title=\"Modified 3 weeks ago by\" data-revision-number=\"2\">2</th>
+                <th class=\"3\" title=\"Modified 3 weeks ago by\" data-revision-number=\"3\">3</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th>age</th>
+                <td class=\"missingRevisions bytes 1\" data-oldest-revision-number=\"1\" title=\"Show More Revisions\"></td>
+                <td class=\"bytes 2 young\" data-revision-number=\"2\">
+                  <span class=\"bytes container\">
+                    <span class=\"bytes positive\"></span>
+                    <span class=\"bytes negative\"></span>
+                  </span>
+                </td>
+                <td class=\"bytes 3\" data-revision-number=\"3\">
+                  <span class=\"bytes container\">
+                    <span class=\"bytes positive\">
+                      <span class=\"bytes unchanged\" title=\"\" style=\"height:100%;\"></span>
+                      <span class=\"bytes added\" title=\"added 23\" style=\"height:100%;\"></span>
+                    </span>
+                    <span class=\"bytes negative\"></span>
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <th>name</th>
+                  <td class=\"missingRevisions bytes 1\" data-oldest-revision-number=\"1\" title=\"Show More Revisions\"></td>
+                  <td class=\"bytes 2 young\" data-revision-number=\"2\">
+                  <span class=\"bytes container\">
+                    <span class=\"bytes positive\">
+                      <span class=\"bytes unchanged\" title=\"11 Bytes unchanged\" style=\"height:100%;\"></span>
+                    </span>
+                    <span class=\"bytes negative\"></span>
+                  </span>
+                </td>
+                <td class=\"bytes 3\" data-revision-number=\"3\">
+                  <span class=\"bytes container\">
+                    <span class=\"bytes positive\">
+                      <span class=\"bytes unchanged\" title=\"5 Bytes unchanged\" style=\"height:45.454545454545%;\"></span>
+                    </span>
+                    <span class=\"bytes negative\">
+                      <span class=\"bytes removed\" title=\"6 Bytes removed\" style=\"height:54.545454545455%;\"></span>
+                    </span>
+                  </span>
+                </td>
+              </tr>
+              </tbody>
+              <tfoot>
+                <tr class=\"compare\"><th> </th>
+                  <td class=\"1\"></td>
+                  <td class=\"2 young\">
+                    <label for=\"revisionNum-2\">
+                      <input id=\"revisionNum-2\" type=\"checkbox\" name=\"revisionNumbers[]\" title=\"Revision 2\" class=\"compare\" value=\"2\" checked=\"checked\"/>
+                    </label>
+                  </td>
+                  <td class=\"3\">
+                    <label for=\"revisionNum-3\">
+                      <input id=\"revisionNum-3\" type=\"checkbox\" name=\"revisionNumbers[]\" title=\"Revision 3\" class=\"compare\" value=\"3\"/>
+                    </label>
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+        <div id=\"formExtras\">
+          <section class=\"clearfix revisionData\">
+            <div class=\"clearfix headers\">
+              <header>
+                <hgroup title=\"{$this->getDateTitle()}\">
+                  <h1></h1>
+                  <h2>3 weeks ago</h2>
+                  <h2></h2>
+                </hgroup>
+              </header>
+            </div>
+          <dl class=\"clearfix\">
+            <dt title=\"name\">name</dt>
+              <dd>Billy Visto</dd>
+          </dl>
+          <footer>
+            <button name=\"restore\" value=\"2\" id=\"restore-2\" class=\"restore\" title=\"Restore Revision 2\">Restore #2</button>
+          </footer>
+        </section>
+      </div>
+    </form>";
 
-//     $now = date("F jS \\a\\t g:ia");
-//     $expected = "<form id=\"revisionsForm\" method=\"POST\">
-//   <div id=\"formExtras\">
-//       <p class=\"message\">You are restoring to revision #2</p>
-//   <section class=\"clearfix revisionData\">
-//     <div class=\"clearfix headers\">
-//       <header>
-//         <hgroup>
-//           <h1/>
-//           <h2>$now</h2>
-//           <h2>by </h2>
-//         </hgroup>
-//       </header>
-//     </div>
-//     <dl class=\"clearfix\">
-//       <dt>age</dt>
-//       <dd><ins>23</ins></dd>
-//       <dt>name</dt>
-//       <dd><del>Billy </del>Visto</dd>
-//     </dl>
-//   </section>
-//   <button id=\"restoreButton\" class=\"positive\" type=\"submit\" name=\"revisionsAction\" value=\"restore\">Confirm Restore</button>
-//   </div>
-//   </form>";
-//     $urlParams = array('revisionNumber' => '2');
-//     $_GET = array('revisionsAction' => 'revision', 'restore' => 'true');
-//     $actual = $this->revisionsAPI->render($urlParams, $this->appUrl);
-//     $this->assertXmlStringEqualsXmlString($expected, $actual);
-//     $this->dropCreatedTables(array('person-revision', 'revisionData'));
-//   }
+    $_GET = array('revisionNumbers' => array('2'), 'revisionNumber' => 'false', 'columns' => array('name'));
+    $actual = $this->revisionsAPI->render();
+    $this->assertXmlStringEqualsXmlString($expected, str_replace('&nbsp;', ' ', $actual));
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
 
-//   /**
-//    * @test
-//    */
-//   public function renderRevisionThankYou()
-//   {
-//     $conn = $this->getConnection();
-//     $this->setUpMock('person-revision');
-//     $this->dbalConnection->query($this->getCreateQuery());
-//     $this->dbalConnection->query($this->getCreateDataQuery());
+  /**
+   * @test
+   */
+  public function renderRevisionRestore()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
 
-//     $this->revisionsAPI->saveRevision(array('name' => 'Billy Visto'));
-//     $this->revisionsAPI->saveRevision(array('name' => 'Visto', 'age' => 23));
+    $this->revisionsAPI->saveRevision(array('name' => 'Billy Visto'));
+    $this->revisionsAPI->saveRevision(array('name' => 'Visto', 'age' => 23));
 
-//     $expected = "<form id=\"revisionsForm\" method=\"POST\">
-//   <div id=\"formExtras\">
-//       <button type=\"submit\" name=\"revisionsAction\" value=\"undo\">Undo</button>
-//   </div>
-//       </form>";
-//     $urlParams = array('oldestRevisionNumber' => '2', 'revisionsAction' => 'thankYou');
-//     $actual = $this->revisionsAPI->render($urlParams, $this->appUrl);
-//     $this->assertXmlStringEqualsXmlString($expected, $actual);
-//     $this->dropCreatedTables(array('person-revision', 'revisionData'));
-//   }
+    $expected = "
+    <form id=\"revisionsForm\" method=\"POST\">
+      <div id=\"hiddenFields\">
+        <input id=\"oldestRevisionNumber\" type=\"hidden\" name=\"oldestRevisionNumber\" value=\"3\" />
+        <input type=\"hidden\" name=\"restore\" value=\"2\" />
+      </div>
+      <div id=\"revisionTimeline\"></div>
+      <div id=\"formExtras\">
+        <p class=\"message\">You are restoring to revision #2</p>
+        <section class=\"clearfix revisionData\">
+          <div class=\"clearfix headers\">
+            <header>
+              <hgroup title=\"{$this->getDateTitle()}\">
+                <h1></h1>
+                <h2>3 weeks ago</h2>
+                <h2></h2>
+              </hgroup>
+            </header>
+          </div>
+          <dl class=\"clearfix\">
+            <dt title=\"age\">age</dt>
+              <dd><ins>23</ins></dd>
+            <dt title=\"name\">name</dt>
+              <dd><del>Billy </del>Visto</dd>
+          </dl>
+        </section>
+        <button id=\"restoreButton\" class=\"positive\" type=\"submit\" name=\"restore\" value=\"2\">Confirm Restore</button>
+      </div>
+    </form>";
+
+    $_GET = array('restore' => '2');
+    $actual = $this->revisionsAPI->render();
+    $this->assertXmlStringEqualsXmlString($expected, str_replace('&nbsp;', ' ', $actual));
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
+  public function renderRevisionThankYou()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $this->revisionsAPI->saveRevision(array('name' => 'Billy Visto'));
+    $this->revisionsAPI->saveRevision(array('name' => 'Visto', 'age' => 23));
+
+    $expected = "
+    <form id=\"revisionsForm\" method=\"POST\">
+      <div id=\"hiddenFields\">
+        <input id=\"oldestRevisionNumber\" type=\"hidden\" name=\"oldestRevisionNumber\" value=\"2\" />
+        <input type=\"hidden\" name=\"revisionsAction\" value=\"thankYou\" />
+      </div>
+      <div id=\"formExtras\"><button type=\"submit\" name=\"revisionsAction\" value=\"undo\">Undo</button></div>
+    </form>";
+
+    $_GET = array('oldestRevisionNumber' => '2', 'revisionsAction' => 'thankYou');
+    $actual = $this->revisionsAPI->render();
+    $this->assertXmlStringEqualsXmlString($expected, str_replace('&nbsp;', ' ', $actual));
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
 
   /**
    * @test
