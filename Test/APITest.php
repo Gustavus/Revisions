@@ -641,10 +641,6 @@ class APITest extends RevisionsTestsHelper
     $_GET = array('revisionNumbers' => array(1,3));
     $actual = $this->revisionsAPI->render();
 
-    //var_dump($this->get($this->revisionsAPI, 'revisions')->compareTwoRevisions(1, 4));
-    //var_dump($this->get($this->revisionsAPI, 'revisions')->getRevisionByNumber(3));
-    //exit;
-
     $this->assertXmlStringEqualsXmlString($expected, str_replace('&nbsp;', ' ', $actual));
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }
