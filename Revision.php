@@ -192,6 +192,7 @@ class Revision extends RevisionsBase
     $days        = (int) $interval->format('%d');
     $totalDays   = (int) $interval->format('%r%a');
     $startText   = '';
+
     if ($totalDays > 1 || $totalDays < -1) {
       $intervalArr = array_filter(array(
           'year'  => (int) $interval->format('%y'),
