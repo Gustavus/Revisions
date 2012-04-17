@@ -112,7 +112,31 @@ class RevisionTest extends \Gustavus\Test\Test
     $this->assertSame('months', $revision->getReturnClassName(array('month' => 2)));
     $this->assertSame('year', $revision->getReturnClassName(array('year' => 1)));
     $this->assertSame('years', $revision->getReturnClassName(array('year' => 2)));
+  }
 
+  /**
+   * @test
+   */
+  public function makeNonSpecificRelativeDate()
+  {
+    $revision = new \Gustavus\Test\TestObject($this->revision);
+
+    $this->assertSame('Just Now', $revision->makeNonSpecificRelativeDate(array('second' => 4)));
+    $this->assertSame(array(), $revision->makeNonSpecificRelativeDate(array()));
+    $this->assertSame('A few seconds ago', $revision->makeNonSpecificRelativeDate(array('second' => 11)));
+    $this->assertSame(array('relative' => '1 minute '), $revision->makeNonSpecificRelativeDate(array('minute' => 1)));
+    $this->assertSame(array('relative' => '10 minutes '), $revision->makeNonSpecificRelativeDate(array('minute' => 10)));
+    $this->assertSame(array('relative' => '1 hour '), $revision->makeNonSpecificRelativeDate(array('hour' => 1)));
+    $this->assertSame(array('relative' => '2 hours '), $revision->makeNonSpecificRelativeDate(array('hour' => 2)));
+    $this->assertSame('Yesterday', $revision->makeNonSpecificRelativeDate(array('day' => 1), 1));
+    $this->assertSame('Tomorrow', $revision->makeNonSpecificRelativeDate(array('day' => 1), -1));
+    $this->assertSame(array('relative' => '2 days '), $revision->makeNonSpecificRelativeDate(array('day' => 2)));
+    $this->assertSame('Last week', $revision->makeNonSpecificRelativeDate(array('week' => 1)));
+    $this->assertSame(array('relative' => '2 weeks '), $revision->makeNonSpecificRelativeDate(array('week' => 2)));
+    $this->assertSame('Last month', $revision->makeNonSpecificRelativeDate(array('month' => 1)));
+    $this->assertSame(array('relative' => '2 months '), $revision->makeNonSpecificRelativeDate(array('month' => 2)));
+    $this->assertSame('Last year', $revision->makeNonSpecificRelativeDate(array('year' => 1)));
+    $this->assertSame(array('startText' => 'Around ', 'relative' => '2 years '), $revision->makeNonSpecificRelativeDate(array('year' => 2)));
   }
 
   /**

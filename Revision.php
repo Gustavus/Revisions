@@ -135,8 +135,9 @@ class Revision extends RevisionsBase
    * @param  integer $totalDays
    * @return mixed either a string, or an array
    */
-  private function makeNonSpecificRelativeDate(array $array, $totalDays)
+  private function makeNonSpecificRelativeDate(array $array, $totalDays = 0)
   {
+    require_once('format/format.class.php');
     // first key will be the greatest time measurement that isn't empty
     $firstKey = key($array);
     $return = array();
