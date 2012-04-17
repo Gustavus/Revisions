@@ -183,7 +183,7 @@ class Revision extends RevisionsBase
   {
     require_once('format/format.class.php');
     if (is_int($date)) {
-      // $date is a timestamp
+      // $date is a timestamp. We want it as a DateTime object
       $date = new \DateTime('@'.$date);
     }
     $now         = new \DateTime('now');

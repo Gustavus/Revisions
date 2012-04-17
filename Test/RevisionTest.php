@@ -148,6 +148,7 @@ class RevisionTest extends \Gustavus\Test\Test
 
     $this->assertSame('Last month', $revision->makeRelativeDate(new \DateTime('-1 months -3 weeks')));
     $this->assertSame('1 month, 3 weeks, and 2 days ago', $revision->makeRelativeDate(new \DateTime('-1 months -3 weeks'), false, true));
+    $this->assertSame('1 year, 1 month, 3 weeks, and 2 days from now', $revision->makeRelativeDate(new \DateTime('+1 years +1 months +3 weeks +3 days'), false, true));
     $this->assertSame('1 minute ago', $revision->makeRelativeDate(new \DateTime('-1 minutes')));
 
     $this->assertSame('now', $revision->makeRelativeDate(new \DateTime('-2 seconds'), true, false));
@@ -189,6 +190,7 @@ class RevisionTest extends \Gustavus\Test\Test
 
     $this->assertSame('1 minute ago', $revision->makeRelativeDate(time()-60));
     $this->assertSame('Around 2 years ago', $revision->makeRelativeDate(time()-(62899200 + 86400 * 3)));
+    $this->assertSame('Next year', $revision->makeRelativeDate(time()+62899200));
   }
 
   /**
