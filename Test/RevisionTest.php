@@ -93,12 +93,111 @@ class RevisionTest extends \Gustavus\Test\Test
   /**
    * @test
    */
+  public function getReturnClassName()
+  {
+    $revision = new \Gustavus\Test\TestObject($this->revision);
+
+    $this->assertSame('now', $revision->getReturnClassName(array('second' => 4)));
+    $this->assertSame('now', $revision->getReturnClassName(array()));
+    $this->assertSame('minute', $revision->getReturnClassName(array('second' => 11)));
+    $this->assertSame('minute', $revision->getReturnClassName(array('minute' => 1)));
+    $this->assertSame('minutes', $revision->getReturnClassName(array('minute' => 10)));
+    $this->assertSame('hour', $revision->getReturnClassName(array('hour' => 1)));
+    $this->assertSame('hours', $revision->getReturnClassName(array('hour' => 2)));
+    $this->assertSame('day', $revision->getReturnClassName(array('day' => 1)));
+    $this->assertSame('days', $revision->getReturnClassName(array('day' => 2)));
+    $this->assertSame('week', $revision->getReturnClassName(array('week' => 1)));
+    $this->assertSame('weeks', $revision->getReturnClassName(array('week' => 2)));
+    $this->assertSame('month', $revision->getReturnClassName(array('month' => 1)));
+    $this->assertSame('months', $revision->getReturnClassName(array('month' => 2)));
+    $this->assertSame('year', $revision->getReturnClassName(array('year' => 1)));
+    $this->assertSame('years', $revision->getReturnClassName(array('year' => 2)));
+
+  }
+
+  /**
+   * @test
+   */
+  public function makeRelativeDate()
+  {
+    $revision = new \Gustavus\Test\TestObject($this->revision);
+
+    $this->assertSame('Last month', $revision->makeRelativeDate(new \DateTime('-1 months -3 weeks')));
+    $this->assertSame('1 month, 3 weeks, and 2 days ago', $revision->makeRelativeDate(new \DateTime('-1 months -3 weeks'), false, true));
+    $this->assertSame('1 minute ago', $revision->makeRelativeDate(new \DateTime('-1 minutes')));
+
+    $this->assertSame('now', $revision->makeRelativeDate(new \DateTime('-2 seconds'), true, false));
+    $this->assertSame('minute', $revision->makeRelativeDate(new \DateTime('-59 seconds'), true, false));
+    $this->assertSame('minute', $revision->makeRelativeDate(new \DateTime('-60 seconds'), true, false));
+    $this->assertSame('minutes', $revision->makeRelativeDate(new \DateTime('-2 minutes'), true, false));
+
+    $this->assertSame('Just Now', $revision->makeRelativeDate(new \DateTime()));
+    $this->assertSame('Just Now', $revision->makeRelativeDate(new \DateTime('-5 seconds')));
+    $this->assertSame('A few seconds ago', $revision->makeRelativeDate(new \DateTime('-11 seconds')));
+    $this->assertSame('1 minute ago', $revision->makeRelativeDate(new \DateTime('-61 seconds')));
+    $this->assertSame('2 minutes ago', $revision->makeRelativeDate(new \DateTime('-120 seconds')));
+    $this->assertSame('1 hour ago', $revision->makeRelativeDate(new \DateTime('-3600 seconds')));
+    $this->assertSame('2 hours ago', $revision->makeRelativeDate(new \DateTime('-7200 seconds')));
+    $this->assertSame('Yesterday', $revision->makeRelativeDate(new \DateTime('-86400 seconds')));
+    $this->assertSame('2 days ago', $revision->makeRelativeDate(new \DateTime('-172800 seconds')));
+    $this->assertSame('Last week', $revision->makeRelativeDate(new \DateTime('-604800 seconds')));
+    $this->assertSame('2 weeks ago', $revision->makeRelativeDate(new \DateTime('-1209600 seconds')));
+    $this->assertSame('Last month', $revision->makeRelativeDate(new \DateTime('-1 months')));
+    $this->assertSame('2 months ago', $revision->makeRelativeDate(new \DateTime('-2 months')));
+    $this->assertSame('Last year', $revision->makeRelativeDate(new \DateTime('-12 months')));
+    $this->assertSame('Around 2 years ago', $revision->makeRelativeDate(new \DateTime('-2 years')));
+
+    $this->assertSame('now', $revision->makeRelativeDate(new \DateTime(), true, false));
+    $this->assertSame('now', $revision->makeRelativeDate(new \DateTime('-5 seconds'), true, false));
+    $this->assertSame('minute', $revision->makeRelativeDate(new \DateTime('-11 seconds'), true, false));
+    $this->assertSame('minute', $revision->makeRelativeDate(new \DateTime('-61 seconds'), true, false));
+    $this->assertSame('minutes', $revision->makeRelativeDate(new \DateTime('-120 seconds'), true, false));
+    $this->assertSame('hour', $revision->makeRelativeDate(new \DateTime('-3600 seconds'), true, false));
+    $this->assertSame('hours', $revision->makeRelativeDate(new \DateTime('-7200 seconds'), true, false));
+    $this->assertSame('day', $revision->makeRelativeDate(new \DateTime('-86400 seconds'), true, false));
+    $this->assertSame('days', $revision->makeRelativeDate(new \DateTime('-172800 seconds'), true, false));
+    $this->assertSame('week', $revision->makeRelativeDate(new \DateTime('-604800 seconds'), true, false));
+    $this->assertSame('weeks', $revision->makeRelativeDate(new \DateTime('-1209600 seconds'), true, false));
+    $this->assertSame('month', $revision->makeRelativeDate(new \DateTime('-1 month'), true, false));
+    $this->assertSame('months', $revision->makeRelativeDate(new \DateTime('-61 days'), true, false));
+    $this->assertSame('year', $revision->makeRelativeDate(new \DateTime('-366 days'), true, false));
+    $this->assertSame('years', $revision->makeRelativeDate(new \DateTime('-2 years'), true, false));
+
+    $this->assertSame('1 minute ago', $revision->makeRelativeDate(time()-60));
+    $this->assertSame('Around 2 years ago', $revision->makeRelativeDate(time()-(62899200 + 86400 * 3)));
+  }
+
+  /**
+   * @test
+   */
   public function getRevisionRelativeDate()
   {
     $date = new \DateTime('-1 months -3 weeks');
-    $this->revisionProperties['date'] = $date->format('c');
+    $this->revisionProperties['date'] = $date->format('Y-m-d H:i:s');
     $this->setUp();
-    $this->assertSame('1 month ago', $this->revision->getRevisionRelativeDate());
+    $this->assertSame('Last month', $this->revision->getRevisionRelativeDate());
+  }
+
+  /**
+   * @test
+   */
+  public function getRevisionRelativeDateOneYearAgo()
+  {
+    $date = new \DateTime('-1 years');
+    $this->revisionProperties['date'] = $date->format('Y-m-d H:i:s');
+    $this->setUp();
+    $this->assertSame('Last year', $this->revision->getRevisionRelativeDate());
+  }
+
+  /**
+   * @test
+   */
+  public function getRevisionRelativeDateSpecific()
+  {
+    $date = new \DateTime('-1 months -3 weeks');
+    $this->revisionProperties['date'] = $date->format('Y-m-d H:i:s');
+    $this->setUp();
+    $this->assertSame('1 month, 3 weeks, and 2 days ago', $this->revision->getRevisionRelativeDate(true));
   }
 
   /**
@@ -107,9 +206,32 @@ class RevisionTest extends \Gustavus\Test\Test
   public function getRevisionRelativeDateAFewSecondsAgo()
   {
     $date = new \DateTime('-5 hours -3 minutes');
-    $this->revisionProperties['date'] = $date->format('c');
+    $this->revisionProperties['date'] = $date->format('Y-m-d H:i:s');
     $this->setUp();
     $this->assertSame('5 hours ago', $this->revision->getRevisionRelativeDate());
+  }
+
+  /**
+   * @test
+   */
+  public function getRevisionRelativeDateAFewSecondsAgoSpecific()
+  {
+    $date = new \DateTime('-5 hours -3 minutes');
+    $this->revisionProperties['date'] = $date->format('Y-m-d H:i:s');
+    $this->setUp();
+    $this->assertSame('5 hours and 3 minutes ago', $this->revision->getRevisionRelativeDate(true));
+  }
+
+
+  /**
+   * @test
+   */
+  public function getRevisionRelativeDateAFewSecondsInTheFuture()
+  {
+    $date = new \DateTime('+5 hours +3 minutes');
+    $this->revisionProperties['date'] = $date->format('Y-m-d H:i:s');
+    $this->setUp();
+    $this->assertSame('5 hours from now', $this->revision->getRevisionRelativeDate());
   }
 
   /**
@@ -118,9 +240,9 @@ class RevisionTest extends \Gustavus\Test\Test
   public function getRevisionRelativeDateLessThanADay()
   {
     $date = new \DateTime('-5 seconds');
-    $this->revisionProperties['date'] = $date->format('c');
+    $this->revisionProperties['date'] = $date->format('Y-m-d H:i:s');
     $this->setUp();
-    $this->assertSame('just now', $this->revision->getRevisionRelativeDate());
+    $this->assertSame('Just Now', $this->revision->getRevisionRelativeDate());
   }
 
   /**
@@ -128,10 +250,10 @@ class RevisionTest extends \Gustavus\Test\Test
    */
   public function getRevisionRelativeDateYears()
   {
-    $date = new \DateTime('-2 years');
-    $this->revisionProperties['date'] = $date->format('c');
+    $date = new \DateTime('-2 years -5 days');
+    $this->revisionProperties['date'] = $date->format('Y-m-d H:i:s');
     $this->setUp();
-    $this->assertSame('2 years ago', $this->revision->getRevisionRelativeDate());
+    $this->assertSame('Around 2 years ago', $this->revision->getRevisionRelativeDate());
   }
 
   /**
@@ -140,7 +262,7 @@ class RevisionTest extends \Gustavus\Test\Test
   public function getRevisionRelativeDateDays()
   {
     $date = new \DateTime('-2 days');
-    $this->revisionProperties['date'] = $date->format('c');
+    $this->revisionProperties['date'] = $date->format('Y-m-d H:i:s');
     $this->setUp();
     $this->assertSame('2 days ago', $this->revision->getRevisionRelativeDate());
   }
@@ -148,12 +270,23 @@ class RevisionTest extends \Gustavus\Test\Test
   /**
    * @test
    */
-  public function getRevisionRelativeDateDay()
+  public function getRevisionRelativeDateDayOne()
   {
     $date = new \DateTime('-1 days');
-    $this->revisionProperties['date'] = $date->format('c');
+    $this->revisionProperties['date'] = $date->format('Y-m-d H:i:s');
     $this->setUp();
-    $this->assertSame('1 day ago', $this->revision->getRevisionRelativeDate());
+    $this->assertSame('Yesterday', $this->revision->getRevisionRelativeDate());
+  }
+
+  /**
+   * @test
+   */
+  public function getRevisionRelativeDateDayTomorrow()
+  {
+    $date = new \DateTime('+1 days');
+    $this->revisionProperties['date'] = $date->format('Y-m-d H:i:s');
+    $this->setUp();
+    $this->assertSame('Tomorrow', $this->revision->getRevisionRelativeDate());
   }
 
   /**
@@ -162,7 +295,7 @@ class RevisionTest extends \Gustavus\Test\Test
   public function getRevisionRelativeDateMinutes()
   {
     $date = new \DateTime('-20 minutes');
-    $this->revisionProperties['date'] = $date->format('c');
+    $this->revisionProperties['date'] = $date->format('Y-m-d H:i:s');
     $this->setUp();
     $this->assertSame('20 minutes ago', $this->revision->getRevisionRelativeDate());
   }
@@ -173,7 +306,7 @@ class RevisionTest extends \Gustavus\Test\Test
   public function getRevisionRelativeDateMinutesSeconds()
   {
     $date = new \DateTime('-20 minutes -30 seconds');
-    $this->revisionProperties['date'] = $date->format('c');
+    $this->revisionProperties['date'] = $date->format('Y-m-d H:i:s');
     $this->setUp();
     $this->assertSame('20 minutes ago', $this->revision->getRevisionRelativeDate());
   }
@@ -184,7 +317,7 @@ class RevisionTest extends \Gustavus\Test\Test
   public function getRevisionRelativeDateWeeks()
   {
     $date = new \DateTime('-20 days');
-    $this->revisionProperties['date'] = $date->format('c');
+    $this->revisionProperties['date'] = $date->format('Y-m-d H:i:s');
     $this->setUp();
     $this->assertSame('2 weeks ago', $this->revision->getRevisionRelativeDate());
   }
