@@ -264,6 +264,141 @@ class APITest extends RevisionsTestsHelper
   /**
    * @test
    */
+  public function renderRevisionsWithLabels()
+  {
+    $conn = $this->getConnection();
+    $this->revisionsManagerInfo['labels'] = array('age' => 'Age', 'name' => 'Name');
+    $this->setUp();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $this->revisionsAPI->saveRevision(array('name' => 'Billy Visto'));
+    $this->revisionsAPI->saveRevision(array('name' => 'Visto', 'age' => 23));
+    $expected = "
+    <form id=\"revisionsForm\" method=\"GET\">
+      <div id=\"hiddenFields\">
+        <input id=\"oldestRevisionNumber\" type=\"hidden\" name=\"oldestRevisionNumber\" value=\"0\" />
+        <input type=\"hidden\" name=\"limit\" value=\"10\" />
+      </div>
+      <div id=\"revisionTimeline\">
+        <h4>Revision History</h4>
+        <div class=\"labels\">
+          <div>Age</div>
+          <div>Name</div>
+          <div>
+            <button id=\"compareButton\" class=\"positive\" name=\"revisionNumber\" value=\"false\">Compare</button>
+          </div>
+        </div>
+        <div class=\"viewport\">
+          <span class=\"scrollHotspot scrollLeft disabled\">◂</span>
+          <span class=\"scrollHotspot scrollRight disabled\">▸</span>
+          <table class=\"fancy\">
+            <thead>
+              <tr>
+                <th> </th>
+                <th class=\"1\" title=\"Modified 3 weeks ago by\" data-revision-number=\"1\">1</th>
+                <th class=\"2\" title=\"Modified 3 weeks ago by\" data-revision-number=\"2\">2</th>
+                <th class=\"3\" title=\"Modified 3 weeks ago by\" data-revision-number=\"3\">3</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th>Age</th>
+                <td class=\"bytes 1\" data-revision-number=\"1\">
+                  <span class=\"bytes container\">
+                    <span class=\"bytes positive\"></span>
+                    <span class=\"bytes negative\"></span>
+                  </span>
+                </td>
+                <td class=\"bytes 2\" data-revision-number=\"2\">
+                  <span class=\"bytes container\">
+                    <span class=\"bytes positive\"></span>
+                    <span class=\"bytes negative\"></span>
+                  </span>
+                </td>
+                <td class=\"bytes 3\" data-revision-number=\"3\">
+                  <span class=\"bytes container\">
+                    <span class=\"bytes positive\">
+                      <span class=\"bytes unchanged\" title=\"\" style=\"height:100%;\"></span>
+                      <span class=\"bytes added\" title=\"added 23\" style=\"height:100%;\"></span>
+                    </span>
+                    <span class=\"bytes negative\"></span>
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <th>Name</th>
+                <td class=\"bytes 1\" data-revision-number=\"1\">
+                  <span class=\"bytes container\">
+                    <span class=\"bytes positive\">
+                      <span class=\"bytes unchanged\" title=\"0 Bytes unchanged\" style=\"height:100%;\"></span>
+                      <span class=\"bytes added\" title=\"11 Bytes added\" style=\"height:100%;\"></span>
+                    </span>
+                    <span class=\"bytes negative\"></span>
+                  </span>
+                </td>
+                <td class=\"bytes 2\" data-revision-number=\"2\">
+                  <span class=\"bytes container\">
+                    <span class=\"bytes positive\">
+                      <span class=\"bytes unchanged\" title=\"11 Bytes unchanged\" style=\"height:100%;\"></span>
+                    </span>
+                    <span class=\"bytes negative\"></span>
+                  </span>
+                </td>
+                <td class=\"bytes 3\" data-revision-number=\"3\">
+                  <span class=\"bytes container\">
+                    <span class=\"bytes positive\">
+                      <span class=\"bytes unchanged\" title=\"5 Bytes unchanged\" style=\"height:45.454545454545%;\"></span>
+                    </span>
+                    <span class=\"bytes negative\">
+                      <span class=\"bytes removed\" title=\"6 Bytes removed\" style=\"height:54.545454545455%;\"></span>
+                    </span>
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr class=\"compare\">
+                <th> </th>
+                <td class=\"1\">
+                  <label for=\"revisionNum-1\">
+                    <input id=\"revisionNum-1\" type=\"checkbox\" name=\"revisionNumbers[]\" title=\"Revision 1\" class=\"compare\" value=\"1\"/>
+                  </label>
+                </td>
+                <td class=\"2\">
+                  <label for=\"revisionNum-2\">
+                    <input id=\"revisionNum-2\" type=\"checkbox\" name=\"revisionNumbers[]\" title=\"Revision 2\" class=\"compare\" value=\"2\"/>
+                  </label>
+                </td>
+                <td class=\"3\">
+                  <label for=\"revisionNum-3\">
+                    <input id=\"revisionNum-3\" type=\"checkbox\" name=\"revisionNumbers[]\" title=\"Revision 3\" class=\"compare\" value=\"3\"/>
+                  </label>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+      <div id=\"formExtras\"></div>
+    </form>";
+
+    $_GET = array('limit' => 10);
+    $actual = $this->revisionsAPI->render();
+
+    // $echo = str_replace('"', '\"', str_replace('&nbsp;', ' ', $actual));
+    // echo "<pre>$echo</pre>";
+    // exit;
+
+    $this->assertXmlStringEqualsXmlString($expected, str_replace('&nbsp;', ' ', $actual));
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+
+  /**
+   * @test
+   */
   public function renderRevisionsNoLimitUntilRevision3()
   {
     $conn = $this->getConnection();
