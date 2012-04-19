@@ -3,7 +3,7 @@
  * @package Revisions
  */
 namespace Gustavus\Revisions;
-use \Format;
+use \Gustavus\Utility\DateTime;
 
 /**
  * A single Revision object that contains many RevisionData objects
@@ -107,7 +107,7 @@ class Revision extends RevisionsBase
    */
   public function getRevisionRelativeDate($beSpecific = false)
   {
-    $date = new \Gustavus\Utility\DateTime(new \DateTime($this->date));
+    $date = new DateTime($this->date);
     return $date->relative(null, $beSpecific);
   }
 
