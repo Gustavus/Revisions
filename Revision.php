@@ -3,7 +3,7 @@
  * @package Revisions
  */
 namespace Gustavus\Revisions;
-use \Gustavus\Utility\DateTime;
+use Gustavus\Utility\DateTime;
 
 /**
  * A single Revision object that contains many RevisionData objects
