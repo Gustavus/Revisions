@@ -108,7 +108,7 @@ class Revision extends RevisionsBase
   public function getRevisionRelativeDate($beSpecific = false)
   {
     $date = new DateTime($this->date);
-    return $date->relative(null, $beSpecific);
+    return $date->toRelative(null, $beSpecific)->getValue();
   }
 
   /**
