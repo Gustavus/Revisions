@@ -117,7 +117,7 @@ class RevisionTest extends \Gustavus\Test\Test
    */
   public function getRevisionRelativeDateSpecific()
   {
-    $date = new \DateTime('-1 months -3 weeks');
+    $date = new \DateTime('-1 months -3 weeks -2 days');
     $this->revisionProperties['date'] = $date->format('Y-m-d H:i:s');
     $this->setUp();
     $this->assertSame('1 month, 3 weeks, and 2 days ago', $this->revision->getRevisionRelativeDate(true));
