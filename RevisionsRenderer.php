@@ -3,6 +3,7 @@
  * @package Revisions
  */
 namespace Gustavus\Revisions;
+use Gustavus\TwigFactory\TwigFactory;
 
 /**
  * Renders out revisions to the application
@@ -229,6 +230,6 @@ class RevisionsRenderer
           'shouldRenderRevisionData'  => $this->shouldRenderRevisionData,
         )
     );
-    return \Gustavus\TwigFactory\TwigFactory::renderTwigFilesystemTemplate("/cis/lib/Gustavus/Revisions/views/$filename", $params);
+    return TwigFactory::renderTwigFilesystemTemplate("/cis/lib/Gustavus/Revisions/views/$filename", $params);
   }
 }
