@@ -106,7 +106,7 @@ class RevisionsManager extends RevisionsBase
       // can't use getNowExpression because it doesn't support the timezone parameter
       return 'datetime("now", "localtime")';
     } else {
-      $db->getDatabasePlatform()->getNowExpression();
+      return $db->getDatabasePlatform()->getNowExpression();
     }
   }
 
@@ -164,9 +164,8 @@ class RevisionsManager extends RevisionsBase
     $db = $this->getDB();
     $qb = $db->createQueryBuilder();
     $qb->select('dataDB.`id`, dataDB.`contentHash`, dataDB.`revisionId`, dataDB.`revisionNumber`, dataDB.`key`, dataDB.`value`, rDB.`revisionNumber` as `revisionRevisionNumber`')
-      ->from("`{$this->revisionDataTable}`", 'dataDB');
-
-    $qb = $qb->innerJoin('dataDB', "`{$this->revisionsTable}`", 'rDB', 'rDB.`id` = dataDB.`revisionId` AND rDB.`table` = :table AND rDB.`rowId` = :rowId');
+      ->from("`{$this->revisionDataTable}`", 'dataDB')
+      ->innerJoin('dataDB', "`{$this->revisionsTable}`", 'rDB', 'rDB.`id` = dataDB.`revisionId` AND rDB.`table` = :table AND rDB.`rowId` = :rowId');
     $args = array(
       ':table' => $this->table,
       ':rowId' => $this->rowId,
@@ -279,8 +278,8 @@ class RevisionsManager extends RevisionsBase
 
       $qb = $db->createQueryBuilder();
       $qb->select(':hash, :revisionId, COUNT(dataDB.`revisionNumber`), :key, :value')
-        ->from("`{$this->revisionDataTable}`", 'dataDB');
-      $qb = $qb->innerJoin('dataDB', "`{$this->revisionsTable}`", 'rDB', 'rDB.`id` = dataDB.`revisionId` AND rDB.`table` = :table AND rDB.`rowId` = :rowId')
+        ->from("`{$this->revisionDataTable}`", 'dataDB')
+        ->innerJoin('dataDB', "`{$this->revisionsTable}`", 'rDB', 'rDB.`id` = dataDB.`revisionId` AND rDB.`table` = :table AND rDB.`rowId` = :rowId')
         ->where('`key` = :key');
       $select = $qb->getSQL();
 
@@ -327,6 +326,14 @@ class RevisionsManager extends RevisionsBase
       ':createdBy'      => $createdBy,
       ':contentHash'    => $this->generateHashFromArray($revisionContent),
     );
+
+    $qb = $db->createQueryBuilder();
+    $qb->select(":contentHash, :table, :rowId, COUNT(`revisionNumber`), :message, :createdBy, {$this->getNowExpression()}")
+      ->from("`{$this->revisionsTable}`", 'rDB')
+      ->where('`table` = :table')
+      ->andWhere('`rowId` = :rowId');
+    $select = $qb->getSQL();
+
     $sql = sprintf('
       INSERT INTO `%1$s` (
         `contentHash`,
@@ -336,20 +343,10 @@ class RevisionsManager extends RevisionsBase
         `message`,
         `createdBy`,
         `createdOn`
-      ) SELECT
-          :contentHash,
-          :table,
-          :rowId,
-          COUNT(revisionNumber),
-          :message,
-          :createdBy,
-          %2$s
-        FROM `%1$s`
-        WHERE `table` = :table
-          AND `rowId` = :rowId;
+      ) %2$s
         ',
         $this->revisionsTable,
-        $this->getNowExpression()
+        $select
     );
     $db->executeUpdate($sql, $args);
     return (int) $db->lastInsertId();
