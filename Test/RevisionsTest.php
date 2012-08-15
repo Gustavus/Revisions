@@ -1295,6 +1295,7 @@ class RevisionsTest extends RevisionsTestsHelper
    */
   public function getRevisionObjectsWithOldestRevisionNumber()
   {
+    $this->revisionsManagerInfo['limit'] = 1;
     $conn = $this->getConnection();
     $this->setUpMock('person-revision');
     $this->dbalConnection->query($this->getCreateQuery());

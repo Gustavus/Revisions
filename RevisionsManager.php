@@ -44,7 +44,7 @@ class RevisionsManager extends RevisionsBase
   /**
    * @var integer limit of how many revisions to pull
    */
-  protected $limit = 1;
+  protected $limit = 10;
 
   /**
    * Class constructor
