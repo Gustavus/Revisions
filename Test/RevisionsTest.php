@@ -313,6 +313,32 @@ class RevisionsTest extends RevisionsTestsHelper
   /**
    * @test
    */
+  public function makeAndSaveRevisionFirstWithObject()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $this->ymlFile = 'nameRevision.yml';
+    $expected = $this->getDataSet();
+
+    $testObject = new TestObject('Billy Visto');
+    $this->revisions->makeAndSaveRevision(array('name' => $testObject), '', 'name');
+
+    $actualDataSet = $conn->createDataSet(array('person-revision', 'revisionData'));
+    $actual = $this->getFilteredDataSet($actualDataSet, array('person-revision' => array('createdOn'), 'revisionData' => array('createdOn')));
+    $expected = $this->getFilteredDataSet($expected, array('person-revision' => array('createdOn'), 'revisionData' => array('createdOn')));
+
+    $this->assertDataSetsEqual($expected, $actual);
+    $this->assertTablesEqual($expected->getTable('person-revision'), $actual->getTable('person-revision'));
+    $this->assertTablesEqual($expected->getTable('revisionData'), $actual->getTable('revisionData'));
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
   public function makeAndSaveRevisionSecond()
   {
     $conn = $this->getConnection();

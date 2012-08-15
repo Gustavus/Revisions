@@ -181,7 +181,11 @@ class Revisions extends RevisionsManager
     $oldRevisionDataArray = array();
     $oldText              = array();
     $brandNewColumns      = array();
-    foreach ($newText as $key => $value) {
+    foreach ($newText as $key => &$value) {
+      if (is_object($value)) {
+        // try to cast the object to a string. This requires the object having a magic toString function.
+        $value = (string) $value;
+      }
       if ($key[0] === ':') {
         // if passing in the same array as you would to a pdo or doctrine query
         $key = substr($key, 1);
@@ -201,6 +205,7 @@ class Revisions extends RevisionsManager
       }
       $revisionInfo            = $revisionData->renderRevisionForDB($value);
       $revisionInfoArray[$key] = $revisionInfo;
+      $count = 0;
     }
     $columnInfo = $this->getColumnInformation($newText);
     foreach ($columnInfo['missingColumns'] as $column) {
