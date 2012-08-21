@@ -448,7 +448,12 @@ var revisions = {
   makeHistory: function($element, shouldMakeHistory)
   {
     var revData = revisions.makeDataObject($element);
-    var url = '?' + $.param(revData);
+    if (window.symfonyApp) {
+      var delimiter = '&';
+    } else {
+      var delimiter = '?';
+    }
+    var url = delimiter + $.param(revData);
     if (window.History.enabled && shouldMakeHistory) {
       window.History.pushState(revData, null, url);
     } else {
