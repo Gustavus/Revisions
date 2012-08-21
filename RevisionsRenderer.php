@@ -38,6 +38,11 @@ class RevisionsRenderer
   private $shouldRenderRevisionData = true;
 
   /**
+   * @var boolean
+   */
+  private $shouldAllowRestore = true;
+
+  /**
    * array of column labels used for mapping column names to formatted labels
    *
    * @var array
@@ -50,12 +55,13 @@ class RevisionsRenderer
    * @param array revisionsUrlParams
    * @param array applicationUrlParams
    */
-  public function __construct(Revisions $revisions, array $revisionsUrlParams = array(), array $applicationUrlParams = array(), array $labels = array())
+  public function __construct(Revisions $revisions, array $revisionsUrlParams = array(), array $applicationUrlParams = array(), array $labels = array(), $shouldAllowRestore = true)
   {
     $this->revisions            = $revisions;
     $this->revisionsUrlParams   = $revisionsUrlParams;
     $this->applicationUrlParams = $applicationUrlParams;
     $this->labels               = $labels;
+    $this->shouldAllowRestore   = $shouldAllowRestore;
   }
 
   /**
@@ -228,6 +234,7 @@ class RevisionsRenderer
           'hiddenFields'          => $this->removeParams(array_merge($this->applicationUrlParams, array('oldestRevisionNumber' => $oldestRevisionNumber + 1), $this->revisionsUrlParams), array('barebones', 'oldestRevisionInTimeline', 'visibleRevisions', 'revisionNumbers')),
           'shouldRenderTimeline'      => $this->shouldRenderTimeline,
           'shouldRenderRevisionData'  => $this->shouldRenderRevisionData,
+          'shouldAllowRestore'         => $this->shouldAllowRestore,
         )
     );
     return TwigFactory::renderTwigFilesystemTemplate("/cis/lib/Gustavus/Revisions/views/$filename", $params);

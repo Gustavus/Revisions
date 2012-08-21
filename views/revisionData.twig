@@ -34,7 +34,7 @@
         {% endfor %}
       </dl>
       {% block restoreButton %}
-        {{ _self.renderRestoreButton(revisions|length, visibleRevisions[0]) }}
+        {{ _self.renderRestoreButton(revisions|length, visibleRevisions[0], shouldAllowRestore) }}
       {% endblock %}
     </section>
   {% endblock revisionData %}
@@ -50,8 +50,8 @@
   </header>
 {% endmacro %}
 
-{% macro renderRestoreButton(revisionsLength, revisionNumber) %}
-  <footer>
+{% macro renderRestoreButton(revisionsLength, revisionNumber, shouldAllowRestore) %}
+  <footer{% if not shouldAllowRestore %} class="hidden"{% endif %}>
     <button name="restore" value="{{ revisionNumber }}" id="restore-{{ revisionNumber }}" class="restore{% if revisionNumber == revisionsLength - 1 %} disabled{% endif %}" title="Restore Revision {{ revisionNumber }}">Restore #{{ revisionNumber }}</button>
   </footer>
 {% endmacro %}

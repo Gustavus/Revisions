@@ -30,6 +30,11 @@ class API
   private $revisionsRenderer;
 
   /**
+   * @var Boolean
+   */
+  private $allowRestore = true;
+
+  /**
    * array of column labels used for mapping column names to formatted labels
    *
    * @var array
@@ -69,6 +74,9 @@ class API
         $this->revisions = new Revisions($params);
         if (isset($params['labels'])) {
           $this->labels = $params['labels'];
+        }
+        if (isset($params['allowRestore'])) {
+          $this->allowRestore = $params['allowRestore'];
         }
     } else {
       throw new \RuntimeException('Insufficient application information');
@@ -617,7 +625,7 @@ class API
    */
   private function constructRevisionsRenderer(array $urlParams)
   {
-    $this->revisionsRenderer = new RevisionsRenderer($this->revisions, $this->getRevisionsUrlParams($urlParams), $this->getApplicationUrlParams($urlParams), $this->labels);
+    $this->revisionsRenderer = new RevisionsRenderer($this->revisions, $this->getRevisionsUrlParams($urlParams), $this->getApplicationUrlParams($urlParams), $this->labels, $this->allowRestore);
     $this->setUpItemsToRender($urlParams);
   }
 
