@@ -3,6 +3,8 @@
  * @package Revisions
  */
 namespace Gustavus\Revisions;
+use Symfony\Component\HttpFoundation\Request,
+  Gustavus\Utility\String;
 
 /**
  * API to interact with the revisions project
@@ -86,29 +88,42 @@ class API
   /**
    * Renders out the revisions or revision requested
    *
+   * @param  Request $request will be used if symfony is using revisions
+   * @param  string $index index the request parameters are stored in the request
    * @return string
    */
-  public function render()
+  public function render($request = null, $index = null)
   {
-    if (isset($_GET['barebones'])) {
-      // making an ajax request, so we don't want any extra information returned
-      ob_end_clean();
+    if ($request !== null && $index !== null) {
+      if ($request->getMethod() === 'POST') {
+        $post = (new String($request->get($index)))->splitQueryString()->getValue();
+      } else {
+        $queryStringArray = (new String($request->get($index)))->splitQueryString()->getValue();
+      }
+    } else {
+      $post = $_POST;
+      $queryStringArray = $_GET;
     }
-    if (!empty($_POST)) {
+
+    if (!empty($post)) {
       // submitted the form with Post method.
       return $this->handlePostAction($_POST);
     }
+    if (isset($queryStringArray['barebones'])) {
+      // making an ajax request, so we don't want any extra information returned
+      ob_end_clean();
+    }
     // form was either submitted, or it is just a regular page load.
     // get revisionsRenderer ready to go
-    $this->constructRevisionsRenderer($_GET);
-    if (isset($_GET['barebones'])) {
+    $this->constructRevisionsRenderer($queryStringArray);
+    if (isset($queryStringArray['barebones'])) {
       // an ajax call was made for new information
       // we want the new information echoed to the ajax call and then we want to exit so nothing else gets thrown in.
-      echo $this->doWorkRequstedInUrl($_GET);
+      echo $this->doWorkRequstedInUrl($queryStringArray);
       exit();
     } else {
       // regular page load
-      return $this->doWorkRequstedInUrl($_GET);
+      return $this->doWorkRequstedInUrl($queryStringArray);
     }
   }
 
