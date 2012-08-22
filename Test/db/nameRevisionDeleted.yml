@@ -26,19 +26,40 @@ revisionData:
     revisionId: 2
     revisionNumber: 1
     key: "age"
-    value: '23'
+    value: '[[0,null,"23"]]'
   -
     id: 5
     contentHash: "afe3690ec4cda7e262f0ca81858777df"
     revisionId: 2
     revisionNumber: 1
     key: "name"
-    value: '[[1,null," Visto"]]'
+    value: '[[0,null,"Billy Visto"]]'
   -
     id: 6
-    contentHash: "5ca49fbfb5ba90d2927d7f85f07ad74d"
+    contentHash: "d41d8cd98f00b204e9800998ecf8427e"
     revisionId: 3
     revisionNumber: 2
+    key: "age"
+    value: '[[null,null,""]]'
+  -
+    id: 7
+    contentHash: "d41d8cd98f00b204e9800998ecf8427e"
+    revisionId: 3
+    revisionNumber: 2
+    key: "name"
+    value: '[[0,0,""]]'
+  -
+    id: 8
+    contentHash: "37693cfc748049e45d87b8c7d8b9aacd"
+    revisionId: 4
+    revisionNumber: 3
+    key: "age"
+    value: '23'
+  -
+    id: 9
+    contentHash: "5ca49fbfb5ba90d2927d7f85f07ad74d"
+    revisionId: 4
+    revisionNumber: 3
     key: "name"
     value: '"Billy"'
 person-revision:
@@ -62,10 +83,19 @@ person-revision:
     createdOn:
   -
     id: 3
-    contentHash: ae38ac06d3966cf1fcc8808881cb876b
+    contentHash: 6514b0fbcf41202c20513efe1285ad73
     table: "person"
     rowId: 1
     revisionNumber: 2
+    message:
+    createdBy:
+    createdOn:
+  -
+    id: 4
+    contentHash: ae38ac06d3966cf1fcc8808881cb876b
+    table: "person"
+    rowId: 1
+    revisionNumber: 3
     message:
     createdBy:
     createdOn:

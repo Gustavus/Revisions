@@ -407,7 +407,7 @@ class RevisionsManager extends RevisionsBase
       }
     }
 
-    $changes = array_diff($newContent, $oldContent);
+    $changes = array_diff_assoc($newContent, $oldContent);
     if (!empty($changes)) {
       // newContent is different from oldContent
       $newRevisionId = $this->saveRevisionContent($newContent, $message, $createdBy);

@@ -534,6 +534,33 @@ class RevisionsTest extends RevisionsTestsHelper
   /**
    * @test
    */
+  public function makeAndSaveRevisionAddingNewRow()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $this->ymlFile = 'nameRevisionAdvanced.yml';
+    $expected = $this->getDataSet();
+
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy'));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy', 'age' => 22));
+    $this->revisions->makeAndSaveRevision(array('age' => 23, 'name' => 'Billy Visto'));
+
+    $actualDataSet = $conn->createDataSet(array('person-revision', 'revisionData'));
+    $actual = $this->getFilteredDataSet($actualDataSet, array('person-revision' => array('createdOn'), 'revisionData' => array('createdOn')));
+    $expected = $this->getFilteredDataSet($expected, array('person-revision' => array('createdOn'), 'revisionData' => array('createdOn')));
+
+    $this->assertDataSetsEqual($expected, $actual);
+    $this->assertTablesEqual($expected->getTable('person-revision'), $actual->getTable('person-revision'));
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
   public function makeDiffInfoObjects()
   {
     $diff = new Revisions\DiffInfo(array('startIndex' => 1, 'endIndex' => 2, 'info' => ''));
