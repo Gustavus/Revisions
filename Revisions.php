@@ -192,6 +192,10 @@ class Revisions extends RevisionsManager
       }
       $oldRevisionData = $this->getRevisionData(null, $key, true, 1);
       $oldRevisionDataArray = array_merge($oldRevisionDataArray, $oldRevisionData);
+      if ($value === null) {
+        // we will treat null as an empty string
+        $value = '';
+      }
       if (isset($oldRevisionData[$key])) {
         // revision exists in DB, so the first item will be the full current content
         $oldContentArray         = array_shift($oldRevisionData[$key]);
@@ -200,11 +204,20 @@ class Revisions extends RevisionsManager
       } else {
         // revision doesn't exist yet
         $revisionData            = new RevisionDataDiff(array('nextContent' => ''));
-        $oldText[$key]           = '';
-        $brandNewColumns[]       = $key;
+        if ($value === '') {
+          // We don't want this hanging around if this is a new revision that hasn't actually changed
+          unset($newText[$key]);
+        } else {
+          // If we added this stuff in to a null value, it will break things since this isn't actually a change
+          $oldText[$key]           = '';
+          $brandNewColumns[]       = $key;
+        }
       }
       $revisionInfo            = $revisionData->renderRevisionForDB($value);
-      $revisionInfoArray[$key] = $revisionInfo;
+      if ($revisionInfo !== null) {
+        // if there isn't a change, renderRevisionForDB will return null, so we don't want this
+        $revisionInfoArray[$key] = $revisionInfo;
+      }
       $count = 0;
     }
     $columnInfo = $this->getColumnInformation($newText);

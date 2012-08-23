@@ -313,6 +313,31 @@ class RevisionsTest extends RevisionsTestsHelper
   /**
    * @test
    */
+  public function makeAndSaveRevisionFirstWithNull()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $this->ymlFile = 'nameRevision.yml';
+    $expected = $this->getDataSet();
+
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto', 'age' => null), '', 'name');
+
+    $actualDataSet = $conn->createDataSet(array('person-revision', 'revisionData'));
+    $actual = $this->getFilteredDataSet($actualDataSet, array('person-revision' => array('createdOn'), 'revisionData' => array('createdOn')));
+    $expected = $this->getFilteredDataSet($expected, array('person-revision' => array('createdOn'), 'revisionData' => array('createdOn')));
+
+    $this->assertDataSetsEqual($expected, $actual);
+    $this->assertTablesEqual($expected->getTable('person-revision'), $actual->getTable('person-revision'));
+    $this->assertTablesEqual($expected->getTable('revisionData'), $actual->getTable('revisionData'));
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
   public function makeAndSaveRevisionFirstWithObject()
   {
     $conn = $this->getConnection();
@@ -482,8 +507,8 @@ class RevisionsTest extends RevisionsTestsHelper
     $this->dbalConnection->query($this->getCreateQuery());
     $this->dbalConnection->query($this->getCreateDataQuery());
 
-    $this->ymlFile = 'nameRevisionEmpty.yml';
-    $expected = $this->getDataSet();
+    $expectedDataSet = $conn->createDataSet(array('person-revision', 'revisionData'));
+    $expected = $this->getFilteredDataSet($expectedDataSet, array('person-revision' => array('createdOn'), 'revisionData' => array('createdOn')));
 
     $post = array('age' => '', 'city' => '', 'name' => '');
 
@@ -491,7 +516,6 @@ class RevisionsTest extends RevisionsTestsHelper
 
     $actualDataSet = $conn->createDataSet(array('person-revision', 'revisionData'));
     $actual = $this->getFilteredDataSet($actualDataSet, array('person-revision' => array('createdOn'), 'revisionData' => array('createdOn')));
-    $expected = $this->getFilteredDataSet($expected, array('person-revision' => array('createdOn'), 'revisionData' => array('createdOn')));
 
     $this->assertDataSetsEqual($expected, $actual);
     $this->assertTablesEqual($expected->getTable('person-revision'), $actual->getTable('person-revision'));
@@ -512,7 +536,6 @@ class RevisionsTest extends RevisionsTestsHelper
     $expected = $this->getDataSet();
 
     $post = array('age' => 23, 'city' => '', 'name' => 'Billy Visto');
-
     $this->revisions->makeAndSaveRevision($post);
 
     $post2 = array('age' => '', 'city' => '', 'name' => '');
@@ -541,8 +564,9 @@ class RevisionsTest extends RevisionsTestsHelper
     $this->dbalConnection->query($this->getCreateQuery());
     $this->dbalConnection->query($this->getCreateDataQuery());
 
-    $this->ymlFile = 'nameRevisionAdvanced.yml';
-    $expected = $this->getDataSet();
+    // we want to check against the empty tables
+    $expectedDataSet = $conn->createDataSet(array('person-revision', 'revisionData'));
+    $expected = $this->getFilteredDataSet($expectedDataSet, array('person-revision' => array('createdOn'), 'revisionData' => array('createdOn')));
 
     $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
     $this->revisions->makeAndSaveRevision(array('name' => 'Billy'));
@@ -551,7 +575,6 @@ class RevisionsTest extends RevisionsTestsHelper
 
     $actualDataSet = $conn->createDataSet(array('person-revision', 'revisionData'));
     $actual = $this->getFilteredDataSet($actualDataSet, array('person-revision' => array('createdOn'), 'revisionData' => array('createdOn')));
-    $expected = $this->getFilteredDataSet($expected, array('person-revision' => array('createdOn'), 'revisionData' => array('createdOn')));
 
     $this->assertDataSetsEqual($expected, $actual);
     $this->assertTablesEqual($expected->getTable('person-revision'), $actual->getTable('person-revision'));

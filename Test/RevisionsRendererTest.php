@@ -114,7 +114,6 @@ class RevisionsRendererTest extends RevisionsTestsHelper
     $this->revisionsRenderer = new Revisions\RevisionsRenderer($this->revisions, array(), array(), $labels);
 
     $expected = array(
-      'aboutYou' => 'About You',
       'age'     => 'Age',
       'name'    => 'name',
     );
@@ -142,14 +141,12 @@ class RevisionsRendererTest extends RevisionsTestsHelper
 
     $labels = array(
       'name'    => 'Name',
-      'aboutYou' => 'About You',
       'age'     => 'Age',
     );
     $this->revisionsRenderer = new Revisions\RevisionsRenderer($this->revisions, array(), array(), $labels);
 
     $expected = array(
       'name'    => 'Name',
-      'aboutYou' => 'About You',
       'age'     => 'Age',
     );
     $result = $this->call($this->revisionsRenderer, 'makeLabels');
@@ -177,7 +174,6 @@ class RevisionsRendererTest extends RevisionsTestsHelper
     $this->revisionsRenderer = new Revisions\RevisionsRenderer($this->revisions);
 
     $expected = array(
-      'aboutYou' => 'aboutYou',
       'age' => 'age',
       'name' => 'name',
     );
