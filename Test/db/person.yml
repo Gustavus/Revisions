@@ -1,0 +1,7 @@
+person:
+  -
+    id: 1
+    name: "Billy Visto"
+    age: 23
+    city: "North Mankato"
+    aboutYou: "I like food"

@@ -4,30 +4,30 @@ person-revision:
     table: "person"
     rowId: 1
     key: "name"
-    value: "Visto"
+    value: ""
     startIndex: 1
-    endIndex:
+    endIndex: 2
   -
     id: 2
     table: "person"
     rowId: 1
     key: "age"
-    value: 23
+    value: 22
     startIndex: 0
-    endIndex: 0
+    endIndex: 1
   -
     id: 3
     table: "person"
     rowId: 1
     key: "city"
-    value: "North"
+    value: ""
     startIndex: 0
-    endIndex:
+    endIndex: 1
   -
     id: 4
     table: "person"
     rowId: 1
     key: "aboutYou"
-    value: "I like"
+    value: ""
     startIndex: 0
-    endIndex:
+    endIndex: 1

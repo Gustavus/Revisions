@@ -1,0 +1,48 @@
+revisionData:
+  -
+    id: 1
+    contentHash: "d41d8cd98f00b204e9800998ecf8427e"
+    revisionId: 1
+    revisionNumber: 0
+    key: "age"
+    value: '[[null,null,""]]'
+  -
+    id: 2
+    contentHash: "d41d8cd98f00b204e9800998ecf8427e"
+    revisionId: 1
+    revisionNumber: 0
+    key: "name"
+    value: '[[0,2,""]]'
+  -
+    id: 3
+    contentHash: "37693cfc748049e45d87b8c7d8b9aacd"
+    revisionId: 2
+    revisionNumber: 1
+    key: "age"
+    value: '23'
+  -
+    id: 4
+    contentHash: "afe3690ec4cda7e262f0ca81858777df"
+    revisionId: 2
+    revisionNumber: 1
+    key: "name"
+    value: '"Billy Visto"'
+person-revision:
+  -
+    id: 1
+    contentHash: "a4248216ba962e20097ca9133bf30a56"
+    table: "person"
+    rowId: 1
+    revisionNumber: 0
+    message:
+    createdBy:
+    createdOn:
+  -
+    id: 2
+    contentHash: "cb05afd4c533e16fefcf21b72dd3b048"
+    table: "person"
+    rowId: 1
+    revisionNumber: 1
+    message:
+    createdBy:
+    createdOn:

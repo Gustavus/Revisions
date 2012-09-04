@@ -1,0 +1,48 @@
+{% if revisions|length > 0 or not shouldRenderTimeline %}
+  {% spaceless %}
+    <form id="revisionsForm" method="{% block formMethod %}GET{% endblock %}">
+      {% block hiddenFields %}
+        <div id="hiddenFields">
+          {% for key, value in hiddenFields %}
+            {# value|keys|length because we want to see if value is an array, and if it is a string, it will not have keys, but will have a length #}
+            {% if value|keys|length > 0 %}
+              {% for arrKey, arrValue in value %}
+                <input type="hidden" name="{{ key }}[{{ arrKey }}]" value="{{ arrValue }}" />
+              {% endfor %}
+            {% else %}
+              <input{% if key == 'oldestRevisionNumber' %} id="oldestRevisionNumber"{% endif %} type="hidden" name="{{ key }}" value="{{ value }}" />
+            {% endif %}
+          {% endfor %}
+        </div>
+      {% endblock %}
+      {% block revisionTimeline %}
+      {% endblock %}
+      {% block actionButton %}
+      {% endblock %}
+      {% if shouldRenderRevisionData %}
+        <div id="formExtras">
+          {% block formExtras %}
+          {% endblock %}
+        </div>
+      {% endif %}
+    </form>
+  {% endspaceless %}
+{% else %}
+  <p class="message">There doesn't seem to be any data associated with the information provided.</p>
+{% endif %}
+
+{% macro renderErrorColumns(num) %}
+  {% for i in 1..num %}
+    <td class="error">{{ _self.renderError() }}</td>
+  {% endfor %}
+{% endmacro %}
+
+{% macro renderError() %}An unexpected error occured.{% endmacro %}
+
+{% macro renderTitle(revision, revisionNumber, oldestRevisionNumber) %}{% spaceless %}
+  {% if revision != null and revisionNumber > oldestRevisionNumber and revisionNumber != 0 %}
+    Modified {{ revision.getRevisionRelativeDate() }} by {{ revision.getcreatedBy() }}
+  {% else %}
+    Look at revision {{ revisionNumber }}
+  {% endif %}
+{% endspaceless %}{% endmacro %}

@@ -1,0 +1,536 @@
+/*ins {
+  color: green;
+}
+del {
+  color: red;
+}*/
+
+/* Revision Timeline */
+span.bytes {
+  display: block;
+}
+#revisionTimeline {
+  overflow-x: hidden;
+  overflow-y: visible;
+  max-width: 100%;
+  margin: 1em 0;
+  z-index: 1;
+  position: relative;
+
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+#revisionTimeline .viewport {
+  margin-left: 102px;
+}
+
+/* Revision Timeline scrolling hotspots */
+#revisionTimeline .viewport .scrollHotspot {
+  background: rgba(0, 0, 0, .65);
+  color: #fff;
+
+  display: block;
+  text-align: center;
+
+  font-size: 1.2em;
+
+  width: 11px;
+  height: 25px;
+  line-height: 25px;
+
+  overflow: visible;
+  z-index: 10;
+
+  position: absolute;
+  bottom: 40%;
+
+  -webkit-transition: all .05s ease-in-out;
+  -moz-transition: all .05s ease-in-out;
+  -ms-transition: all .05s ease-in-out;
+  -o-transition: all .05s ease-in-out;
+  transition: all .05s ease-in-out;
+}
+#revisionTimeline .viewport:hover .scrollHotspot {
+  cursor: pointer;
+}
+
+#revisionTimeline .scrollHotspot.scrollLeft {
+  left: -12px;
+  border-radius: 0 2px 2px 0;
+  padding-right: 1px;
+}
+#revisionTimeline .viewport:hover .scrollHotspot.scrollLeft:not(.disabled) {
+  left: 0;
+}
+
+#revisionTimeline .scrollHotspot.scrollRight {
+  right: -12px;
+  border-radius: 2px 0 0 2px;
+  padding-left: 1px;
+}
+#revisionTimeline .viewport:hover .scrollHotspot.scrollRight:not(.disabled) {
+  right: 0;
+}
+
+#revisionTimeline th:first-child {
+  display: none;
+}
+#revisionTimeline th:last-child, #revisionTimeline td:last-child {
+  border-right: 1px solid #aaa;
+}
+#revisionTimeline .labels {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+
+  width: 100px;
+  padding: 17px 4px 0 0;
+  position: absolute;
+
+  font-size: .85em;
+  font-weight: bold;
+
+  z-index: 3;
+  background-color: #fff;
+  box-shadow: 6px 0 4px -4px rgba(0, 0, 0, .25);
+
+  text-align: right;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#revisionTimeline .labels div {
+  height: 20px;
+  line-height: 20px;
+}
+#revisionTimeline .labels div:last-child {
+  padding-top: 4px;
+  height: 30px;
+}
+#revisionTimeline .labels button {
+  font-size: 1em;
+}
+/*
+#revisionsForm #revisionTimeline th:first-child {
+  font-size: .85em;
+  position: absolute;
+
+  /* We want to give it some extra padding on the left that gets chopped so you can't see underneath it when scrolling left in Chrome *\/
+  margin: 0 0 0 -150px;
+  width: 150px;
+  padding: 0 4px 0 50px;
+
+  border-spacing: 0;
+  border-collapse: collapse;
+
+  background: #fff;
+
+  /* These elements need to be a little extra tall so the box shadows line up correctly *\/
+  height: 26px;
+  line-height: 22px;
+  box-shadow: 5px 0 4px -4px rgba(0, 0, 0, .25);
+
+  z-index: 3;
+  border: none;
+
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+#revisionsForm #revisionTimeline tfoot th:first-child {
+  /* Prevents the button from overlapping the scrollbar *\/
+  padding-top: 4px;
+  height: 3.17em;
+  margin-top: -1px;
+
+}
+/*
+#revisionTimeline td:nth-child(2), #revisionTimeline th:nth-child(2) {
+  padding-left: 110px;
+  text-align: right;
+}
+*/
+#revisionTimeline td {
+  min-width: 15px;
+  width: 15px;
+  vertical-align: middle;
+}
+td.bytes {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+#revisionsForm th {
+  vertical-align: middle;
+}
+#revisionTimeline button.missingRevisions {
+  height: .3em;
+  width: .3em;
+  padding: 0;
+  margin: 3px;
+  border: 0;
+  background: transparent;
+}
+#revisionTimeline {
+  margin-top: .5em;
+}
+#revisionTimeline table {
+  margin: 0;
+}
+#revisionTimeline thead th {
+  font-size: 9px;
+  color: #ddd;
+}
+#revisionTimeline thead th.hover, #revisionTimeline thead th.selected, #revisionTimeline thead th.old, #revisionTimeline thead th.young {
+  color: #888;
+}
+#revisionTimeline tbody th, #revisionTimeline tfoot th {
+  text-align: right;
+  border-right: 1px solid #eee;
+}
+#revisionTimeline tfoot th, #revisionTimeline tfoot td {
+  background-color: rgba(0, 0, 0, .06);
+}
+#revisionTimeline input {
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+}
+#revisionTimeline tfoot label {
+  display: block;
+  height: 2.5em;
+  line-height: 2.5em;
+  padding: 0;
+}
+#revisionTimeline thead th, #revisionTimeline tbody td {
+  cursor: pointer;
+}
+
+/* Timeline Revision Changes */
+.bytes {
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+.removed.bytes, .added.bytes {
+  text-indent: -9999px;
+  border-left: 1px solid rgba(255, 255, 255, .4);
+}
+.positive.bytes {
+  position: relative;
+  top: 0;
+  height: 50%;
+  width: 100%;
+  border-bottom: 1px solid #999;
+}
+.negative.bytes {
+  position: absolute;
+  bottom: 0;
+  height: 50%;
+  width: 100%;
+}
+.unchanged.bytes {
+  position: absolute;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, .13);
+  border-left: 1px solid rgba(255, 255, 255, .4);
+  width: 100%;
+  z-index: 1;
+  border-radius: 0 1px 0 0;
+  box-shadow: inset 0 1px 5px rgba(0, 0, 0, .08);
+}
+.added.bytes {
+  position: absolute;
+  bottom: 0;
+  background-color: #0b0;
+  width: 100%;
+  z-index: 2;
+  border-radius: 0 1px 0 0;
+  box-shadow: inset 0 1px 5px rgba(0, 0, 0, .1);
+}
+.removed.bytes {
+  top: 0;
+  background-color: #b00;
+  width: 100%;
+  border-radius: 0 0 1px 0;
+  box-shadow: inset 0 2px 4px -2px rgba(0, 0, 0, .5);
+}
+.removed.bytes, .added.bytes, .unchanged.bytes {
+  min-height: 1px;
+}
+.bytes.container {
+  position: relative;
+  /* Firefox doesn't like elements with a height of 100%, so we need to use px */
+  height: 20px;
+  width: 100%;
+  padding: 2px 0;
+}
+#revisionTimeline button {
+  font-size: 2.5em;
+  margin: 0;
+  padding: 0;
+}
+#revisionTimeline #compareButton {
+  padding: 3px;
+}
+#revisionTimeline button:focus, #revisionTimeline button:hover {
+  text-decoration: none;
+}
+#revisionTimeline #timelineText {
+  font-size: 1em;
+  display: block;
+}
+
+/* Table Column Hover */
+#revisionTimeline td.hover, #revisionTimeline th.hover {
+  background-color: rgba(0, 0, 0, .05);
+}
+#revisionTimeline tr.odd td.hover, #revisionTimeline tr.odd th.hover {
+  background-color: rgba(0, 0, 0, .1);
+}
+
+/* Table Column Hover and Selected */
+#revisionTimeline td.hover.selected, #revisionTimeline th.hover.selected {
+  background-color: rgba(0, 0, 0, .1);
+}
+#revisionTimeline tr.odd td.hover.selected, #revisionTimeline tr.odd th.hover.selected {
+  background-color: rgba(0, 0, 0, .15);
+}
+
+/* Table Column Selected */
+#revisionTimeline td.selected, #revisionTimeline th.selected {
+  background-color: rgba(0, 0, 0, .05);
+}
+#revisionTimeline tr.odd td.selected, #revisionTimeline tr.odd th.selected {
+  background-color: rgba(0, 0, 0, .1);
+}
+
+/* Revision highlighting */
+#revisionTimeline .old {
+  background-color: rgba(190, 190, 0, .15);
+}
+#revisionTimeline .odd .old {
+  background-color: rgba(190, 190, 0, .225);
+}
+#revisionTimeline tfoot td.old {
+  background-color: rgba(190, 190, 0, .3);
+}
+#revisionTimeline .young {
+  background-color: rgba(0, 80, 230, .1);
+}
+#revisionTimeline .odd .young {
+  background-color: rgba(0, 80, 230, .15);
+}
+#revisionTimeline tfoot td.young {
+  background-color: rgba(0, 80, 230, .2);
+}
+
+#revisionTimeline thead th, #revisionTimeline tfoot td {
+  text-align: center;
+}
+#revisionTimeline thead th {
+  padding: 2px 0;
+}
+#revisionTimeline tfoot td {
+  padding: 0;
+}
+tr.compare td {
+  padding-left: 0px;
+}
+
+#formExtras {
+  clear: both;
+  padding: 1px 0; /* Prevent collapsing margins */
+}
+
+/* Revision Data */
+.revisionData {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  border-radius: .5em;
+  border: 1px solid rgba(0, 0, 0, .25);
+  background-color: rgba(0, 80, 230, .15);
+}
+
+.revisionData .headers {
+  box-shadow: inset 0 -10px 20px -10px rgba(0, 0, 0, .2);
+  background-color: rgba(0, 0, 0, .03);
+}
+.revisionData header {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  padding: 10px;
+  border-radius: .5em .5em 0 0;
+}
+.revisionData h1, .revisionData h2 {
+  display: inline;
+  font-family: Arial, "Helvetica Nueue", Helvetica, sans-serif;
+  vertical-align: middle;
+  margin: 0;
+}
+.revisionData h1 {
+  font-size: 1.35em;
+  font-weight: bold;
+  margin-right: .5em;
+}
+.revisionData h2 {
+  font-size: .85em;
+  font-style: italic;
+  margin-right: .25em;
+}
+.revisionData header p {
+  margin: 0;
+}
+.revisionData footer button {
+  width: 100%;
+  display: block;
+  font-size: 1.4em;
+  font-weight: bold;
+  margin: 0;
+  border-radius: 0 0 .35em .35em;
+}
+.revisionData dt {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  background-color: rgba(255, 255, 255, .5);
+  margin: 0;
+  padding: 1em 10px .25em 10px;
+  clear: both;
+  box-shadow: inset 0 10px 20px -10px rgba(0, 0, 0, .1);
+  border-top: 1px solid rgba(0, 0, 0, .2);
+  font-size: 1.1em;
+  font-weight: bold;
+}
+.revisionData dd {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  padding: 10px;
+  margin: 0;
+  font-family: Consolas, monospace;
+}
+.revisionData ins {
+  background-color: #dfd;
+  box-shadow: 0 0 0 1px #aea;
+}
+.revisionData del {
+  text-decoration: none;
+  background-color: #fdd;
+  box-shadow: 0 0 0 1px #fbb;
+}
+
+/* Comparing */
+.revisionData.comparison {
+  background: -webkit-linear-gradient(
+      0deg,
+      rgba(190, 190, 0, .15) 0px,
+      rgba(190, 190, 0, .15) 49.99999%,
+      rgba(0, 80, 230, .15) 49.99999%,
+      rgba(0, 80, 230, .15) 100%
+    ) 0 0 no-repeat;
+  background: -moz-linear-gradient(
+      0deg,
+      rgba(190, 190, 0, .15) 0px,
+      rgba(190, 190, 0, .15) 49.99999%,
+      rgba(0, 80, 230, .15) 49.99999%,
+      rgba(0, 80, 230, .15) 100%
+    ) 0 0 no-repeat;
+  background: -ms-linear-gradient(
+      0deg,
+      rgba(190, 190, 0, .15) 0px,
+      rgba(190, 190, 0, .15) 49.99999%,
+      rgba(0, 80, 230, .15) 49.99999%,
+      rgba(0, 80, 230, .15) 100%
+    ) 0 0 no-repeat;
+  background: -o-linear-gradient(
+      0deg,
+      rgba(190, 190, 0, .15) 0px,
+      rgba(190, 190, 0, .15) 49.99999%,
+      rgba(0, 80, 230, .15) 49.99999%,
+      rgba(0, 80, 230, .15) 100%
+    ) 0 0 no-repeat;
+  background: linear-gradient(
+      0deg,
+      rgba(190, 190, 0, .15) 0px,
+      rgba(190, 190, 0, .15) 49.99999%,
+      rgba(0, 80, 230, .15) 49.99999%,
+      rgba(0, 80, 230, .15) 100%
+    ) 0 0 no-repeat;
+}
+.revisionData.comparison header, .revisionData.comparison dd {
+  width: 50%;
+  float: left;
+}
+/* Old Restore Button */
+.revisionData.comparison footer {
+  width: 49.99999%;
+  float: left;
+}
+/* Young Restore Button */
+.revisionData.comparison footer + footer {
+  width: 50.2%;
+  float: left;
+}
+.revisionData.comparison header:first-child {
+  border-radius: .5em 0 0 0;
+}
+.revisionData.comparison header:nth-child(2) {
+  border-radius: 0 .5em 0 0;
+}
+
+.revisionData.comparison footer button {
+  border-radius: 0 0 0 .35em;
+}
+.revisionData.comparison footer + footer button {
+  border-radius: 0 0 .35em 0;
+}
+
+/* Revision A */
+.revisionData.comparison dt + dd ins {
+  display: none;
+}
+
+/* Revision B */
+.revisionData.comparison dd + dd del {
+  display: none;
+}
+
+/* Slide Viewport for sliding the old revisionData out and the new revisionData in*/
+.slideViewport {
+  position: relative;
+  /*overflow: hidden;*/
+}
+
+.slideViewport .slideSection.slide-left, .slideViewport .slideSection.slide-right {
+  position: absolute;
+  top: 0;
+  padding: 1px 0; /* This should match the padding on #formExtras */
+  width: 100%;
+}
+
+.slideViewport .slideSection.slide-left {
+  left: 100%;
+  margin-left: 50px;
+}
+
+.slideViewport .slideSection.slide-right {
+  right: 100%;
+  margin-right: 50px;
+}
+.hidden {
+  display: none;
+}

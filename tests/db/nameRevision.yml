@@ -1,9 +1,0 @@
-personRevision:
-  -
-    id: 1
-    table: "person"
-    rowId: 1
-    key: "name"
-    value: "Visto"
-    startIndex: 1
-    endIndex:

@@ -1,0 +1,57 @@
+{% extends 'base.twig' %}
+{% import 'base.twig' as base %}
+{% import 'revisions.twig' as revisionsTwig %}
+
+{% block revisionTimeline %}
+  {% if shouldRenderTimeline %}
+    {{ revisionsTwig.renderTimeline(revisions, maxColumnSizes, visibleRevisions, oldestRevisionNumber, limit, labels) }}
+  {% endif %}
+{% endblock %}
+
+{% block formExtras %}
+  {% block revisionData %}
+    <section class="clearfix revisionData">
+      <div class="clearfix headers">
+        {{ _self.renderHeader(revisions[visibleRevisions[0]]) }}
+      </div>
+      <dl class="clearfix">
+        {% if columns|length == 0 %}
+          {% set columns = revision.revisionData|keys %}
+        {% endif %}
+        {% for key, label in labels %}
+          {% if key in columns and revision.revisionData[key] != null %}
+            {% set revisionData = revision.revisionData[key] %}
+            <dt{% if revisionData.error %} class="error"{% endif %} title="{{ key }}">{{ label }}</dt>
+            <dd>
+              {%- if revisionData.error -%}
+                {{- base.renderError() -}}
+              {%- else -%}
+                {# + 1 because the revisionData for revision 3 is actually the revisionData for revision 2 so the diffs match since we want how 2 changed to 3 if looking at 3 #}
+                {{- revisionData.getContent(true, revision.getRevisionNumber() + 1)|raw -}}
+              {%- endif -%}
+            </dd>
+          {% endif %}
+        {% endfor %}
+      </dl>
+      {% block restoreButton %}
+        {{ _self.renderRestoreButton(revisions|length, visibleRevisions[0], shouldAllowRestore) }}
+      {% endblock %}
+    </section>
+  {% endblock revisionData %}
+{% endblock %}
+
+{% macro renderHeader(revision) %}
+  <header>
+    <hgroup title="{{ revision.getRevisionDate()|date("c") }}">
+      <h1>{{ revision.getRevisionMessage() }}</h1>
+      <h2>{{ revision.getRevisionRelativeDate() }}</h2>
+      <h2>{% if revision.getCreatedBy() != '' %}by {{ revision.getCreatedBy() }}{% endif %}</h2>
+    </hgroup>
+  </header>
+{% endmacro %}
+
+{% macro renderRestoreButton(revisionsLength, revisionNumber, shouldAllowRestore) %}
+  <footer{% if not shouldAllowRestore %} class="hidden"{% endif %}>
+    <button name="restore" value="{{ revisionNumber }}" id="restore-{{ revisionNumber }}" class="restore{% if revisionNumber == revisionsLength - 1 %} disabled{% endif %}" title="Restore Revision {{ revisionNumber }}">Restore #{{ revisionNumber }}</button>
+  </footer>
+{% endmacro %}

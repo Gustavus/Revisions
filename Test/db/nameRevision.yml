@@ -1,0 +1,34 @@
+revisionData:
+  -
+    id: 1
+    contentHash: "d41d8cd98f00b204e9800998ecf8427e"
+    revisionId: 1
+    revisionNumber: 0
+    key: "name"
+    value: '[[0,2,""]]'
+  -
+    id: 2
+    contentHash: "afe3690ec4cda7e262f0ca81858777df"
+    revisionId: 2
+    revisionNumber: 1
+    key: "name"
+    value: '"Billy Visto"'
+person-revision:
+  -
+    id: 1
+    contentHash: "555dfa90763bd852d5dd9144887eed97"
+    table: "person"
+    rowId: 1
+    revisionNumber: 0
+    message:
+    createdBy: "name"
+    createdOn:
+  -
+    id: 2
+    contentHash: "68ffbab073818b5bba5e6e1d7f2aad7f"
+    table: "person"
+    rowId: 1
+    revisionNumber: 1
+    message:
+    createdBy: "name"
+    createdOn:

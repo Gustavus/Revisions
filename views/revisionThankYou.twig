@@ -1,0 +1,11 @@
+{% extends 'revisionData.twig' %}
+{% import 'base.twig' as base %}
+
+{% block formMethod %}POST{% endblock %}
+
+{% block revisionTimeline %}
+{% endblock %}
+
+{% block formExtras %}
+  <button type="submit" name="revisionsAction" value="undo">Undo</button>
+{% endblock %}
