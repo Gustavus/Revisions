@@ -182,43 +182,46 @@ class Revisions extends RevisionsManager
     $oldText              = array();
     $brandNewColumns      = array();
     foreach ($newText as $key => &$value) {
-      if (is_object($value)) {
-        // try to cast the object to a string. This requires the object having a magic toString function.
-        $value = (string) $value;
-      }
-      if ($key[0] === ':') {
-        // if passing in the same array as you would to a pdo or doctrine query
-        $key = substr($key, 1);
-      }
-      $oldRevisionData = $this->getRevisionData(null, $key, true, 1);
-      $oldRevisionDataArray = array_merge($oldRevisionDataArray, $oldRevisionData);
-      if ($value === null) {
-        // we will treat null as an empty string
-        $value = '';
-      }
-      if (isset($oldRevisionData[$key])) {
-        // revision exists in DB, so the first item will be the full current content
-        $oldContentArray         = array_shift($oldRevisionData[$key]);
-        $revisionData            = new RevisionDataDiff(array('nextContent' => $oldContentArray['value']));
-        $oldText[$key]           = $oldContentArray['value'];
-      } else {
-        // revision doesn't exist yet
-        $revisionData            = new RevisionDataDiff(array('nextContent' => ''));
-        if ($value === '') {
-          // We don't want this hanging around if this is a new revision that hasn't actually changed
-          unset($newText[$key]);
-        } else {
-          // If we added this stuff in to a null value, it will break things since this isn't actually a change
-          $oldText[$key]           = '';
-          $brandNewColumns[]       = $key;
+      if (!empty($key) && is_string($key)) {
+        // make sure the key isn't empty and is a string in case the application using this doesn't make the array correctly
+        if (is_object($value)) {
+          // try to cast the object to a string. This requires the object having a magic toString function.
+          $value = (string) $value;
         }
+        if ($key[0] === ':') {
+          // if passing in the same array as you would to a pdo or doctrine query
+          $key = substr($key, 1);
+        }
+        $oldRevisionData = $this->getRevisionData(null, $key, true, 1);
+        $oldRevisionDataArray = array_merge($oldRevisionDataArray, $oldRevisionData);
+        if ($value === null) {
+          // we will treat null as an empty string
+          $value = '';
+        }
+        if (isset($oldRevisionData[$key])) {
+          // revision exists in DB, so the first item will be the full current content
+          $oldContentArray         = array_shift($oldRevisionData[$key]);
+          $revisionData            = new RevisionDataDiff(array('nextContent' => $oldContentArray['value']));
+          $oldText[$key]           = $oldContentArray['value'];
+        } else {
+          // revision doesn't exist yet
+          $revisionData            = new RevisionDataDiff(array('nextContent' => ''));
+          if ($value === '') {
+            // We don't want this hanging around if this is a new revision that hasn't actually changed
+            unset($newText[$key]);
+          } else {
+            // If we added this stuff in to a null value, it will break things since this isn't actually a change
+            $oldText[$key]           = '';
+            $brandNewColumns[]       = $key;
+          }
+        }
+        $revisionInfo            = $revisionData->renderRevisionForDB($value);
+        if ($revisionInfo !== null) {
+          // if there isn't a change, renderRevisionForDB will return null, so we don't want this
+          $revisionInfoArray[$key] = $revisionInfo;
+        }
+        $count = 0;
       }
-      $revisionInfo            = $revisionData->renderRevisionForDB($value);
-      if ($revisionInfo !== null) {
-        // if there isn't a change, renderRevisionForDB will return null, so we don't want this
-        $revisionInfoArray[$key] = $revisionInfo;
-      }
-      $count = 0;
     }
     $columnInfo = $this->getColumnInformation($newText);
     foreach ($columnInfo['missingColumns'] as $column) {

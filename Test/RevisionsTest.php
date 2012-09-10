@@ -232,6 +232,34 @@ class RevisionsTest extends RevisionsTestsHelper
   /**
    * @test
    */
+  public function makeAndSaveRevisionEmptyKey()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $this->saveRevisionToDB('', 'Billy Visto', 'name', $this->revisions, array(), null, 'name', array('name'));
+    $this->saveRevisionToDB('Billy Visto', 'Billy', 'name', $this->revisions);
+    $this->saveRevisionToDB('Billy', 'Billy Visto', 'name', $this->revisions);
+
+    $this->ymlFile = 'nameRevision2.yml';
+    $expected = $this->getDataSet();
+
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto', '' => 'something'));
+
+    $actualDataSet = $conn->createDataSet(array('person-revision', 'revisionData'));
+    $actual = $this->getFilteredDataSet($actualDataSet, array('person-revision' => array('createdOn'), 'revisionData' => array('createdOn')));
+    $expected = $this->getFilteredDataSet($expected, array('person-revision' => array('createdOn'), 'revisionData' => array('createdOn')));
+
+    $this->assertDataSetsEqual($expected, $actual);
+    $this->assertTablesEqual($expected->getTable('person-revision'), $actual->getTable('person-revision'));
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
   public function makeAndSaveRevisionPDOArray()
   {
     $conn = $this->getConnection();
