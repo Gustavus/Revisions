@@ -2,6 +2,7 @@
 /**
  * @package Revisions
  * @subpackage Tests
+ * @author Billy Visto
  */
 
 namespace Gustavus\Revisions\Test;
@@ -10,6 +11,7 @@ use \Gustavus\Revisions;
 /**
  * @package Revisions
  * @subpackage Tests
+ * @author Billy Visto
  */
 class RevisionsTest extends RevisionsTestsHelper
 {
@@ -56,6 +58,7 @@ class RevisionsTest extends RevisionsTestsHelper
 
   /**
    * @param string $tableName
+   * @return  void
    */
   private function setUpMock($tableName)
   {
@@ -606,6 +609,66 @@ class RevisionsTest extends RevisionsTestsHelper
 
     $this->assertDataSetsEqual($expected, $actual);
     $this->assertTablesEqual($expected->getTable('person-revision'), $actual->getTable('person-revision'));
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
+  public function makeAndSaveRevisionAddingNewRowInitialIsBlank()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    // we want to check against the empty tables
+    $expectedDataSet = $conn->createDataSet(array('person-revision', 'revisionData'));
+    $expected = $this->getFilteredDataSet($expectedDataSet, array('person-revision' => array('createdOn'), 'revisionData' => array('createdOn')));
+
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto', 'age' => ''));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy'));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy', 'age' => 22));
+    $this->revisions->makeAndSaveRevision(array('age' => 23, 'name' => 'Billy Visto'));
+
+    $actualDataSet = $conn->createDataSet(array('person-revision', 'revisionData'));
+    $actual = $this->getFilteredDataSet($actualDataSet, array('person-revision' => array('createdOn'), 'revisionData' => array('createdOn')));
+
+    $this->assertDataSetsEqual($expected, $actual);
+    $this->assertTablesEqual($expected->getTable('person-revision'), $actual->getTable('person-revision'));
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * This test mostly verifies that no errors occur
+   * @test
+   */
+  public function makeAndSaveRevisionNumbers()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $this->ymlFile = 'nameRevision2.yml';
+    $expected = $this->getDataSet();
+
+    $this->revisions->makeAndSaveRevision(array('status' => 1));
+    $this->revisions->makeAndSaveRevision(array('status' => ''));
+    $this->revisions->makeAndSaveRevision(array('status' => 2));
+    $this->revisions->makeAndSaveRevision(array('status' => 5));
+    $this->revisions->makeAndSaveRevision(array('status' => 6));
+    $this->revisions->getRevisionByNumber(1);
+    //$this->revisions->makeAndSaveRevision(array('status' => [[null,null,2]]));
+    // $this->revisions->makeAndSaveRevision(array('status' => 6));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy', 'age' => 22, 'status' => 1));
+    $this->revisions->makeAndSaveRevision(array('age' => 23, 'name' => 'Billy Visto'));
+
+    // $actualDataSet = $conn->createDataSet(array('person-revision', 'revisionData'));
+    // $actual = $this->getFilteredDataSet($actualDataSet, array('person-revision' => array('createdOn'), 'revisionData' => array('createdOn')));
+
+    // $this->assertDataSetsEqual($expected, $actual);
+    // $this->assertTablesEqual($expected->getTable('person-revision'), $actual->getTable('person-revision'));
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }
 

@@ -1,6 +1,7 @@
 <?php
 /**
  * @package Revisions
+ * @author  Billy Visto
  */
 namespace Gustavus\Revisions;
 
@@ -8,6 +9,7 @@ namespace Gustavus\Revisions;
  * Interacts with the database
  *
  * @package Revisions
+ * @author  Billy Visto
  */
 class RevisionsManager extends RevisionsBase
 {
@@ -255,7 +257,6 @@ class RevisionsManager extends RevisionsBase
    *
    * @param json $revisionInfo
    * @param integer $revisionId id of the revision in the revision db
-   * @param string $revisionNumber current cells revision number
    * @param string $column column of the cell
    * @param string $revisionContent content the revision was. Used to generate a hash
    * @param integer $oldRevisionId
@@ -311,7 +312,7 @@ class RevisionsManager extends RevisionsBase
   /**
    * Saves revision into DB
    *
-   * @param array $revisonContent revision's full content containing all of the columns keyed by column
+   * @param array $revisionContent revision's full content containing all of the columns keyed by column
    * @param string $message revision message
    * @param string $createdBy person who edited the revision
    * @return integer insertId
@@ -428,11 +429,8 @@ class RevisionsManager extends RevisionsBase
           // update existing revisionData
           $affectedRows += $this->saveRevisionData($value, $latestRevisionData['revisionId'], $key, $oldContent[$key], $latestRevisionData['id']);
         }
-        if ($newContent[$key] !== $oldContent[$key]) {
-          // insert new content to db if it isn't the same as it used to be.
-          // It will be the same in the case of a blank first addition
-          $affectedRows += $this->saveRevisionData(json_encode($newContent[$key]), $newRevisionId, $key, $newContent[$key]);
-        }
+        // add full current content in as the last thing for this key in the db
+        $affectedRows += $this->saveRevisionData(json_encode($newContent[$key]), $newRevisionId, $key, $newContent[$key]);
       }
     }
     return ($affectedRows !== 0);
