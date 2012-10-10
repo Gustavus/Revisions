@@ -182,6 +182,7 @@ class Revisions extends RevisionsManager
     $oldText              = array();
     $brandNewColumns      = array();
     foreach ($newText as $key => &$value) {
+      assert('!is_array($value)');
       if (!empty($key) && is_string($key)) {
         // make sure the key isn't empty and is a string in case the application using this doesn't make the array correctly
         if (is_object($value)) {
@@ -207,10 +208,10 @@ class Revisions extends RevisionsManager
           // revision doesn't exist yet
           $revisionData            = new RevisionDataDiff(array('nextContent' => ''));
           if ($value === '') {
-            // We don't want this hanging around if this is a new revision that hasn't actually changed
+            // We don't want this hanging around since this is a new revision that is still empty
             unset($newText[$key]);
           } else {
-            // If we added this stuff in to a null value, it will break things since this isn't actually a change
+            // set the old text to be empty string and add it to the array of brand new columns
             $oldText[$key]           = '';
             $brandNewColumns[]       = $key;
           }
