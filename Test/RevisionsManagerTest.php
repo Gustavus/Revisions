@@ -532,6 +532,68 @@ class RevisionsManagerTest extends RevisionsTestsHelper
   /**
    * @test
    */
+  public function parseDataResultWithDiffs()
+  {
+    $fetchAllResult =  array(
+      array(
+        "id" => "3",
+        'contentHash' => "3",
+        'revisionId' => '3',
+        "revisionNumber" => "2",
+        "key" => "status",
+        "value" =>  3,
+        'revisionRevisionNumber' => '2',
+      ),
+      array(
+        "id" => "2",
+        'contentHash' => "2",
+        'revisionId' => '2',
+        "revisionNumber" => "1",
+        "key" => "status",
+        "value" =>  '[[null,null,2]]',
+        'revisionRevisionNumber' => '1',
+      ),
+      array(
+        "id" => "1",
+        'contentHash' => "",
+        'revisionId' => '1',
+        "revisionNumber" => "0",
+        "key" => "status",
+        "value" => '[[null,null,""]]',
+        'revisionRevisionNumber' => '0',
+      )
+    );
+    $expected = array('status' => array(
+        '2' => array(
+          "id" => "3",
+          'contentHash' => "3",
+          'revisionId' => '3',
+          "value" =>  3,
+          'revisionRevisionNumber' => '2',
+        ),
+        '1' => array(
+          "id" => "2",
+          'contentHash' => "2",
+          'revisionId' => '2',
+          "value" =>  array(array(null,null,2)),
+          'revisionRevisionNumber' => '1',
+        ),
+        '0' => array(
+          'id' => '1',
+          'contentHash' => "",
+          'revisionId' => '1',
+          'value' => array(array(null,null,'')),
+          'revisionRevisionNumber' => '0',
+        ),
+      ),
+    );
+    $actual = $this->call($this->revisionsManager, 'parseDataResult', array($fetchAllResult, 'status'));
+    $this->assertSame($expected, $actual);
+  }
+
+  /**
+   * @test
+   */
   public function getNowExpression()
   {
     $conn = $this->getConnection();
