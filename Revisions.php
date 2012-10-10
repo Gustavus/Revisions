@@ -1,6 +1,7 @@
 <?php
 /**
  * @package Revisions
+ * @author  Billy Visto
  */
 namespace Gustavus\Revisions;
 
@@ -8,6 +9,7 @@ namespace Gustavus\Revisions;
  * Creates Revision objects and sets things up for saving revisions
  *
  * @package Revisions
+ * @author  Billy Visto
  */
 class Revisions extends RevisionsManager
 {
@@ -537,7 +539,7 @@ class Revisions extends RevisionsManager
    * @param  integer $revisionNumber revision number you want
    * @return string
    */
-  public function getRevisionByNumber($revisionNumber, $column = null)
+  public function getRevisionByNumber($revisionNumber)
   {
     assert('is_int($revisionNumber)');
     $this->populateEmptyRevisions($revisionNumber);
