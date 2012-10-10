@@ -2,6 +2,7 @@
 /**
  * @package Revisions
  * @subpackage Tests
+ * @author  Billy Visto
  */
 
 namespace Gustavus\Revisions\Test;
@@ -10,6 +11,7 @@ use Gustavus\Revisions;
 /**
  * @package Revisions
  * @subpackage Tests
+ * @author  Billy Visto
  */
 class RevisionsManagerTest extends RevisionsTestsHelper
 {
@@ -71,6 +73,7 @@ class RevisionsManagerTest extends RevisionsTestsHelper
 
   /**
    * @param string $tableName
+   * @return  void
    */
   private function setUpMock($tableName)
   {
