@@ -428,11 +428,8 @@ class RevisionsManager extends RevisionsBase
           // update existing revisionData
           $affectedRows += $this->saveRevisionData($value, $latestRevisionData['revisionId'], $key, $oldContent[$key], $latestRevisionData['id']);
         }
-        if ($newContent[$key] !== $oldContent[$key]) {
-          // insert new content to db if it isn't the same as it used to be.
-          // It will be the same in the case of a blank first addition
-          $affectedRows += $this->saveRevisionData(json_encode($newContent[$key]), $newRevisionId, $key, $newContent[$key]);
-        }
+        // add full current content in as the last thing for this key in the db
+        $affectedRows += $this->saveRevisionData(json_encode($newContent[$key]), $newRevisionId, $key, $newContent[$key]);
       }
     }
     return ($affectedRows !== 0);
