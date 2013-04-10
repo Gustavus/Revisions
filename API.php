@@ -266,8 +266,7 @@ class API
       '/js/history/scripts/bundled/html4+html5/jquery.history.js',
       Resource::renderResource(['path' => '/revisions/js/revisions.js', 'version' => self::REVISIONS_JS_VERSION]),
     );
-    $js = $this->modernizeJS($revisionsScripts);
-    return $content . $js;
+    return $content . $this->modernizeJS($revisionsScripts);
   }
 
   /**
@@ -286,7 +285,6 @@ class API
       </script>',
         implode('","', $scripts)
     );
-    //return '';
   }
 
   /**

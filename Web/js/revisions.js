@@ -11,6 +11,11 @@ var revisions = {
       return revisions.timeline.$viewport;
     },
 
+    isViewportNeeded: function()
+    {
+      return $('#revisionTimeline .viewport table').outerWidth() > $('#revisionTimeline').width();
+    },
+
     $lastRevisionTh: null,
 
     getLastRevisionTh: function() {
@@ -60,11 +65,11 @@ var revisions = {
     },
 
     getLeftOffset: function() {
-      if (revisions.timeline.getViewport().length !== 0 && revisions.timeline.getViewport().viewport('content').length === 0) {
+      if (revisions.timeline.isViewportNeeded() && revisions.timeline.getViewport().length !== 0 && revisions.timeline.getViewport().viewport('content').length === 0) {
         // set up viewport if timeline exists but not yet a viewport
         revisions.setUpViewport();
       }
-      if (revisions.timeline.getViewport().viewport('content').length !== 0) {
+      if (revisions.timeline.isViewportNeeded() && revisions.timeline.getViewport().viewport('content').length !== 0) {
         // the viewport exists, so we can get the position of it
         return revisions.timeline.getViewport().viewport('content').position().left;
       } else {
@@ -556,7 +561,7 @@ var revisions = {
       height: $table.height() + 'px',
       width: $('#revisionTimeline').width() - parseInt(revisions.timeline.getViewport().css('marginLeft')) + 'px'
     }
-    if ($('#revisionTimeline .viewport table').outerWidth() > $('#revisionTimeline').width()) {
+    if (revisions.timeline.isViewportNeeded()) {
       revisions.timeline.getViewport()
         .css(dimensions)
         .viewport({
@@ -641,7 +646,7 @@ $('#revisionsForm').on('click', 'thead th, tbody td', function() {
 });
 
 /* Set up viewport */
-revisions.setUpViewport()
+revisions.setUpViewport();
 
 $(document).ready(function() {
   $('#compareButton').attr('disabled', 'disabled');
