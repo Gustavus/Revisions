@@ -4,7 +4,8 @@
  */
 namespace Gustavus\Revisions;
 use Symfony\Component\HttpFoundation\Request,
-  Gustavus\Utility\String;
+  Gustavus\Utility\String,
+  Gustavus\Resources\Resource;
 
 /**
  * API to interact with the revisions project
@@ -259,13 +260,11 @@ class API
     $revisionsScripts = array(
       '/js/jquery/ui/current/minified/jquery.ui.mouse.min.js',
       '/js/jquery/ui/current/minified/jquery.ui.draggable.min.js',
-      '/js/jquery/ui/current/minified/jquery.effects.slide.min.js',
+      '/js/jquery/ui/current/minified/jquery.ui.effect-slide.min.js',
       '/revisions/js/jquery-viewport/jquery.viewport.min.js',
-      '/min/f=/revisions/js/jquery-mousewheel/jquery.mousewheel.js&amp;1',
+      Resource::renderResource(['path' => '/revisions/js/jquery-mousewheel/jquery.mousewheel.js', 'version' => 1]),
       '/js/history/scripts/bundled/html4+html5/jquery.history.js',
-      sprintf('/min/f=/revisions/js/revisions.js&%1$s',
-          self::REVISIONS_JS_VERSION
-      ),
+      Resource::renderResource(['path' => '/revisions/js/revisions.js', 'version' => self::REVISIONS_JS_VERSION]),
     );
     $js = $this->modernizeJS($revisionsScripts);
     return $content . $js;
