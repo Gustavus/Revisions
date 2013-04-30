@@ -240,9 +240,9 @@ class API
    */
   final public function renderRevisionsCSS($content = null)
   {
-    return sprintf('%1$s<link rel="stylesheet" href="/min/f=/revisions/css/revisions.css&%2$s" type="text/css" media="screen, projection" />',
+    return sprintf('%1$s<link rel="stylesheet" href="%2$s" type="text/css" media="screen, projection" />',
         $content,
-        self::REVISIONS_CSS_VERSION
+        Resource::renderCSS(['path' => '/revisions/css/revisions.css', 'version' =>  self::REVISIONS_CSS_VERSION])
     );
   }
 
