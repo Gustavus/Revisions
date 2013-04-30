@@ -727,4 +727,20 @@ class API
   {
     return $this->revisionsRenderer->renderRevisionRestore($revNum);
   }
+
+  /**
+   * Gets the number of revisions
+   *
+   * @return integer|null Number of revisions, or null if none are found
+   */
+  public function getRevisionCount()
+  {
+    if ($this->revisions->findLatestRevisionNumberPulled() === null) {
+      $origLimit = $this->revisions->getLimit();
+      $this->revisions->setLimit(1);
+      $this->revisions->populateEmptyRevisions();
+      $this->revisions->setLimit($origLimit);
+    }
+    return $this->revisions->findLatestRevisionNumberPulled();
+  }
 }

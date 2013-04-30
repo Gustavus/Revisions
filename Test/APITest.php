@@ -2088,4 +2088,69 @@ class APITest extends RevisionsTestsHelper
     );
     $this->assertFalse($this->call($this->revisionsAPI, 'revisionsAreVisible', array($urlParams)));
   }
+
+  /**
+   * @test
+   */
+  public function getRevisionCountEmpty()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $this->assertSame(null, $this->revisionsAPI->getRevisionCount());
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
+  public function getRevisionCount()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $this->revisionsAPI->saveRevision(array('name' => 'Billy Visto'));
+
+    $this->assertSame(1, $this->revisionsAPI->getRevisionCount());
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
+  public function getRevisionCountMultiple()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $this->revisionsAPI->saveRevision(array('name' => 'Billy Visto'));
+    $this->revisionsAPI->saveRevision(array('name' => 'Visto'));
+    $this->revisionsAPI->saveRevision(array('name' => 'Billy'));
+
+    $this->assertSame(3, $this->revisionsAPI->getRevisionCount());
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
+  public function getRevisionCountNewField()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $this->revisionsAPI->saveRevision(array('name' => 'Billy Visto'));
+    $this->revisionsAPI->saveRevision(array('name' => 'Visto', 'age' => 23));
+
+    $this->assertSame(3, $this->revisionsAPI->getRevisionCount());
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
 }
