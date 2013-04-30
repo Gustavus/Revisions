@@ -1,6 +1,7 @@
 <?php
 /**
  * @package Revisions
+ * @author  Billy Visto
  */
 namespace Gustavus\Revisions;
 use Symfony\Component\HttpFoundation\Request,
@@ -11,6 +12,7 @@ use Symfony\Component\HttpFoundation\Request,
  * API to interact with the revisions project
  *
  * @package Revisions
+ * @author  Billy Visto
  */
 class API
 {
@@ -64,21 +66,26 @@ class API
    * Class constructor
    *
    * @param array $params application's revision info
+   *
+   * @throws  \RuntimeException If there isn't enough information supplied for the application
+   * @return  void
    */
   public function __construct(array $params = array())
   {
     if (isset($params['dbName'],
-      $params['revisionsTable'],
-      $params['revisionDataTable'],
-      $params['table'],
-      $params['rowId'])) {
-        $this->revisions = new Revisions($params);
-        if (isset($params['labels'])) {
-          $this->labels = $params['labels'];
-        }
-        if (isset($params['allowRestore'])) {
-          $this->allowRestore = $params['allowRestore'];
-        }
+        $params['revisionsTable'],
+        $params['revisionDataTable'],
+        $params['table'],
+        $params['rowId']
+      )
+    ) {
+      $this->revisions = new Revisions($params);
+      if (isset($params['labels'])) {
+        $this->labels = $params['labels'];
+      }
+      if (isset($params['allowRestore'])) {
+        $this->allowRestore = $params['allowRestore'];
+      }
     } else {
       throw new \RuntimeException('Insufficient application information');
     }
@@ -617,7 +624,7 @@ class API
   /**
    * constructs revisionsRenderer object
    *
-   * @param array urlParams
+   * @param array $urlParams
    * @return void
    */
   private function constructRevisionsRenderer(array $urlParams)
@@ -683,10 +690,10 @@ class API
   /**
    * Renders out a table of revisionData for each column with the old content, and new content
    *
-   * @param  integer oldRevNum
+   * @param  integer $oldRevNum
    * @param  integer $newRevNum
    * @param  array $columns
-   * @param  integer oldestRevNum oldestRevNum pulled into the revisions Object
+   * @param  integer $oldestRevNum oldestRevNum pulled into the revisions Object
    * @return string
    */
   private function renderRevisionComparisonText($oldRevNum, $newRevNum, array $columns = array(), $oldestRevNum = null)
@@ -697,9 +704,9 @@ class API
   /**
    * Renders out a table of revisionData for each column
    *
-   * @param  integer revNum
+   * @param  integer $revNum
    * @param  array $columns
-   * @param  integer oldestRevNum oldestRevNum pulled into the revisions Object
+   * @param  integer $oldestRevNum oldestRevNum pulled into the revisions Object
    * @return string
    */
   private function renderRevisionData($revNum, array $columns = array(), $oldestRevNum = null)
@@ -720,7 +727,7 @@ class API
   /**
    * Renders out a table of revisionData for each column with a confirm restore button
    *
-   * @param  integer revNum
+   * @param  integer $revNum
    * @return string
    */
   private function renderRevisionRestore($revNum)

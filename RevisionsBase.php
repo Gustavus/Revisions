@@ -1,6 +1,7 @@
 <?php
 /**
  * @package Revisions
+ * @author  Billy Visto
  */
 namespace Gustavus\Revisions;
 
@@ -8,6 +9,7 @@ namespace Gustavus\Revisions;
  * Gets extended by other classes to use common functions
  *
  * @package Revisions
+ * @author  Billy Visto
  */
 abstract class RevisionsBase
 {

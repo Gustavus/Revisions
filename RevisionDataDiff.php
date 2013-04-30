@@ -1,6 +1,7 @@
 <?php
 /**
  * @package Revisions
+ * @author  Billy Visto
  */
 namespace Gustavus\Revisions;
 
@@ -8,6 +9,7 @@ namespace Gustavus\Revisions;
  * Creates a RevisionData object
  *
  * @package Revisions
+ * @author  Billy Visto
  */
 class RevisionDataDiff extends RevisionData
 {
@@ -76,7 +78,7 @@ class RevisionDataDiff extends RevisionData
    */
   private function putRevisionContentTogether($revisionInfo, $showChanges)
   {
-    $nextContentArr = $this->splitWords($this->getNextContent(), false);
+    $nextContentArr = $this->splitWords($this->getNextContent());
     foreach ($revisionInfo as $diffInfo) {
       $revisionContent = ($showChanges) ? $this->renderContentChange($diffInfo->getInfo(), false) : $diffInfo->getInfo();
       $endIndex   = $diffInfo->getEndIndex();
@@ -149,6 +151,7 @@ class RevisionDataDiff extends RevisionData
    * Renders changes to get from $nextContent to $newContent
    *
    * @param string $newContent
+   * @param boolean $showChanges whether to show the changes or not
    * @return string
    */
   public function makeDiff($newContent, $showChanges = false)
@@ -233,11 +236,11 @@ class RevisionDataDiff extends RevisionData
    * I won't describe the format of the array, but it will be obvious
    * if you use print_r() on the result of a diff on some test data.
    *
-   * @link https://github.com/paulgb/simplediff/blob/master/simplediff.php
-   *
    * @param array $old
    * @param array $new
    * @return array
+   *
+   * @link https://github.com/paulgb/simplediff/blob/master/simplediff.php
    */
   private function diff(array $old, array $new)
   {
@@ -358,10 +361,9 @@ class RevisionDataDiff extends RevisionData
    * Splits a string at word boundaries
    *
    * @param  string $content
-   * @param  boolean $shouldFilter
    * @return array
    */
-  private function splitWords($content, $shouldFilter = true)
+  private function splitWords($content)
   {
     $split = preg_split('`(\b|\s+)`', $content, null, PREG_SPLIT_NO_EMPTY|PREG_SPLIT_DELIM_CAPTURE);
     return $split;
