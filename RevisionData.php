@@ -1,6 +1,7 @@
 <?php
 /**
  * @package Revisions
+ * @author  Billy Visto
  */
 namespace Gustavus\Revisions;
 
@@ -8,6 +9,7 @@ namespace Gustavus\Revisions;
  * A single RevisionData object containing DiffInfo objects
  *
  * @package Revisions
+ * @author  Billy Visto
  */
 abstract class RevisionData extends RevisionsBase
 {
@@ -105,6 +107,7 @@ abstract class RevisionData extends RevisionsBase
 
   /**
    * @param boolean $showChanges
+   * @param integer $currentRevisionNumber Number of the revision we are currently working with
    * @return string
    */
   public function getContent($showChanges = false, $currentRevisionNumber = null)

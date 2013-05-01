@@ -1,6 +1,7 @@
 <?php
 /**
  * @package Revisions
+ * @author  Billy Visto
  */
 namespace Gustavus\Revisions;
 
@@ -8,6 +9,7 @@ namespace Gustavus\Revisions;
  * Contains information on how to roll back each specific part of a revision
  *
  * @package Revisions
+ * @author  Billy Visto
  */
 class DiffInfo extends RevisionsBase
 {

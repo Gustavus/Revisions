@@ -1,6 +1,7 @@
 <?php
 /**
  * @package Revisions
+ * @author  Billy Visto
  */
 namespace Gustavus\Revisions;
 use Gustavus\Utility\DateTime;
@@ -9,6 +10,7 @@ use Gustavus\Utility\DateTime;
  * A single Revision object that contains many RevisionData objects
  *
  * @package Revisions
+ * @author  Billy Visto
  */
 class Revision extends RevisionsBase
 {
@@ -103,6 +105,7 @@ class Revision extends RevisionsBase
   /**
    * Gets the relative date to now.
    *
+   * @param  boolean $beSpecific Whether to be specific for the relative date
    * @return string
    */
   public function getRevisionRelativeDate($beSpecific = false)

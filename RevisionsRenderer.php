@@ -1,6 +1,7 @@
 <?php
 /**
  * @package Revisions
+ * @author  Billy Visto
  */
 namespace Gustavus\Revisions;
 use Gustavus\TwigFactory\TwigFactory;
@@ -9,6 +10,7 @@ use Gustavus\TwigFactory\TwigFactory;
  * Renders out revisions to the application
  *
  * @package Revisions
+ * @author  Billy Visto
  */
 class RevisionsRenderer
 {
@@ -52,8 +54,10 @@ class RevisionsRenderer
   /**
    * Class constructor
    * @param Revisions $revisions
-   * @param array revisionsUrlParams
-   * @param array applicationUrlParams
+   * @param array $revisionsUrlParams
+   * @param array $applicationUrlParams
+   * @param array $labels labels to use
+   * @param boolean $shouldAllowRestore
    */
   public function __construct(Revisions $revisions, array $revisionsUrlParams = array(), array $applicationUrlParams = array(), array $labels = array(), $shouldAllowRestore = true)
   {
@@ -100,7 +104,7 @@ class RevisionsRenderer
    * Renders out all the revisions with information about them
    *
    * @param  integer $limit
-   * @param  integer oldestRevNum oldestRevNum pulled into the revisions Object
+   * @param  integer $oldestRevNum oldestRevNum pulled into the revisions Object
    * @return string
    */
   public function renderRevisions($limit = null, $oldestRevNum = null)
@@ -120,10 +124,10 @@ class RevisionsRenderer
   /**
    * Renders out a table of revisionData for each column with the old content, and new content
    *
-   * @param  integer oldRevNum
+   * @param  integer $oldRevNum
    * @param  integer $newRevNum
    * @param  array $columns
-   * @param  integer oldestRevNum oldestRevNum pulled into the revisions Object
+   * @param  integer $oldestRevNum oldestRevNum pulled into the revisions Object
    * @return string
    */
   public function renderRevisionComparisonText($oldRevNum, $newRevNum, array $columns = array(), $oldestRevNum = null)
@@ -136,9 +140,9 @@ class RevisionsRenderer
   /**
    * Renders out a table of revisionData for each column
    *
-   * @param  integer revNum
+   * @param  integer $revNum
    * @param  array $columns
-   * @param  integer oldestRevNum oldestRevNum pulled into the revisions Object
+   * @param  integer $oldestRevNum oldestRevNum pulled into the revisions Object
    * @return string
    */
   public function renderRevisionData($revNum, array $columns = array(), $oldestRevNum = null)
@@ -155,7 +159,7 @@ class RevisionsRenderer
   /**
    * Renders out a table of revisionData for each column with a button to confirm restore
    *
-   * @param  integer revNum
+   * @param  integer $revNum
    * @return string
    */
   public function renderRevisionRestore($revNum)
@@ -214,9 +218,9 @@ class RevisionsRenderer
    * Renders out the template
    *
    * @param  string $filename  location of twig template
-   * @param  mixed $revisions array of revisions, or a single revision object
+   * @param  mixed $revision array of revisions, or a single revision object
    * @param  array $params  array of additional params to pass to twig
-   * @param  integer oldestRevNum oldestRevNum pulled into the revisions Object
+   * @param  integer $oldestRevNum oldestRevNum pulled into the revisions Object
    * @return string
    */
   private function renderTwig($filename, $revision, array $params = array(), $oldestRevNum = null)
