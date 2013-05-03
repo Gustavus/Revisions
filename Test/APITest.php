@@ -6,7 +6,8 @@
  */
 
 namespace Gustavus\Revisions\Test;
-use Gustavus\Revisions\API;
+use Gustavus\Revisions\API,
+  Gustavus\Extensibility\Filters;
 
 /**
  * Test class for API
@@ -72,6 +73,17 @@ class APITest extends RevisionsTestsHelper
   public function tearDown()
   {
     unset($this->revisionsAPI);
+  }
+
+  /**
+   * executes filters that are triggered in rendering
+   *
+   * @return void
+   */
+  public static function tearDownAfterClass()
+  {
+    Filters::clear('head');
+    Filters::clear('scripts');
   }
 
   /**
