@@ -238,7 +238,7 @@ class API
    * @param string $content
    * @return string
    */
-  final public function renderRevisionsCSS($content = null)
+  public function renderRevisionsCSS($content = null)
   {
     return sprintf('%1$s<link rel="stylesheet" href="%2$s" type="text/css" media="screen, projection" />',
         $content,

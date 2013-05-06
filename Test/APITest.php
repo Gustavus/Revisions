@@ -6,11 +6,32 @@
  */
 
 namespace Gustavus\Revisions\Test;
-use \Gustavus\Revisions;
+use Gustavus\Revisions\API,
+  Gustavus\Extensibility\Filters;
+
+/**
+ * Test class for API
+ *
+ * @package Revisions
+ * @subpackage Test
+ * @author  Billy Visto
+ */
+class APITestClass extends API {
+  /**
+   * Overloads renderRevisionsCSS to avoid cssCrushing files
+   *
+   * @param  string $content
+   * @return string
+   */
+  public function renderRevisionsCSS($content = null)
+  {
+    return '/revisions/css/revisions.css';
+  }
+}
 
 /**
  * @package Revisions
- * @subpackage Tests
+ * @subpackage Test
  * @author  Billy Visto
  */
 class APITest extends RevisionsTestsHelper
@@ -42,7 +63,7 @@ class APITest extends RevisionsTestsHelper
   public function setUp()
   {
     $this->date = new \DateTime('-3 weeks');
-    $this->revisionsAPI = new Revisions\API($this->revisionsManagerInfo);
+    $this->revisionsAPI = new APITestClass($this->revisionsManagerInfo);
   }
 
   /**
@@ -52,6 +73,17 @@ class APITest extends RevisionsTestsHelper
   public function tearDown()
   {
     unset($this->revisionsAPI);
+  }
+
+  /**
+   * executes filters that are triggered in rendering
+   *
+   * @return void
+   */
+  public static function tearDownAfterClass()
+  {
+    Filters::clear('head');
+    Filters::clear('scripts');
   }
 
   /**
@@ -96,7 +128,7 @@ class APITest extends RevisionsTestsHelper
    */
   public function testConstructionException()
   {
-    $this->revisionsAPI = new Revisions\API();
+    $this->revisionsAPI = new APITestClass();
     $this->assertInstanceOf('Gustavus\Revisions\Revisions', $this->get($this->revisionsAPI, 'revisions'));
   }
 
@@ -1722,7 +1754,7 @@ class APITest extends RevisionsTestsHelper
     $this->assertNull($this->get($this->revisionsAPI, 'revisions')->getRevisionByNumber(4));
     $this->assertInstanceOf('\Gustavus\Revisions\Revision', $this->get($this->revisionsAPI, 'revisions')->getRevisionByNumber(3));
 
-    \Gustavus\Extensibility\Actions::add(Revisions\API::RESTORE_HOOK, array($this, 'restore'));
+    \Gustavus\Extensibility\Actions::add(API::RESTORE_HOOK, array($this, 'restore'));
     $this->revisionsAPI->render();
 
     // simulate page loaded and object deconstruction
