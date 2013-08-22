@@ -19,7 +19,7 @@ class API
   const RESTORE_HOOK          = '\Gustavus\Revisions\API\Restore';
   const RESTORE_ACTION        = 'restore';
   const UNDO_ACTION           = 'undo';
-  const REVISIONS_JS_VERSION  = 1;
+  const REVISIONS_JS_VERSION  = 2;
   const REVISIONS_CSS_VERSION = 1;
 
   /**
