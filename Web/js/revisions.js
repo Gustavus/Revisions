@@ -247,6 +247,9 @@ var revisions = {
   // slide timeline to make sure visible revisions are in view
   showVisibleRevisionInTimeline: function($formExtras, shouldAnimate)
   {
+    if (!revisions.timeline.isViewportNeeded()) {
+      return;
+    }
     if ($('#revisionTimeline').html() !== '' && $formExtras.find('footer button:first-child').html() !== '') {
       // revision timeline and revisionData exist
       var oldestRevDataShown = $formExtras.find('footer button:first-child').val();
