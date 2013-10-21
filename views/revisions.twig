@@ -1,9 +1,10 @@
 {% extends 'base.twig' %}
 {% import 'base.twig' as base %}
+{% import _self as self %}
 
 {% block revisionTimeline %}
   {% if shouldRenderTimeline %}
-    {{ _self.renderTimeline(revisions, maxColumnSizes, [], oldestRevisionNumber, limit, labels) }}
+    {{ self.renderTimeline(revisions, maxColumnSizes, [], oldestRevisionNumber, limit, labels) }}
   {% endif %}
 {% endblock %}
 
@@ -12,6 +13,7 @@
 
 {% macro renderTimeline(revisions, maxColumnSizes, visibleRevisions, oldestRevisionNumber, limit, labels) %}
   {% import 'base.twig' as base %}
+  {% import _self as self %}
   <div id="revisionTimeline">
     <h4>Revision History</h4>
     <div class="labels">
@@ -29,7 +31,7 @@
             <th>&nbsp;</th>
             {% for revisionNumber, revision in revisions %}
               {% if revisionNumber != 0 %}
-                <th class="{{ revisionNumber }}{{- _self.generateRevisionClass(revisionNumber, visibleRevisions) -}}" title="{{ base.renderTitle(revision, revisionNumber, oldestRevisionNumber) }}" data-revision-number="{{ revisionNumber }}">{{ revisionNumber }}</th>
+                <th class="{{ revisionNumber }}{{- self.generateRevisionClass(revisionNumber, visibleRevisions) -}}" title="{{ base.renderTitle(revision, revisionNumber, oldestRevisionNumber) }}" data-revision-number="{{ revisionNumber }}">{{ revisionNumber }}</th>
               {% endif %}
             {% endfor %}
           </tr>
@@ -42,11 +44,11 @@
                 {% if revision.error %}
                   {{ base.renderErrorColumns(1) }}
                 {% elseif revision != null and revisionNumber > oldestRevisionNumber and revisionNumber != 0 %}
-                  <td class="bytes {{ revisionNumber }}{{- _self.generateRevisionClass(revisionNumber, visibleRevisions) -}}" data-revision-number="{{ revisionNumber }}">
+                  <td class="bytes {{ revisionNumber }}{{- self.generateRevisionClass(revisionNumber, visibleRevisions) -}}" data-revision-number="{{ revisionNumber }}">
                   {% if revision.getRevisionData(column).getRevisionRevisionNumber() == revision.getRevisionNumber() %}
-                    {{ _self.renderCell(revision, revisions[revisionNumber - 1], maxColumnSizes[column], column) }}
+                    {{ self.renderCell(revision, revisions[revisionNumber - 1], maxColumnSizes[column], column) }}
                   {% else %}
-                    {{ _self.renderCell(revision, revision, maxColumnSizes[column], column) }}
+                    {{ self.renderCell(revision, revision, maxColumnSizes[column], column) }}
                   {% endif %}
                   </td>
                 {% else %}
@@ -64,7 +66,7 @@
             <th>&nbsp;</th>
             {% for revisionNumber, revision in revisions %}
               {% if revision != null and revisionNumber > oldestRevisionNumber and not revision.error and revisionNumber != 0 %}
-                <td class="{{ revisionNumber }}{{- _self.generateRevisionClass(revisionNumber, visibleRevisions) -}}">
+                <td class="{{ revisionNumber }}{{- self.generateRevisionClass(revisionNumber, visibleRevisions) -}}">
                   <label for="revisionNum-{{ revisionNumber }}">
                     <input id="revisionNum-{{ revisionNumber }}" type="checkbox" name="revisionNumbers[]" title="Revision {{ revisionNumber }}" class="compare" value="{{ revisionNumber }}"{% if revisionNumber in visibleRevisions and visibleRevisions|length >= 1 %} checked="checked"{% endif %}/>
                   </label>
@@ -93,6 +95,7 @@
 {% endspaceless %}{{ class }}{% endmacro %}
 
 {% macro renderCell(revision, previousRevision, maxColumnSize, column) %}
+  {% import _self as self %}
   {% if revision.getRevisionData(column).contentIsNumeric() %}
     {% set revisionContentSize = revision.getRevisionData(column).getContent() %}
   {% else %}
@@ -128,17 +131,17 @@
   <span class="bytes container">
     <span class="bytes positive">
       {% if unchangedPercentage > 0 %}
-        <span class="bytes unchanged" title="{{ _self.renderChangedTitle(revision.getRevisionData(column), revisionContentSize - addedContentSize, 'unchanged', removedContentSize) }}" style="height:{{ unchangedPercentage }}%;">
+        <span class="bytes unchanged" title="{{ self.renderChangedTitle(revision.getRevisionData(column), revisionContentSize - addedContentSize, 'unchanged', removedContentSize) }}" style="height:{{ unchangedPercentage }}%;">
         </span>
       {% endif %}
       {% if addedPercentage > 0 %}
-        <span class="bytes added" title="{{ _self.renderChangedTitle(revision.getRevisionData(column), addedContentSize, 'added', 0) }}" style="height:{{ addedPercentage }}%;">
+        <span class="bytes added" title="{{ self.renderChangedTitle(revision.getRevisionData(column), addedContentSize, 'added', 0) }}" style="height:{{ addedPercentage }}%;">
         </span>
       {% endif %}
     </span>
     <span class="bytes negative">
       {% if removedPercentage > 0 %}
-        <span class="bytes removed" title="{{ _self.renderChangedTitle(revision.getRevisionData(column), removedContentSize, 'removed', 0) }}" style="height:{{ removedPercentage }}%;">
+        <span class="bytes removed" title="{{ self.renderChangedTitle(revision.getRevisionData(column), removedContentSize, 'removed', 0) }}" style="height:{{ removedPercentage }}%;">
         </span>
       {% endif %}
     </span>
@@ -146,8 +149,9 @@
 {% endmacro %}
 
 {% macro renderChangedTitle(revisionData, number, label, removedContentSize) %}{% spaceless %}
+  {% import _self as self %}
     {% if revisionData.contentIsNumeric() %}
-      {{ _self.renderNumericChangeLabel(label, number, removedContentSize) }}
+      {{ self.renderNumericChangeLabel(label, number, removedContentSize) }}
     {% else %}
       {{ number }} Bytes {{ label }}
     {% endif %}
@@ -155,10 +159,11 @@
 {% endmacro %}
 
 {% macro renderNumericChangeLabel(label, number, removedContentSize) %}{% spaceless %}
+  {% import _self as self %}
     {% if label == 'added' %}
-      added {{ _self.workWithNumber(number) }}
+      added {{ self.workWithNumber(number) }}
     {% elseif label == 'removed' %}
-      subtracted {{ _self.workWithNumber(number) }}
+      subtracted {{ self.workWithNumber(number) }}
     {% endif %}
   {% endspaceless %}
 {% endmacro %}
