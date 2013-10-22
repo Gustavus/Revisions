@@ -1,6 +1,7 @@
 {% extends 'base.twig' %}
 {% import 'base.twig' as base %}
 {% import 'revisions.twig' as revisionsTwig %}
+{% import _self as self %}
 
 {% block revisionTimeline %}
   {% if shouldRenderTimeline %}
@@ -12,7 +13,7 @@
   {% block revisionData %}
     <section class="clearfix revisionData">
       <div class="clearfix headers">
-        {{ _self.renderHeader(revisions[visibleRevisions[0]]) }}
+        {{ self.renderHeader(revisions[visibleRevisions[0]]) }}
       </div>
       <dl class="clearfix">
         {% if columns|length == 0 %}
@@ -34,7 +35,7 @@
         {% endfor %}
       </dl>
       {% block restoreButton %}
-        {{ _self.renderRestoreButton(revisions|length, visibleRevisions[0], shouldAllowRestore) }}
+        {{ self.renderRestoreButton(revisions|length, visibleRevisions[0], shouldAllowRestore) }}
       {% endblock %}
     </section>
   {% endblock revisionData %}
