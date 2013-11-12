@@ -329,7 +329,7 @@ class RevisionsTest extends RevisionsTestsHelper
     $this->ymlFile = 'nameRevision.yml';
     $expected = $this->getDataSet();
 
-    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'), '', 'name');
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'), null, 'name');
 
     $actualDataSet = $conn->createDataSet(array('person-revision', 'revisionData'));
     $actual = $this->getFilteredDataSet($actualDataSet, array('person-revision' => array('createdOn'), 'revisionData' => array('createdOn')));
@@ -354,7 +354,7 @@ class RevisionsTest extends RevisionsTestsHelper
     $this->ymlFile = 'nameRevision.yml';
     $expected = $this->getDataSet();
 
-    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto', 'age' => null), '', 'name');
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto', 'age' => null), null, 'name');
 
     $actualDataSet = $conn->createDataSet(array('person-revision', 'revisionData'));
     $actual = $this->getFilteredDataSet($actualDataSet, array('person-revision' => array('createdOn'), 'revisionData' => array('createdOn')));
@@ -380,7 +380,7 @@ class RevisionsTest extends RevisionsTestsHelper
     $expected = $this->getDataSet();
 
     $testObject = new TestObject('Billy Visto');
-    $this->revisions->makeAndSaveRevision(array('name' => $testObject), '', 'name');
+    $this->revisions->makeAndSaveRevision(array('name' => $testObject), null, 'name');
 
     $actualDataSet = $conn->createDataSet(array('person-revision', 'revisionData'));
     $actual = $this->getFilteredDataSet($actualDataSet, array('person-revision' => array('createdOn'), 'revisionData' => array('createdOn')));
@@ -407,7 +407,7 @@ class RevisionsTest extends RevisionsTestsHelper
 
     $this->saveRevisionToDB('', 'Billy Visto', 'name', $this->revisions, array(), null, 'name', array('name'));
     $this->saveRevisionToDB('Billy Visto', 'Billy', 'name', $this->revisions);
-    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'), '', 'name');
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'), null, 'name');
 
     $actualDataSet = $conn->createDataSet(array('person-revision', 'revisionData'));
     $actual = $this->getFilteredDataSet($actualDataSet, array('person-revision' => array('createdOn'), 'revisionData' => array('createdOn')));
