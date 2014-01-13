@@ -714,13 +714,13 @@ class RevisionsTest extends RevisionsTestsHelper
 
   /**
    * @test
-   * @expectedException PDOException
+   * @expectedException Doctrine\DBAL\DBALException
    */
   public function getRevisionByNumberWithNoTable()
   {
     $conn = $this->getConnection();
     $this->setUpMock('person-revision');
-    $this->assertInstanceOf('PDOException', $this->revisions->getRevisionByNumber(1));
+    $this->assertInstanceOf('Doctrine\DBAL\DBALException', $this->revisions->getRevisionByNumber(1));
   }
 
   /**
