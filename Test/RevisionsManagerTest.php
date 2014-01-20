@@ -680,7 +680,7 @@ class RevisionsManagerTest extends RevisionsTestsHelper
     $this->dbalConnection->query($this->getCreateQuery());
 
     //$this->saveRevisionToDB($currContent, $newContent, $this->revisionsManagerMock);
-    $insertId = $this->call($this->revisionsManagerMock, 'saveRevisionContent', array(array('name' => 'Billy Visto'), "", 'name'));
+    $insertId = $this->call($this->revisionsManagerMock, 'saveRevisionContent', array(array('name' => 'Billy Visto'), null, 'name'));
 
     $actualDataSet = $conn->createDataSet(array('person-revision'));
     $actual = $this->getFilteredDataSet($actualDataSet, array('person-revision' => array('createdOn')));
@@ -714,7 +714,7 @@ class RevisionsManagerTest extends RevisionsTestsHelper
     $revisionInfoArray = array('name' => $revisionInfo);
 
     // modify
-    $this->call($this->revisionsManagerMock, 'saveRevision', array($revisionInfoArray, array('name' => $newContent), array('name' => ''), array(), '', 'name', array('name')));
+    $this->call($this->revisionsManagerMock, 'saveRevision', array($revisionInfoArray, array('name' => $newContent), array('name' => ''), array(), null, 'name', array('name')));
 
     //$this->saveRevisionToDB('Billy Visto', 'Billy', 'name', $this->revisionsManagerMock);
 
@@ -751,7 +751,7 @@ class RevisionsManagerTest extends RevisionsTestsHelper
     $revisionInfoArray = array('name' => $revisionInfo);
 
     // modify
-    $this->call($this->revisionsManagerMock, 'saveRevision', array($revisionInfoArray, array('name' => $newContent), array('name' => $currContent), array(), '', 'name', array('name')));
+    $this->call($this->revisionsManagerMock, 'saveRevision', array($revisionInfoArray, array('name' => $newContent), array('name' => $currContent), array(), null, 'name', array('name')));
 
     $actualDataSet = $conn->createDataSet(array('person-revision', 'revisionData'));
     $actual = $this->getFilteredDataSet($actualDataSet, array('person-revision' => array('createdOn'), 'revisionData' => array('createdOn')));
