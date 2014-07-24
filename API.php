@@ -112,9 +112,9 @@ class API
   {
     if ($request !== null && $index !== null) {
       if ($request->getMethod() === 'POST') {
-        $post = (new String($request->get($index)))->splitQueryString()->getValue();
+        $post = (new String($request->get($index)))->splitQueryString(true)->getValue();
       } else {
-        $queryStringArray = (new String($request->get($index)))->splitQueryString()->getValue();
+        $queryStringArray = (new String($request->get($index)))->splitQueryString(true)->getValue();
       }
     } else {
       $post = $_POST;
