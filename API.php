@@ -4,8 +4,7 @@
  * @author  Billy Visto
  */
 namespace Gustavus\Revisions;
-use Symfony\Component\HttpFoundation\Request,
-  Gustavus\Utility\String,
+use Gustavus\Utility\String,
   Gustavus\Resources\Resource;
 
 /**
@@ -116,22 +115,12 @@ class API
   /**
    * Renders out the revisions or revision requested
    *
-   * @param  Request $request will be used if symfony is using revisions
-   * @param  string $index index the request parameters are stored in the request
    * @return string
    */
   public function render($request = null, $index = null)
   {
-    if ($request !== null && $index !== null) {
-      if ($request->getMethod() === 'POST') {
-        $post = (new String($request->get($index)))->splitQueryString(true)->getValue();
-      } else {
-        $queryStringArray = (new String($request->get($index)))->splitQueryString(true)->getValue();
-      }
-    } else {
-      $post = $_POST;
-      $queryStringArray = $_GET;
-    }
+    $post = $_POST;
+    $queryStringArray = $_GET;
 
     if (!empty($post)) {
       // submitted the form with Post method.
