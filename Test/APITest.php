@@ -16,7 +16,8 @@ use Gustavus\Revisions\API,
  * @subpackage Test
  * @author  Billy Visto
  */
-class APITestClass extends API {
+class APITestClass extends API
+{
   /**
    * Overloads renderRevisionsCSS to avoid cssCrushing files
    *
@@ -30,6 +31,8 @@ class APITestClass extends API {
 }
 
 /**
+ * Tests for API
+ *
  * @package Revisions
  * @subpackage Test
  * @author  Billy Visto
@@ -39,7 +42,7 @@ class APITest extends RevisionsTestsHelper
   /**
    * @var string
    */
-  private $error = "An unexpected error occured.";
+  private $error = 'An unexpected error occured.';
 
   /**
    * @var RevisionsAPI
@@ -175,105 +178,105 @@ class APITest extends RevisionsTestsHelper
 
     $this->revisionsAPI->saveRevision(array('name' => 'Billy Visto'));
     $this->revisionsAPI->saveRevision(array('name' => 'Visto', 'age' => 23));
-    $expected = "
-    <form id=\"revisionsForm\" method=\"GET\">
-      <div id=\"hiddenFields\">
-        <input id=\"oldestRevisionNumber\" type=\"hidden\" name=\"oldestRevisionNumber\" value=\"0\" />
-        <input type=\"hidden\" name=\"limit\" value=\"10\" />
+    $expected = '
+    <form id="revisionsForm" method="GET">
+      <div id="hiddenFields">
+        <input id="oldestRevisionNumber" type="hidden" name="oldestRevisionNumber" value="0" />
+        <input type="hidden" name="limit" value="10" />
       </div>
-      <div id=\"revisionTimeline\">
+      <div id="revisionTimeline">
         <h4>Revision History</h4>
-        <div class=\"labels\">
+        <div class="labels">
           <div>age</div>
           <div>name</div>
           <div>
-            <button id=\"compareButton\" class=\"positive\" name=\"revisionNumber\" value=\"false\">Compare</button>
+            <button id="compareButton" class="positive" name="revisionNumber" value="false">Compare</button>
           </div>
         </div>
-        <div class=\"viewport\">
-          <span class=\"scrollHotspot scrollLeft disabled\">◂</span>
-          <span class=\"scrollHotspot scrollRight disabled\">▸</span>
-          <table class=\"fancy\">
+        <div class="viewport">
+          <span class="scrollHotspot scrollLeft disabled">◂</span>
+          <span class="scrollHotspot scrollRight disabled">▸</span>
+          <table class="fancy">
             <thead>
               <tr>
                 <th> </th>
-                <th class=\"1\" title=\"Modified 3 weeks ago by\" data-revision-number=\"1\">1</th>
-                <th class=\"2\" title=\"Modified 3 weeks ago by\" data-revision-number=\"2\">2</th>
-                <th class=\"3\" title=\"Modified 3 weeks ago by\" data-revision-number=\"3\">3</th>
+                <th class="1" title="Modified 3 weeks ago by" data-revision-number="1">1</th>
+                <th class="2" title="Modified 3 weeks ago by" data-revision-number="2">2</th>
+                <th class="3" title="Modified 3 weeks ago by" data-revision-number="3">3</th>
               </tr>
             </thead>
             <tbody>
               <tr>
                 <th>age</th>
-                <td class=\"bytes 1\" data-revision-number=\"1\">
-                  <span class=\"bytes container\">
-                    <span class=\"bytes positive\"></span>
-                    <span class=\"bytes negative\"></span>
+                <td class="bytes 1" data-revision-number="1">
+                  <span class="bytes container">
+                    <span class="bytes positive"></span>
+                    <span class="bytes negative"></span>
                   </span>
                 </td>
-                <td class=\"bytes 2\" data-revision-number=\"2\">
-                  <span class=\"bytes container\">
-                    <span class=\"bytes positive\"></span>
-                    <span class=\"bytes negative\"></span>
+                <td class="bytes 2" data-revision-number="2">
+                  <span class="bytes container">
+                    <span class="bytes positive"></span>
+                    <span class="bytes negative"></span>
                   </span>
                 </td>
-                <td class=\"bytes 3\" data-revision-number=\"3\">
-                  <span class=\"bytes container\">
-                    <span class=\"bytes positive\">
-                      <span class=\"bytes unchanged\" title=\"\" style=\"height:100%;\"></span>
-                      <span class=\"bytes added\" title=\"added 23\" style=\"height:100%;\"></span>
+                <td class="bytes 3" data-revision-number="3">
+                  <span class="bytes container">
+                    <span class="bytes positive">
+                      <span class="bytes unchanged" title="" style="height:100%;"></span>
+                      <span class="bytes added" title="added 23" style="height:100%;"></span>
                     </span>
-                    <span class=\"bytes negative\"></span>
+                    <span class="bytes negative"></span>
                   </span>
                 </td>
               </tr>
               <tr>
                 <th>name</th>
-                <td class=\"bytes 1\" data-revision-number=\"1\">
-                  <span class=\"bytes container\">
-                    <span class=\"bytes positive\">
-                      <span class=\"bytes unchanged\" title=\"0 Bytes unchanged\" style=\"height:100%;\"></span>
-                      <span class=\"bytes added\" title=\"11 Bytes added\" style=\"height:100%;\"></span>
+                <td class="bytes 1" data-revision-number="1">
+                  <span class="bytes container">
+                    <span class="bytes positive">
+                      <span class="bytes unchanged" title="0 Bytes unchanged" style="height:100%;"></span>
+                      <span class="bytes added" title="11 Bytes added" style="height:100%;"></span>
                     </span>
-                    <span class=\"bytes negative\"></span>
+                    <span class="bytes negative"></span>
                   </span>
                 </td>
-                <td class=\"bytes 2\" data-revision-number=\"2\">
-                  <span class=\"bytes container\">
-                    <span class=\"bytes positive\">
-                      <span class=\"bytes unchanged\" title=\"11 Bytes unchanged\" style=\"height:100%;\"></span>
+                <td class="bytes 2" data-revision-number="2">
+                  <span class="bytes container">
+                    <span class="bytes positive">
+                      <span class="bytes unchanged" title="11 Bytes unchanged" style="height:100%;"></span>
                     </span>
-                    <span class=\"bytes negative\"></span>
+                    <span class="bytes negative"></span>
                   </span>
                 </td>
-                <td class=\"bytes 3\" data-revision-number=\"3\">
-                  <span class=\"bytes container\">
-                    <span class=\"bytes positive\">
-                      <span class=\"bytes unchanged\" title=\"5 Bytes unchanged\" style=\"height:45.454545454545%;\"></span>
+                <td class="bytes 3" data-revision-number="3">
+                  <span class="bytes container">
+                    <span class="bytes positive">
+                      <span class="bytes unchanged" title="5 Bytes unchanged" style="height:45.454545454545%;"></span>
                     </span>
-                    <span class=\"bytes negative\">
-                      <span class=\"bytes removed\" title=\"6 Bytes removed\" style=\"height:54.545454545455%;\"></span>
+                    <span class="bytes negative">
+                      <span class="bytes removed" title="6 Bytes removed" style="height:54.545454545455%;"></span>
                     </span>
                   </span>
                 </td>
               </tr>
             </tbody>
             <tfoot>
-              <tr class=\"compare\">
+              <tr class="compare">
                 <th> </th>
-                <td class=\"1\">
-                  <label for=\"revisionNum-1\">
-                    <input id=\"revisionNum-1\" type=\"checkbox\" name=\"revisionNumbers[]\" title=\"Revision 1\" class=\"compare\" value=\"1\"/>
+                <td class="1">
+                  <label for="revisionNum-1">
+                    <input id="revisionNum-1" type="checkbox" name="revisionNumbers[]" title="Revision 1" class="compare" value="1"/>
                   </label>
                 </td>
-                <td class=\"2\">
-                  <label for=\"revisionNum-2\">
-                    <input id=\"revisionNum-2\" type=\"checkbox\" name=\"revisionNumbers[]\" title=\"Revision 2\" class=\"compare\" value=\"2\"/>
+                <td class="2">
+                  <label for="revisionNum-2">
+                    <input id="revisionNum-2" type="checkbox" name="revisionNumbers[]" title="Revision 2" class="compare" value="2"/>
                   </label>
                 </td>
-                <td class=\"3\">
-                  <label for=\"revisionNum-3\">
-                    <input id=\"revisionNum-3\" type=\"checkbox\" name=\"revisionNumbers[]\" title=\"Revision 3\" class=\"compare\" value=\"3\"/>
+                <td class="3">
+                  <label for="revisionNum-3">
+                    <input id="revisionNum-3" type="checkbox" name="revisionNumbers[]" title="Revision 3" class="compare" value="3"/>
                   </label>
                 </td>
               </tr>
@@ -281,8 +284,8 @@ class APITest extends RevisionsTestsHelper
           </table>
         </div>
       </div>
-      <div id=\"formExtras\"></div>
-    </form>";
+      <div id="formExtras"></div>
+    </form>';
 
     $_GET = array('limit' => 10);
     $actual = $this->revisionsAPI->render();
@@ -309,105 +312,105 @@ class APITest extends RevisionsTestsHelper
 
     $this->revisionsAPI->saveRevision(array('name' => 'Billy Visto'));
     $this->revisionsAPI->saveRevision(array('name' => 'Visto', 'age' => 23));
-    $expected = "
-    <form id=\"revisionsForm\" method=\"GET\">
-      <div id=\"hiddenFields\">
-        <input id=\"oldestRevisionNumber\" type=\"hidden\" name=\"oldestRevisionNumber\" value=\"0\" />
-        <input type=\"hidden\" name=\"limit\" value=\"10\" />
+    $expected = '
+    <form id="revisionsForm" method="GET">
+      <div id="hiddenFields">
+        <input id="oldestRevisionNumber" type="hidden" name="oldestRevisionNumber" value="0" />
+        <input type="hidden" name="limit" value="10" />
       </div>
-      <div id=\"revisionTimeline\">
+      <div id="revisionTimeline">
         <h4>Revision History</h4>
-        <div class=\"labels\">
+        <div class="labels">
           <div>Age</div>
           <div>Name</div>
           <div>
-            <button id=\"compareButton\" class=\"positive\" name=\"revisionNumber\" value=\"false\">Compare</button>
+            <button id="compareButton" class="positive" name="revisionNumber" value="false">Compare</button>
           </div>
         </div>
-        <div class=\"viewport\">
-          <span class=\"scrollHotspot scrollLeft disabled\">◂</span>
-          <span class=\"scrollHotspot scrollRight disabled\">▸</span>
-          <table class=\"fancy\">
+        <div class="viewport">
+          <span class="scrollHotspot scrollLeft disabled">◂</span>
+          <span class="scrollHotspot scrollRight disabled">▸</span>
+          <table class="fancy">
             <thead>
               <tr>
                 <th> </th>
-                <th class=\"1\" title=\"Modified 3 weeks ago by\" data-revision-number=\"1\">1</th>
-                <th class=\"2\" title=\"Modified 3 weeks ago by\" data-revision-number=\"2\">2</th>
-                <th class=\"3\" title=\"Modified 3 weeks ago by\" data-revision-number=\"3\">3</th>
+                <th class="1" title="Modified 3 weeks ago by" data-revision-number="1">1</th>
+                <th class="2" title="Modified 3 weeks ago by" data-revision-number="2">2</th>
+                <th class="3" title="Modified 3 weeks ago by" data-revision-number="3">3</th>
               </tr>
             </thead>
             <tbody>
               <tr>
                 <th>Age</th>
-                <td class=\"bytes 1\" data-revision-number=\"1\">
-                  <span class=\"bytes container\">
-                    <span class=\"bytes positive\"></span>
-                    <span class=\"bytes negative\"></span>
+                <td class="bytes 1" data-revision-number="1">
+                  <span class="bytes container">
+                    <span class="bytes positive"></span>
+                    <span class="bytes negative"></span>
                   </span>
                 </td>
-                <td class=\"bytes 2\" data-revision-number=\"2\">
-                  <span class=\"bytes container\">
-                    <span class=\"bytes positive\"></span>
-                    <span class=\"bytes negative\"></span>
+                <td class="bytes 2" data-revision-number="2">
+                  <span class="bytes container">
+                    <span class="bytes positive"></span>
+                    <span class="bytes negative"></span>
                   </span>
                 </td>
-                <td class=\"bytes 3\" data-revision-number=\"3\">
-                  <span class=\"bytes container\">
-                    <span class=\"bytes positive\">
-                      <span class=\"bytes unchanged\" title=\"\" style=\"height:100%;\"></span>
-                      <span class=\"bytes added\" title=\"added 23\" style=\"height:100%;\"></span>
+                <td class="bytes 3" data-revision-number="3">
+                  <span class="bytes container">
+                    <span class="bytes positive">
+                      <span class="bytes unchanged" title="" style="height:100%;"></span>
+                      <span class="bytes added" title="added 23" style="height:100%;"></span>
                     </span>
-                    <span class=\"bytes negative\"></span>
+                    <span class="bytes negative"></span>
                   </span>
                 </td>
               </tr>
               <tr>
                 <th>Name</th>
-                <td class=\"bytes 1\" data-revision-number=\"1\">
-                  <span class=\"bytes container\">
-                    <span class=\"bytes positive\">
-                      <span class=\"bytes unchanged\" title=\"0 Bytes unchanged\" style=\"height:100%;\"></span>
-                      <span class=\"bytes added\" title=\"11 Bytes added\" style=\"height:100%;\"></span>
+                <td class="bytes 1" data-revision-number="1">
+                  <span class="bytes container">
+                    <span class="bytes positive">
+                      <span class="bytes unchanged" title="0 Bytes unchanged" style="height:100%;"></span>
+                      <span class="bytes added" title="11 Bytes added" style="height:100%;"></span>
                     </span>
-                    <span class=\"bytes negative\"></span>
+                    <span class="bytes negative"></span>
                   </span>
                 </td>
-                <td class=\"bytes 2\" data-revision-number=\"2\">
-                  <span class=\"bytes container\">
-                    <span class=\"bytes positive\">
-                      <span class=\"bytes unchanged\" title=\"11 Bytes unchanged\" style=\"height:100%;\"></span>
+                <td class="bytes 2" data-revision-number="2">
+                  <span class="bytes container">
+                    <span class="bytes positive">
+                      <span class="bytes unchanged" title="11 Bytes unchanged" style="height:100%;"></span>
                     </span>
-                    <span class=\"bytes negative\"></span>
+                    <span class="bytes negative"></span>
                   </span>
                 </td>
-                <td class=\"bytes 3\" data-revision-number=\"3\">
-                  <span class=\"bytes container\">
-                    <span class=\"bytes positive\">
-                      <span class=\"bytes unchanged\" title=\"5 Bytes unchanged\" style=\"height:45.454545454545%;\"></span>
+                <td class="bytes 3" data-revision-number="3">
+                  <span class="bytes container">
+                    <span class="bytes positive">
+                      <span class="bytes unchanged" title="5 Bytes unchanged" style="height:45.454545454545%;"></span>
                     </span>
-                    <span class=\"bytes negative\">
-                      <span class=\"bytes removed\" title=\"6 Bytes removed\" style=\"height:54.545454545455%;\"></span>
+                    <span class="bytes negative">
+                      <span class="bytes removed" title="6 Bytes removed" style="height:54.545454545455%;"></span>
                     </span>
                   </span>
                 </td>
               </tr>
             </tbody>
             <tfoot>
-              <tr class=\"compare\">
+              <tr class="compare">
                 <th> </th>
-                <td class=\"1\">
-                  <label for=\"revisionNum-1\">
-                    <input id=\"revisionNum-1\" type=\"checkbox\" name=\"revisionNumbers[]\" title=\"Revision 1\" class=\"compare\" value=\"1\"/>
+                <td class="1">
+                  <label for="revisionNum-1">
+                    <input id="revisionNum-1" type="checkbox" name="revisionNumbers[]" title="Revision 1" class="compare" value="1"/>
                   </label>
                 </td>
-                <td class=\"2\">
-                  <label for=\"revisionNum-2\">
-                    <input id=\"revisionNum-2\" type=\"checkbox\" name=\"revisionNumbers[]\" title=\"Revision 2\" class=\"compare\" value=\"2\"/>
+                <td class="2">
+                  <label for="revisionNum-2">
+                    <input id="revisionNum-2" type="checkbox" name="revisionNumbers[]" title="Revision 2" class="compare" value="2"/>
                   </label>
                 </td>
-                <td class=\"3\">
-                  <label for=\"revisionNum-3\">
-                    <input id=\"revisionNum-3\" type=\"checkbox\" name=\"revisionNumbers[]\" title=\"Revision 3\" class=\"compare\" value=\"3\"/>
+                <td class="3">
+                  <label for="revisionNum-3">
+                    <input id="revisionNum-3" type="checkbox" name="revisionNumbers[]" title="Revision 3" class="compare" value="3"/>
                   </label>
                 </td>
               </tr>
@@ -415,8 +418,8 @@ class APITest extends RevisionsTestsHelper
           </table>
         </div>
       </div>
-      <div id=\"formExtras\"></div>
-    </form>";
+      <div id="formExtras"></div>
+    </form>';
 
     $_GET = array('limit' => 10);
     $actual = $this->revisionsAPI->render();
@@ -442,71 +445,71 @@ class APITest extends RevisionsTestsHelper
 
     $this->revisionsAPI->saveRevision(array('name' => 'Billy Visto'));
     $this->revisionsAPI->saveRevision(array('name' => 'Visto', 'age' => 23));
-    $expected = "
-    <form id=\"revisionsForm\" method=\"GET\">
-      <div id=\"hiddenFields\">
-        <input id=\"oldestRevisionNumber\" type=\"hidden\" name=\"oldestRevisionNumber\" value=\"3\" />
+    $expected = '
+    <form id="revisionsForm" method="GET">
+      <div id="hiddenFields">
+        <input id="oldestRevisionNumber" type="hidden" name="oldestRevisionNumber" value="3" />
       </div>
-      <div id=\"revisionTimeline\">
+      <div id="revisionTimeline">
         <h4>Revision History</h4>
-        <div class=\"labels\">
+        <div class="labels">
           <div>age</div>
           <div>name</div>
           <div>
-            <button id=\"compareButton\" class=\"positive\" name=\"revisionNumber\" value=\"false\">Compare</button>
+            <button id="compareButton" class="positive" name="revisionNumber" value="false">Compare</button>
           </div>
         </div>
-        <div class=\"viewport\">
-          <span class=\"scrollHotspot scrollLeft disabled\">◂</span>
-          <span class=\"scrollHotspot scrollRight disabled\">▸</span>
-          <table class=\"fancy\">
+        <div class="viewport">
+          <span class="scrollHotspot scrollLeft disabled">◂</span>
+          <span class="scrollHotspot scrollRight disabled">▸</span>
+          <table class="fancy">
             <thead>
               <tr>
                 <th> </th>
-                <th class=\"1\" title=\"Look at revision 1\" data-revision-number=\"1\">1</th>
-                <th class=\"2\" title=\"Look at revision 2\" data-revision-number=\"2\">2</th>
-                <th class=\"3\" title=\"Modified 3 weeks ago by\" data-revision-number=\"3\">3</th>
+                <th class="1" title="Look at revision 1" data-revision-number="1">1</th>
+                <th class="2" title="Look at revision 2" data-revision-number="2">2</th>
+                <th class="3" title="Modified 3 weeks ago by" data-revision-number="3">3</th>
               </tr>
             </thead>
             <tbody>
               <tr>
                 <th>age</th>
-                <td class=\"missingRevisions bytes 1\" data-oldest-revision-number=\"1\" title=\"Show More Revisions\"></td>
-                <td class=\"missingRevisions bytes 2\" data-oldest-revision-number=\"2\" title=\"Show More Revisions\"></td>
-                <td class=\"bytes 3\" data-revision-number=\"3\">
-                  <span class=\"bytes container\">
-                    <span class=\"bytes positive\">
-                      <span class=\"bytes unchanged\" title=\"\" style=\"height:100%;\"></span>
-                      <span class=\"bytes added\" title=\"added 23\" style=\"height:100%;\"></span>
+                <td class="missingRevisions bytes 1" data-oldest-revision-number="1" title="Show More Revisions"></td>
+                <td class="missingRevisions bytes 2" data-oldest-revision-number="2" title="Show More Revisions"></td>
+                <td class="bytes 3" data-revision-number="3">
+                  <span class="bytes container">
+                    <span class="bytes positive">
+                      <span class="bytes unchanged" title="" style="height:100%;"></span>
+                      <span class="bytes added" title="added 23" style="height:100%;"></span>
                     </span>
-                    <span class=\"bytes negative\"></span>
+                    <span class="bytes negative"></span>
                   </span>
                 </td>
               </tr>
               <tr>
                 <th>name</th>
-                <td class=\"missingRevisions bytes 1\" data-oldest-revision-number=\"1\" title=\"Show More Revisions\"></td>
-                <td class=\"missingRevisions bytes 2\" data-oldest-revision-number=\"2\" title=\"Show More Revisions\"></td>
-                <td class=\"bytes 3\" data-revision-number=\"3\">
-                  <span class=\"bytes container\">
-                    <span class=\"bytes positive\">
-                      <span class=\"bytes unchanged\" title=\"5 Bytes unchanged\" style=\"height:45.454545454545%;\"></span>
+                <td class="missingRevisions bytes 1" data-oldest-revision-number="1" title="Show More Revisions"></td>
+                <td class="missingRevisions bytes 2" data-oldest-revision-number="2" title="Show More Revisions"></td>
+                <td class="bytes 3" data-revision-number="3">
+                  <span class="bytes container">
+                    <span class="bytes positive">
+                      <span class="bytes unchanged" title="5 Bytes unchanged" style="height:45.454545454545%;"></span>
                     </span>
-                    <span class=\"bytes negative\">
-                      <span class=\"bytes removed\" title=\"6 Bytes removed\" style=\"height:54.545454545455%;\"></span>
+                    <span class="bytes negative">
+                      <span class="bytes removed" title="6 Bytes removed" style="height:54.545454545455%;"></span>
                     </span>
                   </span>
                 </td>
               </tr>
             </tbody>
             <tfoot>
-              <tr class=\"compare\">
+              <tr class="compare">
                 <th> </th>
-                <td class=\"1\"></td>
-                <td class=\"2\"></td>
-                <td class=\"3\">
-                  <label for=\"revisionNum-3\">
-                    <input id=\"revisionNum-3\" type=\"checkbox\" name=\"revisionNumbers[]\" title=\"Revision 3\" class=\"compare\" value=\"3\"/>
+                <td class="1"></td>
+                <td class="2"></td>
+                <td class="3">
+                  <label for="revisionNum-3">
+                    <input id="revisionNum-3" type="checkbox" name="revisionNumbers[]" title="Revision 3" class="compare" value="3"/>
                   </label>
                 </td>
               </tr>
@@ -514,8 +517,8 @@ class APITest extends RevisionsTestsHelper
           </table>
         </div>
       </div>
-      <div id=\"formExtras\"></div>
-    </form>";
+      <div id="formExtras"></div>
+    </form>';
 
     $_GET = array('oldestRevisionNumber' => 3);
     $actual = $this->revisionsAPI->render();
@@ -537,107 +540,107 @@ class APITest extends RevisionsTestsHelper
     $this->revisionsAPI->saveRevision(array('name' => 'Billy Visto'));
     $this->saveRevisionToDB('Billy', 'Billy Visto', 'name', $this->get($this->revisionsAPI, 'revisions'));
     $this->revisionsAPI->saveRevision(array('name' => 'Visto', 'age' => 23));
-    $expected = "
-    <form id=\"revisionsForm\" method=\"GET\">
-      <div id=\"hiddenFields\">
-        <input id=\"oldestRevisionNumber\" type=\"hidden\" name=\"oldestRevisionNumber\" value=\"1\" />
+    $expected = '
+    <form id="revisionsForm" method="GET">
+      <div id="hiddenFields">
+        <input id="oldestRevisionNumber" type="hidden" name="oldestRevisionNumber" value="1" />
       </div>
-      <div id=\"revisionTimeline\">
+      <div id="revisionTimeline">
         <h4>Revision History</h4>
-        <div class=\"labels\">
+        <div class="labels">
           <div>age</div>
           <div>name</div>
           <div>
-            <button id=\"compareButton\" class=\"positive\" name=\"revisionNumber\" value=\"false\">Compare</button>
+            <button id="compareButton" class="positive" name="revisionNumber" value="false">Compare</button>
           </div>
         </div>
-        <div class=\"viewport\">
-          <span class=\"scrollHotspot scrollLeft disabled\">◂</span>
-          <span class=\"scrollHotspot scrollRight disabled\">▸</span>
-          <table class=\"fancy\">
+        <div class="viewport">
+          <span class="scrollHotspot scrollLeft disabled">◂</span>
+          <span class="scrollHotspot scrollRight disabled">▸</span>
+          <table class="fancy">
             <thead>
               <tr>
                 <th> </th>
-                <th class=\"1\" title=\"Modified 3 weeks ago by\" data-revision-number=\"1\">1</th>
-                <th class=\"2\" title=\"Modified 3 weeks ago by name\" data-revision-number=\"2\">2</th>
-                <th class=\"3\" title=\"Modified 3 weeks ago by\" data-revision-number=\"3\">3</th>
-                <th class=\"4\" title=\"Modified 3 weeks ago by\" data-revision-number=\"4\">4</th>
+                <th class="1" title="Modified 3 weeks ago by" data-revision-number="1">1</th>
+                <th class="2" title="Modified 3 weeks ago by name" data-revision-number="2">2</th>
+                <th class="3" title="Modified 3 weeks ago by" data-revision-number="3">3</th>
+                <th class="4" title="Modified 3 weeks ago by" data-revision-number="4">4</th>
               </tr>
             </thead>
             <tbody>
               <tr>
                 <th>age</th>
-                <td class=\"error\">An unexpected error occured.</td>
-                <td class=\"bytes 2\" data-revision-number=\"2\">
-                  <span class=\"bytes container\">
-                    <span class=\"bytes positive\"></span>
-                    <span class=\"bytes negative\"></span>
+                <td class="error">An unexpected error occured.</td>
+                <td class="bytes 2" data-revision-number="2">
+                  <span class="bytes container">
+                    <span class="bytes positive"></span>
+                    <span class="bytes negative"></span>
                   </span>
                 </td>
-                <td class=\"bytes 3\" data-revision-number=\"3\">
-                  <span class=\"bytes container\">
-                    <span class=\"bytes positive\"></span>
-                    <span class=\"bytes negative\"></span>
+                <td class="bytes 3" data-revision-number="3">
+                  <span class="bytes container">
+                    <span class="bytes positive"></span>
+                    <span class="bytes negative"></span>
                   </span>
                 </td>
-                <td class=\"bytes 4\" data-revision-number=\"4\">
-                  <span class=\"bytes container\">
-                    <span class=\"bytes positive\">
-                      <span class=\"bytes unchanged\" title=\"\" style=\"height:100%;\"></span>
-                      <span class=\"bytes added\" title=\"added 23\" style=\"height:100%;\"></span>
+                <td class="bytes 4" data-revision-number="4">
+                  <span class="bytes container">
+                    <span class="bytes positive">
+                      <span class="bytes unchanged" title="" style="height:100%;"></span>
+                      <span class="bytes added" title="added 23" style="height:100%;"></span>
                     </span>
-                    <span class=\"bytes negative\"></span>
+                    <span class="bytes negative"></span>
                   </span>
                 </td>
               </tr>
               <tr>
                 <th>name</th>
-                <td class=\"error\">An unexpected error occured.</td>
-                <td class=\"bytes 2\" data-revision-number=\"2\">
-                  <span class=\"bytes container\">
-                    <span class=\"bytes positive\">
-                    <span class=\"bytes unchanged\" title=\"5 Bytes unchanged\" style=\"height:100%;\"></span>
-                    <span class=\"bytes added\" title=\"6 Bytes added\" style=\"height:54.545454545455%;\"></span>
+                <td class="error">An unexpected error occured.</td>
+                <td class="bytes 2" data-revision-number="2">
+                  <span class="bytes container">
+                    <span class="bytes positive">
+                    <span class="bytes unchanged" title="5 Bytes unchanged" style="height:100%;"></span>
+                    <span class="bytes added" title="6 Bytes added" style="height:54.545454545455%;"></span>
                   </span>
-                    <span class=\"bytes negative\"></span>
-                  </span>
-                </td>
-                <td class=\"bytes 3\" data-revision-number=\"3\">
-                  <span class=\"bytes container\">
-                    <span class=\"bytes positive\">
-                      <span class=\"bytes unchanged\" title=\"11 Bytes unchanged\" style=\"height:100%;\"></span>
-                    </span>
-                    <span class=\"bytes negative\"></span>
+                    <span class="bytes negative"></span>
                   </span>
                 </td>
-                <td class=\"bytes 4\" data-revision-number=\"4\">
-                  <span class=\"bytes container\">
-                    <span class=\"bytes positive\">
-                      <span class=\"bytes unchanged\" title=\"5 Bytes unchanged\" style=\"height:45.454545454545%;\"></span>
+                <td class="bytes 3" data-revision-number="3">
+                  <span class="bytes container">
+                    <span class="bytes positive">
+                      <span class="bytes unchanged" title="11 Bytes unchanged" style="height:100%;"></span>
                     </span>
-                    <span class=\"bytes negative\">
-                      <span class=\"bytes removed\" title=\"6 Bytes removed\" style=\"height:54.545454545455%;\"></span>
+                    <span class="bytes negative"></span>
+                  </span>
+                </td>
+                <td class="bytes 4" data-revision-number="4">
+                  <span class="bytes container">
+                    <span class="bytes positive">
+                      <span class="bytes unchanged" title="5 Bytes unchanged" style="height:45.454545454545%;"></span>
+                    </span>
+                    <span class="bytes negative">
+                      <span class="bytes removed" title="6 Bytes removed" style="height:54.545454545455%;"></span>
                     </span>
                   </span>
                 </td>
               </tr>
             </tbody>
             <tfoot>
-              <tr class=\"compare\"><th> </th>
-                <td class=\"1\"></td>
-                <td class=\"2\">
-                  <label for=\"revisionNum-2\">
-                    <input id=\"revisionNum-2\" type=\"checkbox\" name=\"revisionNumbers[]\" title=\"Revision 2\" class=\"compare\" value=\"2\"/>
+              <tr class="compare"><th> </th>
+                <td class="1"></td>
+                <td class="2">
+                  <label for="revisionNum-2">
+                    <input id="revisionNum-2" type="checkbox" name="revisionNumbers[]" title="Revision 2" class="compare" value="2"/>
                   </label>
                 </td>
-                <td class=\"3\">
-                  <label for=\"revisionNum-3\">
-                    <input id=\"revisionNum-3\" type=\"checkbox\" name=\"revisionNumbers[]\" title=\"Revision 3\" class=\"compare\" value=\"3\"/>
+                <td class="3">
+                  <label for="revisionNum-3">
+                    <input id="revisionNum-3" type="checkbox" name="revisionNumbers[]" title="Revision 3" class="compare" value="3"/>
                   </label>
                 </td>
-                <td class=\"4\">
-                  <label for=\"revisionNum-4\">
-                    <input id=\"revisionNum-4\" type=\"checkbox\" name=\"revisionNumbers[]\" title=\"Revision 4\" class=\"compare\" value=\"4\"/>
+                <td class="4">
+                  <label for="revisionNum-4">
+                    <input id="revisionNum-4" type="checkbox" name="revisionNumbers[]" title="Revision 4" class="compare" value="4"/>
                   </label>
                 </td>
               </tr>
@@ -645,8 +648,8 @@ class APITest extends RevisionsTestsHelper
           </table>
         </div>
       </div>
-      <div id=\"formExtras\"></div>
-    </form>";
+      <div id="formExtras"></div>
+    </form>';
 
     $_GET = array('oldestRevisionNumber' => 1);
     $actual = $this->revisionsAPI->render();
@@ -1605,14 +1608,14 @@ class APITest extends RevisionsTestsHelper
     $this->revisionsAPI->saveRevision(array('name' => 'Billy Visto'));
     $this->revisionsAPI->saveRevision(array('name' => 'Visto', 'age' => 23));
 
-    $expected = "
-    <form id=\"revisionsForm\" method=\"POST\">
-      <div id=\"hiddenFields\">
-        <input id=\"oldestRevisionNumber\" type=\"hidden\" name=\"oldestRevisionNumber\" value=\"2\" />
-        <input type=\"hidden\" name=\"revisionsAction\" value=\"thankYou\" />
+    $expected = '
+    <form id="revisionsForm" method="POST">
+      <div id="hiddenFields">
+        <input id="oldestRevisionNumber" type="hidden" name="oldestRevisionNumber" value="2" />
+        <input type="hidden" name="revisionsAction" value="thankYou" />
       </div>
-      <div id=\"formExtras\"><button type=\"submit\" name=\"revisionsAction\" value=\"undo\">Undo</button></div>
-    </form>";
+      <div id="formExtras"><button type="submit" name="revisionsAction" value="undo">Undo</button></div>
+    </form>';
 
     $_GET = array('oldestRevisionNumber' => '2', 'revisionsAction' => 'thankYou');
     $actual = $this->revisionsAPI->render();

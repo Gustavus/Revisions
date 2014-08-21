@@ -2,14 +2,18 @@
 /**
  * @package Revisions
  * @subpackage Tests
+ * @author  Billy Visto
  */
 
 namespace Gustavus\Revisions\Test;
 use Gustavus\Revisions;
 
 /**
+ * Tests for Revision
+ *
  * @package Revisions
  * @subpackage Tests
+ * @author  Billy Visto
  */
 class RevisionTest extends \Gustavus\Test\Test
 {

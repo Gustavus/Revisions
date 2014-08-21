@@ -9,6 +9,8 @@ namespace Gustavus\Revisions\Test;
 use \Gustavus\Revisions;
 
 /**
+ * Test for Revisions
+ *
  * @package Revisions
  * @subpackage Tests
  * @author Billy Visto
@@ -679,7 +681,7 @@ class RevisionsTest extends RevisionsTestsHelper
   {
     $diff = new Revisions\DiffInfo(array('startIndex' => 1, 'endIndex' => 2, 'info' => ''));
     $expected = array($diff);
-    $actual = $this->call($this->revisions, 'makeDiffInfoObjects', array(array(array(1,2,""))));
+    $actual = $this->call($this->revisions, 'makeDiffInfoObjects', array(array(array(1,2,''))));
     $this->assertSame($expected[0]->getStartIndex(), $actual[0]->getStartIndex());
     $this->assertSame($expected[0]->getEndIndex(), $actual[0]->getEndIndex());
     $this->assertSame($expected[0]->getInfo(), $actual[0]->getInfo());

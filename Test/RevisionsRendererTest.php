@@ -2,21 +2,25 @@
 /**
  * @package Revisions
  * @subpackage Tests
+ * @author  Billy Visto
  */
 
 namespace Gustavus\Revisions\Test;
 use \Gustavus\Revisions;
 
 /**
+ * Test for RevisionsRenderer
+ *
  * @package Revisions
  * @subpackage Tests
+ * @author  Billy Visto
  */
 class RevisionsRendererTest extends RevisionsTestsHelper
 {
   /**
    * @var string
    */
-  private $error = "An unexpected error occured.";
+  private $error = 'An unexpected error occured.';
 
   /**
    * @var RevisionsRenderer
@@ -100,7 +104,7 @@ class RevisionsRendererTest extends RevisionsTestsHelper
     $this->dbalConnection->query($this->getCreateQuery());
     $this->dbalConnection->query($this->getCreateDataQuery());
 
-    $this->revisions->makeAndSaveRevision(array('age' => 23, 'name' => 'Billy Visto', 'aboutYou' => ""));
+    $this->revisions->makeAndSaveRevision(array('age' => 23, 'name' => 'Billy Visto', 'aboutYou' => ''));
     $this->revisions->makeAndSaveRevision(array('name' => 'Billy'));
     $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
     $this->revisions->makeAndSaveRevision(array('age' => 123));
@@ -132,7 +136,7 @@ class RevisionsRendererTest extends RevisionsTestsHelper
     $this->dbalConnection->query($this->getCreateQuery());
     $this->dbalConnection->query($this->getCreateDataQuery());
 
-    $this->revisions->makeAndSaveRevision(array('age' => 23, 'name' => 'Billy Visto', 'aboutYou' => ""));
+    $this->revisions->makeAndSaveRevision(array('age' => 23, 'name' => 'Billy Visto', 'aboutYou' => ''));
     $this->revisions->makeAndSaveRevision(array('name' => 'Billy'));
     $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
     $this->revisions->makeAndSaveRevision(array('age' => 123));
@@ -164,7 +168,7 @@ class RevisionsRendererTest extends RevisionsTestsHelper
     $this->dbalConnection->query($this->getCreateQuery());
     $this->dbalConnection->query($this->getCreateDataQuery());
 
-    $this->revisions->makeAndSaveRevision(array('age' => 23, 'name' => 'Billy Visto', 'aboutYou' => ""));
+    $this->revisions->makeAndSaveRevision(array('age' => 23, 'name' => 'Billy Visto', 'aboutYou' => ''));
     $this->revisions->makeAndSaveRevision(array('name' => 'Billy'));
     $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
     $this->revisions->makeAndSaveRevision(array('age' => 123));
@@ -192,7 +196,7 @@ class RevisionsRendererTest extends RevisionsTestsHelper
     $this->dbalConnection->query($this->getCreateQuery());
     $this->dbalConnection->query($this->getCreateDataQuery());
 
-    $this->revisions->makeAndSaveRevision(array('age' => 23, 'name' => 'Billy Visto', 'aboutYou' => ""));
+    $this->revisions->makeAndSaveRevision(array('age' => 23, 'name' => 'Billy Visto', 'aboutYou' => ''));
     $this->revisions->makeAndSaveRevision(array('name' => 'Billy'));
     $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
     $this->revisions->makeAndSaveRevision(array('age' => 123));

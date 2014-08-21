@@ -2,14 +2,18 @@
 /**
  * @package Revisions
  * @subpackage Tests
+ * @author  Billy Visto
  */
 
 namespace Gustavus\Revisions\Test;
 use Gustavus\Revisions;
 
 /**
+ * Test for Revisions
+ *
  * @package Revisions
  * @subpackage Tests
+ * @author  Billy Visto
  */
 class RevisionDataDiffTest extends \Gustavus\Test\Test
 {
@@ -848,7 +852,7 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
    */
   public function makeRevisionInfoAdditionReplacement()
   {
-   $this->revisionDataDiffProperties = array(
+    $this->revisionDataDiffProperties = array(
       'nextContent' => 'some test content revision',
     );
     $this->setUp();
@@ -1119,7 +1123,7 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
    */
   public function makeRevisionInfoAdditionReplacementByTag()
   {
-   $this->revisionDataDiffProperties = array(
+    $this->revisionDataDiffProperties = array(
       'nextContent'   => 'some test content revision.',
       'splitStrategy' => 'sentenceOrTag',
     );
@@ -1136,7 +1140,7 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
    */
   public function makeRevisionInfoByTagNewSentence()
   {
-   $this->revisionDataDiffProperties = array(
+    $this->revisionDataDiffProperties = array(
       'nextContent'   => 'some test content revision',
       'splitStrategy' => 'sentenceOrTag',
     );
@@ -1153,7 +1157,7 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
    */
   public function makeRevisionInfoByTagSentenceAdditions()
   {
-   $this->revisionDataDiffProperties = array(
+    $this->revisionDataDiffProperties = array(
       'nextContent'   => 'some test content revision. Hello.',
       'splitStrategy' => 'sentenceOrTag',
     );
@@ -1170,7 +1174,7 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
    */
   public function makeRevisionInfoByTagSentenceReplacement()
   {
-   $this->revisionDataDiffProperties = array(
+    $this->revisionDataDiffProperties = array(
       'nextContent'   => 'some test content revision. Hello. This is a sentence.',
       'splitStrategy' => 'sentenceOrTag',
     );
@@ -1187,7 +1191,7 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
    */
   public function makeRevisionInfoByTagSentenceRemoval()
   {
-   $this->revisionDataDiffProperties = array(
+    $this->revisionDataDiffProperties = array(
       'nextContent'   => 'some test content revision. Hello. This is a sentence.',
       'splitStrategy' => 'sentenceOrTag',
     );
@@ -1204,7 +1208,7 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
    */
   public function makeRevisionInfoByTagTagAdded()
   {
-   $this->revisionDataDiffProperties = array(
+    $this->revisionDataDiffProperties = array(
       'nextContent'   => 'some test content revision. Hello<br/> This is a sentence.',
       'splitStrategy' => 'sentenceOrTag',
     );
@@ -1239,7 +1243,7 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
     $this->revisionDataDiffProperties['nextContent'] = '';
     $this->setUp();
     $result = $this->call($this->revisionDataDiff, 'renderRevisionForDB', array(23));
-    $expected = json_encode(array(array(null,null,"")));
+    $expected = json_encode(array(array(null,null,'')));
     $this->assertSame($expected, $result);
   }
 
@@ -1350,39 +1354,39 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
 
     $expected = array(
       array(
-        "d" => array(),
-        "i" => array(),
+        'd' => array(),
+        'i' => array(),
       ),
-      "I",
-      " ",
-      "like",
-      " ",
-      "to",
-      " ",
-      "eat",
-      " ",
+      'I',
+      ' ',
+      'like',
+      ' ',
+      'to',
+      ' ',
+      'eat',
+      ' ',
       array(
-        "d" => array(),
-        "i" => array(
-          "a",
-          " ",
-          "lot",
-          " ",
-          "of",
-          " ",
+        'd' => array(),
+        'i' => array(
+          'a',
+          ' ',
+          'lot',
+          ' ',
+          'of',
+          ' ',
         ),
       ),
-      "food",
+      'food',
       array(
-        "d" => array(),
-        "i" => array(
-          " ",
-          "while",
-          " ",
-          "triple",
-          " ",
-          "jumping",
-          ".",
+        'd' => array(),
+        'i' => array(
+          ' ',
+          'while',
+          ' ',
+          'triple',
+          ' ',
+          'jumping',
+          '.',
         ),
       ),
     );
@@ -1400,38 +1404,38 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
 
     $expected = array(
       array(
-        "d" => array(),
-        "i" => array(),
+        'd' => array(),
+        'i' => array(),
       ),
-      "I",
-      " ",
-      "like",
-      " ",
-      "to",
-      " ",
-      "eat",
-      " ",
+      'I',
+      ' ',
+      'like',
+      ' ',
+      'to',
+      ' ',
+      'eat',
+      ' ',
       array(
-        "d" => array(),
-        "i" => array(
-          "a",
-          " ",
-          "lot",
-          " ",
-          "of",
-          " ",
+        'd' => array(),
+        'i' => array(
+          'a',
+          ' ',
+          'lot',
+          ' ',
+          'of',
+          ' ',
         ),
       ),
-      "food",
+      'food',
       array(
-        "d" => array(),
-        "i" => array(
-          " ",
-          "while",
-          " ",
-          "triple",
-          " ",
-          "jumping",
+        'd' => array(),
+        'i' => array(
+          ' ',
+          'while',
+          ' ',
+          'triple',
+          ' ',
+          'jumping',
         ),
       ),
     );
@@ -1449,8 +1453,8 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
 
     $expected = array(
       array(
-        "d" => array('I like to eat food'),
-        "i" => array('I like to eat a lot of food while triple jumping', '.'),
+        'd' => array('I like to eat food'),
+        'i' => array('I like to eat a lot of food while triple jumping', '.'),
       ),
     );
     $this->assertSame($expected, $diff);
@@ -1496,27 +1500,27 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
     $diff = $this->call($this->revisionDataDiff, 'myArrayDiff', array($this->call($this->revisionDataDiff, 'splitWords', array($revisionContent)), $this->call($this->revisionDataDiff, 'splitWords', array($nextContent))));
 
     $expected = array(
-      "8" => array(
-        "d" => array(),
-        "i" => array(
-          "a",
-          " ",
-          "lot",
-          " ",
-          "of",
-          " ",
+      '8' => array(
+        'd' => array(),
+        'i' => array(
+          'a',
+          ' ',
+          'lot',
+          ' ',
+          'of',
+          ' ',
         ),
       ),
-      "15" => array(
-        "d" => array(),
-        "i" => array(
-          " ",
-          "while",
-          " ",
-          "triple",
-          " ",
-          "jumping",
-          ".",
+      '15' => array(
+        'd' => array(),
+        'i' => array(
+          ' ',
+          'while',
+          ' ',
+          'triple',
+          ' ',
+          'jumping',
+          '.',
         ),
       ),
     );
@@ -1533,33 +1537,33 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
     $diff = $this->call($this->revisionDataDiff, 'myArrayDiff', array($this->call($this->revisionDataDiff, 'splitWords', array($revisionContent)), $this->call($this->revisionDataDiff, 'splitWords', array($nextContent))));
 
     $expected = array(
-      "0" => array(
-        "d" => array(),
-        "i" => array(
-          ".",
+      '0' => array(
+        'd' => array(),
+        'i' => array(
+          '.',
         ),
       ),
-      "9" => array(
-        "d" => array(),
-        "i" => array(
-          "a",
-          " ",
-          "lot",
-          " ",
-          "of",
-          " ",
+      '9' => array(
+        'd' => array(),
+        'i' => array(
+          'a',
+          ' ',
+          'lot',
+          ' ',
+          'of',
+          ' ',
         ),
       ),
-      "16" => array(
-        "d" => array(),
-        "i" => array(
-          " ",
-          "while",
-          " ",
-          "triple",
-          " ",
-          "jumping",
-          ".",
+      '16' => array(
+        'd' => array(),
+        'i' => array(
+          ' ',
+          'while',
+          ' ',
+          'triple',
+          ' ',
+          'jumping',
+          '.',
         ),
       ),
     );
@@ -1576,35 +1580,35 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
     $diff = $this->call($this->revisionDataDiff, 'myArrayDiff', array($this->call($this->revisionDataDiff, 'splitWords', array($revisionContent)), $this->call($this->revisionDataDiff, 'splitWords', array($nextContent))));
 
     $expected = array(
-      "0" => array(
-        "d" => array(
-          "?",
+      '0' => array(
+        'd' => array(
+          '?',
         ),
-        "i" => array(
-          ".",
-        ),
-      ),
-      "9" => array(
-        "d" => array(),
-        "i" => array(
-          "a",
-          " ",
-          "lot",
-          " ",
-          "of",
-          " ",
+        'i' => array(
+          '.',
         ),
       ),
-      "16" => array(
-        "d" => array(),
-        "i" => array(
-          " ",
-          "while",
-          " ",
-          "triple",
-          " ",
-          "jumping",
-          ".",
+      '9' => array(
+        'd' => array(),
+        'i' => array(
+          'a',
+          ' ',
+          'lot',
+          ' ',
+          'of',
+          ' ',
+        ),
+      ),
+      '16' => array(
+        'd' => array(),
+        'i' => array(
+          ' ',
+          'while',
+          ' ',
+          'triple',
+          ' ',
+          'jumping',
+          '.',
         ),
       ),
     );
@@ -1621,26 +1625,26 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
     $diff = $this->call($this->revisionDataDiff, 'myArrayDiff', array($this->call($this->revisionDataDiff, 'splitWords', array($revisionContent)), $this->call($this->revisionDataDiff, 'splitWords', array($nextContent))));
 
     $expected = array(
-      "8" => array(
-        "d" => array(),
-        "i" => array(
-          "a",
-          " ",
-          "lot",
-          " ",
-          "of",
-          " ",
+      '8' => array(
+        'd' => array(),
+        'i' => array(
+          'a',
+          ' ',
+          'lot',
+          ' ',
+          'of',
+          ' ',
         ),
       ),
-      "15" => array(
-        "d" => array(),
-        "i" => array(
-          " ",
-          "while",
-          " ",
-          "triple",
-          " ",
-          "jumping",
+      '15' => array(
+        'd' => array(),
+        'i' => array(
+          ' ',
+          'while',
+          ' ',
+          'triple',
+          ' ',
+          'jumping',
         ),
       ),
     );
@@ -1657,9 +1661,9 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
     $diff = $this->call($this->revisionDataDiff, 'myArrayDiff', array($this->call($this->revisionDataDiff, 'splitWords', array($revisionContent)), $this->call($this->revisionDataDiff, 'splitWords', array($nextContent))));
 
     $expected = array(
-      "15" => array(
-        "d" => array('.'),
-        "i" => array(),
+      '15' => array(
+        'd' => array('.'),
+        'i' => array(),
       )
     );
     $this->assertSame($expected, $diff);
@@ -1675,11 +1679,11 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
     $diff = $this->call($this->revisionDataDiff, 'myArrayDiff', array($this->call($this->revisionDataDiff, 'splitSentenceOrTag', array($revisionContent)), $this->call($this->revisionDataDiff, 'splitSentenceOrTag', array($nextContent))));
 
     $expected = array(
-      "0" => array(
-        "d" => array('I like to eat food'),
-        "i" => array(
-          "I like to eat a lot of food while triple jumping",
-          ".",
+      '0' => array(
+        'd' => array('I like to eat food'),
+        'i' => array(
+          'I like to eat a lot of food while triple jumping',
+          '.',
         ),
       ),
     );
@@ -1696,12 +1700,12 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
     $diff = $this->call($this->revisionDataDiff, 'myArrayDiff', array($this->call($this->revisionDataDiff, 'splitSentenceOrTag', array($revisionContent)), $this->call($this->revisionDataDiff, 'splitSentenceOrTag', array($nextContent))));
 
     $expected = array(
-      "0" => array(
-        "d" => array('I like to eat food'),
-        "i" => array(
-          ".",
-          "I like to eat a lot of food while triple jumping",
-          ".",
+      '0' => array(
+        'd' => array('I like to eat food'),
+        'i' => array(
+          '.',
+          'I like to eat a lot of food while triple jumping',
+          '.',
         ),
       ),
     );
@@ -1718,15 +1722,15 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
     $diff = $this->call($this->revisionDataDiff, 'myArrayDiff', array($this->call($this->revisionDataDiff, 'splitSentenceOrTag', array($revisionContent)), $this->call($this->revisionDataDiff, 'splitSentenceOrTag', array($nextContent))));
 
     $expected = array(
-      "0" => array(
-        "d" => array(
+      '0' => array(
+        'd' => array(
           '?',
           'I like to eat food'
         ),
-        "i" => array(
-          ".",
-          "I like to eat a lot of food while triple jumping",
-          ".",
+        'i' => array(
+          '.',
+          'I like to eat a lot of food while triple jumping',
+          '.',
         ),
       ),
     );
@@ -1743,12 +1747,12 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
     $diff = $this->call($this->revisionDataDiff, 'myArrayDiff', array($this->call($this->revisionDataDiff, 'splitSentenceOrTag', array($revisionContent)), $this->call($this->revisionDataDiff, 'splitSentenceOrTag', array($nextContent))));
 
     $expected = array(
-      "0" => array(
-        "d" => array(
+      '0' => array(
+        'd' => array(
           'I like to eat food'
         ),
-        "i" => array(
-          "I like to eat a lot of food while triple jumping",
+        'i' => array(
+          'I like to eat a lot of food while triple jumping',
         ),
       ),
     );
@@ -1765,9 +1769,9 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
     $diff = $this->call($this->revisionDataDiff, 'myArrayDiff', array($this->call($this->revisionDataDiff, 'splitSentenceOrTag', array($revisionContent)), $this->call($this->revisionDataDiff, 'splitSentenceOrTag', array($nextContent))));
 
     $expected = array(
-      "1" => array(
-        "d" => array('.'),
-        "i" => array(),
+      '1' => array(
+        'd' => array('.'),
+        'i' => array(),
       )
     );
     $this->assertSame($expected, $diff);
@@ -1781,7 +1785,7 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
     $revisionData = new Revisions\RevisionDataDiff(array('nextContent' => 'I like to eat food'));
     $nextContent = 'I like to eat a lot of food while triple jumping.';
     $actual = $revisionData->renderRevisionForDB($nextContent);
-    $expected = json_encode(array(array(8, 13, ""), array(15, 21, "")));
+    $expected = json_encode(array(array(8, 13, ''), array(15, 21, '')));
     $this->assertSame($expected, $actual);
   }
 
@@ -1793,7 +1797,7 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
     $revisionData = new Revisions\RevisionDataDiff(array('nextContent' => 'I like to eat food'));
     $nextContent = 'I like to eat a lot of food while triple jumping!';
     $actual = $revisionData->renderRevisionForDB($nextContent);
-    $expected = json_encode(array(array(8, 13, ""), array(15, 21, "")));
+    $expected = json_encode(array(array(8, 13, ''), array(15, 21, '')));
     $this->assertSame($expected, $actual);
   }
 
@@ -1805,7 +1809,7 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
     $revisionData = new Revisions\RevisionDataDiff(array('nextContent' => 'I like to eat food'));
     $nextContent = 'I like to eat a lot of food while triple jumping';
     $actual = $revisionData->renderRevisionForDB($nextContent);
-    $expected = json_encode(array(array(8, 13, ""), array(15, 20, "")));
+    $expected = json_encode(array(array(8, 13, ''), array(15, 20, '')));
     $this->assertSame($expected, $actual);
   }
 
@@ -1878,24 +1882,24 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
     $expected = array(
       '7' => array(
         'd' => array(
-          ".",
-          " ",
-          "Food",
-          " ",
-          "is",
-          " ",
-          "good",
-          "!",
+          '.',
+          ' ',
+          'Food',
+          ' ',
+          'is',
+          ' ',
+          'good',
+          '!',
         ),
         'i' => array(
-          " ",
-          "a",
-          " ",
-          "lot",
-          " ",
-          "of",
-          " ",
-          "food",
+          ' ',
+          'a',
+          ' ',
+          'lot',
+          ' ',
+          'of',
+          ' ',
+          'food',
         ),
       ),
     );
@@ -1917,14 +1921,14 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
     $expected = array(
       '0' => array(
         'd' => array(
-          "Brooklyn",
-          " ",
-          "Park",
+          'Brooklyn',
+          ' ',
+          'Park',
         ),
         'i' => array(
-          "Saint",
-          " ",
-          "Peter",
+          'Saint',
+          ' ',
+          'Peter',
         ),
       ),
     );
@@ -1948,41 +1952,41 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
         'd' => array(
         ),
         'i' => array(
-          "jump",
-          ".",
-          " ",
-          "I",
-          " ",
-          "also",
-          " ",
-          "like",
-          " ",
-          "to",
-          " "
+          'jump',
+          '.',
+          ' ',
+          'I',
+          ' ',
+          'also',
+          ' ',
+          'like',
+          ' ',
+          'to',
+          ' '
         ),
       ),
       '18' => array(
         'd' => array(
-          " ",
-          "a",
-          " ",
-          "lot",
-          " ",
-          "of",
-          " ",
-          "junk",
-          " ",
-          "food"
+          ' ',
+          'a',
+          ' ',
+          'lot',
+          ' ',
+          'of',
+          ' ',
+          'junk',
+          ' ',
+          'food'
         ),
         'i' => array(
-          ".",
-          " ",
-          "Food",
-          " ",
-          "is",
-          " ",
-          "good",
-          "!"
+          '.',
+          ' ',
+          'Food',
+          ' ',
+          'is',
+          ' ',
+          'good',
+          '!'
         ),
       ),
     );
@@ -2004,45 +2008,45 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
     $expected = array(
       '3' => array(
         'd' => array(
-          " "
+          ' '
         ),
         'i' => array(
-          "  ",
-          "to",
-          " ",
-          "jump",
-          ".",
-          " ",
-          "I",
-          " ",
-          "also",
-          " ",
-          "like",
-          "  ",
+          '  ',
+          'to',
+          ' ',
+          'jump',
+          '.',
+          ' ',
+          'I',
+          ' ',
+          'also',
+          ' ',
+          'like',
+          '  ',
         ),
       ),
       '18' => array(
         'd' => array(
-          " ",
-          "a",
-          "  ",
-          "lot",
-          " ",
-          "of",
-          " ",
-          "junk",
-          " ",
-          "food"
+          ' ',
+          'a',
+          '  ',
+          'lot',
+          ' ',
+          'of',
+          ' ',
+          'junk',
+          ' ',
+          'food'
         ),
         'i' => array(
-          ".",
-          " ",
-          "Food",
-          " ",
-          "is",
-          " ",
-          "good",
-          "!"
+          '.',
+          ' ',
+          'Food',
+          ' ',
+          'is',
+          ' ',
+          'good',
+          '!'
         ),
       ),
     );
@@ -2066,41 +2070,41 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
         'd' => array(
         ),
         'i' => array(
-          "jump",
-          ".",
-          "  ",
-          "I",
-          "  ",
-          "also",
-          "  ",
-          "like",
-          "   ",
-          "to",
-          "  "
+          'jump',
+          '.',
+          '  ',
+          'I',
+          '  ',
+          'also',
+          '  ',
+          'like',
+          '   ',
+          'to',
+          '  '
         ),
       ),
       '18' => array(
         'd' => array(
-          "  ",
-          "a",
-          "  ",
-          "lot",
-          "  ",
-          "of",
-          "  ",
-          "junk",
-          "  ",
-          "food"
+          '  ',
+          'a',
+          '  ',
+          'lot',
+          '  ',
+          'of',
+          '  ',
+          'junk',
+          '  ',
+          'food'
         ),
         'i' => array(
-          ".",
-          "  ",
-          "Food",
-          "  ",
-          "is",
-          "  ",
-          "good",
-          "!"
+          '.',
+          '  ',
+          'Food',
+          '  ',
+          'is',
+          '  ',
+          'good',
+          '!'
         ),
       ),
     );

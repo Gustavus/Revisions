@@ -2,14 +2,18 @@
 /**
  * @package Revisions
  * @subpackage Tests
+ * @author  Billy Visto
  */
 
 namespace Gustavus\Revisions\Test;
 use Gustavus\Revisions;
 
 /**
+ * Base class for tests
+ *
  * @package Revisions
  * @subpackage Tests
+ * @author  Billy Visto
  */
 class RevisionsTestsHelper extends \Gustavus\Test\TestDBPDO
 {

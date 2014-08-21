@@ -2,14 +2,18 @@
 /**
  * @package Revisions
  * @subpackage Tests
+ * @author  Billy Visto
  */
 
 namespace Gustavus\Revisions\Test;
 use Gustavus\Revisions;
 
 /**
+ * Test for DiffInfo
+ *
  * @package Revisions
  * @subpackage Tests
+ * @author  Billy Visto
  */
 class DiffInfoTest extends \Gustavus\Test\Test
 {
