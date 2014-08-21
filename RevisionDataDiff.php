@@ -78,7 +78,6 @@ class RevisionDataDiff extends RevisionData
    */
   private function putRevisionContentTogether($revisionInfo, $showChanges)
   {
-    //var_dump($this->splitStrategy, $revisionInfo);
     $nextContentArr = $this->splitString($this->getNextContent());
     foreach ($revisionInfo as $diffInfo) {
       $revisionContent = ($showChanges) ? $this->renderContentChange($diffInfo->getInfo(), false) : $diffInfo->getInfo();

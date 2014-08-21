@@ -55,7 +55,7 @@ class RevisionsManager extends RevisionsBase
    *   Either a string to be used all the time, or an array of strategies per key
    *   ie.
    *   <code>
-   *     array('firstName' => 'word', 'biography' => 'sentenceOrTag');
+   *     array('firstName' => 'words', 'biography' => 'sentenceOrTag');
    *   </code>
    *
    * @var string|array
