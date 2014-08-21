@@ -1253,12 +1253,13 @@ class RevisionsTest extends RevisionsTestsHelper
 
     $expected = array(
       'age' => array(
-        'id' => '4',
-        'contentHash' => md5(23),
-        'revisionId' => '2',
-        'revisionNumber' => '1',
-        'value' => 23,
+        'id'                     => '4',
+        'contentHash'            => md5(23),
+        'revisionId'             => '2',
+        'revisionNumber'         => '1',
+        'value'                  => 23,
         'revisionRevisionNumber' => '1',
+        'splitStrategy'          => 'words',
       ),
     );
     $actual = $this->call($this->revisions, 'getMissingRevisionDataInfo', array(array('age'), 3));
@@ -1620,6 +1621,110 @@ class RevisionsTest extends RevisionsTestsHelper
     $this->assertSame(4, $revisionData['age']->getNextContentRevisionNumber());
 
     $this->assertSame($expectedAge, $actualAge);
+    $this->assertSame($expectedName, $actualName);
+
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
+  public function getRevisionContentSplitByTag()
+  {
+    $this->revisionsManagerInfo['splitStrategy'] = 'sentenceOrTag';
+
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $this->revisions->makeAndSaveRevision(array('age' => 23, 'name' => 'Billy Visto'));
+
+    $this->set($this->revisions, 'splitStrategy', 'words');
+
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy'));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
+
+    $this->set($this->revisions, 'splitStrategy', 'sentenceOrTag');
+
+    $this->revisions->makeAndSaveRevision(array('age' => 123));
+
+    $revisionData = $this->revisions->getRevisionByNumber(0)->getRevisionData();
+
+    $expectedAge = '<ins>23</ins>';
+    $actualAge = $revisionData['age']->getContent(true, 2);
+    $expectedName = '<ins>Billy Visto</ins>';
+    $actualName = $revisionData['name']->getContent(true, 2);
+
+    $this->assertSame(1, $revisionData['age']->getNextContentRevisionNumber());
+
+    $this->assertSame($expectedAge, $actualAge);
+    $this->assertSame($expectedName, $actualName);
+
+    $revisionData = $this->revisions->getRevisionByNumber(1)->getRevisionData();
+
+    $expectedAge = 23;
+    $actualAge = $revisionData['age']->getContent(true, 2);
+    $expectedName = 'Billy<del> Visto</del>';
+    $actualName = $revisionData['name']->getContent(true, 2);
+
+    $this->assertSame(4, $revisionData['age']->getNextContentRevisionNumber());
+
+
+    $this->assertSame($expectedAge, $actualAge);
+    $this->assertSame($expectedName, $actualName);
+
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
+  public function getRevisionContentSplitByTagManySentences()
+  {
+    $this->revisionsManagerInfo['splitStrategy'] = ['bio' => 'sentenceOrTag'];
+
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $this->revisions->makeAndSaveRevision(array('bio' => 'This is a test bio. This is another test', 'name' => 'Billy Visto'));
+
+    $this->revisions->makeAndSaveRevision(array('bio' => 'This is a test bio. This is another test. I added a sentence.', 'name' => 'Billy Visto'));
+
+    $this->set($this->revisions, 'splitStrategy', 'words');
+
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy', 'bio' => 'This is a test bio. I added a sentence.'));
+    $this->revisions->makeAndSaveRevision(array('name' => 'Billy Visto'));
+
+    $this->set($this->revisions, 'splitStrategy', ['bio' => 'sentenceOrTag']);
+
+    $this->revisions->makeAndSaveRevision(array('bio' => 'This is a test bio.'));
+
+    $revisionData = $this->revisions->getRevisionByNumber(0)->getRevisionData();
+
+    $expectedBio = '<ins>This is a test bio. This is another test</ins>';
+    $actualBio = $revisionData['bio']->getContent(true, 2);
+    $expectedName = '<ins>Billy Visto</ins>';
+    $actualName = $revisionData['name']->getContent(true, 2);
+
+    $this->assertSame(1, $revisionData['bio']->getNextContentRevisionNumber());
+
+    $this->assertSame($expectedBio, $actualBio);
+    $this->assertSame($expectedName, $actualName);
+
+    $revisionData = $this->revisions->getRevisionByNumber(1)->getRevisionData();
+
+    $expectedBio = 'This is a test bio. This is another test<ins>. I added a sentence.</ins>';
+    $actualBio = $revisionData['bio']->getContent(true, 2);
+    $expectedName = 'Billy Visto';
+    $actualName = $revisionData['name']->getContent(true, 2);
+
+    $this->assertSame(2, $revisionData['bio']->getNextContentRevisionNumber());
+
+
+    $this->assertSame($expectedBio, $actualBio);
     $this->assertSame($expectedName, $actualName);
 
     $this->dropCreatedTables(array('person-revision', 'revisionData'));

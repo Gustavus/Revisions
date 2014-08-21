@@ -82,6 +82,28 @@ abstract class RevisionData extends RevisionsBase
   protected $removedContentSize = 0;
 
   /**
+   * Strategy to use for splitting strings up to generate a diff
+   *   Currently implemented strategies:
+   *   <ul>
+   *     <li>words: Splits at every word boundary.</li>
+   *     <li>sentenceOrTag: Splits at every '.','?', '!', or any tag starting with '<' and ending with '>'.</li>
+   *   </ul>
+   *
+   * @var string
+   */
+  protected $splitStrategy = 'words';
+
+  /**
+   * Array of valid split strategies
+   *
+   * @var array
+   */
+  public static $validSplitStrategies = [
+    'words',
+    'sentenceOrTag',
+  ];
+
+  /**
    * @return integer
    */
   public function getRevisionNumber()

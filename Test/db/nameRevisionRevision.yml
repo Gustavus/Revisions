@@ -6,6 +6,7 @@ revisionData:
     revisionNumber: 0
     key: "name"
     value: '[[1,null," Visto"]]'
+    splitStrategy: "words"
 person-revision:
   -
     id: 1

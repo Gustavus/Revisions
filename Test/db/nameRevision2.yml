@@ -6,6 +6,7 @@ revisionData:
     revisionNumber: 0
     key: "name"
     value: '[[0,2,""]]'
+    splitStrategy: "words"
   -
     id: 2
     contentHash: "afe3690ec4cda7e262f0ca81858777df"
@@ -13,6 +14,7 @@ revisionData:
     revisionNumber: 1
     key: "name"
     value: '[[1,null," Visto"]]'
+    splitStrategy: "words"
   -
     id: 3
     contentHash: "5ca49fbfb5ba90d2927d7f85f07ad74d"
@@ -20,6 +22,7 @@ revisionData:
     revisionNumber: 2
     key: "name"
     value: '[[1,2,""]]'
+    splitStrategy: "words"
   -
     id: 4
     contentHash: "afe3690ec4cda7e262f0ca81858777df"
@@ -27,6 +30,7 @@ revisionData:
     revisionNumber: 3
     key: "name"
     value: '"Billy Visto"'
+    splitStrategy: "words"
 person-revision:
   -
     id: 1

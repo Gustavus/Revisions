@@ -309,12 +309,13 @@ class RevisionsManagerTest extends RevisionsTestsHelper
     $this->call($this->revisionsManagerMock, 'saveRevisionData', array(json_encode($newContent), 1, 'name', $currContent));
     $actual = $this->call($this->revisionsManagerMock, 'getRevisionData', array(1));
     $expected = array('name' => array(
-        'id' => '1',
-        'contentHash' => md5($currContent),
-        'revisionId' => '1',
-        'revisionNumber' => '0',
-        'value' => 'Billy Joel Visto',
+        'id'                     => '1',
+        'contentHash'            => md5($currContent),
+        'revisionId'             => '1',
+        'revisionNumber'         => '0',
+        'value'                  => 'Billy Joel Visto',
         'revisionRevisionNumber' => '0',
+        'splitStrategy'          => 'words',
       ),
     );
     $this->assertSame($expected, $actual);
@@ -324,7 +325,7 @@ class RevisionsManagerTest extends RevisionsTestsHelper
   /**
    * @test
    */
-  public function getRevisionData2()
+  public function getRevisionDataTwo()
   {
     $conn = $this->getConnection();
     $this->setUpMock('person-revision');
@@ -339,11 +340,12 @@ class RevisionsManagerTest extends RevisionsTestsHelper
     $actual = $this->call($this->revisionsManagerMock, 'getRevisionData', array(null, 'name'));
     $expected = array('name' => array(
       '0' => array(
-        'id' => '1',
-        'contentHash' => md5($currContent),
-        'revisionId' => '1',
-        'value' => 'Billy Joel Visto',
+        'id'                     => '1',
+        'contentHash'            => md5($currContent),
+        'revisionId'             => '1',
+        'value'                  => 'Billy Joel Visto',
         'revisionRevisionNumber' => '0',
+        'splitStrategy'          => 'words',
       ),
     ));
     $this->assertSame($expected, $actual);
@@ -374,18 +376,20 @@ class RevisionsManagerTest extends RevisionsTestsHelper
 
     $expected = array('name' => array(
       '1' => array(
-        "id" => "2",
-        'contentHash' => md5('Billy Visto'),
-        'revisionId' => '2',
-        "value" =>  "Billy Visto",
+        "id"                     => "2",
+        'contentHash'            => md5('Billy Visto'),
+        'revisionId'             => '2',
+        "value"                  =>  "Billy Visto",
         'revisionRevisionNumber' => '1',
+        'splitStrategy'          => 'words',
       ),
       '0' => array(
-        'id' => '1',
-        'contentHash' => md5('Billy Joel Visto'),
-        'revisionId' => '1',
-        'value' => 'Billy Joel Visto',
+        'id'                     => '1',
+        'contentHash'            => md5('Billy Joel Visto'),
+        'revisionId'             => '1',
+        'value'                  => 'Billy Joel Visto',
         'revisionRevisionNumber' => '0',
+        'splitStrategy'          => 'words',
         ),
       ),
     );
@@ -418,11 +422,12 @@ class RevisionsManagerTest extends RevisionsTestsHelper
 
     $expected = array('name' => array(
       '0' => array(
-        'id' => '1',
-        'contentHash' => md5('Billy Joel Visto'),
-        'revisionId' => '1',
-        'value' => 'Billy Joel Visto',
+        'id'                     => '1',
+        'contentHash'            => md5('Billy Joel Visto'),
+        'revisionId'             => '1',
+        'value'                  => 'Billy Joel Visto',
         'revisionRevisionNumber' => '0',
+        'splitStrategy'          => 'words',
         ),
       ),
     );
@@ -450,11 +455,12 @@ class RevisionsManagerTest extends RevisionsTestsHelper
     $actual = $this->call($this->revisionsManagerMock, 'getRevisionData', array(null, 'name', true));
     $expected = array('name' => array(
       '0' => array(
-        'id' => '1',
-        'contentHash' => md5('Billy Joel Visto'),
-        'revisionId' => '1',
-        'value' => 'Billy Joel Visto',
+        'id'                     => '1',
+        'contentHash'            => md5('Billy Joel Visto'),
+        'revisionId'             => '1',
+        'value'                  => 'Billy Joel Visto',
         'revisionRevisionNumber' => '0',
+        'splitStrategy'          => 'words',
       ),
     ));
     $this->assertSame($expected, $actual);
@@ -467,21 +473,23 @@ class RevisionsManagerTest extends RevisionsTestsHelper
   public function parseDataResult()
   {
     $fetchAllResult =  array(array(
-      "id" => "1",
-      'contentHash' => "Billy Joel Visto",
-      'revisionId' => '1',
-      "revisionNumber" => "0",
-      "key" => "name",
-      "value" => '"Billy Joel Visto"',
+      "id"                     => "1",
+      'contentHash'            => "Billy Joel Visto",
+      'revisionId'             => '1',
+      "revisionNumber"         => "0",
+      "key"                    => "name",
+      "value"                  => '"Billy Joel Visto"',
       'revisionRevisionNumber' => '0',
+      'splitStrategy'          => 'words',
     ));
     $expected = array('name' => array(
-        'id' => '1',
-        'contentHash' => "Billy Joel Visto",
-        'revisionId' => '1',
-        'revisionNumber' => '0',
-        'value' => 'Billy Joel Visto',
+        'id'                     => '1',
+        'contentHash'            => "Billy Joel Visto",
+        'revisionId'             => '1',
+        'revisionNumber'         => '0',
+        'value'                  => 'Billy Joel Visto',
         'revisionRevisionNumber' => '0',
+        'splitStrategy'          => 'words',
       ),
     );
     $actual = $this->call($this->revisionsManager, 'parseDataResult', array($fetchAllResult));
@@ -491,40 +499,45 @@ class RevisionsManagerTest extends RevisionsTestsHelper
   /**
    * @test
    */
-  public function parseDataResult2()
+  public function parseDataResultTwo()
   {
     $fetchAllResult =  array(array(
-      "id" => "2",
-      'contentHash' => "Billy Visto",
-      'revisionId' => '2',
-      "revisionNumber" => "1",
-      "key" => "name",
-      "value" =>  '"Billy Visto"',
-      'revisionRevisionNumber' => '1',
-    ),
-    array(
-      "id" => "1",
-      'contentHash' => "Billy Joel Visto",
-      'revisionId' => '1',
-      "revisionNumber" => "0",
-      "key" => "name",
-      "value" => '"Billy Joel Visto"',
-      'revisionRevisionNumber' => '0',
-    ));
+        "id"                     => "2",
+        'contentHash'            => "Billy Visto",
+        'revisionId'             => '2',
+        "revisionNumber"         => "1",
+        "key"                    => "name",
+        "value"                  =>  '"Billy Visto"',
+        'revisionRevisionNumber' => '1',
+        'splitStrategy'          => 'words',
+      ),
+      array(
+        "id"                     => "1",
+        'contentHash'            => "Billy Joel Visto",
+        'revisionId'             => '1',
+        "revisionNumber"         => "0",
+        "key"                    => "name",
+        "value"                  => '"Billy Joel Visto"',
+        'revisionRevisionNumber' => '0',
+        'splitStrategy'          => 'sentenceOrTag',
+      )
+    );
     $expected = array('name' => array(
       '1' => array(
-        "id" => "2",
-        'contentHash' => "Billy Visto",
-        'revisionId' => '2',
-        "value" =>  "Billy Visto",
+        "id"                     => "2",
+        'contentHash'            => "Billy Visto",
+        'revisionId'             => '2',
+        "value"                  =>  "Billy Visto",
         'revisionRevisionNumber' => '1',
+        'splitStrategy'          => 'words',
       ),
       '0' => array(
-        'id' => '1',
-        'contentHash' => "Billy Joel Visto",
-        'revisionId' => '1',
-        'value' => 'Billy Joel Visto',
+        'id'                     => '1',
+        'contentHash'            => "Billy Joel Visto",
+        'revisionId'             => '1',
+        'value'                  => 'Billy Joel Visto',
         'revisionRevisionNumber' => '0',
+        'splitStrategy'          => 'sentenceOrTag',
         ),
       ),
     );
@@ -539,54 +552,60 @@ class RevisionsManagerTest extends RevisionsTestsHelper
   {
     $fetchAllResult =  array(
       array(
-        "id" => "3",
-        'contentHash' => "3",
-        'revisionId' => '3',
-        "revisionNumber" => "2",
-        "key" => "status",
-        "value" =>  3,
+        "id"                     => "3",
+        'contentHash'            => "3",
+        'revisionId'             => '3',
+        "revisionNumber"         => "2",
+        "key"                    => "status",
+        "value"                  =>  3,
         'revisionRevisionNumber' => '2',
+        'splitStrategy'          => 'words',
       ),
       array(
-        "id" => "2",
-        'contentHash' => "2",
-        'revisionId' => '2',
-        "revisionNumber" => "1",
-        "key" => "status",
-        "value" =>  '[[null,null,2]]',
+        "id"                     => "2",
+        'contentHash'            => "2",
+        'revisionId'             => '2',
+        "revisionNumber"         => "1",
+        "key"                    => "status",
+        "value"                  =>  '[[null,null,2]]',
         'revisionRevisionNumber' => '1',
+        'splitStrategy'          => 'words',
       ),
       array(
-        "id" => "1",
-        'contentHash' => "",
-        'revisionId' => '1',
-        "revisionNumber" => "0",
-        "key" => "status",
-        "value" => '[[null,null,""]]',
+        "id"                     => "1",
+        'contentHash'            => "",
+        'revisionId'             => '1',
+        "revisionNumber"         => "0",
+        "key"                    => "status",
+        "value"                  => '[[null,null,""]]',
         'revisionRevisionNumber' => '0',
+        'splitStrategy'          => 'words',
       )
     );
     $expected = array('status' => array(
         '2' => array(
-          "id" => "3",
-          'contentHash' => "3",
-          'revisionId' => '3',
-          "value" =>  3,
+          "id"                     => "3",
+          'contentHash'            => "3",
+          'revisionId'             => '3',
+          "value"                  =>  3,
           'revisionRevisionNumber' => '2',
+          'splitStrategy'          => 'words',
         ),
         '1' => array(
-          "id" => "2",
-          'contentHash' => "2",
-          'revisionId' => '2',
-          "value" =>  array(array(null,null,2)),
+          "id"                     => "2",
+          'contentHash'            => "2",
+          'revisionId'             => '2',
+          "value"                  =>  array(array(null,null,2)),
           'revisionRevisionNumber' => '1',
+          'splitStrategy'          => 'words',
         ),
         '0' => array(
-          'id' => '1',
-          'contentHash' => "",
-          'revisionId' => '1',
-          'value' => array(array(null,null,'')),
+          'id'                     => '1',
+          'contentHash'            => "",
+          'revisionId'             => '1',
+          'value'                  => array(array(null,null,'')),
           'revisionRevisionNumber' => '0',
+          'splitStrategy'          => 'words',
         ),
       ),
     );

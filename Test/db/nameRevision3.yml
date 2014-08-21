@@ -6,6 +6,7 @@ revisionData:
     revisionNumber: 0
     key: "aboutYou"
     value: '[[0,8,""]]'
+    splitStrategy: "words"
   -
     id: 2
     contentHash: "4d99b21c607ded383af0db8d14eadb34"
@@ -13,6 +14,7 @@ revisionData:
     revisionNumber: 1
     key: "aboutYou"
     value: '[[8,13,""],[15,20,""]]'
+    splitStrategy: "words"
   -
     id: 3
     contentHash: "89ecb9229ed6f41f7260e383bd274119"
@@ -20,6 +22,7 @@ revisionData:
     revisionNumber: 2
     key: "aboutYou"
     value: '"I like to eat a lot of food while triple jumping"'
+    splitStrategy: "words"
 person-revision:
   -
     id: 1

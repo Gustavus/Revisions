@@ -66,11 +66,18 @@ class Revisions extends RevisionsManager
    *
    * @param string $oldText
    * @param string $newText
+   * @param string $splitStrategy Strategy to use for splitting the content when making diffs
    * @return Revision
    */
-  public function makeRevisionData($oldText, $newText)
+  public function makeRevisionData($oldText, $newText, $splitStrategy = null)
   {
-    $revisionData = new RevisionDataDiff(array('nextContent' => $oldText));
+    $params = ['nextContent' => $oldText];
+
+    if (!empty($splitStrategy) && in_array($splitStrategy, $this->validSplitStrategies)) {
+      $params['splitStrategy'] = $splitStrategy;
+    }
+
+    $revisionData = new RevisionDataDiff($params);
     $revisionData->makeRevisionDataInfo($newText);
     return $revisionData;
   }
@@ -204,11 +211,11 @@ class Revisions extends RevisionsManager
         if (isset($oldRevisionData[$key])) {
           // revision exists in DB, so the first item will be the full current content
           $oldContentArray         = array_shift($oldRevisionData[$key]);
-          $revisionData            = new RevisionDataDiff(array('nextContent' => $oldContentArray['value']));
+          $revisionData            = new RevisionDataDiff(['nextContent' => $oldContentArray['value'], 'splitStrategy' => $this->getSplitStrategyForKey($key)]);
           $oldText[$key]           = $oldContentArray['value'];
         } else {
           // revision doesn't exist yet
-          $revisionData            = new RevisionDataDiff(array('nextContent' => ''));
+          $revisionData            = new RevisionDataDiff(['nextContent' => '', 'splitStrategy' => $this->getSplitStrategyForKey($key)]);
           if ($value === '') {
             // We don't want this hanging around since this is a new revision that is still empty
             unset($newText[$key]);
@@ -317,6 +324,7 @@ class Revisions extends RevisionsManager
             'id'                        => $value['revisionId'],
             'number'                    => $value['revisionNumber'],
             'revisionNumber'            => $value['revisionRevisionNumber'],
+            'splitStrategy'             => $value['splitStrategy'],
             'nextContentRevisionNumber' => $previousContentRevisionNumber,
             'diffInfo'                  => $this->makeDiffInfoObjects($value['value']),
             'nextContent'               => $previousContent,

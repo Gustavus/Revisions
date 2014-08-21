@@ -486,6 +486,27 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
   /**
    * @test
    */
+  public function renderRevisionSplitByTag()
+  {
+    $this->revisionDataDiffProperties = array(
+      'nextContent' => 'a sentence.',
+      'splitStrategy' => 'sentenceOrTag',
+    );
+    $this->diffInfoProperties = array(
+      'startIndex' => 2,
+      'endIndex' => null,
+      'info' => '<br/> another sentence',
+    );
+    $this->setUp();
+    $expected = 'a sentence.<br/> another sentence';
+
+    $result = $this->call($this->revisionDataDiff, 'renderRevision');
+    $this->assertSame($expected, $result);
+  }
+
+  /**
+   * @test
+   */
   public function renderRevisionBoolean()
   {
     $this->revisionDataDiffProperties = array(
@@ -821,6 +842,7 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
     $expected = array($diff);
     $this->compareRevisionInfo($expected, $result);
   }
+
   /**
    * @test
    */
@@ -1081,6 +1103,125 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
   /**
    * @test
    */
+  public function makeRevisionInfoByTag()
+  {
+    $this->revisionDataDiffProperties['nextContent'] = 'some testing test content';
+    $this->revisionDataDiffProperties['splitStrategy'] = 'sentenceOrTag';
+    $this->setUp();
+    $result = $this->call($this->revisionDataDiff, 'makeDiffInfo', array('some test content'));
+    $diff = new Revisions\DiffInfo(array('startIndex' => 0, 'endIndex' => 0, 'info' => 'some testing test content'));
+    $expected = array($diff);
+    $this->compareRevisionInfo($expected, $result);
+  }
+
+  /**
+   * @test
+   */
+  public function makeRevisionInfoAdditionReplacementByTag()
+  {
+   $this->revisionDataDiffProperties = array(
+      'nextContent'   => 'some test content revision.',
+      'splitStrategy' => 'sentenceOrTag',
+    );
+    $this->setUp();
+    $diff = new Revisions\DiffInfo(array('startIndex' => 0, 'endIndex' => 0, 'info' => 'some test content revision.'));
+    $expected = array($diff);
+
+    $result = $this->call($this->revisionDataDiff, 'makeDiffInfo', array('some new test change'));
+    $this->compareRevisionInfo($expected, $result);
+  }
+
+  /**
+   * @test
+   */
+  public function makeRevisionInfoByTagNewSentence()
+  {
+   $this->revisionDataDiffProperties = array(
+      'nextContent'   => 'some test content revision',
+      'splitStrategy' => 'sentenceOrTag',
+    );
+    $this->setUp();
+    $diff = new Revisions\DiffInfo(array('startIndex' => 1, 'endIndex' => 3, 'info' => ''));
+    $expected = array($diff);
+
+    $result = $this->call($this->revisionDataDiff, 'makeDiffInfo', array('some test content revision. Hello.'));
+    $this->compareRevisionInfo($expected, $result);
+  }
+
+  /**
+   * @test
+   */
+  public function makeRevisionInfoByTagSentenceAdditions()
+  {
+   $this->revisionDataDiffProperties = array(
+      'nextContent'   => 'some test content revision. Hello.',
+      'splitStrategy' => 'sentenceOrTag',
+    );
+    $this->setUp();
+    $diff = new Revisions\DiffInfo(array('startIndex' => 2, 'endIndex' => 2, 'info' => ' Hello'));
+    $expected = array($diff);
+
+    $result = $this->call($this->revisionDataDiff, 'makeDiffInfo', array('some test content revision. Arst. This is a new sentence.'));
+    $this->compareRevisionInfo($expected, $result);
+  }
+
+  /**
+   * @test
+   */
+  public function makeRevisionInfoByTagSentenceReplacement()
+  {
+   $this->revisionDataDiffProperties = array(
+      'nextContent'   => 'some test content revision. Hello. This is a sentence.',
+      'splitStrategy' => 'sentenceOrTag',
+    );
+    $this->setUp();
+    $diff = new Revisions\DiffInfo(array('startIndex' => 2, 'endIndex' => 2, 'info' => ' Hello'));
+    $expected = array($diff);
+
+    $result = $this->call($this->revisionDataDiff, 'makeDiffInfo', array('some test content revision. Arst. This is a sentence.'));
+    $this->compareRevisionInfo($expected, $result);
+  }
+
+  /**
+   * @test
+   */
+  public function makeRevisionInfoByTagSentenceRemoval()
+  {
+   $this->revisionDataDiffProperties = array(
+      'nextContent'   => 'some test content revision. Hello. This is a sentence.',
+      'splitStrategy' => 'sentenceOrTag',
+    );
+    $this->setUp();
+    $diff = new Revisions\DiffInfo(array('startIndex' => 1, 'endIndex' => null, 'info' => '. Hello'));
+    $expected = array($diff);
+
+    $result = $this->call($this->revisionDataDiff, 'makeDiffInfo', array('some test content revision. This is a sentence.'));
+    $this->compareRevisionInfo($expected, $result);
+  }
+
+  /**
+   * @test
+   */
+  public function makeRevisionInfoByTagTagAdded()
+  {
+   $this->revisionDataDiffProperties = array(
+      'nextContent'   => 'some test content revision. Hello<br/> This is a sentence.',
+      'splitStrategy' => 'sentenceOrTag',
+    );
+    $this->setUp();
+    $diff = new Revisions\DiffInfo(array('startIndex' => 2, 'endIndex' => 3, 'info' => ' Hello<br/>'));
+    $expected = array($diff);
+
+    $result = $this->call($this->revisionDataDiff, 'makeDiffInfo', array('some test content revision. Arst. This is a sentence.'));
+    $this->compareRevisionInfo($expected, $result);
+
+    // test to make sure we can get back to our original.
+    $this->assertSame('some test content revision. Hello<br/> This is a sentence.', $this->call($this->revisionDataDiff, 'renderRevision'));
+  }
+
+  /**
+   * @test
+   */
   public function renderRevisionForDB()
   {
     $this->revisionDataDiffProperties['nextContent'] = 'some random content';
@@ -1171,7 +1312,7 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
   /**
    * @test
    */
-  public function splitWords2()
+  public function splitWordsTwo()
   {
     $revisionContent = 'I like to eat food';
     $nextContent = 'I like to eat a lot of food while triple jumping.';
@@ -1292,6 +1433,54 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
           " ",
           "jumping",
         ),
+      ),
+    );
+    $this->assertSame($expected, $diff);
+  }
+
+  /**
+   * @test
+   */
+  public function diffByTagWholeLine()
+  {
+    $revisionContent = 'I like to eat food';
+    $nextContent = 'I like to eat a lot of food while triple jumping.';
+    $diff = $this->call($this->revisionDataDiff, 'diff', array($this->call($this->revisionDataDiff, 'splitSentenceOrTag', array($revisionContent)), $this->call($this->revisionDataDiff, 'splitSentenceOrTag', array($nextContent))));
+
+    $expected = array(
+      array(
+        "d" => array('I like to eat food'),
+        "i" => array('I like to eat a lot of food while triple jumping', '.'),
+      ),
+    );
+    $this->assertSame($expected, $diff);
+  }
+
+  /**
+   * @test
+   */
+  public function diffByTag()
+  {
+    $revisionContent = '<p>I like to eat food.</p>I also like to grill food.';
+    $nextContent = '<p>I like to eat a lot of food while triple jumping.</p>I also like to grill food.';
+    $diff = $this->call($this->revisionDataDiff, 'diff', array($this->call($this->revisionDataDiff, 'splitSentenceOrTag', array($revisionContent)), $this->call($this->revisionDataDiff, 'splitSentenceOrTag', array($nextContent))));
+
+    $expected = array(
+      array(
+        'd' => array(),
+        'i' => array(),
+      ),
+      '<p>',
+      array(
+        'd' => array('I like to eat food'),
+        'i' => array('I like to eat a lot of food while triple jumping'),
+      ),
+      '.</p>',
+      'I also like to grill food',
+      '.',
+      array(
+        'd' => array(),
+        'i' => array(),
       ),
     );
     $this->assertSame($expected, $diff);
@@ -1425,7 +1614,7 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
   /**
    * @test
    */
-  public function myArrayDiff2()
+  public function myArrayDiffTwo()
   {
     $revisionContent = 'I like to eat food';
     $nextContent = 'I like to eat a lot of food while triple jumping';
@@ -1469,6 +1658,114 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
 
     $expected = array(
       "15" => array(
+        "d" => array('.'),
+        "i" => array(),
+      )
+    );
+    $this->assertSame($expected, $diff);
+  }
+
+  /**
+   * @test
+   */
+  public function myArrayDiffBySentence()
+  {
+    $revisionContent = 'I like to eat food';
+    $nextContent = 'I like to eat a lot of food while triple jumping.';
+    $diff = $this->call($this->revisionDataDiff, 'myArrayDiff', array($this->call($this->revisionDataDiff, 'splitSentenceOrTag', array($revisionContent)), $this->call($this->revisionDataDiff, 'splitSentenceOrTag', array($nextContent))));
+
+    $expected = array(
+      "0" => array(
+        "d" => array('I like to eat food'),
+        "i" => array(
+          "I like to eat a lot of food while triple jumping",
+          ".",
+        ),
+      ),
+    );
+    $this->assertSame($expected, $diff);
+  }
+
+  /**
+   * @test
+   */
+  public function myArrayDiffPeriodBeginningBySentence()
+  {
+    $revisionContent = 'I like to eat food';
+    $nextContent = '.I like to eat a lot of food while triple jumping.';
+    $diff = $this->call($this->revisionDataDiff, 'myArrayDiff', array($this->call($this->revisionDataDiff, 'splitSentenceOrTag', array($revisionContent)), $this->call($this->revisionDataDiff, 'splitSentenceOrTag', array($nextContent))));
+
+    $expected = array(
+      "0" => array(
+        "d" => array('I like to eat food'),
+        "i" => array(
+          ".",
+          "I like to eat a lot of food while triple jumping",
+          ".",
+        ),
+      ),
+    );
+    $this->assertSame($expected, $diff);
+  }
+
+  /**
+   * @test
+   */
+  public function myArrayDiffPunctuationBeginningBySentence()
+  {
+    $revisionContent = '?I like to eat food';
+    $nextContent = '.I like to eat a lot of food while triple jumping.';
+    $diff = $this->call($this->revisionDataDiff, 'myArrayDiff', array($this->call($this->revisionDataDiff, 'splitSentenceOrTag', array($revisionContent)), $this->call($this->revisionDataDiff, 'splitSentenceOrTag', array($nextContent))));
+
+    $expected = array(
+      "0" => array(
+        "d" => array(
+          '?',
+          'I like to eat food'
+        ),
+        "i" => array(
+          ".",
+          "I like to eat a lot of food while triple jumping",
+          ".",
+        ),
+      ),
+    );
+    $this->assertSame($expected, $diff);
+  }
+
+  /**
+   * @test
+   */
+  public function myArrayDiffTwoBySentence()
+  {
+    $revisionContent = 'I like to eat food';
+    $nextContent = 'I like to eat a lot of food while triple jumping';
+    $diff = $this->call($this->revisionDataDiff, 'myArrayDiff', array($this->call($this->revisionDataDiff, 'splitSentenceOrTag', array($revisionContent)), $this->call($this->revisionDataDiff, 'splitSentenceOrTag', array($nextContent))));
+
+    $expected = array(
+      "0" => array(
+        "d" => array(
+          'I like to eat food'
+        ),
+        "i" => array(
+          "I like to eat a lot of food while triple jumping",
+        ),
+      ),
+    );
+    $this->assertSame($expected, $diff);
+  }
+
+  /**
+   * @test
+   */
+  public function myArrayDiffRemovedPeriodBySentence()
+  {
+    $revisionContent = 'I like to eat a lot of food.';
+    $nextContent = 'I like to eat a lot of food';
+    $diff = $this->call($this->revisionDataDiff, 'myArrayDiff', array($this->call($this->revisionDataDiff, 'splitSentenceOrTag', array($revisionContent)), $this->call($this->revisionDataDiff, 'splitSentenceOrTag', array($nextContent))));
+
+    $expected = array(
+      "1" => array(
         "d" => array('.'),
         "i" => array(),
       )

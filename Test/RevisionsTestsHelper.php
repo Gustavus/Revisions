@@ -69,7 +69,8 @@ class RevisionsTestsHelper extends \Gustavus\Test\TestDBPDO
             `revisionId` INTEGER,
             `revisionNumber` INTEGER,
             `key` VARCHAR,
-            `value` VARCHAR)
+            `value` VARCHAR,
+            `splitStrategy` VARCHAR)
             ';
     return $sql;
   }

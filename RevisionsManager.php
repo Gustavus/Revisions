@@ -5,6 +5,8 @@
  */
 namespace Gustavus\Revisions;
 
+use Gustavus\Revisions\RevisionData;
+
 /**
  * Interacts with the database
  *
@@ -47,6 +49,18 @@ class RevisionsManager extends RevisionsBase
    * @var integer limit of how many revisions to pull
    */
   protected $limit = 10;
+
+  /**
+   * Strategy to use for splitting a string to make a diff
+   *   Either a string to be used all the time, or an array of strategies per key
+   *   ie.
+   *   <code>
+   *     array('firstName' => 'word', 'biography' => 'sentenceOrTag');
+   *   </code>
+   *
+   * @var string|array
+   */
+  protected $splitStrategy;
 
   /**
    * Class constructor
@@ -165,7 +179,7 @@ class RevisionsManager extends RevisionsBase
   {
     $db = $this->getDB();
     $qb = $db->createQueryBuilder();
-    $qb->select('dataDB.`id`, dataDB.`contentHash`, dataDB.`revisionId`, dataDB.`revisionNumber`, dataDB.`key`, dataDB.`value`, rDB.`revisionNumber` as `revisionRevisionNumber`')
+    $qb->select('dataDB.`id`, dataDB.`contentHash`, dataDB.`revisionId`, dataDB.`revisionNumber`, dataDB.`key`, dataDB.`value`, rDB.`revisionNumber` as `revisionRevisionNumber`, dataDB.`splitStrategy`')
       ->from("`{$this->revisionDataTable}`", 'dataDB')
       ->innerJoin('dataDB', "`{$this->revisionsTable}`", 'rDB', 'rDB.`id` = dataDB.`revisionId` AND rDB.`table` = :table AND rDB.`rowId` = :rowId');
     $args = array(
@@ -231,20 +245,22 @@ class RevisionsManager extends RevisionsBase
     foreach ($resultArray as $result) {
       if ($column === null || $forceSingleDimension) {
         $return[$result['key']] = array(
-          'id'             => $result['id'],
-          'contentHash'    => $result['contentHash'],
-          'revisionId'     => $result['revisionId'],
-          'revisionNumber' => $result['revisionNumber'],
-          'value'          => json_decode($result['value']),
+          'id'                     => $result['id'],
+          'contentHash'            => $result['contentHash'],
+          'revisionId'             => $result['revisionId'],
+          'revisionNumber'         => $result['revisionNumber'],
+          'value'                  => json_decode($result['value']),
           'revisionRevisionNumber' => $result['revisionRevisionNumber'],
+          'splitStrategy'          => $result['splitStrategy'],
         );
       } else {
          $return[$result['key']][$result['revisionNumber']] = array(
-          'id'          => $result['id'],
-          'contentHash' => $result['contentHash'],
-          'revisionId'  => $result['revisionId'],
-          'value'       => json_decode($result['value']),
+          'id'                     => $result['id'],
+          'contentHash'            => $result['contentHash'],
+          'revisionId'             => $result['revisionId'],
+          'value'                  => json_decode($result['value']),
           'revisionRevisionNumber' => $result['revisionRevisionNumber'],
+          'splitStrategy'          => $result['splitStrategy'],
         );
       }
     }
@@ -265,8 +281,11 @@ class RevisionsManager extends RevisionsBase
   private function saveRevisionData($revisionInfo, $revisionId, $column, $revisionContent, $oldRevisionId = null)
   {
     $db = $this->getDB();
+
+    $splitStrategy = $this->getSplitStrategyForKey($column);
     $args = array(
-      ':value' => $revisionInfo,
+      ':value'         => $revisionInfo,
+      ':splitStrategy' => $splitStrategy,
     );
     if ($oldRevisionId === null) {
       $args = array_merge($args, array(
@@ -278,7 +297,7 @@ class RevisionsManager extends RevisionsBase
       ));
 
       $qb = $db->createQueryBuilder();
-      $qb->select(':hash, :revisionId, COUNT(dataDB.`revisionNumber`), :key, :value')
+      $qb->select(':hash, :revisionId, COUNT(dataDB.`revisionNumber`), :key, :value, :splitStrategy')
         ->from("`{$this->revisionDataTable}`", 'dataDB')
         ->innerJoin('dataDB', "`{$this->revisionsTable}`", 'rDB', 'rDB.`id` = dataDB.`revisionId` AND rDB.`table` = :table AND rDB.`rowId` = :rowId')
         ->where('`key` = :key');
@@ -290,7 +309,8 @@ class RevisionsManager extends RevisionsBase
           `revisionId`,
           `revisionNumber`,
           `key`,
-          `value`
+          `value`,
+          `splitStrategy`
         ) %2$s;
           ',
           $this->revisionDataTable,
@@ -301,7 +321,8 @@ class RevisionsManager extends RevisionsBase
       $args[':oldContentId'] = $oldRevisionId;
       $sql = sprintf('
         UPDATE `%1$s` SET
-          `value` = :value
+          `value` = :value,
+          `splitStrategy` = :splitStrategy
         WHERE `id` = :oldContentId',
           $this->revisionDataTable
       );
@@ -434,6 +455,24 @@ class RevisionsManager extends RevisionsBase
       }
     }
     return ($affectedRows !== 0);
+  }
+
+  /**
+   * Gets the split strategy to use based off of the key
+   *
+   * @param  string $key Key to search for a specific strategy for
+   * @return string
+   */
+  protected function getSplitStrategyForKey($key)
+  {
+    if (is_array($this->splitStrategy) && isset($this->splitStrategy[$key])) {
+      $splitStrategy = $this->splitStrategy[$key];
+    } else {
+      $splitStrategy = is_string($this->splitStrategy) ? $this->splitStrategy : 'words';
+    }
+
+    // make sure the strategy is valid
+    return (in_array($splitStrategy, RevisionData::$validSplitStrategies)) ? $splitStrategy : 'words';
   }
 
   /**
