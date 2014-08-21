@@ -66,6 +66,18 @@ class API
    * Class constructor
    *
    * @param array $params application's revision info
+   *   Params:
+   *   <ul>
+   *     <li>dbName: Required. name of the db connection</li>
+   *     <li>revisionsTable: Required. table name that revisions will live in.</li>
+   *     <li>revisionDataTable: Required. table name that revision data will live in.</li>
+   *     <li>table: Required. Identifier to know what table or item we are keeping track of revisions for.</li>
+   *     <li>rowId: Required. Identifier to know what row in our table we are keeping a revision for.</li>
+   *     <li>dbal: Doctrine connection to use.</li>
+   *     <li>labels: Labels to override the key for displaying a revision.</li>
+   *     <li>allowRestore: Whether we want to allow restoring to a previous revision or not.</li>
+   *     <li>splitStrategy: Strategy to use for splitting the content to generate diffs.</li>
+   *   </ul>
    *
    * @throws  \RuntimeException If there isn't enough information supplied for the application
    * @return  void
