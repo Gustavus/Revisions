@@ -5,7 +5,9 @@
  */
 namespace Gustavus\Revisions;
 use Gustavus\Utility\String,
-  Gustavus\Resources\Resource;
+  Gustavus\Resources\Resource,
+  Gustavus\Extensibility\Actions,
+  Gustavus\Extensibility\Filters;
 
 /**
  * API to interact with the revisions project
@@ -15,11 +17,12 @@ use Gustavus\Utility\String,
  */
 class API
 {
-  const RESTORE_HOOK          = '\Gustavus\Revisions\API\Restore';
-  const RESTORE_ACTION        = 'restore';
-  const UNDO_ACTION           = 'undo';
-  const REVISIONS_JS_VERSION  = 2;
-  const REVISIONS_CSS_VERSION = 1;
+  const RESTORE_HOOK           = '\Gustavus\Revisions\API\Restore';
+  const RESTORE_ACTION         = 'restore';
+  const UNDO_ACTION            = 'undo';
+  const RENDER_REVISION_FILTER = '\Gustavus\Revisions\API\BuildRevision';
+  const REVISIONS_JS_VERSION   = 2;
+  const REVISIONS_CSS_VERSION  = 2;
 
   /**
    * @var Revisions
@@ -113,11 +116,22 @@ class API
   }
 
   /**
+   * Gets a specific revision
+   *
+   * @param  integer $revisionNumber Revision number to grab
+   * @return Revision
+   */
+  public function getRevision($revisionNumber)
+  {
+    return $this->revisions->getRevisionByNumber($revisionNumber);
+  }
+
+  /**
    * Renders out the revisions or revision requested
    *
    * @return string
    */
-  public function render($request = null, $index = null)
+  public function render()
   {
     $post = $_POST;
     $queryStringArray = $_GET;
@@ -169,7 +183,7 @@ class API
   {
     $revisionContent = $this->revisions->getRevisionContentArray((int) $urlParams['restore']);
     $oldMessage = $this->revisions->getRevisionByNumber((int) $urlParams['restore'])->getRevisionMessage();
-    \Gustavus\Extensibility\Actions::apply(self::RESTORE_HOOK, $revisionContent, $oldMessage, self::RESTORE_ACTION);
+    Actions::apply(self::RESTORE_HOOK, $revisionContent, $oldMessage, self::RESTORE_ACTION);
   }
 
   /**
@@ -185,7 +199,7 @@ class API
     $secondToLatestRevNum = $this->revisions->findOldestRevisionNumberPulled();
     $revisionContent = $this->revisions->getRevisionContentArray($secondToLatestRevNum);
     $oldMessage = $this->revisions->getRevisionByNumber($secondToLatestRevNum)->getRevisionMessage();
-    \Gustavus\Extensibility\Actions::apply(self::RESTORE_HOOK, $revisionContent, $oldMessage, self::UNDO_ACTION);
+    Actions::apply(self::RESTORE_HOOK, $revisionContent, $oldMessage, self::UNDO_ACTION);
     // reset limit to what it was originally at
     $this->revisions->setLimit($limit);
   }
@@ -232,7 +246,7 @@ class API
    */
   private function addCSS()
   {
-    \Gustavus\Extensibility\Filters::add('head', array($this, 'renderRevisionsCSS'));
+    Filters::add('head', array($this, 'renderRevisionsCSS'));
   }
 
   /**
@@ -254,7 +268,7 @@ class API
    */
   private function addJS()
   {
-    \Gustavus\Extensibility\Filters::add('scripts', array($this, 'renderRevisionsJS'));
+    Filters::add('scripts', array($this, 'renderRevisionsJS'));
   }
 
   /**

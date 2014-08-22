@@ -5,6 +5,8 @@
  */
 namespace Gustavus\Revisions;
 
+use Gustavus\Extensibility\Filters;
+
 /**
  * A single RevisionData object containing DiffInfo objects
  *
@@ -130,17 +132,28 @@ abstract class RevisionData extends RevisionsBase
   /**
    * @param boolean $showChanges
    * @param integer $currentRevisionNumber Number of the revision we are currently working with
+   * @param boolean $runFilters Whether to run filters on the rendered content or not.
    * @return string
    */
-  public function getContent($showChanges = false, $currentRevisionNumber = null)
+  public function getContent($showChanges = false, $currentRevisionNumber = null, $runFilters = false)
   {
     if ($showChanges && ($currentRevisionNumber === null || $currentRevisionNumber >= $this->getNextContentRevisionNumber())) {
       // revisionData doesn't belong to a future revision, so we can render the diff
-      return $this->getContentDiff();
+
+      $content = $this->getContentDiff();
+      if ($runFilters && Filters::exists(API::RENDER_REVISION_FILTER)) {
+        return Filters::apply(API::RENDER_REVISION_FILTER, $content);
+      }
+      return $content;
     }
     if (!isset($this->content)) {
       $this->content = $this->renderRevision();
     }
+
+    if ($runFilters && Filters::exists(API::RENDER_REVISION_FILTER)) {
+      return Filters::apply(API::RENDER_REVISION_FILTER, $this->content);
+    }
+
     return $this->content;
   }
 

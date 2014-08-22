@@ -6,7 +6,9 @@
  */
 
 namespace Gustavus\Revisions\Test;
-use Gustavus\Revisions;
+use Gustavus\Revisions,
+  Gustavus\Revisions\API,
+  Gustavus\Extensibility\Filters;
 
 /**
  * Test for Revisions
@@ -690,6 +692,23 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
 
     $result = $this->call($this->revisionDataDiff, 'getContent', array(true));
     $this->assertSame($expected, $result);
+  }
+
+  /**
+   * @test
+   */
+  public function getContentRunningHooks()
+  {
+    $expected = 'some\ntesting\ntest\ncontent';
+
+    Filters::add(API::RENDER_REVISION_FILTER, function($content) {
+      $contentArr = explode(' ', $content);
+      return implode('\n', $contentArr);
+    });
+
+    $result = $this->revisionDataDiff->getContent(false, null, true);
+    $this->assertSame($expected, $result);
+    Filters::clear(API::RENDER_REVISION_FILTER);
   }
 
   /**

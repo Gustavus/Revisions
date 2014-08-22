@@ -28,7 +28,7 @@
                 {{- base.renderError() -}}
               {%- else -%}
                 {# + 1 because the revisionData for revision 3 is actually the revisionData for revision 2 so the diffs match since we want how 2 changed to 3 if looking at 3 #}
-                {{- revisionData.getContent(true, revision.getRevisionNumber() + 1)|raw -}}
+                {{- revisionData.getContent(true, revision.getRevisionNumber() + 1, true)|raw -}}
               {%- endif -%}
             </dd>
           {% endif %}
