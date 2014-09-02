@@ -78,7 +78,7 @@ class RevisionDataDiff extends RevisionData
    */
   private function putRevisionContentTogether($revisionInfo, $showChanges)
   {
-    $nextContentArr = $this->splitWords($this->getNextContent());
+    $nextContentArr = $this->splitString($this->getNextContent());
     foreach ($revisionInfo as $diffInfo) {
       $revisionContent = ($showChanges) ? $this->renderContentChange($diffInfo->getInfo(), false) : $diffInfo->getInfo();
       $endIndex   = $diffInfo->getEndIndex();
@@ -358,6 +358,23 @@ class RevisionDataDiff extends RevisionData
   }
 
   /**
+   * Splits the string using the appropriate strategy
+   *
+   * @param  string $content Content to split
+   * @return array
+   */
+  private function splitString($content)
+  {
+    switch ($this->splitStrategy) {
+      case 'sentenceOrTag':
+          return $this->splitSentenceOrTag($content);
+      case 'words':
+      default:
+          return $this->splitWords($content);
+    }
+  }
+
+  /**
    * Splits a string at word boundaries
    *
    * @param  string $content
@@ -366,6 +383,22 @@ class RevisionDataDiff extends RevisionData
   private function splitWords($content)
   {
     $split = preg_split('`(\b|\s+)`', $content, null, PREG_SPLIT_NO_EMPTY|PREG_SPLIT_DELIM_CAPTURE);
+    return $split;
+  }
+
+  /**
+   * Splits a string at sentence or html tag boundaries
+   *
+   * @param  string $content
+   * @return array
+   */
+  private function splitSentenceOrTag($content)
+  {
+    $sentenceEnd = '[\.|\?|\!]';
+    $tag         = '\<.+?\>';
+    $regex       = sprintf('`((?:%1$s%2$s)|%1$s|(?:%2$s))`', $sentenceEnd, $tag);
+
+    $split = preg_split($regex, $content, null, PREG_SPLIT_NO_EMPTY|PREG_SPLIT_DELIM_CAPTURE);
     return $split;
   }
 
@@ -381,8 +414,8 @@ class RevisionDataDiff extends RevisionData
     if (!is_string($newContent)) {
       return $this->makeNonStringDiffInfo($newContent);
     }
-    $nextContentArr = $this->splitWords($this->getNextContent());
-    $newContentArr  = $this->splitWords($newContent);
+    $nextContentArr = $this->splitString($this->getNextContent());
+    $newContentArr  = $this->splitString($newContent);
     $diffArr        = $this->myArrayDiff($nextContentArr, $newContentArr);
     $diffInfo       = array();
     foreach ($diffArr as $key => $value) {

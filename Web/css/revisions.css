@@ -454,7 +454,7 @@ tr.compare td {
 }
 /* Young Restore Button */
 .revisionData.comparison footer + footer {
-  width: 50.2%;
+  width: 50.00001%;
   float: left;
 }
 .revisionData.comparison header:first-child {

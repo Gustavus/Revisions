@@ -9,6 +9,8 @@ namespace Gustavus\Revisions\Test;
 use Gustavus\Revisions;
 
 /**
+ * Tests for RevisionsManager
+ *
  * @package Revisions
  * @subpackage Tests
  * @author  Billy Visto
@@ -95,10 +97,10 @@ class RevisionsManagerTest extends RevisionsTestsHelper
     $age   = $this->personData['age'];
     $city  = $this->personData['city'];
     $about = $this->personData['aboutYou'];
-    $sql   = "
+    $sql   = '
     INSERT INTO `person` (name, age, city, aboutYou)
     VALUES (?, ?, ?, ?)
-    ";
+    ';
     $this->dbalConnection->executeQuery($sql, array($name, $age, $city, $about));
   }
 
@@ -305,16 +307,17 @@ class RevisionsManagerTest extends RevisionsTestsHelper
     $this->dbalConnection->query($this->getCreateDataQuery());
     $this->dbalConnection->query($this->getCreateQuery());
 
-    $this->call($this->revisionsManagerMock, 'saveRevisionContent', array(array('name' => $newContent), "", 'name'));
+    $this->call($this->revisionsManagerMock, 'saveRevisionContent', array(array('name' => $newContent), '', 'name'));
     $this->call($this->revisionsManagerMock, 'saveRevisionData', array(json_encode($newContent), 1, 'name', $currContent));
     $actual = $this->call($this->revisionsManagerMock, 'getRevisionData', array(1));
     $expected = array('name' => array(
-        'id' => '1',
-        'contentHash' => md5($currContent),
-        'revisionId' => '1',
-        'revisionNumber' => '0',
-        'value' => 'Billy Joel Visto',
+        'id'                     => '1',
+        'contentHash'            => md5($currContent),
+        'revisionId'             => '1',
+        'revisionNumber'         => '0',
+        'value'                  => 'Billy Joel Visto',
         'revisionRevisionNumber' => '0',
+        'splitStrategy'          => 'words',
       ),
     );
     $this->assertSame($expected, $actual);
@@ -324,7 +327,7 @@ class RevisionsManagerTest extends RevisionsTestsHelper
   /**
    * @test
    */
-  public function getRevisionData2()
+  public function getRevisionDataTwo()
   {
     $conn = $this->getConnection();
     $this->setUpMock('person-revision');
@@ -334,16 +337,17 @@ class RevisionsManagerTest extends RevisionsTestsHelper
     $this->dbalConnection->query($this->getCreateDataQuery());
     $this->dbalConnection->query($this->getCreateQuery());
 
-    $this->call($this->revisionsManagerMock, 'saveRevisionContent', array(array('name' => $newContent), "", 'name'));
+    $this->call($this->revisionsManagerMock, 'saveRevisionContent', array(array('name' => $newContent), '', 'name'));
     $this->call($this->revisionsManagerMock, 'saveRevisionData', array(json_encode($newContent), 1, 'name', $currContent));
     $actual = $this->call($this->revisionsManagerMock, 'getRevisionData', array(null, 'name'));
     $expected = array('name' => array(
       '0' => array(
-        'id' => '1',
-        'contentHash' => md5($currContent),
-        'revisionId' => '1',
-        'value' => 'Billy Joel Visto',
+        'id'                     => '1',
+        'contentHash'            => md5($currContent),
+        'revisionId'             => '1',
+        'value'                  => 'Billy Joel Visto',
         'revisionRevisionNumber' => '0',
+        'splitStrategy'          => 'words',
       ),
     ));
     $this->assertSame($expected, $actual);
@@ -361,31 +365,33 @@ class RevisionsManagerTest extends RevisionsTestsHelper
     $this->dbalConnection->query($this->getCreateDataQuery());
     $this->dbalConnection->query($this->getCreateQuery());
 
-    $insertId = $this->call($this->revisionsManagerMock, 'saveRevisionContent', array(array('name' => 'Billy Joel Visto'), "", 'name'));
+    $insertId = $this->call($this->revisionsManagerMock, 'saveRevisionContent', array(array('name' => 'Billy Joel Visto'), '', 'name'));
     $this->call($this->revisionsManagerMock, 'saveRevisionData', array(json_encode('Billy Joel Visto'), $insertId, 'name', 'Billy Joel Visto'));
 
-    $insertId = $this->call($this->revisionsManagerMock, 'saveRevisionContent', array(array('name' => 'Billy Visto'), "", 'name'));
+    $insertId = $this->call($this->revisionsManagerMock, 'saveRevisionContent', array(array('name' => 'Billy Visto'), '', 'name'));
     $this->call($this->revisionsManagerMock, 'saveRevisionData', array(json_encode('Billy Visto'), $insertId, 'name', 'Billy Visto'));
 
-    $insertId = $this->call($this->revisionsManagerMock, 'saveRevisionContent', array(array('age' => '23'), "", 'age'));
+    $insertId = $this->call($this->revisionsManagerMock, 'saveRevisionContent', array(array('age' => '23'), '', 'age'));
     $this->call($this->revisionsManagerMock, 'saveRevisionData', array(json_encode(23), $insertId, 'age', 23));
 
     $actual = $this->call($this->revisionsManagerMock, 'getRevisionData', array(null, 'name'));
 
     $expected = array('name' => array(
       '1' => array(
-        "id" => "2",
-        'contentHash' => md5('Billy Visto'),
-        'revisionId' => '2',
-        "value" =>  "Billy Visto",
+        'id'                     => '2',
+        'contentHash'            => md5('Billy Visto'),
+        'revisionId'             => '2',
+        'value'                  =>  'Billy Visto',
         'revisionRevisionNumber' => '1',
+        'splitStrategy'          => 'words',
       ),
       '0' => array(
-        'id' => '1',
-        'contentHash' => md5('Billy Joel Visto'),
-        'revisionId' => '1',
-        'value' => 'Billy Joel Visto',
+        'id'                     => '1',
+        'contentHash'            => md5('Billy Joel Visto'),
+        'revisionId'             => '1',
+        'value'                  => 'Billy Joel Visto',
         'revisionRevisionNumber' => '0',
+        'splitStrategy'          => 'words',
         ),
       ),
     );
@@ -405,24 +411,25 @@ class RevisionsManagerTest extends RevisionsTestsHelper
     $this->dbalConnection->query($this->getCreateDataQuery());
     $this->dbalConnection->query($this->getCreateQuery());
 
-    $insertId = $this->call($this->revisionsManagerMock, 'saveRevisionContent', array(array('name' => 'Billy Joel Visto'), "", 'name'));
+    $insertId = $this->call($this->revisionsManagerMock, 'saveRevisionContent', array(array('name' => 'Billy Joel Visto'), '', 'name'));
     $this->call($this->revisionsManagerMock, 'saveRevisionData', array(json_encode('Billy Joel Visto'), $insertId, 'name', 'Billy Joel Visto'));
 
-    $insertId = $this->call($this->revisionsManagerMock, 'saveRevisionContent', array(array('name' => 'Billy Visto'), "", 'name'));
+    $insertId = $this->call($this->revisionsManagerMock, 'saveRevisionContent', array(array('name' => 'Billy Visto'), '', 'name'));
     $this->call($this->revisionsManagerMock, 'saveRevisionData', array(json_encode('Billy Visto'), $insertId, 'name', 'Billy Visto'));
 
-    $insertId = $this->call($this->revisionsManagerMock, 'saveRevisionContent', array(array('name' => '23'), "", 'age'));
+    $insertId = $this->call($this->revisionsManagerMock, 'saveRevisionContent', array(array('name' => '23'), '', 'age'));
     $this->call($this->revisionsManagerMock, 'saveRevisionData', array(json_encode(23), $insertId, 'age', 23));
 
     $actual = $this->call($this->revisionsManagerMock, 'getRevisionData', array(null, 'name', true, null, 1));
 
     $expected = array('name' => array(
       '0' => array(
-        'id' => '1',
-        'contentHash' => md5('Billy Joel Visto'),
-        'revisionId' => '1',
-        'value' => 'Billy Joel Visto',
+        'id'                     => '1',
+        'contentHash'            => md5('Billy Joel Visto'),
+        'revisionId'             => '1',
+        'value'                  => 'Billy Joel Visto',
         'revisionRevisionNumber' => '0',
+        'splitStrategy'          => 'words',
         ),
       ),
     );
@@ -445,16 +452,17 @@ class RevisionsManagerTest extends RevisionsTestsHelper
     $this->dbalConnection->query($this->getCreateDataQuery());
     $this->dbalConnection->query($this->getCreateQuery());
 
-    $this->call($this->revisionsManagerMock, 'saveRevisionContent', array(array('name' => $newContent), "", 'name'));
+    $this->call($this->revisionsManagerMock, 'saveRevisionContent', array(array('name' => $newContent), '', 'name'));
     $this->call($this->revisionsManagerMock, 'saveRevisionData', array(json_encode($newContent), 1, 'name', $newContent));
     $actual = $this->call($this->revisionsManagerMock, 'getRevisionData', array(null, 'name', true));
     $expected = array('name' => array(
       '0' => array(
-        'id' => '1',
-        'contentHash' => md5('Billy Joel Visto'),
-        'revisionId' => '1',
-        'value' => 'Billy Joel Visto',
+        'id'                     => '1',
+        'contentHash'            => md5('Billy Joel Visto'),
+        'revisionId'             => '1',
+        'value'                  => 'Billy Joel Visto',
         'revisionRevisionNumber' => '0',
+        'splitStrategy'          => 'words',
       ),
     ));
     $this->assertSame($expected, $actual);
@@ -467,21 +475,23 @@ class RevisionsManagerTest extends RevisionsTestsHelper
   public function parseDataResult()
   {
     $fetchAllResult =  array(array(
-      "id" => "1",
-      'contentHash' => "Billy Joel Visto",
-      'revisionId' => '1',
-      "revisionNumber" => "0",
-      "key" => "name",
-      "value" => '"Billy Joel Visto"',
+      'id'                     => '1',
+      'contentHash'            => 'Billy Joel Visto',
+      'revisionId'             => '1',
+      'revisionNumber'         => '0',
+      'key'                    => 'name',
+      'value'                  => '"Billy Joel Visto"',
       'revisionRevisionNumber' => '0',
+      'splitStrategy'          => 'words',
     ));
     $expected = array('name' => array(
-        'id' => '1',
-        'contentHash' => "Billy Joel Visto",
-        'revisionId' => '1',
-        'revisionNumber' => '0',
-        'value' => 'Billy Joel Visto',
+        'id'                     => '1',
+        'contentHash'            => 'Billy Joel Visto',
+        'revisionId'             => '1',
+        'revisionNumber'         => '0',
+        'value'                  => 'Billy Joel Visto',
         'revisionRevisionNumber' => '0',
+        'splitStrategy'          => 'words',
       ),
     );
     $actual = $this->call($this->revisionsManager, 'parseDataResult', array($fetchAllResult));
@@ -491,40 +501,45 @@ class RevisionsManagerTest extends RevisionsTestsHelper
   /**
    * @test
    */
-  public function parseDataResult2()
+  public function parseDataResultTwo()
   {
     $fetchAllResult =  array(array(
-      "id" => "2",
-      'contentHash' => "Billy Visto",
-      'revisionId' => '2',
-      "revisionNumber" => "1",
-      "key" => "name",
-      "value" =>  '"Billy Visto"',
-      'revisionRevisionNumber' => '1',
-    ),
-    array(
-      "id" => "1",
-      'contentHash' => "Billy Joel Visto",
-      'revisionId' => '1',
-      "revisionNumber" => "0",
-      "key" => "name",
-      "value" => '"Billy Joel Visto"',
-      'revisionRevisionNumber' => '0',
-    ));
+        'id'                     => '2',
+        'contentHash'            => 'Billy Visto',
+        'revisionId'             => '2',
+        'revisionNumber'         => '1',
+        'key'                    => 'name',
+        'value'                  => '"Billy Visto"',
+        'revisionRevisionNumber' => '1',
+        'splitStrategy'          => 'words',
+      ),
+      array(
+        'id'                     => '1',
+        'contentHash'            => 'Billy Joel Visto',
+        'revisionId'             => '1',
+        'revisionNumber'         => '0',
+        'key'                    => 'name',
+        'value'                  => '"Billy Joel Visto"',
+        'revisionRevisionNumber' => '0',
+        'splitStrategy'          => 'sentenceOrTag',
+      )
+    );
     $expected = array('name' => array(
       '1' => array(
-        "id" => "2",
-        'contentHash' => "Billy Visto",
-        'revisionId' => '2',
-        "value" =>  "Billy Visto",
+        'id'                     => '2',
+        'contentHash'            => 'Billy Visto',
+        'revisionId'             => '2',
+        'value'                  =>  'Billy Visto',
         'revisionRevisionNumber' => '1',
+        'splitStrategy'          => 'words',
       ),
       '0' => array(
-        'id' => '1',
-        'contentHash' => "Billy Joel Visto",
-        'revisionId' => '1',
-        'value' => 'Billy Joel Visto',
+        'id'                     => '1',
+        'contentHash'            => 'Billy Joel Visto',
+        'revisionId'             => '1',
+        'value'                  => 'Billy Joel Visto',
         'revisionRevisionNumber' => '0',
+        'splitStrategy'          => 'sentenceOrTag',
         ),
       ),
     );
@@ -539,54 +554,60 @@ class RevisionsManagerTest extends RevisionsTestsHelper
   {
     $fetchAllResult =  array(
       array(
-        "id" => "3",
-        'contentHash' => "3",
-        'revisionId' => '3',
-        "revisionNumber" => "2",
-        "key" => "status",
-        "value" =>  3,
+        'id'                     => '3',
+        'contentHash'            => '3',
+        'revisionId'             => '3',
+        'revisionNumber'         => '2',
+        'key'                    => 'status',
+        'value'                  =>  3,
         'revisionRevisionNumber' => '2',
+        'splitStrategy'          => 'words',
       ),
       array(
-        "id" => "2",
-        'contentHash' => "2",
-        'revisionId' => '2',
-        "revisionNumber" => "1",
-        "key" => "status",
-        "value" =>  '[[null,null,2]]',
+        'id'                     => '2',
+        'contentHash'            => '2',
+        'revisionId'             => '2',
+        'revisionNumber'         => '1',
+        'key'                    => 'status',
+        'value'                  =>  '[[null,null,2]]',
         'revisionRevisionNumber' => '1',
+        'splitStrategy'          => 'words',
       ),
       array(
-        "id" => "1",
-        'contentHash' => "",
-        'revisionId' => '1',
-        "revisionNumber" => "0",
-        "key" => "status",
-        "value" => '[[null,null,""]]',
+        'id'                     => '1',
+        'contentHash'            => '',
+        'revisionId'             => '1',
+        'revisionNumber'         => '0',
+        'key'                    => 'status',
+        'value'                  => '[[null,null,""]]',
         'revisionRevisionNumber' => '0',
+        'splitStrategy'          => 'words',
       )
     );
     $expected = array('status' => array(
         '2' => array(
-          "id" => "3",
-          'contentHash' => "3",
-          'revisionId' => '3',
-          "value" =>  3,
+          'id'                     => '3',
+          'contentHash'            => '3',
+          'revisionId'             => '3',
+          'value'                  =>  3,
           'revisionRevisionNumber' => '2',
+          'splitStrategy'          => 'words',
         ),
         '1' => array(
-          "id" => "2",
-          'contentHash' => "2",
-          'revisionId' => '2',
-          "value" =>  array(array(null,null,2)),
+          'id'                     => '2',
+          'contentHash'            => '2',
+          'revisionId'             => '2',
+          'value'                  =>  array(array(null,null,2)),
           'revisionRevisionNumber' => '1',
+          'splitStrategy'          => 'words',
         ),
         '0' => array(
-          'id' => '1',
-          'contentHash' => "",
-          'revisionId' => '1',
-          'value' => array(array(null,null,'')),
+          'id'                     => '1',
+          'contentHash'            => '',
+          'revisionId'             => '1',
+          'value'                  => array(array(null,null,'')),
           'revisionRevisionNumber' => '0',
+          'splitStrategy'          => 'words',
         ),
       ),
     );
@@ -622,8 +643,8 @@ class RevisionsManagerTest extends RevisionsTestsHelper
     $this->dbalConnection->query($this->getCreateDataQuery());
     $this->dbalConnection->query($this->getCreateQuery());
 
-    $this->call($this->revisionsManagerMock, 'saveRevisionContent', array(array('name' => "Billy Visto"), "", 'name'));
-    $this->call($this->revisionsManagerMock, 'saveRevisionData', array('[[1,null," Visto"]]', 1, 'name', "Billy Visto"));
+    $this->call($this->revisionsManagerMock, 'saveRevisionContent', array(array('name' => 'Billy Visto'), '', 'name'));
+    $this->call($this->revisionsManagerMock, 'saveRevisionData', array('[[1,null," Visto"]]', 1, 'name', 'Billy Visto'));
 
     $actualDataSet = $conn->createDataSet(array('revisionData'));
     $actual = $this->getFilteredDataSet($actualDataSet, array('revisionData' => array('createdOn')));
@@ -651,8 +672,8 @@ class RevisionsManagerTest extends RevisionsTestsHelper
 
     //$this->saveRevisionToDB($currContent, $newContent, $this->revisionsManagerMock);
     //
-    $this->call($this->revisionsManagerMock, 'saveRevisionContent', array(array('name' => ''), "", 'name'));
-    $this->call($this->revisionsManagerMock, 'saveRevisionContent', array(array('name' => 'Billy'), "", 'name'));
+    $this->call($this->revisionsManagerMock, 'saveRevisionContent', array(array('name' => ''), '', 'name'));
+    $this->call($this->revisionsManagerMock, 'saveRevisionContent', array(array('name' => 'Billy'), '', 'name'));
     $this->call($this->revisionsManagerMock, 'saveRevisionData', array('[[0,0,""]]', 1, 'name', ''));
     // add the new row to mimick a soon to be tested function
     $this->call($this->revisionsManagerMock, 'saveRevisionData', array(json_encode('Billy'), 2, 'name', 'Billy'));
@@ -860,10 +881,10 @@ class RevisionsManagerTest extends RevisionsTestsHelper
   public function generateHashFromArray()
   {
     $result = $this->call($this->revisionsManager, 'generateHashFromArray', array(array('name' => 'billy', 'age' => '23')));
-    $expected = "a85c23dadd90c186eaf782ddfd839b58";
+    $expected = 'a85c23dadd90c186eaf782ddfd839b58';
     $this->assertSame($expected, $result);
     $result = $this->call($this->revisionsManager, 'generateHashFromArray', array(array('age' => '23', 'name' => 'billy')));
-    $expected = "a85c23dadd90c186eaf782ddfd839b58";
+    $expected = 'a85c23dadd90c186eaf782ddfd839b58';
     $this->assertSame($expected, $result);
   }
 

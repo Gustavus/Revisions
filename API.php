@@ -4,9 +4,10 @@
  * @author  Billy Visto
  */
 namespace Gustavus\Revisions;
-use Symfony\Component\HttpFoundation\Request,
-  Gustavus\Utility\String,
-  Gustavus\Resources\Resource;
+use Gustavus\Utility\String,
+  Gustavus\Resources\Resource,
+  Gustavus\Extensibility\Actions,
+  Gustavus\Extensibility\Filters;
 
 /**
  * API to interact with the revisions project
@@ -16,11 +17,12 @@ use Symfony\Component\HttpFoundation\Request,
  */
 class API
 {
-  const RESTORE_HOOK          = '\Gustavus\Revisions\API\Restore';
-  const RESTORE_ACTION        = 'restore';
-  const UNDO_ACTION           = 'undo';
-  const REVISIONS_JS_VERSION  = 2;
-  const REVISIONS_CSS_VERSION = 1;
+  const RESTORE_HOOK           = '\Gustavus\Revisions\API\Restore';
+  const RESTORE_ACTION         = 'restore';
+  const UNDO_ACTION            = 'undo';
+  const RENDER_REVISION_FILTER = '\Gustavus\Revisions\API\BuildRevision';
+  const REVISIONS_JS_VERSION   = 2;
+  const REVISIONS_CSS_VERSION  = 2;
 
   /**
    * @var Revisions
@@ -66,6 +68,18 @@ class API
    * Class constructor
    *
    * @param array $params application's revision info
+   *   Params:
+   *   <ul>
+   *     <li>dbName: Required. name of the db connection</li>
+   *     <li>revisionsTable: Required. table name that revisions will live in.</li>
+   *     <li>revisionDataTable: Required. table name that revision data will live in.</li>
+   *     <li>table: Required. Identifier to know what table or item we are keeping track of revisions for.</li>
+   *     <li>rowId: Required. Identifier to know what row in our table we are keeping a revision for.</li>
+   *     <li>dbal: Doctrine connection to use.</li>
+   *     <li>labels: Labels to override the key for displaying a revision.</li>
+   *     <li>allowRestore: Whether we want to allow restoring to a previous revision or not.</li>
+   *     <li>splitStrategy: Strategy to use for splitting the content to generate diffs.</li>
+   *   </ul>
    *
    * @throws  \RuntimeException If there isn't enough information supplied for the application
    * @return  void
@@ -102,24 +116,25 @@ class API
   }
 
   /**
+   * Gets a specific revision
+   *
+   * @param  integer $revisionNumber Revision number to grab
+   * @return Revision
+   */
+  public function getRevision($revisionNumber)
+  {
+    return $this->revisions->getRevisionByNumber($revisionNumber);
+  }
+
+  /**
    * Renders out the revisions or revision requested
    *
-   * @param  Request $request will be used if symfony is using revisions
-   * @param  string $index index the request parameters are stored in the request
    * @return string
    */
-  public function render($request = null, $index = null)
+  public function render()
   {
-    if ($request !== null && $index !== null) {
-      if ($request->getMethod() === 'POST') {
-        $post = (new String($request->get($index)))->splitQueryString(true)->getValue();
-      } else {
-        $queryStringArray = (new String($request->get($index)))->splitQueryString(true)->getValue();
-      }
-    } else {
-      $post = $_POST;
-      $queryStringArray = $_GET;
-    }
+    $post = $_POST;
+    $queryStringArray = $_GET;
 
     if (!empty($post)) {
       // submitted the form with Post method.
@@ -168,7 +183,7 @@ class API
   {
     $revisionContent = $this->revisions->getRevisionContentArray((int) $urlParams['restore']);
     $oldMessage = $this->revisions->getRevisionByNumber((int) $urlParams['restore'])->getRevisionMessage();
-    \Gustavus\Extensibility\Actions::apply(self::RESTORE_HOOK, $revisionContent, $oldMessage, self::RESTORE_ACTION);
+    Actions::apply(self::RESTORE_HOOK, $revisionContent, $oldMessage, self::RESTORE_ACTION);
   }
 
   /**
@@ -184,7 +199,7 @@ class API
     $secondToLatestRevNum = $this->revisions->findOldestRevisionNumberPulled();
     $revisionContent = $this->revisions->getRevisionContentArray($secondToLatestRevNum);
     $oldMessage = $this->revisions->getRevisionByNumber($secondToLatestRevNum)->getRevisionMessage();
-    \Gustavus\Extensibility\Actions::apply(self::RESTORE_HOOK, $revisionContent, $oldMessage, self::UNDO_ACTION);
+    Actions::apply(self::RESTORE_HOOK, $revisionContent, $oldMessage, self::UNDO_ACTION);
     // reset limit to what it was originally at
     $this->revisions->setLimit($limit);
   }
@@ -231,7 +246,7 @@ class API
    */
   private function addCSS()
   {
-    \Gustavus\Extensibility\Filters::add('head', array($this, 'renderRevisionsCSS'));
+    Filters::add('head', array($this, 'renderRevisionsCSS'));
   }
 
   /**
@@ -253,7 +268,7 @@ class API
    */
   private function addJS()
   {
-    \Gustavus\Extensibility\Filters::add('scripts', array($this, 'renderRevisionsJS'));
+    Filters::add('scripts', array($this, 'renderRevisionsJS'));
   }
 
   /**

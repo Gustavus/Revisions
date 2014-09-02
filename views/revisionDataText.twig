@@ -15,14 +15,14 @@
           {%- if revisionData.error -%}
             {{- base.renderError() -}}
           {%- else -%}
-            {{- revisionData.getContent(true)|raw -}}
+            {{- revisionData.getContent(true, null, true)|raw -}}
           {%- endif -%}
         </dd>
         <dd>
           {%- if revisionData.error -%}
             {{- base.renderError() -}}
           {%- else -%}
-            {{- revisionData.getContent(true)|raw -}}
+            {{- revisionData.getContent(true, null, true)|raw -}}
           {%- endif -%}
         </dd>
       {% endif %}

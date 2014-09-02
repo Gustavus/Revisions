@@ -6,6 +6,7 @@ revisionData:
     revisionNumber: 0
     key: "name"
     value: '[[0,2,""]]'
+    splitStrategy: "words"
   -
     id: 2
     contentHash: "afe3690ec4cda7e262f0ca81858777df"
@@ -13,6 +14,7 @@ revisionData:
     revisionNumber: 1
     key: "name"
     value: '"Billy Visto"'
+    splitStrategy: "words"
 person-revision:
   -
     id: 1

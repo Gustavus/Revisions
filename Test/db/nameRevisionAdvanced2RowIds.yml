@@ -6,6 +6,7 @@ revisionData:
     revisionNumber: 0
     key: "age"
     value: '[[null,null,""]]'
+    splitStrategy: "words"
   -
     id: 2
     contentHash: d41d8cd98f00b204e9800998ecf8427e
@@ -13,6 +14,7 @@ revisionData:
     revisionNumber: 0
     key: "name"
     value: '[[0,2,""]]'
+    splitStrategy: "words"
   -
     id: 3
     contentHash: 37693cfc748049e45d87b8c7d8b9aacd
@@ -20,6 +22,7 @@ revisionData:
     revisionNumber: 1
     key: "age"
     value: 23
+    splitStrategy: "words"
   -
     id: 4
     contentHash: afe3690ec4cda7e262f0ca81858777df
@@ -27,6 +30,7 @@ revisionData:
     revisionNumber: 1
     key: "name"
     value: '[[2,3,""]]'
+    splitStrategy: "words"
   -
     id: 5
     contentHash: 50a7dccbd59164a2bbd8805caa12dfd2
@@ -34,6 +38,7 @@ revisionData:
     revisionNumber: 2
     key: "name"
     value: '"Billy Joel Visto"'
+    splitStrategy: "words"
   -
     id: 6
     contentHash: d41d8cd98f00b204e9800998ecf8427e
@@ -41,6 +46,7 @@ revisionData:
     revisionNumber: 0
     key: "age"
     value: '[[null,null,""]]'
+    splitStrategy: "words"
   -
     id: 7
     contentHash: d41d8cd98f00b204e9800998ecf8427e
@@ -48,6 +54,7 @@ revisionData:
     revisionNumber: 0
     key: "name"
     value: '[[0,2,""]]'
+    splitStrategy: "words"
   -
     id: 8
     contentHash: 37693cfc748049e45d87b8c7d8b9aacd
@@ -55,6 +62,7 @@ revisionData:
     revisionNumber: 1
     key: "age"
     value: 23
+    splitStrategy: "words"
   -
     id: 9
     contentHash: 8de40418edc00f2ccd06ed3f0cf6595b
@@ -62,6 +70,7 @@ revisionData:
     revisionNumber: 1
     key: "name"
     value: '"Joy Visto"'
+    splitStrategy: "words"
 person-revision:
   -
     id: 1

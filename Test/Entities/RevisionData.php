@@ -64,6 +64,13 @@ class RevisionData
    */
   private $revisionid;
 
+  /**
+   * @var string $splitStrategy
+   *
+   * @Column(name="splitStrategy", type="string", length=32, nullable=false)
+   */
+  private $splitStrategy = 'words';
+
 
   /**
    * Get id
