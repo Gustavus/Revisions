@@ -2136,7 +2136,7 @@ class APITest extends RevisionsTestsHelper
     $this->dbalConnection->query($this->getCreateQuery());
     $this->dbalConnection->query($this->getCreateDataQuery());
 
-    $this->assertSame(null, $this->revisionsAPI->getRevisionCount());
+    $this->assertSame(0, $this->revisionsAPI->getRevisionCount());
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }
 
