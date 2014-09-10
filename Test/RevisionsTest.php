@@ -1731,4 +1731,145 @@ class RevisionsTest extends RevisionsTestsHelper
 
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }
+
+  /**
+   * @test
+   */
+  public function getRevisionContentSplitByTagHTMLAndPHP()
+  {
+    $this->revisionsManagerInfo['splitStrategy'] = 'sentenceOrTag';
+
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+    $content = '<?php
+use Gustavus\TemplateBuilder\Builder;
+Builder::init();
+$templatePreferences  = array(
+  \'localNavigation\'   => TRUE,
+  \'auxBox\'        => TRUE,
+  \'templateRevision\'    => 2, // updated by template conversion script
+  \'focusBoxType\' => \'links\', // text or links
+//  \'focusBoxColumns\'   => 10,
+//  \'bannerDirectory\'   => \'general\',
+//  \'view\'          => \'template/views/general.html\',
+);
+$properties = [];
+ob_start();
+?>Testing<?php
+$properties[\'title\'] = ob_get_contents();
+ob_clean();
+?><div id="newInput">Replacing content</div>
+<p class="buttonbar"><a class="button facebook" href="#">Face</a> <a class="button twitter" href="#">Twit</a> <a class="button youtube" href="#">You</a> <a class="button wordpress" href="#">word press</a></p><?php
+$properties[\'content\'] = ob_get_contents();
+ob_clean();
+?>
+<p class="focusBoxHeader">Header</p>test
+<?php
+$properties[\'focusBox\'] = ob_get_contents();
+ob_clean();
+?>
+more stuff
+<?php
+$properties[\'focusBox\'] .= ob_get_contents();
+ob_clean();
+
+echo (new Builder($properties, $templatePreferences))->render();';
+
+    $contentVTwo = '<?php
+use Gustavus\TemplateBuilder\Builder;
+Builder::init();
+$templatePreferences  = array(
+  \'localNavigation\'   => TRUE,
+  \'auxBox\'        => TRUE,
+  \'templateRevision\'    => 2, // updated by template conversion script
+  \'focusBoxType\' => \'links\', // text or links
+//  \'focusBoxColumns\'   => 10,
+//  \'bannerDirectory\'   => \'general\',
+//  \'view\'          => \'template/views/general.html\',
+);
+$properties = [];
+ob_start();
+?>Testing<?php
+$properties[\'title\'] = ob_get_contents();
+ob_clean();
+?><div id="newInput">Replacing content arst</div>
+<p class="buttonbar"><a class="button facebook" href="#">Face</a> <a class="button twitter" href="#">Twit</a> <a class="button youtube" href="#">You</a> <a class="button wordpress" href="#">word press</a></p><?php
+$properties[\'content\'] = ob_get_contents();
+ob_clean();
+?>
+<p class="focusBoxHeader">Header</p>test
+<?php
+$properties[\'focusBox\'] = ob_get_contents();
+ob_clean();
+?>
+more stuff
+<?php
+$properties[\'focusBox\'] .= ob_get_contents();
+ob_clean();
+
+echo (new Builder($properties, $templatePreferences))->render();';
+
+    $contentVThree = '<?php
+use Gustavus\TemplateBuilder\Builder;
+Builder::init();
+$templatePreferences  = array(
+  \'localNavigation\'   => TRUE,
+  \'auxBox\'        => TRUE,
+  \'templateRevision\'    => 2, // updated by template conversion script
+  \'focusBoxType\' => \'links\', // text or links
+//  \'focusBoxColumns\'   => 10,
+//  \'bannerDirectory\'   => \'general\',
+//  \'view\'          => \'template/views/general.html\',
+);
+$properties = [];
+ob_start();
+?>Testing<?php
+$properties[\'title\'] = ob_get_contents();
+ob_clean();
+?><div id="newInput">Replacing content arst arstarst</div>
+<p class="buttonbar"><a class="button facebook" href="#">Face</a> <a class="button twitter" href="#">Twit</a> <a class="button youtube" href="#">You</a> <a class="button wordpress" href="#">word press</a></p><?php
+$properties[\'content\'] = ob_get_contents();
+ob_clean();
+?>
+<p class="focusBoxHeader">Header</p>test
+<?php
+$properties[\'focusBox\'] = ob_get_contents();
+ob_clean();
+?>
+more stuff
+<?php
+$properties[\'focusBox\'] .= ob_get_contents();
+ob_clean();
+
+echo (new Builder($properties, $templatePreferences))->render();';
+
+    $this->revisions->makeAndSaveRevision(['page' => $content]);
+    $this->revisions->makeAndSaveRevision(['page' => $contentVTwo]);
+    $this->revisions->makeAndSaveRevision(['page' => $contentVThree]);
+
+    $this->assertFalse($this->revisions->getRevisionByNumber(1)->getError());
+    $this->assertFalse($this->revisions->getRevisionByNumber(0)->getError());
+
+    $revisionData = $this->revisions->getRevisionByNumber(0)->getRevisionData();
+
+    $expectedPage = '<ins>' . $content . '</ins>';
+    $actualPage = $revisionData['page']->getContent(true, 2);
+
+    $this->assertSame(1, $revisionData['page']->getNextContentRevisionNumber());
+
+    $this->assertSame($expectedPage, $actualPage);
+
+    $revisionData = $this->revisions->getRevisionByNumber(1)->getRevisionData();
+
+    $actualPage = $revisionData['page']->getContent(true, 2);
+
+    $this->assertSame(2, $revisionData['page']->getNextContentRevisionNumber());
+
+    $this->assertContains('<div id="newInput"><del>Replacing content</del><ins>Replacing content arst</ins></div>', $actualPage);
+
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
 }
