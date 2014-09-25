@@ -2190,4 +2190,171 @@ class APITest extends RevisionsTestsHelper
     $this->assertSame(3, $this->revisionsAPI->getRevisionCount());
     $this->dropCreatedTables(array('person-revision', 'revisionData'));
   }
+
+  /**
+   * @test
+   */
+  public function saveAndGetRevisionsSplitByTagWithSpaces()
+  {
+    $conn = $this->getConnection();
+    $this->revisionsManagerInfo['rowId'] = 1;
+    $this->revisionsManagerInfo['splitStrategy'] = 'sentenceOrTag';
+
+    $this->setUpMock('person-revision');
+    $this->dbalConnection->query($this->getCreateQuery());
+    $this->dbalConnection->query($this->getCreateDataQuery());
+
+
+    $content = '<?php
+use Gustavus\TemplateBuilder\Builder;
+Builder::init();
+$templatePreferences  = array(
+  \'localNavigation\'  => TRUE,
+  \'auxBox\'  => TRUE,
+  \'templateRevision\' => 2, // updated by template conversion script
+  \'focusBoxType\' => \'links\', // text or links
+//  \'focusBoxColumns\'   => 10,
+//  \'bannerDirectory\'   => \'general\',
+//  \'view\'          => \'template/views/general.html\',
+);
+$properties = [];
+ob_start();
+?>
+Testing
+<?php
+$properties[\'title\'] = ob_get_contents();
+ob_clean();
+?>
+content here
+<?php
+$properties[\'content\'] = ob_get_contents();
+ob_clean();
+?>
+<?php
+  $properties[\'content\'] .= \'arst\';
+?>
+<p class="focusBoxHeader">Header</p>test
+<?php
+$properties[\'focusBox\'] = ob_get_contents();
+ob_clean();
+?>
+more stuff
+<?php
+$properties[\'focusBox\'] .= ob_get_contents();
+ob_clean();
+echo (new Builder($properties, $templatePreferences))->render();';
+    file_put_contents('/cis/lib/Gustavus/Revisions/Test/testContent.php', $content);
+    $content = file_get_contents('/cis/lib/Gustavus/Revisions/Test/testContent.php');
+
+    $this->revisionsAPI->saveRevision(['page' => $content]);
+
+
+    $content = '<?php use Gustavus\TemplateBuilder\Builder;
+Builder::init();
+$templatePreferences  = array(
+  \'localNavigation\'  => TRUE,
+  \'auxBox\'           => TRUE,
+  \'templateRevision\' => 2, // updated by template conversion script
+  \'focusBoxType\' => \'links\', // text or links
+//  \'focusBoxColumns\'   => 10,
+//  \'bannerDirectory\'   => \'general\',
+//  \'view\'          => \'template/views/general.html\',
+);
+$properties = [];
+ob_start();
+
+
+?>
+
+
+<div>Testing</div>
+
+
+<?php
+$properties[\'title\'] = ob_get_contents();
+ob_clean();
+?>
+
+
+
+<div class="test">&nbsp;Testing</div>
+
+
+<?php
+$properties[\'content\'] = ob_get_contents();
+ob_clean();
+?>
+
+
+<?php
+  $properties[\'content\'] .= \'arst\';
+?>
+
+
+<p class="focusBoxHeader">Header</p>test
+
+<?php
+$properties[\'focusBox\'] = ob_get_contents();
+ob_clean();
+?>
+
+more stuff
+
+<?php
+$properties[\'focusBox\'] .= ob_get_contents();
+ob_clean();
+echo (new Builder($properties, $templatePreferences))->render();';
+
+    $this->revisionsAPI->saveRevision(['page' => $content]);
+
+    $content = '<?php
+use Gustavus\TemplateBuilder\Builder;
+Builder::init();
+$templatePreferences  = array(
+  \'localNavigation\'  => TRUE,
+  \'auxBox\'           => TRUE,
+  \'templateRevision\' => 2, // updated by template conversion script
+  \'focusBoxType\'     => \'links\', // text or links
+//  \'focusBoxColumns\'   => 10,
+//  \'bannerDirectory\'   => \'general\',
+//  \'view\'          => \'template/views/general.html\',
+);
+$properties = [];
+ob_start();
+?>
+
+Testings
+
+<?php
+$properties[\'title\'] = ob_get_contents();
+ob_clean();
+?><div class="test">&nbsp;Testing arst</div><?php
+$properties[\'content\'] = ob_get_contents();
+ob_clean();
+?>
+
+<?php
+  $properties[\'content\'] .= \'arst\';
+?>
+
+<p class="focusBoxHeader">Header</p>test
+
+<?php
+$properties[\'focusBox\'] = ob_get_contents();
+ob_clean();
+?>
+
+more stuff
+
+<?php
+$properties[\'focusBox\'] .= ob_get_contents();
+ob_clean();
+echo (new Builder($properties, $templatePreferences))->render();';
+
+    $this->revisionsAPI->saveRevision(['page' => $content]);
+
+    // will be null if something happens
+    $this->assertNotNull($this->revisionsAPI->getRevision(1));
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
 }
