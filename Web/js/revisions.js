@@ -1,113 +1,210 @@
-var revisions = {
+// Make sure our Gustavus pseudo namespace exists
+if(!window.Gustavus) {
+  window.Gustavus = {};
+}
 
-  timeline: {
+/**
+ * Revisions
+ * @class Revisions
+ * @singleton
+ * @author Billy Visto
+ */
+Gustavus.Revisions = {
 
+  /**
+   * Timeline functionality
+   * @class Timeline
+   * @singleton
+   * @author Billy Visto
+   */
+  Timeline: {
+
+    /**
+     * Scrollable viewport. Should only be used by getViewport().
+     * @type {jQuery}
+     */
     $viewport: null,
 
+    /**
+     * Gets the scrollable viewport for the timeline
+     * @return {jQuery}
+     */
     getViewport: function() {
-      if (revisions.timeline.$viewport === null || revisions.timeline.$viewport.length === 0) {
-        revisions.timeline.$viewport = $('#revisionTimeline .viewport');
+      if (Gustavus.Revisions.Timeline.$viewport === null || Gustavus.Revisions.Timeline.$viewport.length === 0) {
+        Gustavus.Revisions.Timeline.$viewport = $('#revisionTimeline .viewport');
       }
-      return revisions.timeline.$viewport;
+      return Gustavus.Revisions.Timeline.$viewport;
     },
 
+    /**
+     * Checks to see if the scrollable viewport is needed.
+     * @return {Boolean}
+     */
     isViewportNeeded: function()
     {
       return $('#revisionTimeline .viewport table').outerWidth() > $('#revisionTimeline').width();
     },
 
+    /**
+     * Table header of the last revision. Should only be used with getLastRevisionTh()
+     * @type {jQuery}
+     */
     $lastRevisionTh: null,
 
+    /**
+     * Gets the table header for the last revision
+     * @return {jQuery}
+     */
     getLastRevisionTh: function() {
-      if (revisions.timeline.$lastRevisionTh === null) {
-        revisions.timeline.$lastRevisionTh = $('#revisionTimeline thead th:last-child');
+      if (Gustavus.Revisions.Timeline.$lastRevisionTh === null) {
+        Gustavus.Revisions.Timeline.$lastRevisionTh = $('#revisionTimeline thead th:last-child');
       }
-      return revisions.timeline.$lastRevisionTh;
+      return Gustavus.Revisions.Timeline.$lastRevisionTh;
     },
 
-    // each individual revision width
+    /**
+     * Width of each individual revision. Should only be used with getRevisionWidth()
+     * @type {Number}
+     */
     revisionWidth: null,
 
+    /**
+     * Gets the revision width
+     * @return {Number}
+     */
     getRevisionWidth: function() {
-      if (revisions.timeline.revisionWidth === null) {
+      if (Gustavus.Revisions.Timeline.revisionWidth === null) {
         // .prev() because the last item has a border right that gets included in outerWidth in firefox but not in chrome, so we will resort to the second to last item
-        revisions.timeline.revisionWidth = (revisions.timeline.getLastRevisionTh().prev()) ? revisions.timeline.getLastRevisionTh().prev().outerWidth() : revisions.timeline.getLastRevisionTh().outerWidth();
+        Gustavus.Revisions.Timeline.revisionWidth = (Gustavus.Revisions.Timeline.getLastRevisionTh().prev()) ? Gustavus.Revisions.Timeline.getLastRevisionTh().prev().outerWidth() : Gustavus.Revisions.Timeline.getLastRevisionTh().outerWidth();
       }
-      return revisions.timeline.revisionWidth;
+      return Gustavus.Revisions.Timeline.revisionWidth;
     },
 
+    /**
+     * Latest revision number. Should only be used with getLatestRevisionNumber().
+     * @type {Number}
+     */
     latestRevisionNumber: null,
 
+    /**
+     * Gets the latest revision number
+     * @return {Number}
+     */
     getLatestRevisionNumber: function() {
-      if (revisions.timeline.latestRevisionNumber === null) {
-        revisions.timeline.latestRevisionNumber = revisions.timeline.getLastRevisionTh().data('revision-number');
+      if (Gustavus.Revisions.Timeline.latestRevisionNumber === null) {
+        Gustavus.Revisions.Timeline.latestRevisionNumber = Gustavus.Revisions.Timeline.getLastRevisionTh().data('revision-number');
       }
-      return revisions.timeline.latestRevisionNumber;
+      return Gustavus.Revisions.Timeline.latestRevisionNumber;
     },
 
+    /**
+     * Width of the table that is within the current viewport. Should only be used in getVisibleTableWidth().
+     * @type {Number}
+     */
     visibleTableWidth: null,
 
+    /**
+     * Gets the width of the table that is within the current viewport.
+     * @return {Number}
+     */
     getVisibleTableWidth: function() {
-      if (revisions.timeline.visibleTableWidth === null) {
-        revisions.timeline.visibleTableWidth = revisions.timeline.getViewport().width();
+      if (Gustavus.Revisions.Timeline.visibleTableWidth === null) {
+        Gustavus.Revisions.Timeline.visibleTableWidth = Gustavus.Revisions.Timeline.getViewport().width();
       }
-      return revisions.timeline.visibleTableWidth;
+      return Gustavus.Revisions.Timeline.visibleTableWidth;
     },
 
     // number of pixels in the table that are not visible
+    /**
+     * Number of pixels in the table that are not visible. Should only be used in getPixelsHidden().
+     * @type {Number}
+     */
     pixelsHidden: null,
 
+    /**
+     * Gets the number of pixels in the table that are not visible.
+     * @return {Number}
+     */
     getPixelsHidden: function() {
-      if (revisions.timeline.pixelsHidden === null) {
-        revisions.timeline.pixelsHidden = revisions.timeline.getLatestRevisionNumber() * revisions.timeline.getRevisionWidth() - revisions.timeline.getVisibleTableWidth();
+      if (Gustavus.Revisions.Timeline.pixelsHidden === null) {
+        Gustavus.Revisions.Timeline.pixelsHidden = Gustavus.Revisions.Timeline.getLatestRevisionNumber() * Gustavus.Revisions.Timeline.getRevisionWidth() - Gustavus.Revisions.Timeline.getVisibleTableWidth();
       }
-      return revisions.timeline.pixelsHidden;
+      return Gustavus.Revisions.Timeline.pixelsHidden;
     },
 
+    /**
+     * Gets the left offset of the table within the viewport.
+     * @return {Number}
+     */
     getLeftOffset: function() {
-      if (revisions.timeline.isViewportNeeded() && revisions.timeline.getViewport().length !== 0 && revisions.timeline.getViewport().viewport('content').length === 0) {
+      if (Gustavus.Revisions.Timeline.isViewportNeeded() && Gustavus.Revisions.Timeline.getViewport().length !== 0 && Gustavus.Revisions.Timeline.getViewport().viewport('content').length === 0) {
         // set up viewport if timeline exists but not yet a viewport
-        revisions.setUpViewport();
+        Gustavus.Revisions.setUpViewport();
       }
-      if (revisions.timeline.isViewportNeeded() && revisions.timeline.getViewport().viewport('content').length !== 0) {
+      if (Gustavus.Revisions.Timeline.isViewportNeeded() && Gustavus.Revisions.Timeline.getViewport().viewport('content').length !== 0) {
         // the viewport exists, so we can get the position of it
-        return revisions.timeline.getViewport().viewport('content').position().left;
+        return Gustavus.Revisions.Timeline.getViewport().viewport('content').position().left;
       } else {
         // if the viewport doesn't exist, there will be no position
         return 0;
       }
     },
 
-    // number of revisions visible as well as hidden to the right.
+    /**
+     * Gets the number of revisions visible in the viewport as well as those hidden to the right.
+     * @return {Number}
+     */
     getNumberOfRevisionsVisible: function() {
-      return Math.floor((revisions.timeline.getVisibleTableWidth() + revisions.timeline.getLeftOffset()) / revisions.timeline.getRevisionWidth());
+      return Math.floor((Gustavus.Revisions.Timeline.getVisibleTableWidth() + Gustavus.Revisions.Timeline.getLeftOffset()) / Gustavus.Revisions.Timeline.getRevisionWidth());
     },
 
-    // load extra revisions to the timeline to cache scrolling a little
-    // revisions.timelineScrollingCache
+    /**
+     * Number of extra revisions we want to load to the timeline so we don't have to keep pulling them in one at a time while the person is scrolling
+     * @type {Number}
+     */
     scrollingCache: 6,
 
-    // minimum number of revisions scrolled until we pull in more revisions to the timeline
-    // revisions.timelineAutoLoadGroupSize
+    /**
+     * Minimum number of revisions scrolled until we pull in more revisions to the timeline
+     * @type {Number}
+     */
     autoLoadGroupSize: 3,
 
-    // how many revisions to pad with when scrolling the timeline
-    // revisions.revisionTimelinePadding
+    /**
+     * How many revisions to pad with when scrolling the timeline
+     * @type {Number}
+     */
     padding: 3,
 
-    // how many revisions to scroll each time the timeline is scrolled
+    /**
+     * How many revisions to scroll each time the timeline is scrolled
+     * @type {Number}
+     */
     revisionsToScrollThrough: 3,
 
-    // how many milliseconds per pixel to slide when hovering over a scrolling hotspot
+    /**
+     * How many milliseconds per pixel to slide when hovering over a scrolling hotspot
+     * @type {Number}
+     */
     hotspotMSPerPixel: 10
-
   },
 
-  // duration of the sliding animation when sliding in revisionData
+  /**
+   * Duration of the sliding animation when sliding in revisionData.
+   * @type {Number}
+   */
   contentSlideSpeed: 250,
 
+  /**
+   * Query string of the application
+   * @type {String}
+   */
   applicationQueryString: '',
 
+  /**
+   * Arguments that the revision system uses.
+   * @type {Array}
+   */
   revisionsArgs: Array(
     'revisionsAction',
     'revisionNumber',
@@ -120,21 +217,44 @@ var revisions = {
     'oldestRevisionInTimeline'
   ),
 
+  /**
+   * Storage for oldData
+   * @type {Object}
+   */
   oldData: {},
 
+  /**
+   * Oldest revision number currently pulled.
+   * @type {Number}
+   */
   oldestRevisionNumber: null,
 
+  /**
+   * Unselects the specified item.
+   * @param  {jQuery} $item
+   * @return {undefined}
+   */
   unselectBox: function($item)
   {
     $item.removeAttr('checked');
     $('#revisionTimeline .' + $item.val()).removeClass('selected');
   },
 
+  /**
+   * Marks the specified item as selected.
+   * @param  {jQuery} $item
+   * @return {undefined}
+   */
   selectBox: function($item)
   {
     $item.attr('checked', 'checked');
   },
 
+  /**
+   * Unselect the box closest to the specified item.
+   * @param  {jQuery} $item
+   * @return {undefined}
+   */
   unselectClosestBox: function($item)
   {
     var $checkedBoxes = $('input.compare:checked:not(#' + $item.attr('id') + ')');
@@ -143,10 +263,10 @@ var revisions = {
     var itemVal       = parseInt($item.val());
     if (firstVal > itemVal) {
       // newly checked box should replace the first checked box
-      revisions.unselectBox($checkedBoxes.first());
+      Gustavus.Revisions.unselectBox($checkedBoxes.first());
     } else if (lastVal < itemVal) {
       // newly checked box should replace the last checked box
-      revisions.unselectBox($checkedBoxes.last());
+      Gustavus.Revisions.unselectBox($checkedBoxes.last());
     } else {
       // it is somewhere in the middle, so we need to figure out which one the new box is closer to.
       var firstDistance = itemVal - firstVal;
@@ -154,20 +274,24 @@ var revisions = {
       var middle        = $('input.compare').length / 2;
       if (firstDistance < lastDistance) {
         // new box is closer to the first box
-        revisions.unselectBox($checkedBoxes.first());
+        Gustavus.Revisions.unselectBox($checkedBoxes.first());
       } else if (lastDistance < firstDistance) {
         // new box is closer to the last box
-        revisions.unselectBox($checkedBoxes.last());
+        Gustavus.Revisions.unselectBox($checkedBoxes.last());
       } else if (itemVal < middle) {
         // item is in the middle, so if it is in the first half of the timeline, unselect the first box
-        revisions.unselectBox($checkedBoxes.first());
+        Gustavus.Revisions.unselectBox($checkedBoxes.first());
       } else {
         // item is in the middle, so if it is in the last half of the timeline, unselect the last box
-        revisions.unselectBox($checkedBoxes.last());
+        Gustavus.Revisions.unselectBox($checkedBoxes.last());
       }
     }
   },
 
+  /**
+   * Enables the compare button if we have 2 revisions selected.
+   * @return {undefined}
+   */
   enableCompareButton: function()
   {
     if ($('td.old input.compare:checked, td.young input.compare:checked').length !== 2) {
@@ -177,6 +301,10 @@ var revisions = {
     }
   },
 
+  /**
+   * Makes an array of the visible revision diffs.
+   * @return {Array}
+   */
   makeVisibleRevisionsArray: function()
   {
     var visibleLength = $('tfoot td.old label input, tfoot td.young label input').length;
@@ -190,6 +318,14 @@ var revisions = {
     return visibleRevisions;
   },
 
+  /**
+   * Animates the replacement of html data for the specified selector
+   *
+   * @param  {jQuery} $selector Selector to animate data replacement in
+   * @param  {String} html      HTML to replace the current data with
+   * @param  {String} direction Direction of the animation
+   * @return {undefined}
+   */
   animateAndReplaceData: function($selector, html, direction)
   {
     // Prevents animations (and their callbacks) from overlapping
@@ -212,7 +348,7 @@ var revisions = {
       .hide('slide', {
           direction: direction,
           distance: $sections.last().outerWidth(true)
-        }, revisions.contentSlideSpeed, function() {
+        }, Gustavus.Revisions.contentSlideSpeed, function() {
           $sections
             .removeClass('slide-' + direction)
             .not(':last-child').remove().end() // Remove all but the last section
@@ -222,6 +358,14 @@ var revisions = {
       );
   },
 
+  /**
+   * Slides the timeline within the viewport.
+   * @param  {Number} pos           Position to slide the timeline to.
+   * @param  {Number} maxPos        Maximum position to slide
+   * @param  {Boolean} shouldAnimate Whether or not to animate the slide or not
+   * @param  {Number} speed         Speed of the animation
+   * @return {undefined}
+   */
   slideTimeline: function(pos, maxPos, shouldAnimate, speed)
   {
     if (pos > maxPos) {
@@ -233,21 +377,26 @@ var revisions = {
       pos = 0;
     }
     if (shouldAnimate) {
-      revisions.timeline.getViewport().viewport('content').stop(true, true).animate({'left': pos + 'px'}, speed, 'easeInOutSine', function() {
+      Gustavus.Revisions.Timeline.getViewport().viewport('content').stop(true, true).animate({'left': pos + 'px'}, speed, 'easeInOutSine', function() {
         // make sure revisions are visible in timeline
-        revisions.loadVisibleRevisionsIntoTimeline();
+        Gustavus.Revisions.loadVisibleRevisionsIntoTimeline();
       });
     } else {
-      revisions.timeline.getViewport().viewport('content').css('left', pos + 'px');
+      Gustavus.Revisions.Timeline.getViewport().viewport('content').css('left', pos + 'px');
       // make sure revisions are visible in timeline
-      revisions.loadVisibleRevisionsIntoTimeline();
+      Gustavus.Revisions.loadVisibleRevisionsIntoTimeline();
     }
   },
 
-  // slide timeline to make sure visible revisions are in view
+  /**
+   * Slides the timeline to make sure visible revisions are in view
+   * @param  {jQuery} $formExtras   jQuery object representing the section containing the diffs
+   * @param  {Boolean} shouldAnimate Whether to animate showing revisions or not
+   * @return {undefined}
+   */
   showVisibleRevisionInTimeline: function($formExtras, shouldAnimate)
   {
-    if (!revisions.timeline.isViewportNeeded()) {
+    if (!Gustavus.Revisions.Timeline.isViewportNeeded()) {
       return;
     }
     if ($('#revisionTimeline').html() !== '' && $formExtras.find('footer button:first-child').html() !== '') {
@@ -256,22 +405,28 @@ var revisions = {
       var latestRevDataShown = $formExtras.find('footer button:last-child').val();
 
       // range of revisions in the visible viewport
-      var visibleRevisionsRange = Array(revisions.timeline.getLatestRevisionNumber() - revisions.timeline.getNumberOfRevisionsVisible(), revisions.timeline.getLatestRevisionNumber() - Math.floor(revisions.timeline.getLeftOffset() / revisions.timeline.getRevisionWidth()));
+      var visibleRevisionsRange = Array(Gustavus.Revisions.Timeline.getLatestRevisionNumber() - Gustavus.Revisions.Timeline.getNumberOfRevisionsVisible(), Gustavus.Revisions.Timeline.getLatestRevisionNumber() - Math.floor(Gustavus.Revisions.Timeline.getLeftOffset() / Gustavus.Revisions.Timeline.getRevisionWidth()));
 
       if (visibleRevisionsRange[0] >= oldestRevDataShown) {
         // timeline needs to scroll left;
-        var newLeftPos = ((visibleRevisionsRange[0] - oldestRevDataShown) + revisions.timeline.padding) * revisions.timeline.getRevisionWidth();
+        var newLeftPos = ((visibleRevisionsRange[0] - oldestRevDataShown) + Gustavus.Revisions.Timeline.padding) * Gustavus.Revisions.Timeline.getRevisionWidth();
 
-        revisions.slideTimeline(newLeftPos, revisions.timeline.getPixelsHidden(), shouldAnimate, revisions.contentSlideSpeed);
+        Gustavus.Revisions.slideTimeline(newLeftPos, Gustavus.Revisions.Timeline.getPixelsHidden(), shouldAnimate, Gustavus.Revisions.contentSlideSpeed);
       } else if (latestRevDataShown >= visibleRevisionsRange[1]) {
         // timeline needs to scroll right;
-        var newLeftPos = ((revisions.timeline.getLatestRevisionNumber() - latestRevDataShown - revisions.timeline.padding) * revisions.timeline.getRevisionWidth());
+        var newLeftPos = ((Gustavus.Revisions.Timeline.getLatestRevisionNumber() - latestRevDataShown - Gustavus.Revisions.Timeline.padding) * Gustavus.Revisions.Timeline.getRevisionWidth());
 
-        revisions.slideTimeline(newLeftPos, revisions.timeline.getPixelsHidden(), shouldAnimate, revisions.contentSlideSpeed);
+        Gustavus.Revisions.slideTimeline(newLeftPos, Gustavus.Revisions.Timeline.getPixelsHidden(), shouldAnimate, Gustavus.Revisions.contentSlideSpeed);
       }
     }
   },
 
+  /**
+   * Replaces sections data with the specified data.
+   * @param  {jQuery} $data     jQuery object containing children of sections to replace
+   * @param  {String} direction Direction of animation
+   * @return {undefined}
+   */
   replaceSectionsWithData: function($data, direction)
   {
     $('#revisionsForm').attr('method', $data.attr('method'));
@@ -281,7 +436,7 @@ var revisions = {
         case 'revisionTimeline':
           // make sure the oldest revisionNumber pulled in is less than the oldestRevisionNumber we have asked for incase the ajax call takes time.
           var $revisionTimeline = $('#revisionTimeline');
-          if (revisions.oldestRevisionNumber === null || $data.find('#hiddenFields #oldestRevisionNumber').val() <= revisions.oldestRevisionNumber) {
+          if (Gustavus.Revisions.oldestRevisionNumber === null || $data.find('#hiddenFields #oldestRevisionNumber').val() <= Gustavus.Revisions.oldestRevisionNumber) {
             if ($(element).html() !== '' && $revisionTimeline.html() !== '') {
               $('#revisionTimeline table').html($(element).find('table').html());
               // make sure revisionTimeline is visible
@@ -296,7 +451,7 @@ var revisions = {
               }
               if ($(element).html() !== '') {
                 // timeline is being replaced. Set up viewport to drag and scroll
-                Extend.add('page', revisions.setUpViewport());
+                Extend.add('page', Gustavus.Revisions.setUpViewport());
               }
             }
           }
@@ -309,27 +464,27 @@ var revisions = {
           } else if ($(element).find('#restoreButton').length !== 0) {
             $('#revisionTimeline').hide();
           }
-          revisions.animateAndReplaceData($('#formExtras'), $(element).html(), direction);
-          revisions.showVisibleRevisionInTimeline($(element), true);
+          Gustavus.Revisions.animateAndReplaceData($('#formExtras'), $(element).html(), direction);
+          Gustavus.Revisions.showVisibleRevisionInTimeline($(element), true);
           restoreButtons = $(element).find('footer button');
           // unselect all boxes
           $('input.compare:checked').each(function(i, element) {
-            revisions.unselectBox($(element));
+            Gustavus.Revisions.unselectBox($(element));
           })
           if (restoreButtons.length === 1) {
             // revisionData
             $('.young').removeClass('young');
             $('.old').removeClass('old');
             $('.' + restoreButtons.first().val()).addClass('young');
-            revisions.selectBox($('#revisionNum-' + restoreButtons.first().val()));
+            Gustavus.Revisions.selectBox($('#revisionNum-' + restoreButtons.first().val()));
           } else if (restoreButtons.length === 2) {
             // revisionData comparison
             $('.old').removeClass('old');
             $('.' + restoreButtons.first().val()).addClass('old').removeClass('selected');
-            revisions.selectBox($('#revisionNum-' + restoreButtons.first().val()));
+            Gustavus.Revisions.selectBox($('#revisionNum-' + restoreButtons.first().val()));
             $('.young').removeClass('young');
             $('.' + restoreButtons.last().val()).addClass('young').removeClass('selected');
-            revisions.selectBox($('#revisionNum-' + restoreButtons.last().val()));
+            Gustavus.Revisions.selectBox($('#revisionNum-' + restoreButtons.last().val()));
           } else {
             // revisionData was removed from the page
             $('.young').removeClass('young');
@@ -345,6 +500,11 @@ var revisions = {
     });
   },
 
+  /**
+   * Makes an object of data for ajax requests.
+   * @param  {jQuery} $element Element the ajax request was triggered with
+   * @return {Object} Object of data for ajax.
+   */
   makeDataObject: function($element)
   {
     var data = {};
@@ -389,19 +549,24 @@ var revisions = {
     return data;
   },
 
+  /**
+   * Gets the direction of the slide animation during the content replacement
+   * @param  {Object} revData Object of revisionsData to decide which direction to slide
+   * @return {string}         Direction to slide the animation. Either left or right.
+   */
   getSlideDirection: function(revData)
   {
-    if (revisions.oldData.revisionNumber !== undefined && revData.revisionNumber !== undefined) {
+    if (Gustavus.Revisions.oldData.revisionNumber !== undefined && revData.revisionNumber !== undefined) {
       // figure out old revisionNumber
-      if (revisions.oldData.revisionNumber === "false") {
+      if (Gustavus.Revisions.oldData.revisionNumber === "false") {
         // set oldRevNum to be the average of the revisionNumbers you are comparing
-        if (revisions.oldData.revisionNumbers !== undefined && revisions.oldData.revisionNumbers.length > 1) {
-          var oldRevNum = (parseInt(revisions.oldData.revisionNumbers[0]) + parseInt(revisions.oldData.revisionNumbers[1])) / 2;
+        if (Gustavus.Revisions.oldData.revisionNumbers !== undefined && Gustavus.Revisions.oldData.revisionNumbers.length > 1) {
+          var oldRevNum = (parseInt(Gustavus.Revisions.oldData.revisionNumbers[0]) + parseInt(Gustavus.Revisions.oldData.revisionNumbers[1])) / 2;
         } else {
           var oldRevNum = 0;
         }
       } else {
-        var oldRevNum = revisions.oldData.revisionNumber;
+        var oldRevNum = Gustavus.Revisions.oldData.revisionNumber;
       }
       // figure out new revisionNumber
       if (revData.revisionNumber === "false") {
@@ -422,10 +587,16 @@ var revisions = {
     } else {
       var direction = 'left';
     }
-    revisions.oldData = revData;
+    Gustavus.Revisions.oldData = revData;
     return direction
   },
 
+  /**
+   * Performs the ajax request with the specified data to the specified url
+   * @param  {Object} revData Data we are replacing to determine the slide direction
+   * @param  {String} url     URL to make the request to
+   * @return {undefined}
+   */
   makeAjaxRequest: function(revData, url)
   {
     // This is triggered when the history state changes
@@ -436,7 +607,7 @@ var revisions = {
       // only set this if the timeline exists
       data['oldestRevisionInTimeline'] = oldestRevisionInTimeline;
     }
-    data['visibleRevisions'] = revisions.makeVisibleRevisionsArray();
+    data['visibleRevisions'] = Gustavus.Revisions.makeVisibleRevisionsArray();
 
     if (url !== '') {
       $.ajax({
@@ -444,7 +615,7 @@ var revisions = {
         type: 'GET',
         data: data,
         success: function(ajaxData) {
-          revisions.replaceSectionsWithData($(ajaxData), revisions.getSlideDirection(revData));
+          Gustavus.Revisions.replaceSectionsWithData($(ajaxData), Gustavus.Revisions.getSlideDirection(revData));
           // Track this event in Google Analytics
           window._gaq = window._gaq || [];
           _gaq.push(['_trackPageview', url.replace(/^https?:\/\/[^\/]+/, '')]);
@@ -453,35 +624,57 @@ var revisions = {
     }
   },
 
+  /**
+   * Makes history for navigating if enabled or performs the ajax request to get the new data
+   * @param  {jQuery} $element          Element that triggered our makeHistory event
+   * @param  {Boolean} shouldMakeHistory Whether we should add to our history stack or just make the ajax request.
+   * @return {undefined}
+   */
   makeHistory: function($element, shouldMakeHistory)
   {
-    var revData = revisions.makeDataObject($element);
-    var url = Gustavus.Utility.URLUtil.urlify(null, revData);
+    var revData = Gustavus.Revisions.makeDataObject($element);
+    var url = Gustavus.Utility.URLUtil.urlify('?', revData, true, false);
 
     if (window.History.enabled && shouldMakeHistory) {
       window.History.pushState(revData, null, url);
     } else {
       // history isn't enabled, so the statechange event wont get called
-      revisions.makeAjaxRequest(revData, url);
+      Gustavus.Revisions.makeAjaxRequest(revData, url);
     }
   },
 
+  /**
+   * Handles click actions
+   * @param  {jQuery} $element          Element the click was triggered on.
+   * @param  {Boolean} shouldMakeHistory Whether we should add to our history stack or not
+   * @return {undefined}
+   */
   handleClickAction: function($element, shouldMakeHistory)
   {
-    // call make history to throw the new url to the stack and trigger the statechange event that calls revisions.makeAjaxRequest
-    revisions.makeHistory($element, shouldMakeHistory);
+    // call make history to throw the new url to the stack and trigger the statechange event that calls Gustavus.Revisions.makeAjaxRequest
+    Gustavus.Revisions.makeHistory($element, shouldMakeHistory);
   },
 
+  /**
+   * Triggers a click action on the show more revisions button.
+   * @param  {Number} oldestRevNumToPull Oldest revision number we want loaded
+   * @return {undefined}
+   */
   triggerShowMoreClick: function(oldestRevNumToPull)
   {
     if ($('.compare input:first-child').val() > oldestRevNumToPull) {
-      revisions.oldestRevisionNumber = oldestRevNumToPull;
+      Gustavus.Revisions.oldestRevisionNumber = oldestRevNumToPull;
       // trigger click on button to pull more revisions
       // don't push to history stack
-      revisions.handleClickAction($('td.bytes.' + oldestRevNumToPull).first(), false);
+      Gustavus.Revisions.handleClickAction($('td.bytes.' + oldestRevNumToPull).first(), false);
     }
   },
 
+  /**
+   * Converts negative numbers and zero to 1.
+   * @param  {Number} number Number to convert.
+   * @return {Number} Adjusted number
+   */
   convertNegativeAndZero: function(number)
   {
     if (number <= 0) {
@@ -491,43 +684,54 @@ var revisions = {
     }
   },
 
+  /**
+   * Loads all visible revisions into the timeline so we have data to look at.
+   * @return {undefined}
+   */
   loadVisibleRevisionsIntoTimeline: function()
   {
     if ($('.compare input:first-child').val() > 1) {
       // pull in extra revisions specified in timelineScrollingCache
-      var oldestRevNumToPull        = revisions.convertNegativeAndZero(revisions.timeline.getLatestRevisionNumber() - (revisions.timeline.getNumberOfRevisionsVisible() + revisions.timeline.scrollingCache));
+      var oldestRevNumToPull        = Gustavus.Revisions.convertNegativeAndZero(Gustavus.Revisions.Timeline.getLatestRevisionNumber() - (Gustavus.Revisions.Timeline.getNumberOfRevisionsVisible() + Gustavus.Revisions.Timeline.scrollingCache));
 
-      if (revisions.oldestRevisionNumber === null) {
-        revisions.triggerShowMoreClick(oldestRevNumToPull);
+      if (Gustavus.Revisions.oldestRevisionNumber === null) {
+        Gustavus.Revisions.triggerShowMoreClick(oldestRevNumToPull);
       } else {
         // pull in by group size set in timelineAutoLoadGroupSize
-        var oldestRevNumAllowedToPull = revisions.convertNegativeAndZero(revisions.oldestRevisionNumber - revisions.timeline.autoLoadGroupSize);
-        if (revisions.oldestRevisionNumber > 1 && oldestRevNumAllowedToPull >= oldestRevNumToPull) {
-          revisions.triggerShowMoreClick(oldestRevNumToPull);
+        var oldestRevNumAllowedToPull = Gustavus.Revisions.convertNegativeAndZero(Gustavus.Revisions.oldestRevisionNumber - Gustavus.Revisions.Timeline.autoLoadGroupSize);
+        if (Gustavus.Revisions.oldestRevisionNumber > 1 && oldestRevNumAllowedToPull >= oldestRevNumToPull) {
+          Gustavus.Revisions.triggerShowMoreClick(oldestRevNumToPull);
         }
       }
     }
   },
 
+  /**
+   * Handles scrolling events triggered by the mouse
+   * @param  {Number} delta  Total distance the mouse has moved
+   * @param  {Number} deltaX Total distance the mouse has moved over the X axis
+   * @param  {Number} deltaY Total distance the mouse has moved over the Y axis
+   * @return {undefined}
+   */
   scrollOnMouseWheel: function(delta, deltaX, deltaY)
   {
     if (delta) {
       var wheelScrollAmount = (deltaX !== 0) ? 0 - deltaX : delta;
 
       if (wheelScrollAmount < 0) {
-        var newPos = revisions.timeline.getLeftOffset() + (revisions.timeline.getRevisionWidth() * revisions.timeline.revisionsToScrollThrough) * wheelScrollAmount;
+        var newPos = Gustavus.Revisions.Timeline.getLeftOffset() + (Gustavus.Revisions.Timeline.getRevisionWidth() * Gustavus.Revisions.Timeline.revisionsToScrollThrough) * wheelScrollAmount;
       } else {
-        var newPos = revisions.timeline.getLeftOffset() + (revisions.timeline.getRevisionWidth() * revisions.timeline.revisionsToScrollThrough) * wheelScrollAmount;
+        var newPos = Gustavus.Revisions.Timeline.getLeftOffset() + (Gustavus.Revisions.Timeline.getRevisionWidth() * Gustavus.Revisions.Timeline.revisionsToScrollThrough) * wheelScrollAmount;
       }
 
       var hoverRevisionNumber = $('#revisionTimeline th.hover').data('revision-number');
 
-      if (newPos > revisions.timeline.getPixelsHidden()) {
-        var revisionsToScroll = (newPos - revisions.timeline.getPixelsHidden()) / (revisions.timeline.revisionsToScrollThrough * revisions.timeline.getRevisionWidth());
+      if (newPos > Gustavus.Revisions.Timeline.getPixelsHidden()) {
+        var revisionsToScroll = (newPos - Gustavus.Revisions.Timeline.getPixelsHidden()) / (Gustavus.Revisions.Timeline.revisionsToScrollThrough * Gustavus.Revisions.Timeline.getRevisionWidth());
       } else if (newPos < 0) {
-        var revisionsToScroll = (0 - newPos) / (revisions.timeline.revisionsToScrollThrough * revisions.timeline.getRevisionWidth());
+        var revisionsToScroll = (0 - newPos) / (Gustavus.Revisions.Timeline.revisionsToScrollThrough * Gustavus.Revisions.Timeline.getRevisionWidth());
       } else {
-        var revisionsToScroll = revisions.timeline.revisionsToScrollThrough;
+        var revisionsToScroll = Gustavus.Revisions.Timeline.revisionsToScrollThrough;
       }
       if (revisionsToScroll === 1) {
         // this means that it wants to scroll over by the width of the revision * the number of revisions to scroll through
@@ -541,27 +745,36 @@ var revisions = {
       }
 
       $('#revisionTimeline tr th.' + newHoverRevisionNumber).mouseenter();
-      revisions.slideTimeline(newPos, revisions.timeline.getPixelsHidden(), false, 1);
+      Gustavus.Revisions.slideTimeline(newPos, Gustavus.Revisions.Timeline.getPixelsHidden(), false, 1);
     }
   },
 
+  /**
+   * Figure out our slide duration based off of the distance of our slide.
+   * @param  {Number} newPos Position we want to move to
+   * @return {Number} Duration of our slide animation
+   */
   findSlideDuration: function(newPos)
   {
     // pixels needed to slide until we hit our target
-    var pixelsUntilEnd = Math.abs(revisions.timeline.getLeftOffset() - newPos);
-    return pixelsUntilEnd * revisions.timeline.hotspotMSPerPixel;
+    var pixelsUntilEnd = Math.abs(Gustavus.Revisions.Timeline.getLeftOffset() - newPos);
+    return pixelsUntilEnd * Gustavus.Revisions.Timeline.hotspotMSPerPixel;
   },
 
+  /**
+   * Sets up the scrollable viewport for the timeline to slide arount in.
+   * @return {undefined}
+   */
   setUpViewport: function()
   {
     var $table = $('#revisionTimeline table');
 
     var dimensions = {
       height: $table.height() + 'px',
-      width: $('#revisionTimeline').width() - parseInt(revisions.timeline.getViewport().css('marginLeft')) + 'px'
+      width: $('#revisionTimeline').width() - parseInt(Gustavus.Revisions.Timeline.getViewport().css('marginLeft')) + 'px'
     }
-    if (revisions.timeline.isViewportNeeded()) {
-      revisions.timeline.getViewport()
+    if (Gustavus.Revisions.Timeline.isViewportNeeded()) {
+      Gustavus.Revisions.Timeline.getViewport()
         .css(dimensions)
         .viewport({
           content: $table,
@@ -573,57 +786,58 @@ var revisions = {
             axis: 'x'
           })
           .on('drag', function(e) {
-            revisions.loadVisibleRevisionsIntoTimeline();
+            Gustavus.Revisions.loadVisibleRevisionsIntoTimeline();
           })
           .on('mousewheel', function(e, delta, deltaX, deltaY) {
-            revisions.scrollOnMouseWheel(delta, deltaX, deltaY);
+            Gustavus.Revisions.scrollOnMouseWheel(delta, deltaX, deltaY);
             return false;
           })
           .ready(function() {
             // make sure the visible revision is also visible in the timeline
-            revisions.showVisibleRevisionInTimeline($('#formExtras'), false);
+            Gustavus.Revisions.showVisibleRevisionInTimeline($('#formExtras'), false);
           });
       $('#revisionTimeline')
         .find('.scrollHotspot').removeClass('disabled').end()
         .on('mouseenter', '.scrollHotspot.scrollRight', function() {
           // slide timeline right
-          revisions.slideTimeline(0, 1, true, revisions.findSlideDuration(0));
+          Gustavus.Revisions.slideTimeline(0, 1, true, Gustavus.Revisions.findSlideDuration(0));
         }).on('mouseleave', '.scrollHotspot.scrollRight', function() {
           // stop animation
-          revisions.timeline.getViewport().viewport('content').stop();
+          Gustavus.Revisions.Timeline.getViewport().viewport('content').stop();
         }).on('mouseenter', '.scrollHotspot.scrollLeft', function() {
           // slide timeline left
-          revisions.slideTimeline(revisions.timeline.getPixelsHidden(), revisions.timeline.getPixelsHidden(), true, revisions.findSlideDuration(revisions.timeline.getPixelsHidden()));
+          Gustavus.Revisions.slideTimeline(Gustavus.Revisions.Timeline.getPixelsHidden(), Gustavus.Revisions.Timeline.getPixelsHidden(), true, Gustavus.Revisions.findSlideDuration(Gustavus.Revisions.Timeline.getPixelsHidden()));
         }).on('mouseleave', '.scrollHotspot.scrollLeft', function() {
           // stop animation
-          revisions.timeline.getViewport().viewport('content').stop();
+          Gustavus.Revisions.Timeline.getViewport().viewport('content').stop();
         });
     }
   }
 }
 
+// bind our history statechange event
 window.History.Adapter.bind(window, 'statechange', function(e, i) {
   var State = window.History.getState();
 
-  revisions.makeAjaxRequest(State.data, State.url);
+  Gustavus.Revisions.makeAjaxRequest(State.data, State.url);
 });
 
 $('#revisionsForm').on('click', 'thead th, tbody td', function() {
-  revisions.handleClickAction($(this), true);
+  Gustavus.Revisions.handleClickAction($(this), true);
   return false;
 }).on('click', 'button', function() {
   if ($('#revisionsForm').attr('method') === 'GET') {
     // we only want to do an ajax request if the form method is get.
-    revisions.handleClickAction($(this), true);
+    Gustavus.Revisions.handleClickAction($(this), true);
     return false;
   }
 }).on('click', 'input.compare', function() {
   // disable compare button if 2 checkboxes aren't checked
   if ($('input.compare:checked').length === 2) {
-    revisions.enableCompareButton();
+    Gustavus.Revisions.enableCompareButton();
   } else if ($('input.compare:checked').length > 2) {
-    revisions.unselectClosestBox($(this));
-    revisions.enableCompareButton();
+    Gustavus.Revisions.unselectClosestBox($(this));
+    Gustavus.Revisions.enableCompareButton();
   } else {
     $('#compareButton').attr('disabled', 'disabled');
   }
@@ -632,7 +846,7 @@ $('#revisionsForm').on('click', 'thead th, tbody td', function() {
     if ($(this).is(':checked')) {
       $('.' + $(this).val()).addClass('selected');
     } else {
-      revisions.unselectBox($(this));
+      Gustavus.Revisions.unselectBox($(this));
     }
   }
 }).on('mouseenter', '#revisionTimeline th, #revisionTimeline td', function() {
@@ -645,9 +859,9 @@ $('#revisionsForm').on('click', 'thead th, tbody td', function() {
 });
 
 /* Set up viewport */
-revisions.setUpViewport();
+Gustavus.Revisions.setUpViewport();
 
 $(document).ready(function() {
   $('#compareButton').attr('disabled', 'disabled');
-  revisions.loadVisibleRevisionsIntoTimeline();
+  Gustavus.Revisions.loadVisibleRevisionsIntoTimeline();
 });
