@@ -456,12 +456,8 @@ var revisions = {
   makeHistory: function($element, shouldMakeHistory)
   {
     var revData = revisions.makeDataObject($element);
-    if (window.symfonyApp) {
-      var delimiter = '&';
-    } else {
-      var delimiter = '?';
-    }
-    var url = delimiter + $.param(revData);
+    var url = Gustavus.Utility.URLUtil.urlify(null, revData);
+
     if (window.History.enabled && shouldMakeHistory) {
       window.History.pushState(revData, null, url);
     } else {
