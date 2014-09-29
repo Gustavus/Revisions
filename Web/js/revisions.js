@@ -633,7 +633,7 @@ Gustavus.Revisions = {
   makeHistory: function($element, shouldMakeHistory)
   {
     var revData = Gustavus.Revisions.makeDataObject($element);
-    var url = Gustavus.Utility.URLUtil.urlify('?', revData, true, false);
+    var url = Gustavus.Utility.URL.urlify('?', revData, true, false);
 
     if (window.History.enabled && shouldMakeHistory) {
       window.History.pushState(revData, null, url);
