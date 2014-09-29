@@ -2243,8 +2243,6 @@ more stuff
 $properties[\'focusBox\'] .= ob_get_contents();
 ob_clean();
 echo (new Builder($properties, $templatePreferences))->render();';
-    file_put_contents('/cis/lib/Gustavus/Revisions/Test/testContent.php', $content);
-    $content = file_get_contents('/cis/lib/Gustavus/Revisions/Test/testContent.php');
 
     $this->revisionsAPI->saveRevision(['page' => $content]);
 
