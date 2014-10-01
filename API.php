@@ -286,7 +286,7 @@ class API
       '/revisions/js/jquery-viewport/jquery.viewport.min.js',
       Resource::renderResource(['path' => '/revisions/js/jquery-mousewheel/jquery.mousewheel.js', 'version' => 1]),
       '/js/history/scripts/bundled/html4+html5/jquery.history.js',
-      Resource::renderResource(['path' => '/revisions/js/revisions.js', 'version' => self::REVISIONS_JS_VERSION]),
+      Resource::renderResource(['urlutil', ['path' => '/revisions/js/revisions.js', 'version' => self::REVISIONS_JS_VERSION]]),
     );
     return $content . $this->modernizeJS($revisionsScripts);
   }

@@ -210,6 +210,7 @@ class RevisionsRenderer
   {
     foreach ($paramsToFilter as $filter) {
       unset($params[$filter]);
+      unset($params[urlencode($filter)]);
     }
     return $params;
   }
@@ -235,7 +236,7 @@ class RevisionsRenderer
           'oldestRevisionNumber'  => $oldestRevisionNumber,
           'limit'                 => $this->revisions->getLimit(),
           'maxColumnSizes'        => $this->revisions->getMaxColumnSizes(),
-          'hiddenFields'          => $this->removeParams(array_merge($this->applicationUrlParams, array('oldestRevisionNumber' => $oldestRevisionNumber + 1), $this->revisionsUrlParams), array('barebones', 'oldestRevisionInTimeline', 'visibleRevisions', 'revisionNumbers')),
+          'hiddenFields'          => $this->removeParams(array_merge($this->applicationUrlParams, array('oldestRevisionNumber' => $oldestRevisionNumber + 1), $this->revisionsUrlParams), array('barebones', 'oldestRevisionInTimeline', 'visibleRevisions', 'visibleRevisions[]', 'revisionNumbers')),
           'shouldRenderTimeline'      => $this->shouldRenderTimeline,
           'shouldRenderRevisionData'  => $this->shouldRenderRevisionData,
           'shouldAllowRestore'         => $this->shouldAllowRestore,

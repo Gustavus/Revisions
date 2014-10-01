@@ -276,7 +276,16 @@ class RevisionDataDiff extends RevisionData
    */
   private function skippedValuesExist($prevKey, $key, $diff)
   {
-    return (count($prevKey) > 0 && is_array($diff[$prevKey[0]]) && $key > 1 && ($key - 1 === end($prevKey) || ($key - 2 === end($prevKey) && preg_match('`\s+`', $diff[$key - 1]) !== 0)));
+    return (
+      count($prevKey) > 0 &&
+      is_array($diff[$prevKey[0]]) &&
+      $key > 1 &&
+      ($key - 1 === end($prevKey) ||
+        ($key - 2 === end($prevKey) &&
+          preg_match('`^\s+$`', $diff[$key - 1]) !== 0
+        )
+      )
+    );
   }
 
   /**
@@ -308,7 +317,7 @@ class RevisionDataDiff extends RevisionData
         if ($this->skippedValuesExist($prevKey, $key, $diff)) {
           // $value is a continuation of a previous diff's deletion and can be thrown on top of it.
           // find skipped spaces between the last index and this one.
-          $skipped = ($key - 2 === end($prevKey) && preg_match('`(\s+)`', $diff[$key - 1], $spaces) !== 0)  ? array($spaces[0]) : array();
+          $skipped = ($key - 2 === end($prevKey) && preg_match('`^(\s+)$`', $diff[$key - 1], $spaces) !== 0)  ? array($spaces[0]) : array();
           // figure out what the deletion we are adding on to is
           $prevD = (isset($return[$prevKey[0] + $oldOffset]['d'])) ? $return[$prevKey[0] + $oldOffset]['d'] : array();
           // add the deletions together to make a chained deletion.
@@ -331,7 +340,7 @@ class RevisionDataDiff extends RevisionData
         }
         // offset of the total number of items we have chained together so we maintain proper keys
         $offset += count($value['i']) - 1;
-      } else if (preg_match('`\s+`', $value) === 0) {
+      } else if (preg_match('`^\s+$`', $value) === 0) {
         // reset $prevKey
         $prevKey = array();
       }
@@ -395,7 +404,7 @@ class RevisionDataDiff extends RevisionData
   private function splitSentenceOrTag($content)
   {
     $sentenceEnd = '[\.|\?|\!]';
-    $tag         = '\<.+?\>';
+    $tag         = '<[^>]+?>';
     $regex       = sprintf('`((?:%1$s%2$s)|%1$s|(?:%2$s))`', $sentenceEnd, $tag);
 
     $split = preg_split($regex, $content, null, PREG_SPLIT_NO_EMPTY|PREG_SPLIT_DELIM_CAPTURE);

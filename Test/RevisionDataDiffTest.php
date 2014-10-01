@@ -1365,6 +1365,65 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
   /**
    * @test
    */
+  public function splitSentenceOrTag()
+  {
+    $content = '<p>I like to eat a lot of food while triple jumping.</p>I also like to grill food.';
+    $expected = array('<p>', 'I like to eat a lot of food while triple jumping', '.</p>', 'I also like to grill food', '.');
+    $result = $this->call($this->revisionDataDiff, 'splitSentenceOrTag', array($content));
+    $this->assertSame($expected, $result);
+  }
+
+  /**
+   * @test
+   */
+  public function splitSentenceOrTagWithPHP()
+  {
+    $content = '<p>I like to eat a lot of food while triple jumping.</p>I also like to grill food.
+<?php echo "arst";';
+    $expected = array('<p>', 'I like to eat a lot of food while triple jumping', '.</p>', 'I also like to grill food', '.', "\n<", '?', 'php echo "arst";');
+    $result = $this->call($this->revisionDataDiff, 'splitSentenceOrTag', array($content));
+    $this->assertSame($expected, $result);
+  }
+
+  /**
+   * @test
+   */
+  public function splitSentenceOrTagWithPHPAndLineBreaks()
+  {
+    $content = '
+<?php
+  $properties = [
+    "content" => "arst",
+  ];
+?>
+<p>I like to eat a lot of food while triple jumping.</p>I also like to grill food.
+<?php echo "arst";';
+    $expected = [
+      "\n",
+      '<?php
+  $properties = [
+    "content" =>',
+      ' "arst",
+  ];
+',
+      '?',
+      ">\n",
+      '<p>',
+      'I like to eat a lot of food while triple jumping',
+      '.</p>',
+      'I also like to grill food',
+      '.',
+      "\n<",
+      '?',
+      'php echo "arst";',
+    ];
+    $result = $this->call($this->revisionDataDiff, 'splitSentenceOrTag', array($content));
+    $this->assertSame($expected, $result);
+  }
+
+  /**
+   * @test
+   */
   public function diff()
   {
     $revisionContent = 'I like to eat food';
@@ -2214,6 +2273,24 @@ class RevisionDataDiffTest extends \Gustavus\Test\Test
     $key = 13;
     $result = $this->call($this->revisionDataDiff, 'skippedValuesExist', array($prevKey, $key, $diff));
     $this->assertTrue($result);
+  }
+
+  /**
+   * @test
+   */
+  public function skippedValuesExistSplitBySentenceOrTag()
+  {
+    $oldContent = 'arst <div class="test">Hello</div>';
+    $nextContent = 'arsts <div class="test">arst</div> <div class="hello">hello</div>';
+    $this->revisionDataDiffProperties['nextContent'] = $oldContent;
+    $this->setUp();
+    $oldSplit = $this->call($this->revisionDataDiff, 'splitSentenceOrTag', array($oldContent));
+    $nextSplit = $this->call($this->revisionDataDiff, 'splitSentenceOrTag', array($nextContent));
+    $diff = $this->call($this->revisionDataDiff, 'diff', array($oldSplit, $nextSplit));
+    $prevKey = array(0);
+    $key = 2;
+    $result = $this->call($this->revisionDataDiff, 'skippedValuesExist', array($prevKey, $key, $diff));
+    $this->assertFalse($result);
   }
 
   /**
