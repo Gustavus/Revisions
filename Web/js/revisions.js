@@ -5,19 +5,47 @@ if(!window.Gustavus) {
 
 /**
  * Revisions
- * @class Revisions
+ * @class Gustavus.Revisions
  * @singleton
  * @author Billy Visto
  */
 Gustavus.Revisions = {
-
   /**
    * Timeline functionality
-   * @class Timeline
+   * @class Gustavus.Revisions.Timeline
    * @singleton
    * @author Billy Visto
    */
   Timeline: {
+    /**
+     * Number of extra revisions we want to load to the timeline so we don't have to keep pulling them in one at a time while the person is scrolling
+     * @type {Number}
+     */
+    scrollingCache: 6,
+
+    /**
+     * Minimum number of revisions scrolled until we pull in more revisions to the timeline
+     * @type {Number}
+     */
+    autoLoadGroupSize: 3,
+
+    /**
+     * How many revisions to pad with when scrolling the timeline
+     * @type {Number}
+     */
+    padding: 3,
+
+    /**
+     * How many revisions to scroll each time the timeline is scrolled
+     * @type {Number}
+     */
+    revisionsToScrollThrough: 3,
+
+    /**
+     * How many milliseconds per pixel to slide when hovering over a scrolling hotspot
+     * @type {Number}
+     */
+    hotspotMSPerPixel: 10
 
     /**
      * Scrollable viewport. Should only be used by getViewport().
@@ -157,52 +185,25 @@ Gustavus.Revisions = {
     getNumberOfRevisionsVisible: function() {
       return Math.floor((Gustavus.Revisions.Timeline.getVisibleTableWidth() + Gustavus.Revisions.Timeline.getLeftOffset()) / Gustavus.Revisions.Timeline.getRevisionWidth());
     },
-
-    /**
-     * Number of extra revisions we want to load to the timeline so we don't have to keep pulling them in one at a time while the person is scrolling
-     * @type {Number}
-     */
-    scrollingCache: 6,
-
-    /**
-     * Minimum number of revisions scrolled until we pull in more revisions to the timeline
-     * @type {Number}
-     */
-    autoLoadGroupSize: 3,
-
-    /**
-     * How many revisions to pad with when scrolling the timeline
-     * @type {Number}
-     */
-    padding: 3,
-
-    /**
-     * How many revisions to scroll each time the timeline is scrolled
-     * @type {Number}
-     */
-    revisionsToScrollThrough: 3,
-
-    /**
-     * How many milliseconds per pixel to slide when hovering over a scrolling hotspot
-     * @type {Number}
-     */
-    hotspotMSPerPixel: 10
   },
 
   /**
    * Duration of the sliding animation when sliding in revisionData.
+   * @member Gustavus.Revisions
    * @type {Number}
    */
   contentSlideSpeed: 250,
 
   /**
    * Query string of the application
+   * @member Gustavus.Revisions
    * @type {String}
    */
   applicationQueryString: '',
 
   /**
    * Arguments that the revision system uses.
+   * @member Gustavus.Revisions
    * @type {Array}
    */
   revisionsArgs: Array(
@@ -219,18 +220,21 @@ Gustavus.Revisions = {
 
   /**
    * Storage for oldData
+   * @member Gustavus.Revisions
    * @type {Object}
    */
   oldData: {},
 
   /**
    * Oldest revision number currently pulled.
+   * @member Gustavus.Revisions
    * @type {Number}
    */
   oldestRevisionNumber: null,
 
   /**
    * Unselects the specified item.
+   * @member Gustavus.Revisions
    * @param  {jQuery} $item
    * @return {undefined}
    */
@@ -242,6 +246,7 @@ Gustavus.Revisions = {
 
   /**
    * Marks the specified item as selected.
+   * @member Gustavus.Revisions
    * @param  {jQuery} $item
    * @return {undefined}
    */
@@ -252,6 +257,7 @@ Gustavus.Revisions = {
 
   /**
    * Unselect the box closest to the specified item.
+   * @member Gustavus.Revisions
    * @param  {jQuery} $item
    * @return {undefined}
    */
@@ -290,6 +296,7 @@ Gustavus.Revisions = {
 
   /**
    * Enables the compare button if we have 2 revisions selected.
+   * @member Gustavus.Revisions
    * @return {undefined}
    */
   enableCompareButton: function()
@@ -303,6 +310,7 @@ Gustavus.Revisions = {
 
   /**
    * Makes an array of the visible revision diffs.
+   * @member Gustavus.Revisions
    * @return {Array}
    */
   makeVisibleRevisionsArray: function()
@@ -321,6 +329,7 @@ Gustavus.Revisions = {
   /**
    * Animates the replacement of html data for the specified selector
    *
+   * @member Gustavus.Revisions
    * @param  {jQuery} $selector Selector to animate data replacement in
    * @param  {String} html      HTML to replace the current data with
    * @param  {String} direction Direction of the animation
@@ -360,6 +369,7 @@ Gustavus.Revisions = {
 
   /**
    * Slides the timeline within the viewport.
+   * @member Gustavus.Revisions
    * @param  {Number} pos           Position to slide the timeline to.
    * @param  {Number} maxPos        Maximum position to slide
    * @param  {Boolean} shouldAnimate Whether or not to animate the slide or not
@@ -390,6 +400,7 @@ Gustavus.Revisions = {
 
   /**
    * Slides the timeline to make sure visible revisions are in view
+   * @member Gustavus.Revisions
    * @param  {jQuery} $formExtras   jQuery object representing the section containing the diffs
    * @param  {Boolean} shouldAnimate Whether to animate showing revisions or not
    * @return {undefined}
@@ -423,6 +434,7 @@ Gustavus.Revisions = {
 
   /**
    * Replaces sections data with the specified data.
+   * @member Gustavus.Revisions
    * @param  {jQuery} $data     jQuery object containing children of sections to replace
    * @param  {String} direction Direction of animation
    * @return {undefined}
@@ -502,6 +514,7 @@ Gustavus.Revisions = {
 
   /**
    * Makes an object of data for ajax requests.
+   * @member Gustavus.Revisions
    * @param  {jQuery} $element Element the ajax request was triggered with
    * @return {Object} Object of data for ajax.
    */
@@ -551,6 +564,7 @@ Gustavus.Revisions = {
 
   /**
    * Gets the direction of the slide animation during the content replacement
+   * @member Gustavus.Revisions
    * @param  {Object} revData Object of revisionsData to decide which direction to slide
    * @return {string}         Direction to slide the animation. Either left or right.
    */
@@ -593,6 +607,7 @@ Gustavus.Revisions = {
 
   /**
    * Performs the ajax request with the specified data to the specified url
+   * @member Gustavus.Revisions
    * @param  {Object} revData Data we are replacing to determine the slide direction
    * @param  {String} url     URL to make the request to
    * @return {undefined}
@@ -626,6 +641,7 @@ Gustavus.Revisions = {
 
   /**
    * Makes history for navigating if enabled or performs the ajax request to get the new data
+   * @member Gustavus.Revisions
    * @param  {jQuery} $element          Element that triggered our makeHistory event
    * @param  {Boolean} shouldMakeHistory Whether we should add to our history stack or just make the ajax request.
    * @return {undefined}
@@ -645,6 +661,7 @@ Gustavus.Revisions = {
 
   /**
    * Handles click actions
+   * @member Gustavus.Revisions
    * @param  {jQuery} $element          Element the click was triggered on.
    * @param  {Boolean} shouldMakeHistory Whether we should add to our history stack or not
    * @return {undefined}
@@ -657,6 +674,7 @@ Gustavus.Revisions = {
 
   /**
    * Triggers a click action on the show more revisions button.
+   * @member Gustavus.Revisions
    * @param  {Number} oldestRevNumToPull Oldest revision number we want loaded
    * @return {undefined}
    */
@@ -672,6 +690,7 @@ Gustavus.Revisions = {
 
   /**
    * Converts negative numbers and zero to 1.
+   * @member Gustavus.Revisions
    * @param  {Number} number Number to convert.
    * @return {Number} Adjusted number
    */
@@ -686,6 +705,7 @@ Gustavus.Revisions = {
 
   /**
    * Loads all visible revisions into the timeline so we have data to look at.
+   * @member Gustavus.Revisions
    * @return {undefined}
    */
   loadVisibleRevisionsIntoTimeline: function()
@@ -708,6 +728,7 @@ Gustavus.Revisions = {
 
   /**
    * Handles scrolling events triggered by the mouse
+   * @member Gustavus.Revisions
    * @param  {Number} delta  Total distance the mouse has moved
    * @param  {Number} deltaX Total distance the mouse has moved over the X axis
    * @param  {Number} deltaY Total distance the mouse has moved over the Y axis
@@ -751,6 +772,7 @@ Gustavus.Revisions = {
 
   /**
    * Figure out our slide duration based off of the distance of our slide.
+   * @member Gustavus.Revisions
    * @param  {Number} newPos Position we want to move to
    * @return {Number} Duration of our slide animation
    */
@@ -763,6 +785,7 @@ Gustavus.Revisions = {
 
   /**
    * Sets up the scrollable viewport for the timeline to slide arount in.
+   * @member Gustavus.Revisions
    * @return {undefined}
    */
   setUpViewport: function()
