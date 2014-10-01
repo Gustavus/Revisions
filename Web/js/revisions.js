@@ -45,7 +45,7 @@ Gustavus.Revisions = {
      * How many milliseconds per pixel to slide when hovering over a scrolling hotspot
      * @type {Number}
      */
-    hotspotMSPerPixel: 10
+    hotspotMSPerPixel: 10,
 
     /**
      * Scrollable viewport. Should only be used by getViewport().
@@ -184,7 +184,7 @@ Gustavus.Revisions = {
      */
     getNumberOfRevisionsVisible: function() {
       return Math.floor((Gustavus.Revisions.Timeline.getVisibleTableWidth() + Gustavus.Revisions.Timeline.getLeftOffset()) / Gustavus.Revisions.Timeline.getRevisionWidth());
-    },
+    }
   },
 
   /**
