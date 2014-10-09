@@ -129,9 +129,10 @@ class API
   /**
    * Renders out the revisions or revision requested
    *
+   * @param  boolean $return Whether to return results or allow content to be echoed.
    * @return string
    */
-  public function render()
+  public function render($return = false)
   {
     $post = $_POST;
     $queryStringArray = $_GET;
@@ -147,7 +148,7 @@ class API
     // form was either submitted, or it is just a regular page load.
     // get revisionsRenderer ready to go
     $this->constructRevisionsRenderer($queryStringArray);
-    if (isset($queryStringArray['barebones'])) {
+    if (!$return && isset($queryStringArray['barebones'])) {
       // an ajax call was made for new information
       // we want the new information echoed to the ajax call and then we want to exit so nothing else gets thrown in.
       echo $this->doWorkRequstedInUrl($queryStringArray);
