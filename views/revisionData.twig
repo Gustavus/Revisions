@@ -52,7 +52,7 @@
 {% endmacro %}
 
 {% macro renderRestoreButton(revisionsLength, revisionNumber, shouldAllowRestore) %}
-  <footer{% if not shouldAllowRestore %} class="hidden"{% endif %}>
+  <footer{% if not shouldAllowRestore %} class="nodisplay"{% endif %}>
     <button name="restore" value="{{ revisionNumber }}" id="restore-{{ revisionNumber }}" class="restore{% if revisionNumber == revisionsLength - 1 %} disabled{% endif %}" title="Restore Revision {{ revisionNumber }}">Restore #{{ revisionNumber }}</button>
   </footer>
 {% endmacro %}
