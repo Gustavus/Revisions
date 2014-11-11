@@ -503,6 +503,6 @@ tr.compare td {
   right: 100%;
   margin-right: 50px;
 }
-.hidden {
+.nodisplay {
   display: none;
 }

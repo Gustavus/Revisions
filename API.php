@@ -182,6 +182,9 @@ class API
    */
   private function handleRestoreAction(array $urlParams)
   {
+    if (!$this->allowRestore) {
+      return;
+    }
     $revisionContent = $this->revisions->getRevisionContentArray((int) $urlParams['restore']);
     $oldMessage = $this->revisions->getRevisionByNumber((int) $urlParams['restore'])->getRevisionMessage();
     Actions::apply(self::RESTORE_HOOK, $revisionContent, $oldMessage, self::RESTORE_ACTION);
@@ -194,6 +197,9 @@ class API
    */
   private function handleUndoAction()
   {
+    if (!$this->allowRestore) {
+      return;
+    }
     $limit = $this->revisions->getLimit();
     $this->revisions->setLimit(2);
     $this->revisions->populateEmptyRevisions();
