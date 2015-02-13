@@ -40,6 +40,13 @@ class API
   private $allowRestore = true;
 
   /**
+   * Whether to show insertions and deletions when rendering a diff
+   *
+   * @var Boolean
+   */
+  private $showInsertionsAndDeletions = true;
+
+  /**
    * array of column labels used for mapping column names to formatted labels
    *
    * @var array
@@ -99,6 +106,9 @@ class API
       }
       if (isset($params['allowRestore'])) {
         $this->allowRestore = $params['allowRestore'];
+      }
+      if (isset($params['showInsertionsAndDeletions'])) {
+        $this->showInsertionsAndDeletions = $params['showInsertionsAndDeletions'];
       }
     } else {
       throw new \RuntimeException('Insufficient application information');
@@ -651,7 +661,7 @@ class API
    */
   private function constructRevisionsRenderer(array $urlParams)
   {
-    $this->revisionsRenderer = new RevisionsRenderer($this->revisions, $this->getRevisionsUrlParams($urlParams), $this->getApplicationUrlParams($urlParams), $this->labels, $this->allowRestore);
+    $this->revisionsRenderer = new RevisionsRenderer($this->revisions, $this->getRevisionsUrlParams($urlParams), $this->getApplicationUrlParams($urlParams), $this->labels, $this->allowRestore, $this->showInsertionsAndDeletions);
     $this->setUpItemsToRender($urlParams);
   }
 
