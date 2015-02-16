@@ -45,6 +45,13 @@ class RevisionsRenderer
   private $shouldAllowRestore = true;
 
   /**
+   * Whether to show insertions and deletions when rendering diffs
+   *
+   * @var boolean
+   */
+  private $showInsertionsAndDeletions = true;
+
+  /**
    * array of column labels used for mapping column names to formatted labels
    *
    * @var array
@@ -58,14 +65,17 @@ class RevisionsRenderer
    * @param array $applicationUrlParams
    * @param array $labels labels to use
    * @param boolean $shouldAllowRestore
+   * @param boolean $showInsertionsAndDeletions
    */
-  public function __construct(Revisions $revisions, array $revisionsUrlParams = array(), array $applicationUrlParams = array(), array $labels = array(), $shouldAllowRestore = true)
+  public function __construct(Revisions $revisions, array $revisionsUrlParams = array(), array $applicationUrlParams = array(), array $labels = array(), $shouldAllowRestore = true, $showInsertionsAndDeletions = true)
   {
     $this->revisions            = $revisions;
     $this->revisionsUrlParams   = $revisionsUrlParams;
     $this->applicationUrlParams = $applicationUrlParams;
     $this->labels               = $labels;
     $this->shouldAllowRestore   = $shouldAllowRestore;
+
+    $this->showInsertionsAndDeletions = $showInsertionsAndDeletions;
   }
 
   /**
@@ -237,9 +247,10 @@ class RevisionsRenderer
           'limit'                 => $this->revisions->getLimit(),
           'maxColumnSizes'        => $this->revisions->getMaxColumnSizes(),
           'hiddenFields'          => $this->removeParams(array_merge($this->applicationUrlParams, array('oldestRevisionNumber' => $oldestRevisionNumber + 1), $this->revisionsUrlParams), array('barebones', 'oldestRevisionInTimeline', 'visibleRevisions', 'visibleRevisions[]', 'revisionNumbers')),
-          'shouldRenderTimeline'      => $this->shouldRenderTimeline,
-          'shouldRenderRevisionData'  => $this->shouldRenderRevisionData,
+          'shouldRenderTimeline'       => $this->shouldRenderTimeline,
+          'shouldRenderRevisionData'   => $this->shouldRenderRevisionData,
           'shouldAllowRestore'         => $this->shouldAllowRestore,
+          'showInsertionsAndDeletions' => $this->showInsertionsAndDeletions,
         )
     );
     return TwigFactory::renderTwigFilesystemTemplate("/cis/lib/Gustavus/Revisions/views/$filename", $params);
