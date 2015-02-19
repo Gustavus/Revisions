@@ -22,7 +22,11 @@
           {%- if revisionData.error -%}
             {{- base.renderError() -}}
           {%- else -%}
-            {{- revisionData.getContent(showInsertionsAndDeletions, null, true)|raw -}}
+            {% if not showInsertionsAndDeletions -%}
+              {{- revisionData.getNextContent(true)|raw -}}
+            {%- else -%}
+              {{- revisionData.getContent(showInsertionsAndDeletions, null, true)|raw -}}
+            {%- endif -%}
           {%- endif -%}
         </dd>
       {% endif %}
