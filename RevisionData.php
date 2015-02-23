@@ -30,7 +30,7 @@ abstract class RevisionData extends RevisionsBase
   protected $revisionNumber;
 
   /**
-   * Current content if this is the latest revision, or the revision content of the previous revision
+   * Current content if this is the latest revision, or the revision content of the next revision
    *
    * @var string current cell content
    */
@@ -122,10 +122,16 @@ abstract class RevisionData extends RevisionsBase
   }
 
   /**
+   * Returns the current content if this is the latest revision, or the revision content of the next revision
+   *
+   * @param boolean $runFilters Whether to run filters on the rendered content or not.
    * @return string
    */
-  public function getNextContent()
+  public function getNextContent($runFilters = false)
   {
+    if ($runFilters && Filters::exists(API::RENDER_REVISION_FILTER)) {
+      return Filters::apply(API::RENDER_REVISION_FILTER, $this->nextContent);
+    }
     return $this->nextContent;
   }
 

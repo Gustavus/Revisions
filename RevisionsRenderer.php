@@ -162,8 +162,14 @@ class RevisionsRenderer
     if ($oldestRevNum > $revNum) {
       $oldestRevNum = $revNum;
     }
-    // $revNum - 1 so we are looking at how it changed from the previous revision since the current revision is the current text in the previous revision
-    return $this->renderTwig('revisionData.twig', $this->revisions->getRevisionByNumber($revNum - 1), array('visibleRevisions' => array($revNum), 'columns' => $columns), $oldestRevNum);
+    if ($this->showInsertionsAndDeletions) {
+      // $revNum - 1 so we are looking at how it changed from the previous revision since the current revision is the current text in the previous revision
+      $revisionToGrab = $revNum - 1;
+    } else {
+      // we aren't viewing a diff, so we just want the specified revision
+      $revisionToGrab = $revNum;
+    }
+    return $this->renderTwig('revisionData.twig', $this->revisions->getRevisionByNumber($revisionToGrab), array('visibleRevisions' => array($revNum), 'columns' => $columns), $oldestRevNum);
   }
 
   /**
