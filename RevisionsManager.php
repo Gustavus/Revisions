@@ -63,6 +63,13 @@ class RevisionsManager extends RevisionsBase
   protected $splitStrategy;
 
   /**
+   * Latest revision number used to verify that nothing got inserted while building a diff
+   *
+   * @var integer
+   */
+  protected $latestRevisionNumber = null;
+
+  /**
    * Class constructor
    *
    * @param array $params
@@ -254,7 +261,7 @@ class RevisionsManager extends RevisionsBase
           'splitStrategy'          => $result['splitStrategy'],
         );
       } else {
-         $return[$result['key']][$result['revisionNumber']] = array(
+        $return[$result['key']][$result['revisionNumber']] = array(
           'id'                     => $result['id'],
           'contentHash'            => $result['contentHash'],
           'revisionId'             => $result['revisionId'],
@@ -276,7 +283,7 @@ class RevisionsManager extends RevisionsBase
    * @param string $column column of the cell
    * @param string $revisionContent content the revision was. Used to generate a hash
    * @param integer $oldRevisionId
-   * @return void
+   * @return integer
    */
   private function saveRevisionData($revisionInfo, $revisionId, $column, $revisionContent, $oldRevisionId = null)
   {
@@ -289,11 +296,11 @@ class RevisionsManager extends RevisionsBase
     );
     if ($oldRevisionId === null) {
       $args = array_merge($args, array(
-        ':revisionId'     => $revisionId,
-        ':key'            => $column,
-        ':hash'           => md5($revisionContent),
-        ':table'          => $this->table,
-        ':rowId'          => $this->rowId,
+          ':revisionId'     => $revisionId,
+          ':key'            => $column,
+          ':hash'           => md5($revisionContent),
+          ':table'          => $this->table,
+          ':rowId'          => $this->rowId,
       ));
 
       $qb = $db->createQueryBuilder();
@@ -414,16 +421,21 @@ class RevisionsManager extends RevisionsBase
   protected function saveRevision(array $revisionInfo, array $newContent, array $oldContent, array $oldRevisionData = array(), $message = null, $createdBy = null, array $brandNewColumns = array())
   {
     $affectedRows = 0;
+    // number to add on to $this->latestRevisionNumber to adjust how many new revisions we will be making here.
+    $latestRevisionNumberAddition = 0;
     $revisionInfo = $this->filterOldColumns($revisionInfo, $brandNewColumns);
     if (empty($revisionInfo)) {
       // revisions are the same as they used to be
       // don't do anything
       return true;
     }
+    // start our transaction so we can roll it back if we get a revision in between the two.
+    $this->getDB()->beginTransaction();
     if (!empty($brandNewColumns)) {
       // new columns exist, and revision isn't the first. Need to get their initial revision in before continuing
       $revContent = array_merge($newContent, $oldContent);
       $revisionId = $this->saveRevisionContent($revContent, $message, $createdBy);
+      ++$latestRevisionNumberAddition;
       foreach ($brandNewColumns as $key) {
         $affectedRows += $this->saveRevisionData($revisionInfo[$key], $revisionId, $key, $oldContent[$key]);
       }
@@ -433,6 +445,7 @@ class RevisionsManager extends RevisionsBase
     if (!empty($changes)) {
       // newContent is different from oldContent
       $newRevisionId = $this->saveRevisionContent($newContent, $message, $createdBy);
+      ++$latestRevisionNumberAddition;
       if (!isset($revisionId)) {
         $revisionId = $newRevisionId;
       }
@@ -454,7 +467,27 @@ class RevisionsManager extends RevisionsBase
         $affectedRows += $this->saveRevisionData(json_encode($newContent[$key]), $newRevisionId, $key, $newContent[$key]);
       }
     }
-    return ($affectedRows !== 0);
+    $revision = $this->getRevisions(null, 1);
+    if (isset($revision[0]['revisionNumber'])) {
+      $latestRevisionNumber = (int) $revision[0]['revisionNumber'];
+    } else {
+      $latestRevisionNumber = null;
+    }
+    // check to verify that nothing got inserted while building our revisions.
+    if (
+      ($this->latestRevisionNumber === null && // no revisions should exist
+        // make sure our latestRevisionNumber is the number of revisions saved - 1
+        // since the revisionNumbers start at 0
+        $latestRevisionNumber === $latestRevisionNumberAddition - 1) ||
+      ($this->latestRevisionNumber !== null &&
+        // our latestRevisionNumber should the current one plus the number of revisions we just saved
+        $latestRevisionNumber === $this->latestRevisionNumber + $latestRevisionNumberAddition)) {
+      // nothing got inserted into our db since we set $this->latestRevisionNumber
+      $this->getDB()->commit();
+      return ($affectedRows !== 0);
+    }
+    $this->getDB()->rollback();
+    return false;
   }
 
   /**
