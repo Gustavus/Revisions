@@ -261,7 +261,7 @@ class RevisionsManager extends RevisionsBase
           'splitStrategy'          => $result['splitStrategy'],
         );
       } else {
-         $return[$result['key']][$result['revisionNumber']] = array(
+        $return[$result['key']][$result['revisionNumber']] = array(
           'id'                     => $result['id'],
           'contentHash'            => $result['contentHash'],
           'revisionId'             => $result['revisionId'],
@@ -283,7 +283,7 @@ class RevisionsManager extends RevisionsBase
    * @param string $column column of the cell
    * @param string $revisionContent content the revision was. Used to generate a hash
    * @param integer $oldRevisionId
-   * @return void
+   * @return integer
    */
   private function saveRevisionData($revisionInfo, $revisionId, $column, $revisionContent, $oldRevisionId = null)
   {
@@ -296,11 +296,11 @@ class RevisionsManager extends RevisionsBase
     );
     if ($oldRevisionId === null) {
       $args = array_merge($args, array(
-        ':revisionId'     => $revisionId,
-        ':key'            => $column,
-        ':hash'           => md5($revisionContent),
-        ':table'          => $this->table,
-        ':rowId'          => $this->rowId,
+          ':revisionId'     => $revisionId,
+          ':key'            => $column,
+          ':hash'           => md5($revisionContent),
+          ':table'          => $this->table,
+          ':rowId'          => $this->rowId,
       ));
 
       $qb = $db->createQueryBuilder();
