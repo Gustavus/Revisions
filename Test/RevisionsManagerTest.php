@@ -786,7 +786,7 @@ class RevisionsManagerTest extends RevisionsTestsHelper
   /**
    * @test
    */
-  public function saveRevision2()
+  public function saveRevisionTwo()
   {
     $conn = $this->getConnection();
     $this->setUpMock('person-revision');
@@ -803,6 +803,46 @@ class RevisionsManagerTest extends RevisionsTestsHelper
     $this->assertTrue($this->saveRevisionToDB('', 'Billy Visto', 'name', $this->revisionsManagerMock, array(), null, 'name', array('name')));
     $this->assertTrue($this->saveRevisionToDB('Billy Visto', 'Billy', 'name', $this->revisionsManagerMock));
     $this->assertTrue($this->saveRevisionToDB('Billy', 'Billy Visto', 'name', $this->revisionsManagerMock));
+
+    $actualDataSet = $conn->createDataSet(array('revisionData', 'person-revision'));
+    $actual = $this->getFilteredDataSet($actualDataSet, array('person-revision' => array('createdOn'), 'revisionData' => array('createdOn')));
+    $expected = $this->getFilteredDataSet($expected, array('person-revision' => array('createdOn'), 'revisionData' => array('createdOn')));
+
+    $this->assertDataSetsEqual($expected, $actual);
+    $this->assertTablesEqual($expected->getTable('person-revision'), $actual->getTable('person-revision'));
+    $this->assertTablesEqual($expected->getTable('revisionData'), $actual->getTable('revisionData'));
+    $this->dropCreatedTables(array('person-revision', 'revisionData'));
+  }
+
+  /**
+   * @test
+   */
+  public function saveRevisionIntercepted()
+  {
+    $conn = $this->getConnection();
+    $this->setUpMock('person-revision');
+    $currContent = 'Billy';
+    $newContent = 'Billy Visto';
+
+    $this->ymlFile = 'nameRevision2.yml';
+    $expected = $this->getDataSet();
+
+    //set up table
+    $this->dbalConnection->query($this->getCreateDataQuery());
+    $this->dbalConnection->query($this->getCreateQuery());
+
+    $this->assertTrue($this->saveRevisionToDB('', 'Billy Visto', 'name', $this->revisionsManagerMock, array(), null, 'name', array('name')));
+    $this->assertTrue($this->saveRevisionToDB('Billy Visto', 'Billy', 'name', $this->revisionsManagerMock));
+    $this->assertTrue($this->saveRevisionToDB('Billy', 'Billy Visto', 'name', $this->revisionsManagerMock));
+
+    $revisionData = new \Gustavus\Revisions\RevisionDataDiff(array(
+      'currentContent' => $currContent,
+    ));
+    $revisionInfo = $revisionData->renderRevisionForDB($newContent);
+    $revisionInfoArray = array('name' => $revisionInfo);
+    // set our latest revision number to be 2 to simulate this one getting called before our third saveRevisionToDB above.
+    $this->set($this->revisionsManagerMock, 'latestRevisionNumber', 2);
+    $this->assertFalse($this->call($this->revisionsManagerMock, 'saveRevision', array($revisionInfoArray, array('name' => $newContent), array('name' => $currContent), array(), null, 'name', array('name'))));
 
     $actualDataSet = $conn->createDataSet(array('revisionData', 'person-revision'));
     $actual = $this->getFilteredDataSet($actualDataSet, array('person-revision' => array('createdOn'), 'revisionData' => array('createdOn')));
