@@ -92,6 +92,14 @@ class RevisionsTestsHelper extends \Gustavus\Test\TestDBPDO
 
     $revisionInfo = $revisionData->renderRevisionForDB($newContent);
     $revisionInfoArray = array($column => $revisionInfo);
-    $this->call($object, 'saveRevision', array($revisionInfoArray, array($column => $newContent), array($column => $currContent), $revisionDataArray, $message, $createdBy, $newColumns));
+
+    $revision = $this->call($object, 'getRevisions', [null, 1]);
+    if (isset($revision[0]['revisionNumber'])) {
+      $latestRevisionNumber = (int) $revision[0]['revisionNumber'];
+    } else {
+      $latestRevisionNumber = null;
+    }
+    $this->set($object, 'latestRevisionNumber', $latestRevisionNumber);
+    return $this->call($object, 'saveRevision', array($revisionInfoArray, array($column => $newContent), array($column => $currContent), $revisionDataArray, $message, $createdBy, $newColumns));
   }
 }

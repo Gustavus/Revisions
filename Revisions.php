@@ -190,6 +190,12 @@ class Revisions extends RevisionsManager
     $oldRevisionDataArray = array();
     $oldText              = array();
     $brandNewColumns      = array();
+    $revision = $this->getRevisions(null, 1);
+    if (isset($revision[0]['revisionNumber'])) {
+      $this->latestRevisionNumber = (int) $revision[0]['revisionNumber'];
+    } else {
+      $this->latestRevisionNumber = null;
+    }
     foreach ($newText as $key => &$value) {
       assert('!is_array($value)');
       if (!empty($key) && is_string($key)) {

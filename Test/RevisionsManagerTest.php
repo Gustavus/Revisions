@@ -800,9 +800,9 @@ class RevisionsManagerTest extends RevisionsTestsHelper
     $this->dbalConnection->query($this->getCreateDataQuery());
     $this->dbalConnection->query($this->getCreateQuery());
 
-    $this->saveRevisionToDB('', 'Billy Visto', 'name', $this->revisionsManagerMock, array(), null, 'name', array('name'));
-    $this->saveRevisionToDB('Billy Visto', 'Billy', 'name', $this->revisionsManagerMock);
-    $this->saveRevisionToDB('Billy', 'Billy Visto', 'name', $this->revisionsManagerMock);
+    $this->assertTrue($this->saveRevisionToDB('', 'Billy Visto', 'name', $this->revisionsManagerMock, array(), null, 'name', array('name')));
+    $this->assertTrue($this->saveRevisionToDB('Billy Visto', 'Billy', 'name', $this->revisionsManagerMock));
+    $this->assertTrue($this->saveRevisionToDB('Billy', 'Billy Visto', 'name', $this->revisionsManagerMock));
 
     $actualDataSet = $conn->createDataSet(array('revisionData', 'person-revision'));
     $actual = $this->getFilteredDataSet($actualDataSet, array('person-revision' => array('createdOn'), 'revisionData' => array('createdOn')));
@@ -899,9 +899,9 @@ class RevisionsManagerTest extends RevisionsTestsHelper
     $this->dbalConnection->query($this->getCreateQuery());
     $this->dbalConnection->query($this->getCreateDataQuery());
 
-    $this->saveRevisionToDB('', 'Billy Visto', 'name', $this->revisionsManagerMock);
-    $this->saveRevisionToDB('', '23', 'age', $this->revisionsManagerMock);
-    $this->saveRevisionToDB('', 'Food', 'aboutYou', $this->revisionsManagerMock);
+    $this->assertTrue($this->saveRevisionToDB('', 'Billy Visto', 'name', $this->revisionsManagerMock));
+    $this->assertTrue($this->saveRevisionToDB('', '23', 'age', $this->revisionsManagerMock));
+    $this->assertTrue($this->saveRevisionToDB('', 'Food', 'aboutYou', $this->revisionsManagerMock));
     $expected = array(array('key' =>  'aboutYou'), array('key' => 'age'), array('key' => 'name'));
     $result = $this->call($this->revisionsManagerMock, 'getRevisionDataColumns');
     $this->assertSame($expected, $result);
