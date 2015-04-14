@@ -431,6 +431,7 @@ class RevisionsManager extends RevisionsBase
     }
     // start our transaction so we can roll it back if we get a revision in between the two.
     $this->getDB()->beginTransaction();
+
     if (!empty($brandNewColumns)) {
       // new columns exist, and revision isn't the first. Need to get their initial revision in before continuing
       $revContent = array_merge($newContent, $oldContent);
@@ -486,6 +487,7 @@ class RevisionsManager extends RevisionsBase
       $this->getDB()->commit();
       return ($affectedRows !== 0);
     }
+    // looks like a revision got inserted in while this one was generating. Rollback our transaction so we don't mess things up.
     $this->getDB()->rollback();
     return false;
   }
