@@ -17,11 +17,29 @@ use Gustavus\Utility\String,
  */
 class API
 {
+  /**
+   * Extensibility hook to use for restoring revisions
+   */
   const RESTORE_HOOK           = '\Gustavus\Revisions\API\Restore';
+  /**
+   * Action to use for restoring revisions
+   */
   const RESTORE_ACTION         = 'restore';
+  /**
+   * Action to use for undoing a revision restoration
+   */
   const UNDO_ACTION            = 'undo';
+  /**
+   * Extensibility filter to use for building the revisions. (Allows you to remove html or anything else from the rendered revision)
+   */
   const RENDER_REVISION_FILTER = '\Gustavus\Revisions\API\BuildRevision';
-  const REVISIONS_JS_VERSION   = 2;
+  /**
+   * JS version
+   */
+  const REVISIONS_JS_VERSION   = 3;
+  /**
+   * CSS version
+   */
   const REVISIONS_CSS_VERSION  = 2;
 
   /**
