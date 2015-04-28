@@ -240,7 +240,7 @@ Gustavus.Revisions = {
    */
   unselectBox: function($item)
   {
-    $item.removeAttr('checked');
+    $item.prop('checked', false);
     $('#revisionTimeline .' + $item.val()).removeClass('selected');
   },
 
@@ -252,7 +252,7 @@ Gustavus.Revisions = {
    */
   selectBox: function($item)
   {
-    $item.attr('checked', 'checked');
+    $item.prop('checked', true);
   },
 
   /**
