@@ -1,5 +1,5 @@
-{% if revisions|length > 0 or not shouldRenderTimeline %}
-  {% spaceless %}
+{%- if revisions|length > 0 or not shouldRenderTimeline -%}
+  {%- spaceless -%}
     <form id="revisionsForm" method="{% block formMethod %}GET{% endblock %}">
       {% block hiddenFields %}
         <div id="hiddenFields">
@@ -26,10 +26,10 @@
         </div>
       {% endif %}
     </form>
-  {% endspaceless %}
-{% else %}
+  {%- endspaceless -%}
+{%- else -%}
   <p class="message">Oops! It appears that there aren't any revisions to display.</p>
-{% endif %}
+{%- endif -%}
 
 {% macro renderErrorColumns(num) %}
   {% import _self as self %}

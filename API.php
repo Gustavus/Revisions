@@ -314,34 +314,29 @@ class API
    */
   final public function renderRevisionsJS($content = null)
   {
-    $revisionsScripts = array(
-      '/js/jquery/ui/current/minified/jquery.ui.mouse.min.js',
-      '/js/jquery/ui/current/minified/jquery.ui.draggable.min.js',
-      '/js/jquery/ui/current/minified/jquery.ui.effect-slide.min.js',
-      '/revisions/js/jquery-viewport/jquery.viewport.min.js',
-      Resource::renderResource(['path' => '/revisions/js/jquery-mousewheel/jquery.mousewheel.js', 'version' => 1]),
-      '/js/history/scripts/bundled/html4+html5/jquery.history.js',
-      Resource::renderResource(['urlutil', ['path' => '/revisions/js/revisions.js', 'version' => self::REVISIONS_JS_VERSION]]),
-    );
-    return $content . $this->modernizeJS($revisionsScripts);
-  }
-
-  /**
-   * Throws js into modernizer.load
-   *
-   * @param array $scripts
-   * @return string
-   */
-  private function modernizeJS(Array $scripts)
-  {
-    return sprintf('
-      <script>
-        Modernizr.load([
-          "%1$s"
-        ]);
+    $js = sprintf('<script>
+        require.config({
+          paths: {
+            "revisions": "%s",
+            "revisionsViewport": "%s",
+            "revisionsMousewheel": "%s",
+            "history": "/js/history/scripts/bundled/html4+html5/jquery.history"
+          },
+          shim: {
+            "revisionsViewport": ["baseJS"],
+            "revisionsMousewheel": ["baseJS"],
+            "history": ["baseJS"],
+            "revisions": ["baseJS", "ui/mouse", "ui/draggable", "ui/effect-slide", "revisionsViewport", "revisionsMousewheel", "history"]
+          }
+        });
+        require(["revisions"]);
       </script>',
-        implode('","', $scripts)
+      Resource::renderResource(['urlutil', ['path' => '/revisions/js/revisions.js', 'version' => self::REVISIONS_JS_VERSION]]),
+      Resource::renderResource(['path' => '/revisions/js/jquery-viewport/jquery.viewport.min.js', 'version' => 1]),
+      Resource::renderResource(['path' => '/revisions/js/jquery-mousewheel/jquery.mousewheel.js', 'version' => 1])
     );
+
+    return $content . $js;
   }
 
   /**
