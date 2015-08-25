@@ -196,7 +196,7 @@ class APITest extends RevisionsTestsHelper
         <div class="viewport">
           <span class="scrollHotspot scrollLeft disabled">◂</span>
           <span class="scrollHotspot scrollRight disabled">▸</span>
-          <table class="fancy">
+          <table class="notresponsive">
             <thead>
               <tr>
                 <th> </th>
@@ -330,7 +330,7 @@ class APITest extends RevisionsTestsHelper
         <div class="viewport">
           <span class="scrollHotspot scrollLeft disabled">◂</span>
           <span class="scrollHotspot scrollRight disabled">▸</span>
-          <table class="fancy">
+          <table class="notresponsive">
             <thead>
               <tr>
                 <th> </th>
@@ -462,7 +462,7 @@ class APITest extends RevisionsTestsHelper
         <div class="viewport">
           <span class="scrollHotspot scrollLeft disabled">◂</span>
           <span class="scrollHotspot scrollRight disabled">▸</span>
-          <table class="fancy">
+          <table class="notresponsive">
             <thead>
               <tr>
                 <th> </th>
@@ -557,7 +557,7 @@ class APITest extends RevisionsTestsHelper
         <div class="viewport">
           <span class="scrollHotspot scrollLeft disabled">◂</span>
           <span class="scrollHotspot scrollRight disabled">▸</span>
-          <table class="fancy">
+          <table class="notresponsive">
             <thead>
               <tr>
                 <th> </th>
@@ -688,7 +688,7 @@ class APITest extends RevisionsTestsHelper
         <div class=\"viewport\">
           <span class=\"scrollHotspot scrollLeft disabled\">◂</span>
           <span class=\"scrollHotspot scrollRight disabled\">▸</span>
-          <table class=\"fancy\">
+          <table class=\"notresponsive\">
             <thead>
               <tr>
                 <th> </th>
@@ -848,7 +848,7 @@ class APITest extends RevisionsTestsHelper
         <div class=\"viewport\">
           <span class=\"scrollHotspot scrollLeft disabled\">◂</span>
           <span class=\"scrollHotspot scrollRight disabled\">▸</span>
-          <table class=\"fancy\">
+          <table class=\"notresponsive\">
             <thead>
               <tr>
                 <th> </th>
@@ -1006,7 +1006,7 @@ class APITest extends RevisionsTestsHelper
         <div class=\"viewport\">
           <span class=\"scrollHotspot scrollLeft disabled\">◂</span>
           <span class=\"scrollHotspot scrollRight disabled\">▸</span>
-          <table class=\"fancy\">
+          <table class=\"notresponsive\">
             <thead>
               <tr>
                 <th> </th>
@@ -1168,7 +1168,7 @@ class APITest extends RevisionsTestsHelper
         <div class=\"viewport\">
           <span class=\"scrollHotspot scrollLeft disabled\">◂</span>
           <span class=\"scrollHotspot scrollRight disabled\">▸</span>
-          <table class=\"fancy\">
+          <table class=\"notresponsive\">
             <thead>
               <tr>
                 <th> </th>
@@ -1299,7 +1299,7 @@ class APITest extends RevisionsTestsHelper
         <div class=\"viewport\">
           <span class=\"scrollHotspot scrollLeft disabled\">◂</span>
           <span class=\"scrollHotspot scrollRight disabled\">▸</span>
-          <table class=\"fancy\">
+          <table class=\"notresponsive\">
             <thead>
               <tr>
                 <th> </th>
@@ -1448,7 +1448,7 @@ class APITest extends RevisionsTestsHelper
         <div class=\"viewport\">
           <span class=\"scrollHotspot scrollLeft disabled\">◂</span>
           <span class=\"scrollHotspot scrollRight disabled\">▸</span>
-          <table class=\"fancy\">
+          <table class=\"notresponsive\">
             <thead>
               <tr>
                 <th> </th>

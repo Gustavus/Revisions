@@ -86,7 +86,7 @@ span.bytes {
   box-sizing: border-box;
 
   width: 100px;
-  padding: 17px 4px 0 0;
+  padding: 18px 4px 8px 0;
   position: absolute;
 
   font-size: .85em;
@@ -158,9 +158,12 @@ span.bytes {
   text-align: right;
 }
 */
+#revisionTimeline tbody tr:nth-child(odd) td {
+  background-color: #$(web-background);
+}
 #revisionTimeline td {
-  min-width: 15px;
-  width: 15px;
+  min-width: 18px;
+  width: 18px;
   vertical-align: middle;
 }
 td.bytes {
@@ -184,6 +187,7 @@ td.bytes {
 }
 #revisionTimeline table {
   margin: 0;
+  padding: 0;
 }
 #revisionTimeline thead th {
   font-size: 9px;
@@ -197,10 +201,10 @@ td.bytes {
   border-right: 1px solid #eee;
 }
 #revisionTimeline tfoot th, #revisionTimeline tfoot td {
-  background-color: rgba(0, 0, 0, .06);
+  border-top: 2px solid #$(brand-shadow-gray);
+  background-color: #fff;
 }
 #revisionTimeline input {
-  padding: 0;
   margin: 0;
   cursor: pointer;
 }
@@ -247,7 +251,6 @@ td.bytes {
   border-left: 1px solid rgba(255, 255, 255, .4);
   width: 100%;
   z-index: 1;
-  border-radius: 0 1px 0 0;
   box-shadow: inset 0 1px 5px rgba(0, 0, 0, .08);
 }
 .added.bytes {
@@ -256,14 +259,12 @@ td.bytes {
   background-color: #0b0;
   width: 100%;
   z-index: 2;
-  border-radius: 0 1px 0 0;
   box-shadow: inset 0 1px 5px rgba(0, 0, 0, .1);
 }
 .removed.bytes {
   top: 0;
   background-color: #b00;
   width: 100%;
-  border-radius: 0 0 1px 0;
   box-shadow: inset 0 2px 4px -2px rgba(0, 0, 0, .5);
 }
 .removed.bytes, .added.bytes, .unchanged.bytes {
@@ -359,7 +360,6 @@ tr.compare td {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
-  border-radius: .5em;
   border: 1px solid rgba(0, 0, 0, .25);
   background-color: rgba(0, 80, 230, .15);
 }
@@ -373,7 +373,6 @@ tr.compare td {
   -moz-box-sizing: border-box;
   box-sizing: border-box;
   padding: 10px;
-  border-radius: .5em .5em 0 0;
 }
 .revisionData h1, .revisionData h2 {
   display: inline;
@@ -400,7 +399,6 @@ tr.compare td {
   font-size: 1.4em;
   font-weight: bold;
   margin: 0;
-  border-radius: 0 0 .35em .35em;
 }
 .revisionData dt {
   -webkit-box-sizing: border-box;
@@ -456,19 +454,6 @@ tr.compare td {
 .revisionData.comparison footer + footer {
   width: 50.00001%;
   float: left;
-}
-.revisionData.comparison header:first-child {
-  border-radius: .5em 0 0 0;
-}
-.revisionData.comparison header:nth-child(2) {
-  border-radius: 0 .5em 0 0;
-}
-
-.revisionData.comparison footer button {
-  border-radius: 0 0 0 .35em;
-}
-.revisionData.comparison footer + footer button {
-  border-radius: 0 0 .35em 0;
 }
 
 /* Revision A */
