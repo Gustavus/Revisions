@@ -87,6 +87,7 @@ class APITest extends RevisionsTestsHelper
   {
     Filters::clear('head');
     Filters::clear('scripts');
+    parent::tearDownAfterClass();
   }
 
   /**

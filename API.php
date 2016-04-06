@@ -4,8 +4,7 @@
  * @author  Billy Visto
  */
 namespace Gustavus\Revisions;
-use Gustavus\Utility\String,
-  Gustavus\Resources\Resource,
+use Gustavus\Resources\Resource,
   Gustavus\Extensibility\Actions,
   Gustavus\Extensibility\Filters;
 
